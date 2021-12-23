@@ -1,0 +1,6 @@
+CR
+__pycache__
+*~
+bin
+lib*
+pyvenv.cfg
