@@ -31,6 +31,15 @@ def wrap(payload):
             pl_list[i] = "\n".join(textwrap.wrap(chunk, width=74))
     return "".join(pl_list)
 
+def make_urls_sensitive(text):
+    new_text = []
+    for word in re.split(r"(\s+)", text):
+        if re.match("(https?|ftp)://", word):
+            new_text.append(f"""<a href="{word}">{word}</a>""")
+        else:
+            new_text.append(word)
+    return "".join(new_text)
+
 def email_to_html(year, month, msg):
     # Perl?
     yr = year - 1900
@@ -40,7 +49,7 @@ def email_to_html(year, month, msg):
     headers = html.escape(CRLF.join(": ".join(hdr) for hdr in message._headers
                                         if hdr[0] != "Received" and hdr[0][0:2] != "X-"))
     raw_payload = message.get_payload(decode=True).decode("utf-8")
-    body = html.escape(wrap(raw_payload))
+    body = make_urls_sensitive(html.escape(wrap(raw_payload)))
     as_string = f"""
 <html>
 <head>
