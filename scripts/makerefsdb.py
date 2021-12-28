@@ -20,7 +20,10 @@ def ensure_db(sqldb):
             create table messageids
               (
                 messageid,
-                filename
+                filename,
+                year,
+                month,
+                seq
               )
         ''')
         cur.execute('''
@@ -33,11 +36,27 @@ def ensure_db(sqldb):
         conn.commit()
     return conn
 
+def decompose_filename(filename):
+    "Extract year, month and sequence number from filename."
+
+    # Filename looks like this:
+    #    CR/2004-01/eml-files/classicrendezvous.10401.0368.eml
+    # Trust the year and month in the subdirectory, then take the last
+    # number (0368, in this case) minus one as the sequence number.
+
+    seq = int(os.path.split(filename)[1].split(".")[-2], 10) - 1
+    (year, month) = [int(x)
+                       for x in
+                         os.path.split(filename)[0].split("/")[1].split("-")]
+    return (year, month, seq)
+
 def insert_references(message, conn, filename, verbose):
     nrecs = 0
     msgid = message["Message-ID"]
     if not msgid:
         return nrecs
+
+    (year, month, seq) = decompose_filename(filename)
     conn.execute("delete from msgrefs"
                  "  where messageid = ?",
                  (msgid,))
@@ -45,15 +64,24 @@ def insert_references(message, conn, filename, verbose):
                  "  where messageid = ?",
                  (msgid,))
     conn.commit()
+    (year, month, seq) = decompose_filename(filename)
     conn.execute("insert into messageids"
-                 "  values (?, ?)",
-                 (msgid, filename))
+                 "  values (?, ?, ?, ?, ?)",
+                 (msgid, filename, year, month, seq))
     nrecs += 1
     if verbose:
         print("  >>", msgid)
 
     if message["References"] is not None:
         for reference in message["References"].split():
+            conn.execute("insert into msgrefs"
+                         "  values (?, ?)",
+                         (msgid, reference))
+            nrecs += 1
+            if verbose:
+                print("    :", reference)
+    if message["In-Reply-To"] is not None:
+        for reference in message["In-Reply-To"].split():
             conn.execute("insert into msgrefs"
                          "  values (?, ?)",
                          (msgid, reference))
@@ -109,7 +137,12 @@ def main():
             if args.verbose:
                 print(">>", filename, nrecs)
             records += nrecs
-    print("Total records inserted:", records)
+    print("records inserted:", records)
+    cur = conn.cursor()
+    cur.execute("select count(*) from messageids")
+    print(f"{cur.fetchone()[0]} total message ids")
+    cur.execute("select count(*) from msgrefs")
+    print(f"{cur.fetchone()[0]} total references")
 
 if __name__ == "__main__":
     sys.exit(main())
