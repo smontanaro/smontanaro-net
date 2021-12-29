@@ -1,103 +1,200 @@
+#!/usr/bin/env python
+
+"Return to Flask..."
+
 import email
 import html
 import os
 import re
+import sqlite3
+import sys
 import textwrap
 
 from flask import Flask, redirect, url_for
 
+CRLF = "\r\n"
+REFDB = os.path.join(os.path.dirname(__file__), "references.db")
+
 app = Flask(__name__)
+
+@app.route("/favicon.ico")
+def favicon():
+    return redirect(url_for("static", filename="images/favicon.ico"))
 
 @app.route("/")
 def index():
+    "index"
     return '''
 <p>Nobody here but us chickens...
 and the <a href="CR">old Classic Rendezvous Archives.</a>
 </p>
 '''
 
-@app.route('/hello')
-def hello():
-    return 'Hello, World'
-    return "Hello, World!"
-
-CRLF = "\r\n"
-
 def wrap(payload):
+    "wrap paragraphs in the payload."
     pl_list = re.split("(\n+)", payload)
-    for i in range(len(pl_list)):
-        chunk = pl_list[i]
+    for (i, chunk) in enumerate(pl_list):
         if chunk and (re.match(r"\s", chunk) is None):
             pl_list[i] = "\n".join(textwrap.wrap(chunk, width=74))
     return "".join(pl_list)
 
 def make_urls_sensitive(text):
+    "<a>-ify words which look like urls (just https?)."
     new_text = []
     for word in re.split(r"(\s+)", text):
-        if re.match("(https?|ftp)://", word):
+        if re.match("https?://", word):
             new_text.append(f"""<a href="{word}">{word}</a>""")
         else:
             new_text.append(word)
     return "".join(new_text)
 
-def email_to_html(year, month, msg):
-    # Perl?
-    yr = year - 1900
-    msg = f"classicrendezvous.{yr:3d}{month:02d}.{msg:04d}.eml"
-    filename = os.path.join("CR", f"{year:04d}-{month:02d}", "eml-files", msg)
-    message = email.message_from_file(open(filename))
-    headers = html.escape(CRLF.join(": ".join(hdr) for hdr in message._headers
-                                        if hdr[0] != "Received" and hdr[0][0:2] != "X-"))
-    raw_payload = message.get_payload(decode=True).decode("utf-8")
+ZAP_HEADERS = {
+    "content-transfer-encoding",
+    "content-type",
+    "delivered-to",
+    "domainkey-signature",
+    "errors-to",
+    "mime-version",
+    "precedence",
+    "received",
+    "return-path",
+    "sender",
+    }
+
+def format_headers(message):
+    headers = []
+    conn = sqlite3.connect(REFDB)
+    cur = conn.cursor()
+    for item in message.items():
+        # Skip various headers - maybe later insert as comments...
+        if (item[0].lower() in ZAP_HEADERS or
+            item[0][:2].lower() == "x-" or
+            item[0][:5].lower() == "list-"):
+            continue
+        if item[0].lower() == "message-id":
+            cur.execute("select reference from msgrefs"
+                        "  where messageid = ?",
+                        (item[1],))
+            print("refs>>", item[1], "->", cur.fetchall())
+            cur.execute("select year, month, seq from messageids"
+                        "  where messageid = ?",
+                        (item[1],))
+            print("message>>", item[1], "->", cur.fetchall())
+            headers.append(html.escape(": ".join(item)))
+        elif item[0].lower() in ("in-reply-to", "references"):
+            tags = []
+            for tgt_msgid in item[1].split():
+                cur.execute("select year, month, seq from messageids"
+                            "  where messageid = ?",
+                            (tgt_msgid,))
+                try:
+                    (year, month, seq) = cur.fetchone()
+                except (TypeError, IndexError):
+                    print(f"failed to locate {tgt_msgid}.",
+                          file=sys.stderr)
+                    tag = html.escape(tgt_msgid)
+                else:
+                    url = url_for('cr_message', year=year,
+                                  month=month, msg=seq)
+                    tag = f"""<a href="{url}">{html.escape(tgt_msgid)}</a>"""
+                tags.append(tag)
+            headers.append(f'''{item[0]}: {" ".join(tags)}''')
+        else:
+            headers.append(html.escape(": ".join(item)))
+    return CRLF.join(headers)
+
+def eml_file(year, month, msgid):
+    # MHonARC was written in Perl, so of course Y2k
+    perl_yr = year - 1900
+    return f"classicrendezvous.{perl_yr:3d}{month:02d}.{(msgid+1):04d}.eml"
+
+def msg_exists(mydir, year, month, msgid):
+    name = eml_file(year, month, msgid)
+    full_path = os.path.join(mydir, name)
+    if os.path.exists(full_path):
+        return full_path
+    return ""
+
+def email_to_html(year, month, msgid):
+    "convert the email referenced by year, month and msgid to html."
+    msg = eml_file(year, month, msgid)
+    mydir = os.path.join("CR", f"{year:04d}-{month:02d}", "eml-files")
+    for encoding in ("utf-8", "latin-1"):
+        with open(os.path.join(mydir, msg), encoding=encoding) as fobj:
+            try:
+                message = email.message_from_file(fobj)
+            except UnicodeDecodeError:
+                pass
+            else:
+                raw_payload = message.get_payload(decode=True).decode(encoding)
+                break
+
+    headers = format_headers(message)
     body = make_urls_sensitive(html.escape(wrap(raw_payload)))
-    as_string = f"""
+
+    nxt = prv = ""
+    if msg_exists(mydir, year, month, msgid - 1):
+        url = url_for("cr_message", year=year, month=f"{month:02d}",
+                      msg=(msgid - 1))
+        prv = f' <a href="{url}">Prev</a>'
+    if msg_exists(mydir, year, month, msgid + 1):
+        url = url_for("cr_message", year=year, month=f"{month:02d}",
+                      msg=(msgid + 1))
+        nxt = f' <a href="{url}">Next</a>'
+    up = url_for("new_cr", year=year, month=f"{month:02d}", filename="maillist.html")
+
+    nav = f'''<a href="{up}">Up</a>{nxt}{prv}'''
+
+    return f"""
 <html>
 <head>
+<meta http-equiv="content-type" content="text/html; charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" type="text/css" href="{url_for('static', filename='css/default.css')}" />
 </head>
 <body>
-<a href="../..">Up</a>
+<p>{nav}<p>
 <pre>
 {headers}
-</pre>
-{CRLF}
-{CRLF}
-<pre>
+
 {body}
 </pre>
 </body>
 </html>
-    """
-    return as_string
+"""
 
-def _render_file(filename):
-    "Relying on MHonArc's presumed Latin-1 encoding for now."
-    return open(filename, encoding="latin1").read()
-
-@app.route('/CR/<int:year>/<int:month>/<int:msg>')
+@app.route('/CR/<year>/<month>/<int:msg>')
 def cr_message(year, month, msg):
-    return email_to_html(year, month, msg)
+    "render email as html."
+    return email_to_html(int(year), int(month), msg)
 
-@app.route('/<int:year>-<int:month>')
-@app.route('/CR/<int:year>-<int:month>/html/<filename>')
-@app.route('/<int:year>-<int:month>/html/<filename>')
-@app.route('/<int:year>-<int:month>/<filename>')
-def old_cr_month(year, month, filename="index.html"):
-    return redirect(url_for("cr", year=year, month=month,
+@app.route('/<year>-<month>/html/<filename>')
+@app.route('/CR/<year>-<month>/html/<filename>')
+@app.route('/<year>-<month>')
+@app.route('/<year>-<month>/<filename>')
+def old_cr(year, month, filename="index.html"):
+    "convert old archive url structure to new."
+    print(">> old_cr:", (year, month, filename))
+    return redirect(url_for("new_cr", year=year, month=month,
                             filename=filename),
                     code=301)
-    # return redirect(url_for("cr", year=str(year), month=str(month),
+    # return redirect(url_for("new_cr", year=str(year), month=str(month),
     #                         filename=filename),
     #                 code=301)
 
 @app.route("/CR")
 @app.route("/CR/")
-@app.route('/CR/<int:year>/<int:month>')
-@app.route('/CR/<int:year>/<int:month>/<filename>')
-def cr(year=None, month=None, filename="index.html"):
+@app.route('/CR/<year>/<month>')
+@app.route('/CR/<year>/<month>/<filename>')
+def new_cr(year=None, month=None, filename="index.html"):
+    "basic new archive url format display"
+    print(">> cr:", (year, month, filename))
     if year is None or month is None:
         endpoint = os.path.join("CR", filename)
     else:
-        endpoint = os.path.join("CR", f"{year:04d}-{month:02d}", "html",
+        endpoint = os.path.join("CR", f"{year}-{month}", "html",
                                 filename)
-    return _render_file(endpoint)
+    print(">> endpoint:", endpoint)
+    # Rely on MHonArc's presumed Latin-1 encoding for now.
+    with open(endpoint, encoding="latin1") as fobj:
+        return fobj.read()
