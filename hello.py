@@ -54,6 +54,7 @@ ZAP_HEADERS = {
     "delivered-to",
     "domainkey-signature",
     "errors-to",
+    "message-id",
     "mime-version",
     "precedence",
     "received",
@@ -132,6 +133,8 @@ def email_to_html(year, month, msgid):
     headers = format_headers(message)
     body = make_urls_sensitive(html.escape(wrap(raw_payload)))
 
+    anchor = f"{(msgid - 1):05d}"
+
     nxt = prv = ""
     if msg_exists(mydir, year, month, msgid - 1):
         url = url_for("cr_message", year=year, month=f"{month:02d}",
@@ -143,7 +146,13 @@ def email_to_html(year, month, msgid):
         nxt = f' <a href="{url}">Next</a>'
     up = url_for("new_cr", year=year, month=f"{month:02d}", filename="maillist.html")
 
-    nav = f'''<a href="{up}">Up</a>{nxt}{prv}'''
+    date_url = url_for("new_cr", year=year, month=f"{month:02d}",
+                       filename="maillist.html") + f"#{anchor}"
+    thread_url = url_for("new_cr", year=year, month=f"{month:02d}",
+                           filename="threads.html") + f"#{anchor}"
+    nav = (f'''<a href="{up}">Up</a>{nxt}{prv}'''
+           f''' <a href="{date_url}">Date Index</a>'''
+           f''' <a href="{thread_url}">Thread Index</a>''')
 
     return f"""
 <html>
@@ -189,6 +198,10 @@ def old_cr(year, month, filename="index.html"):
 def new_cr(year=None, month=None, filename="index.html"):
     "basic new archive url format display"
     print(">> cr:", (year, month, filename))
+    if "#" in filename:
+        (filename, anchor) = filename.split("#")
+    else:
+        anchor = ""
     if year is None or month is None:
         endpoint = os.path.join("CR", filename)
     else:
@@ -198,3 +211,15 @@ def new_cr(year=None, month=None, filename="index.html"):
     # Rely on MHonArc's presumed Latin-1 encoding for now.
     with open(endpoint, encoding="latin1") as fobj:
         return fobj.read()
+
+# Tutorial Gunicorn wsgi_app
+def app(environ, start_response):
+    """Simplest possible application object"""
+    data = b'Hello, World!\n'
+    status = '200 OK'
+    response_headers = [
+        ('Content-type', 'text/plain'),
+        ('Content-Length', str(len(data)))
+    ]
+    start_response(status, response_headers)
+    return iter([data])
