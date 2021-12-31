@@ -197,7 +197,6 @@ def old_cr(year, month, filename="index.html"):
 @app.route('/CR/<year>/<month>/<filename>')
 def new_cr(year=None, month=None, filename="index.html"):
     "basic new archive url format display"
-    print(">> cr:", (year, month, filename))
     if "#" in filename:
         (filename, anchor) = filename.split("#")
     else:
@@ -207,7 +206,6 @@ def new_cr(year=None, month=None, filename="index.html"):
     else:
         endpoint = os.path.join("CR", f"{year}-{month}", "html",
                                 filename)
-    print(">> endpoint:", endpoint)
     # Rely on MHonArc's presumed Latin-1 encoding for now.
     with open(endpoint, encoding="latin1") as fobj:
         return fobj.read()
