@@ -10,7 +10,7 @@ import sqlite3
 import sys
 import textwrap
 
-from flask import Flask, redirect, url_for
+from flask import Flask, redirect, url_for, render_template
 
 CRLF = "\r\n"
 REFDB = os.path.join(os.path.dirname(__file__), "references.db")
@@ -116,6 +116,16 @@ def msg_exists(mydir, year, month, msgid):
         return full_path
     return ""
 
+def trim_subject_prefix(subject):
+    "Trim prefix detritus like [CR], Re:, etc"
+    clean_subject = []
+    words = subject.split()
+    for word in words:
+        if word.lower() in ("[classicrendezvous]", "[cr]", "re:"):
+            continue
+        clean_subject.append(word)
+    return " ".join(clean_subject)
+
 def email_to_html(year, month, msgid):
     "convert the email referenced by year, month and msgid to html."
     msg = eml_file(year, month, msgid)
@@ -150,27 +160,15 @@ def email_to_html(year, month, msgid):
                        filename="maillist.html") + f"#{anchor}"
     thread_url = url_for("new_cr", year=year, month=f"{month:02d}",
                            filename="threads.html") + f"#{anchor}"
-    nav = (f'''<a href="{up}">Up</a>{nxt}{prv}'''
+
+    title = trim_subject_prefix(message["Subject"])
+    nav = (f'''<a href="/CR">Archive Home</a>'''
+           f''' <a href="{up}">Up</a>{nxt}{prv}'''
            f''' <a href="{date_url}">Date Index</a>'''
            f''' <a href="{thread_url}">Thread Index</a>''')
+    primary = f"""<pre>{headers}\n\n{body}</pre>"""
 
-    return f"""
-<html>
-<head>
-<meta http-equiv="content-type" content="text/html; charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" type="text/css" href="{url_for('static', filename='css/default.css')}" />
-</head>
-<body>
-<p>{nav}<p>
-<pre>
-{headers}
-
-{body}
-</pre>
-</body>
-</html>
-"""
+    return render_template("main.html", title=title, nav=nav, primary=primary)
 
 @app.route('/CR/<year>/<month>/<int:msg>')
 def cr_message(year, month, msg):
@@ -213,7 +211,7 @@ def new_cr(year=None, month=None, filename="index.html"):
         return fobj.read()
 
 # Tutorial Gunicorn wsgi_app
-def app(environ, start_response):
+def application(environ, start_response):
     """Simplest possible application object"""
     data = b'Hello, World!\n'
     status = '200 OK'
