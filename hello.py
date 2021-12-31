@@ -162,7 +162,8 @@ def email_to_html(year, month, msgid):
                            filename="threads.html") + f"#{anchor}"
 
     title = trim_subject_prefix(message["Subject"])
-    nav = (f'''<a href="/CR">Archive Home</a>'''
+    nav = (f'''<a href="/">Home</a>'''
+           f'''<a href="/CR">CR Archives</a>'''
            f''' <a href="{up}">Up</a>{nxt}{prv}'''
            f''' <a href="{date_url}">Date Index</a>'''
            f''' <a href="{thread_url}">Thread Index</a>''')
