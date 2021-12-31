@@ -24,11 +24,12 @@ def favicon():
 @app.route("/")
 def index():
     "index"
-    return '''
+    primary = '''
 <p>Nobody here but us chickens...
 and the <a href="CR">old Classic Rendezvous Archives.</a>
 </p>
 '''
+    return render_template("main.html", title="Hello", nav="", primary=primary)
 
 def wrap(payload):
     "wrap paragraphs in the payload."
@@ -163,7 +164,7 @@ def email_to_html(year, month, msgid):
 
     title = trim_subject_prefix(message["Subject"])
     nav = (f'''<a href="/">Home</a>'''
-           f'''<a href="/CR">CR Archives</a>'''
+           f''' <a href="/CR">CR Archives</a>'''
            f''' <a href="{up}">Up</a>{nxt}{prv}'''
            f''' <a href="{date_url}">Date Index</a>'''
            f''' <a href="{thread_url}">Thread Index</a>''')
