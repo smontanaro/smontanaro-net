@@ -18,28 +18,36 @@ import arrow
 import dateutil.parser
 import dateutil.tz
 
+def convert_ts_bytes(stamp):
+    "SQLite3 converter for tz-aware datetime objects"
+    stamp = stamp.decode("utf-8")
+    return datetime.datetime.fromisoformat(stamp)
+
 def ensure_db(sqldb):
     "make sure the database and its schema exist"
     create = not os.path.exists(sqldb)
-    conn = sqlite3.connect(sqldb)
+    sqlite3.register_converter("TIMESTAMP", convert_ts_bytes)
+    conn = sqlite3.connect(sqldb, detect_types=(sqlite3.PARSE_DECLTYPES
+                                                | sqlite3.PARSE_COLNAMES))
     if create:
         cur = conn.cursor()
         cur.execute('''
             create table messageids
               (
-                messageid,
-                filename,
-                year,
-                month,
-                seq,
-                timestamp
+                messageid TEXT PRIMARY KEY,
+                filename TEXT,
+                year INTEGER,
+                month INTEGER,
+                seq INTEGER,
+                ts timestamp
               )
         ''')
         cur.execute('''
             create table msgrefs
               (
-                messageid,
-                reference
+                messageid TEXT,
+                reference TEXT,
+                FOREIGN KEY(reference) REFERENCES messageids(messageid)
               )
         ''')
         conn.commit()
@@ -59,6 +67,7 @@ TZMAP = {
     " MDT": " America/Denver",
     " PST": " America/Los_Angeles",
     " PDT": " America/Los_Angeles",
+    " Pacific Daylight Time": " America/Los_Angeles",
 }
 
 TZINFOS = {
@@ -71,6 +80,7 @@ TZINFOS = {
     "PST": dateutil.tz.gettz("America/Los_Angeles"),
     "PDT": dateutil.tz.gettz("America/Los_Angeles"),
     "SGT": dateutil.tz.gettz("Asia/Singapore"),
+    "UT": dateutil.tz.UTC,
 }
 
 ARROW_FORMATS = [
@@ -195,6 +205,22 @@ def insert_references(message, conn, filename, verbose):
     conn.commit()
     return nrecs
 
+def process_one_file(filename, conn, verbose):
+    "handle a single file"
+    for encoding in ("utf-8", "latin-1"):
+        with open(filename, encoding=encoding) as fobj:
+            try:
+                message = email.message_from_file(fobj)
+            except (UnicodeDecodeError, email.errors.MessageError):
+                continue
+            else:
+                break
+    else:
+        raise ValueError(f"failed to read message from {filename}")
+    if message.defects:
+        raise ValueError(f"message parse errors {message.defects} in {filename}")
+    return insert_references(message, conn, filename, verbose)
+
 def main():
     "see __doc__"
     parser = argparse.ArgumentParser()
@@ -202,13 +228,29 @@ def main():
                         default=False)
     parser.add_argument("-v", "--verbose", dest="verbose", action="count",
                         default=0)
-    parser.add_argument("top", help="directory containing email files to process")
-    parser.add_argument("sqldb")
+    parser.add_argument("-o", "--one", dest="one", help="Process a single email file",
+                        default=None)
+    parser.add_argument("-d", "--database", dest="sqldb", help="SQLite3 database file")
+    parser.add_argument("top", help="directory containing email files to process",
+                        default=None, nargs="?")
     args = parser.parse_args()
+    if args.one and args.top:
+        print("Only one of top level directory and single filename may be given",
+              file=sys.stderr)
+        return 1
+
     if args.createdb and os.path.exists(args.sqldb):
         os.remove(args.sqldb)
 
     conn = ensure_db(args.sqldb)
+
+    if args.one:
+        try:
+            nrecs = process_one_file(args.one, conn, args.verbose)
+        except ValueError:
+            print(f"failed to process message {args.one}", file=sys.stderr)
+            return 1
+        return 0
 
     last_dir = ""
     for email_dir in sorted(glob.glob(f"{args.top}/**/eml-files")):
@@ -217,23 +259,12 @@ def main():
         if args.verbose and last_dir != dirpath:
             last_dir = dirpath
         for filename in sorted(glob.glob(f"{email_dir}/classicrendezvous.*.eml")):
-            for encoding in ("utf-8", "latin-1"):
-                with open(filename, encoding=encoding) as fobj:
-                    try:
-                        message = email.message_from_file(fobj)
-                    except (UnicodeDecodeError, email.errors.MessageError):
-                        continue
-                    else:
-                        break
-            else:
-                print(f"failed to read message from {filename}", file=sys.stderr)
-                continue
-            if message.defects:
-                print(f"message parse errors {message.defects} in {filename}",
-                      file=sys.stderr)
+            try:
+                nrecs = process_one_file(filename, conn, args.verbose)
+            except ValueError:
+                print(f"failed to process message {filename}", file=sys.stderr)
                 continue
             nfiles += 1
-            nrecs = insert_references(message, conn, filename, args.verbose)
             if args.verbose > 1:
                 print("  >>", filename, nrecs)
             records += nrecs
@@ -244,6 +275,7 @@ def main():
     print(f"{cur.fetchone()[0]} total message ids")
     cur.execute("select count(*) from msgrefs")
     print(f"{cur.fetchone()[0]} total references")
+    return 0
 
 if __name__ == "__main__":
     sys.exit(main())
