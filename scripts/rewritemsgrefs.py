@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 
-"Rewrite MHonARC msgNNNNN.html hrefs with MMMM, where MMMM == NNNN + 1."
+"Rewrite MHonARC msg0NNNN.html hrefs with NNNN"
 
 import argparse
 import os
 import re
 import sys
+import tempfile
 
 def read_file(filename):
     "open and read filename's contents, trying utf-8 or latin-1."
@@ -18,11 +19,20 @@ def read_file(filename):
             pass
     raise UnicodeDecodeError(f"{filename} unreadable with these encodings: {encodings}")
 
+def make_edits(fullpath):
+    "do the msg0NNNN.html -> NNNN+1 dance"
+    raw = read_file(fullpath)
+    split = re.split(r'''href="msg([0-9]+)[.]html"''', raw)
+    for (indx, num) in enumerate(split):
+        if indx % 2:
+            split[indx] = f'''href="{(int(num, 10)+1):04d}"'''
+    return "".join(split)
+
 def main():
     "see __doc__"
     parser = argparse.ArgumentParser()
-    parser.add_argument("-n", "--dry-run", dest="dryrun", action="store_true",
-                        default=False)
+    parser.add_argument("-d", "--diff", dest="diff", action="store_true",
+                        default=False, help="just display diffs")
     parser.add_argument("top")
     args = parser.parse_args()
 
@@ -31,22 +41,26 @@ def main():
             if not filename.endswith(".html"):
                 continue
             fullpath = os.path.join(dirpath, filename)
-            print(fullpath, end="")
-            if args.dryrun:
-                print()
-                continue
-            raw = read_file(fullpath)
-            split = re.split(r'''href="msg([0-9]+)[.]html"''', raw)
-            repls = 0
-            for (indx, num) in enumerate(split):
-                if indx % 2:
-                    split[indx] = f'''href="{(int(num, 10) + 1):04d}"'''
-                    repls += 1
-            cooked = "".join(split)
-            if not os.path.exists(f"{fullpath}.orig"):
-                os.rename(fullpath, f"{fullpath}.orig")
-            with open(fullpath, "w", encoding="utf-8") as fobj:
-                fobj.write(cooked)
-            print(" replaced", repls, "occurrences")
+            print(fullpath)
+
+            cooked = make_edits(fullpath)
+
+            # set up for temporary or permanent output
+            if args.diff:
+                fd, outf = tempfile.mkstemp()
+                with os.fdopen(fd, "w", encoding="utf-8") as fobj:
+                    fobj.write(cooked)
+            else:
+                if not os.path.exists(f"{fullpath}.orig"):
+                    os.rename(fullpath, f"{fullpath}.orig")
+                outf = fullpath
+                with open(fullpath, "w", encoding="utf-8") as fobj:
+                    fobj.write(cooked)
+
+            # if changes are temporary, diff them against the original, then discard
+            if args.diff:
+                os.system(f"diff -u {fullpath} {outf}")
+                os.unlink(outf)
+
 if __name__ == "__main__":
     sys.exit(main())
