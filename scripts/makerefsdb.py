@@ -6,11 +6,17 @@ Process References: headers in email files from emaildir, adding to sqldb
 """
 
 import argparse
+import datetime
 import email.errors
 import glob
 import os
+import re
 import sqlite3
 import sys
+
+import arrow
+import dateutil.parser
+import dateutil.tz
 
 def ensure_db(sqldb):
     "make sure the database and its schema exist"
@@ -25,7 +31,8 @@ def ensure_db(sqldb):
                 filename,
                 year,
                 month,
-                seq
+                seq,
+                timestamp
               )
         ''')
         cur.execute('''
@@ -38,6 +45,77 @@ def ensure_db(sqldb):
         conn.commit()
     return conn
 
+TZMAP = {
+    # dumb heuristics - keep these first
+    "+0000 GMT": "UTC",
+    " 0 (GMT)": " UTC",
+    " -800": " -0800",
+    # more typical mappings (leading space to avoid stuff like "(EST)")
+    " EST": " America/New_York",
+    " EDT": " America/New_York",
+    " CST": " America/Chicago",
+    " CDT": " America/Chicago",
+    " MST": " America/Denver",
+    " MDT": " America/Denver",
+    " PST": " America/Los_Angeles",
+    " PDT": " America/Los_Angeles",
+}
+
+TZINFOS = {
+    "EST": dateutil.tz.gettz("America/New_York"),
+    "EDT": dateutil.tz.gettz("America/New_York"),
+    "CST": dateutil.tz.gettz("America/Chicago"),
+    "CDT": dateutil.tz.gettz("America/Chicago"),
+    "MST": dateutil.tz.gettz("America/Denver"),
+    "MDT": dateutil.tz.gettz("America/Denver"),
+    "PST": dateutil.tz.gettz("America/Los_Angeles"),
+    "PDT": dateutil.tz.gettz("America/Los_Angeles"),
+    "SGT": dateutil.tz.gettz("Asia/Singapore"),
+}
+
+ARROW_FORMATS = [
+    "YYYY/MM/DD ddd A hh:mm:ss ZZZ",
+    "ddd, DD MMM YYYY HH:mm:ss ZZZ",
+    "ddd, D MMM YYYY HH:mm:ss ZZZ",
+    "YYYY/MM/DD ddd A hh:mm:ss ZZ",
+    "ddd, DD MMM YYYY HH:mm:ss ZZ",
+    "ddd, D MMM YYYY HH:mm:ss ZZ",
+    "YYYY/MM/DD ddd A hh:mm:ss Z",
+    "ddd, DD MMM YYYY HH:mm:ss Z",
+    "ddd, D MMM YYYY HH:mm:ss Z",
+    "DD MMM YYYY HH:mm:ss ZZZ",
+    "D MMM YYYY HH:mm:ss ZZZ",
+]
+
+ONE_SEC = datetime.timedelta(seconds=1)
+
+def parse_date(timestring):
+    "A few tries to parse message dates"
+    timestring = timestring.strip()
+    if timestring.lower().startswith("date:"):
+        # print(f"strip leading 'date:' from {timestring}")
+        timestring = timestring.split(maxsplit=1)[1].strip()
+    timestring = timestring.strip()
+    # map obsolete names since arrow appears not to do that.
+    timestring = timestring.strip()
+    for obsolete, name in TZMAP.items():
+        tzs = timestring.replace(obsolete, name)
+        if tzs != timestring:
+            #print(f"{timestring} -> {tzs}")
+            timestring = tzs
+            break
+    if timestring.endswith(")"):
+        timestring = re.sub(r"\s*\([^)]*\)$", "", timestring)
+    try:
+        timestamp = dateutil.parser.parse(timestring, tzinfos=TZINFOS)
+    except dateutil.parser.ParserError:
+        # try arrow with its format capability
+        try:
+            timestamp = arrow.get(timestring, ARROW_FORMATS).datetime
+        except arrow.parser.ParserError as exc:
+            raise dateutil.parser.ParserError(str(exc))
+    return timestamp
+
 def decompose_filename(filename):
     "Extract year, month and sequence number from filename."
 
@@ -48,7 +126,7 @@ def decompose_filename(filename):
 
     try:
         seq = int(os.path.split(filename)[1].split(".")[-2], 10) - 1
-    except IndexError:
+    except (ValueError, IndexError):
         print(f"Error decomposing {filename}", file=sys.stderr)
         raise
     (year, month) = [int(x)
@@ -60,11 +138,30 @@ def insert_references(message, conn, filename, verbose):
     "extract reference bits from message and insert in db"
     nrecs = 0
     msgid = message["Message-ID"]
+    datestr = message["Date"]
     if not msgid:
         return nrecs
 
     cur = conn.cursor()
-    (year, month, seq) = decompose_filename(filename)
+    try:
+        (year, month, seq) = decompose_filename(filename)
+    except ValueError as exc:
+        print(exc, file=sys.stderr)
+        return 0
+    try:
+        stamp = parse_date(datestr)
+    except dateutil.parser.ParserError as exc:
+        cur.execute("select max(timestamp) from messageids"
+                    "  where year <= ? and month <= ?",
+                    (year, month))
+        stamp = dateutil.parser.parse(cur.fetchone()[0]) + ONE_SEC
+        print(f"date parsing error for {datestr} ({exc}) - fall back to {stamp}",
+              file=sys.stderr)
+
+    if stamp.tzinfo is None:
+        # force UTC
+        stamp = stamp.replace(tzinfo=dateutil.tz.UTC)
+
     cur.execute("delete from msgrefs"
                 "  where messageid = ?",
                 (msgid,))
@@ -72,8 +169,8 @@ def insert_references(message, conn, filename, verbose):
                 "  where messageid = ?",
                 (msgid,))
     cur.execute("insert into messageids"
-                "  values (?, ?, ?, ?, ?)",
-                (msgid, filename, year, month, seq))
+                "  values (?, ?, ?, ?, ?, ?)",
+                (msgid, filename, year, month, seq, stamp))
     nrecs += 1
     if verbose > 2:
         print("  >>", msgid)
@@ -118,9 +215,8 @@ def main():
         records = nfiles = 0
         dirpath = os.path.dirname(email_dir)
         if args.verbose and last_dir != dirpath:
-            print(">>", dirpath)
             last_dir = dirpath
-        for filename in sorted(glob.glob(f"{email_dir}/*.eml")):
+        for filename in sorted(glob.glob(f"{email_dir}/classicrendezvous.*.eml")):
             for encoding in ("utf-8", "latin-1"):
                 with open(filename, encoding=encoding) as fobj:
                     try:
@@ -142,7 +238,7 @@ def main():
                 print("  >>", filename, nrecs)
             records += nrecs
         if args.verbose:
-            print("<<", dirpath, records, nfiles)
+            print(">>", dirpath, records, nfiles)
     cur = conn.cursor()
     cur.execute("select count(*) from messageids")
     print(f"{cur.fetchone()[0]} total message ids")
