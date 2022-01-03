@@ -61,6 +61,7 @@ ZAP_HEADERS = {
     "mime-version",
     "precedence",
     "received",
+    "reply-to",
     "return-path",
     "sender",
     }
@@ -75,17 +76,7 @@ def format_headers(message):
             item[0][:2].lower() == "x-" or
             item[0][:5].lower() == "list-"):
             continue
-        if item[0].lower() == "message-id":
-            cur.execute("select reference from msgrefs"
-                        "  where messageid = ?",
-                        (item[1],))
-            print("refs>>", item[1], "->", cur.fetchall())
-            cur.execute("select year, month, seq from messageids"
-                        "  where messageid = ?",
-                        (item[1],))
-            print("message>>", item[1], "->", cur.fetchall())
-            headers.append(html.escape(": ".join(item)))
-        elif item[0].lower() in ("in-reply-to", "references"):
+        if item[0].lower() in ("in-reply-to", "references"):
             tags = []
             for tgt_msgid in item[1].split():
                 cur.execute("select year, month, seq from messageids"
@@ -133,10 +124,10 @@ def email_to_html(year, month, msgid):
         with open(os.path.join(mydir, msg), encoding=encoding) as fobj:
             try:
                 message = email.message_from_file(fobj)
+                raw_payload = message.get_payload(decode=True).decode(encoding)
             except UnicodeDecodeError:
                 pass
             else:
-                raw_payload = message.get_payload(decode=True).decode(encoding)
                 break
 
     headers = format_headers(message)
