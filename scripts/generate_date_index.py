@@ -28,8 +28,7 @@ def generate_index(records):
             print(f'''<li>'''
                   f'''<a href="/CR/{r['year']}/{r['month']}/{r['seq']:05d}">'''
                   f'''{html.escape(r['subject'])}</a>'''
-                  f'''<br>'''
-                  f'''&nbsp;&nbsp;&nbsp;&nbsp;{html.escape(r["sender"])}'''
+                  f'''&nbsp;&nbsp;{html.escape(r["sender"])}'''
                   f'''</li>''')
         print("</ul>")
 
