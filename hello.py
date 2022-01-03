@@ -2,6 +2,7 @@
 
 "Return to Flask..."
 
+import datetime
 import email
 import html
 import os
@@ -24,12 +25,13 @@ def favicon():
 @app.route("/")
 def index():
     "index"
-    primary = '''
+    body = '''
 <p>Nobody here but us chickens...
 and the <a href="CR">old Classic Rendezvous Archives.</a>
 </p>
 '''
-    return render_template("main.html", title="Hello", nav="", primary=primary)
+    return render_template("main.html", title="Hello", nav="", clean_title="Hello",
+                           body=body)
 
 def wrap(payload):
     "wrap paragraphs in the payload."
@@ -108,7 +110,7 @@ def format_headers(message):
 def eml_file(year, month, msgid):
     # MHonARC was written in Perl, so of course Y2k
     perl_yr = year - 1900
-    return f"classicrendezvous.{perl_yr:3d}{month:02d}.{(msgid+1):04d}.eml"
+    return f"classicrendezvous.{perl_yr:3d}{month:02d}.{(msgid):04d}.eml"
 
 def msg_exists(mydir, year, month, msgid):
     name = eml_file(year, month, msgid)
@@ -117,15 +119,11 @@ def msg_exists(mydir, year, month, msgid):
         return full_path
     return ""
 
+PFX_MATCHER = re.compile(r"\[classicrendezvous\]|\[cr\]|re:|\s+", flags=re.I)
 def trim_subject_prefix(subject):
     "Trim prefix detritus like [CR], Re:, etc"
-    clean_subject = []
-    words = subject.split()
-    for word in words:
-        if word.lower() in ("[classicrendezvous]", "[cr]", "re:"):
-            continue
-        clean_subject.append(word)
-    return " ".join(clean_subject)
+    words = PFX_MATCHER.split(subject)
+    return " ".join([word for word in words if word])
 
 def email_to_html(year, month, msgid):
     "convert the email referenced by year, month and msgid to html."
@@ -144,7 +142,7 @@ def email_to_html(year, month, msgid):
     headers = format_headers(message)
     body = make_urls_sensitive(html.escape(wrap(raw_payload)))
 
-    anchor = f"{(msgid - 1):05d}"
+    anchor = f"{msgid:05d}"
 
     nxt = prv = ""
     if msg_exists(mydir, year, month, msgid - 1):
@@ -162,15 +160,40 @@ def email_to_html(year, month, msgid):
     thread_url = url_for("new_cr", year=year, month=f"{month:02d}",
                            filename="threads.html") + f"#{anchor}"
 
-    title = trim_subject_prefix(message["Subject"])
+    clean_title = trim_subject_prefix(message["Subject"])
     nav = (f'''<a href="/">Home</a>'''
            f''' <a href="/CR">CR Archives</a>'''
            f''' <a href="{up}">Up</a>{nxt}{prv}'''
            f''' <a href="{date_url}">Date Index</a>'''
            f''' <a href="{thread_url}">Thread Index</a>''')
-    primary = f"""<pre>{headers}\n\n{body}</pre>"""
+    body = f"""<pre>{headers}\n\n{body}</pre>"""
 
-    return render_template("main.html", title=title, nav=nav, primary=primary)
+    return render_template("main.html", title=message["Subject"], clean_title=clean_title,
+                           nav=nav, body=body)
+
+@app.route("/CR/<int:year>/<int:month>/dates")
+def dates(year, month):
+    dt = datetime.date(year, month, 1)
+    title = dt.strftime("%b %Y Date Index")
+    thread_url = url_for("new_cr", year=year, month=f"{month:02d}", filename="threads")
+    nav = (f'''<a name="top"><a href="/">Home</a></a>'''
+           f''' <a href="/CR">CR Archives</a>'''
+           f''' <a href="{thread_url}">By Thread</a>''')
+    with open(f'''CR/{dt.strftime("%Y-%m")}/generated/dates.body''') as fobj:
+        body = fobj.read()
+    return render_template("main.html", title=title, clean_title=title, body=body, nav=nav)
+
+@app.route("/CR/<int:year>/<int:month>/threads")
+def threads(year, month):
+    dt = datetime.date(year, month, 1)
+    title = dt.strftime("%b %Y Thread Index")
+    date_url = url_for("new_cr", year=year, month=f"{month:02d}", filename="dates")
+    nav = (f'''<a href="/">Home</a>'''
+           f''' <a href="/CR">CR Archives</a>'''
+           f''' <a href="{date_url}">By Date</a>''')
+    with open(f'''CR/{dt.strftime("%Y-%m")}/generated/threads.body''') as fobj:
+        body = fobj.read()
+    return render_template("main.html", title=title, clean_title=title, body=body, nav=nav)
 
 @app.route('/CR/<year>/<month>/<int:msg>')
 def cr_message(year, month, msg):
@@ -193,6 +216,19 @@ def old_cr(year, month, filename="index.html"):
 
 @app.route("/CR")
 @app.route("/CR/")
+@app.route("/CR/index.html")
+@app.route("/CR/index")
+def cr_index():
+    "templated index"
+    title = "Old Classic Rendezvous Archive"
+    if os.path.exists("CR/generated/index.body"):
+        with open("CR/generated/index.body") as fobj:
+            body = fobj.read()
+            return render_template("main.html", title=title, clean_title=title, body=body, nav="")
+    else:
+        with open("CR/index.html") as fobj:
+            return fobj.read()
+
 @app.route('/CR/<year>/<month>')
 @app.route('/CR/<year>/<month>/<filename>')
 def new_cr(year=None, month=None, filename="index.html"):
