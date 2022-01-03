@@ -137,7 +137,7 @@ def decompose_filename(filename):
     # number (0368, in this case) minus one as the sequence number.
 
     try:
-        seq = int(os.path.split(filename)[1].split(".")[-2], 10) - 1
+        seq = int(os.path.split(filename)[1].split(".")[-2], 10)
     except (ValueError, IndexError):
         print(f"Error decomposing {filename}", file=sys.stderr)
         raise
@@ -189,16 +189,20 @@ def insert_references(message, conn, filename, verbose):
     if verbose > 2:
         print("  >>", msgid)
 
-    if message["References"] is not None:
-        for reference in message["References"].split():
-            cur.execute("insert into msgrefs"
-                        "  values (?, ?)",
-                        (msgid, reference))
-            nrecs += 1
-            if verbose > 3:
-                print("    :", reference)
+    reply_ref = None
     if message["In-Reply-To"] is not None:
-        for reference in message["In-Reply-To"].split():
+        reply_ref = message["In-Reply-To"]
+        cur.execute("insert into msgrefs"
+                    "  values (?, ?)",
+                    (msgid, reply_ref))
+        nrecs += 1
+        if verbose > 3:
+            print("    :", reply_ref)
+
+    if message["References"] is not None:
+        for reference in re.findall("<[^\s>]+>", message["References"]):
+            if reference == reply_ref:
+                continue
             cur.execute("insert into msgrefs"
                         "  values (?, ?)",
                         (msgid, reference))
