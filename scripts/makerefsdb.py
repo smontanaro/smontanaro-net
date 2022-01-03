@@ -191,7 +191,7 @@ def insert_references(message, conn, filename, verbose):
 
     reply_ref = None
     if message["In-Reply-To"] is not None:
-        reply_ref = message["In-Reply-To"]
+        reply_ref = message["In-Reply-To"].strip()
         cur.execute("insert into msgrefs"
                     "  values (?, ?)",
                     (msgid, reply_ref))
@@ -201,6 +201,7 @@ def insert_references(message, conn, filename, verbose):
 
     if message["References"] is not None:
         for reference in re.findall("<[^\s>]+>", message["References"]):
+            reference = reference.strip()
             if reference == reply_ref:
                 continue
             cur.execute("insert into msgrefs"
