@@ -36,6 +36,8 @@ def ensure_db(sqldb):
               (
                 messageid TEXT PRIMARY KEY,
                 filename TEXT,
+                sender TEXT,
+                subject TEXT,
                 year INTEGER,
                 month INTEGER,
                 seq INTEGER,
@@ -149,6 +151,8 @@ def insert_references(message, conn, filename, verbose):
     nrecs = 0
     msgid = message["Message-ID"]
     datestr = message["Date"]
+    sender = message["From"]
+    subject = message["Subject"]
     if not msgid:
         return nrecs
 
@@ -179,8 +183,8 @@ def insert_references(message, conn, filename, verbose):
                 "  where messageid = ?",
                 (msgid,))
     cur.execute("insert into messageids"
-                "  values (?, ?, ?, ?, ?, ?)",
-                (msgid, filename, year, month, seq, stamp))
+                "  values (?, ?, ?, ?, ?, ?, ?, ?)",
+                (msgid, filename, sender, subject, year, month, seq, stamp))
     nrecs += 1
     if verbose > 2:
         print("  >>", msgid)
