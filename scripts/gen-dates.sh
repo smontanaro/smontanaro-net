@@ -12,4 +12,5 @@ for yr_mo in CR/2???-?? ; do
     outdir=CR/${yr_mo}/generated
     mkdir -p ${outdir}
     python scripts/generate_date_index.py -d references.db $yr $mo > ${outdir}/dates.body
+    python scripts/generate_thread_index.py -d references.db $yr $mo > ${outdir}/threads.body
 done
