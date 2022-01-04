@@ -147,9 +147,9 @@ def email_to_html(year, month, msgid):
     up = url_for("new_cr", year=year, month=f"{month:02d}", filename="maillist.html")
 
     date_url = url_for("new_cr", year=year, month=f"{month:02d}",
-                       filename="maillist.html") + f"#{anchor}"
+                       filename="dates") + f"#{anchor}"
     thread_url = url_for("new_cr", year=year, month=f"{month:02d}",
-                           filename="threads.html") + f"#{anchor}"
+                           filename="threads") + f"#{anchor}"
 
     clean_title = trim_subject_prefix(message["Subject"])
     nav = (f'''<a href="/">Home</a>'''
