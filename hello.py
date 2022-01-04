@@ -11,7 +11,7 @@ import sqlite3
 import sys
 import textwrap
 
-from flask import Flask, redirect, url_for, render_template
+from flask import Flask, redirect, url_for, render_template, abort
 
 CRLF = "\r\n"
 REFDB = os.path.join(os.path.dirname(__file__), "references.db")
@@ -30,8 +30,8 @@ def index():
 and the <a href="CR">old Classic Rendezvous Archives.</a>
 </p>
 '''
-    return render_template("main.html", title="Hello", nav="", clean_title="Hello",
-                           body=body)
+    return render_template("main.html", title="Hello", nav="",
+                           clean_title="Hello", body=body)
 
 def wrap(payload):
     "wrap paragraphs in the payload."
@@ -144,7 +144,8 @@ def email_to_html(year, month, msgid):
         url = url_for("cr_message", year=year, month=f"{month:02d}",
                       msg=(msgid + 1))
         nxt = f' <a href="{url}">Next</a>'
-    up = url_for("new_cr", year=year, month=f"{month:02d}", filename="maillist.html")
+    up = url_for("new_cr", year=year, month=f"{month:02d}",
+                 filename="maillist.html")
 
     date_url = url_for("new_cr", year=year, month=f"{month:02d}",
                        filename="dates") + f"#{anchor}"
@@ -159,51 +160,63 @@ def email_to_html(year, month, msgid):
            f''' <a href="{thread_url}">Thread Index</a>''')
     body = f"""<pre>{headers}\n\n{body}</pre>"""
 
-    return render_template("main.html", title=message["Subject"], clean_title=clean_title,
-                           nav=nav, body=body)
+    return render_template("main.html", title=message["Subject"],
+                           clean_title=clean_title, nav=nav, body=body)
 
+@app.route("/CR/<int:year>/<int:month>")
 @app.route("/CR/<int:year>/<int:month>/dates")
 def dates(year, month):
     dt = datetime.date(year, month, 1)
     title = dt.strftime("%b %Y Date Index")
-    thread_url = url_for("new_cr", year=year, month=f"{month:02d}", filename="threads")
+    thread_url = url_for("new_cr", year=year, month=f"{month:02d}",
+                         filename="threads")
     nav = (f'''<a name="top"><a href="/">Home</a></a>'''
            f''' <a href="/CR">CR Archives</a>'''
            f''' <a href="{thread_url}">By Thread</a>''')
     with open(f'''CR/{dt.strftime("%Y-%m")}/generated/dates.body''') as fobj:
         body = fobj.read()
-    return render_template("main.html", title=title, clean_title=title, body=body, nav=nav)
+    return render_template("main.html", title=title, clean_title=title,
+                           body=body, nav=nav)
 
 @app.route("/CR/<int:year>/<int:month>/threads")
 def threads(year, month):
     dt = datetime.date(year, month, 1)
     title = dt.strftime("%b %Y Thread Index")
-    date_url = url_for("new_cr", year=year, month=f"{month:02d}", filename="dates")
+    date_url = url_for("new_cr", year=year, month=f"{month:02d}",
+                       filename="dates")
     nav = (f'''<a href="/">Home</a>'''
            f''' <a href="/CR">CR Archives</a>'''
            f''' <a href="{date_url}">By Date</a>''')
     with open(f'''CR/{dt.strftime("%Y-%m")}/generated/threads.body''') as fobj:
         body = fobj.read()
-    return render_template("main.html", title=title, clean_title=title, body=body, nav=nav)
+    return render_template("main.html", title=title, clean_title=title,
+                           body=body, nav=nav)
 
 @app.route('/CR/<year>/<month>/<int:msg>')
 def cr_message(year, month, msg):
     "render email as html."
+    # print(">> cr_message:", (year, month, msg), file=sys.stderr)
     return email_to_html(int(year), int(month), msg)
 
 @app.route('/<year>-<month>/html/<filename>')
-@app.route('/CR/<year>-<month>/html/<filename>')
-@app.route('/<year>-<month>')
-@app.route('/<year>-<month>/<filename>')
-def old_cr(year, month, filename="index.html"):
+def old_cr(year, month, filename):
     "convert old archive url structure to new."
-    print(">> old_cr:", (year, month, filename))
-    return redirect(url_for("new_cr", year=year, month=month,
-                            filename=filename),
-                    code=301)
-    # return redirect(url_for("new_cr", year=str(year), month=str(month),
-    #                         filename=filename),
-    #                 code=301)
+    print(">> old_cr:", (year, month, filename), file=sys.stderr)
+    if filename in ("index.html", "maillist.html"):
+        return redirect(url_for("dates", year=year, month=month),
+                        code=301)
+    if filename == "threads.html":
+        return redirect(url_for("threads", year=year, month=month),
+                        code=301)
+
+    mat = re.search("msg([0-9]+)[.]html", filename)
+    if mat is None:
+        abort(404)
+    else:
+        map_to = f"{(int(mat.groups()[0]) + 1):05d}"
+        return redirect(url_for("cr_message", year=year, month=month,
+                                msg=map_to),
+                        code=301)
 
 @app.route("/CR")
 @app.route("/CR/")
@@ -215,7 +228,8 @@ def cr_index():
     if os.path.exists("CR/generated/index.body"):
         with open("CR/generated/index.body") as fobj:
             body = fobj.read()
-            return render_template("main.html", title=title, clean_title=title, body=body, nav="")
+            return render_template("main.html", title=title, clean_title=title,
+                                   body=body, nav="")
     else:
         with open("CR/index.html") as fobj:
             return fobj.read()
