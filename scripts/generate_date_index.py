@@ -18,6 +18,13 @@ def date_key(record):
     "groupby key func"
     return record["ts"].date()
 
+def generate_link(r):
+    "HTML for a single message"
+    return (f'''<a name="{r['seq']:05d}">'''
+            f'''<a href="/CR/{r['year']}/{r['month']}/{r['seq']:05d}">'''
+            f'''{html.escape(r['subject'])}</a></a>'''
+            f'''&nbsp;&nbsp;{html.escape(r["sender"])}''')
+
 def generate_index(records):
     "html fragment output"
     for (dt, chunk) in itertools.groupby(records, date_key):
@@ -25,11 +32,9 @@ def generate_index(records):
         print(f'''<a href="#top">Top</a>''')
         print(f'''<ul>''')
         for r in chunk:
-            print(f'''<li>'''
-                  f'''<a href="/CR/{r['year']}/{r['month']}/{r['seq']:05d}">'''
-                  f'''{html.escape(r['subject'])}</a>'''
-                  f'''&nbsp;&nbsp;{html.escape(r["sender"])}'''
-                  f'''</li>''')
+            print(f'''<li>''')
+            print(generate_link(r))
+            print(f'''</li>''')
         print("</ul>")
 
 def main():
