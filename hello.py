@@ -8,10 +8,12 @@ import html
 import os
 import re
 import sqlite3
-import sys
 import textwrap
 
-from flask import Flask, redirect, url_for, render_template, abort
+from flask import (Flask, redirect, url_for, render_template,
+                   abort, jsonify)
+
+from util import eprint, strip_mime
 
 CRLF = "\r\n"
 REFDB = os.path.join(os.path.dirname(__file__), "references.db")
@@ -20,11 +22,14 @@ app = Flask(__name__)
 
 @app.route("/favicon.ico")
 def favicon():
+    "websites need these"
+    eprint(">> favicon")
     return redirect(url_for("static", filename="images/favicon.ico"))
 
 @app.route("/")
 def index():
     "index"
+    eprint(">> index")
     body = '''
 <p>Nobody here but us chickens...
 and the <a href="CR">old Classic Rendezvous Archives.</a>
@@ -67,6 +72,7 @@ ZAP_HEADERS = {
     }
 
 def format_headers(message):
+    "generate message header block"
     headers = []
     conn = sqlite3.connect(REFDB)
     cur = conn.cursor()
@@ -85,8 +91,7 @@ def format_headers(message):
                 try:
                     (year, month, seq) = cur.fetchone()
                 except (TypeError, IndexError):
-                    print(f"failed to locate {tgt_msgid}.",
-                          file=sys.stderr)
+                    eprint(f"failed to locate {tgt_msgid}.")
                     tag = html.escape(tgt_msgid)
                 else:
                     url = url_for('cr_message', year=year,
@@ -99,11 +104,13 @@ def format_headers(message):
     return CRLF.join(headers)
 
 def eml_file(year, month, msgid):
+    "compute email file from sequence number"
     # MHonARC was written in Perl, so of course Y2k
     perl_yr = year - 1900
     return f"classicrendezvous.{perl_yr:3d}{month:02d}.{(msgid):04d}.eml"
 
 def msg_exists(mydir, year, month, msgid):
+    "test to see if there is an email message to which we should href"
     name = eml_file(year, month, msgid)
     full_path = os.path.join(mydir, name)
     if os.path.exists(full_path):
@@ -116,25 +123,25 @@ def trim_subject_prefix(subject):
     words = PFX_MATCHER.split(subject)
     return " ".join([word for word in words if word])
 
-def email_to_html(year, month, msgid):
-    "convert the email referenced by year, month and msgid to html."
-    msg = eml_file(year, month, msgid)
-    mydir = os.path.join("CR", f"{year:04d}-{month:02d}", "eml-files")
+def read_message(path):
+    "read an email message from path, trying encodings"
     for encoding in ("utf-8", "latin-1"):
-        with open(os.path.join(mydir, msg), encoding=encoding) as fobj:
+        with open(path, encoding=encoding) as fobj:
             try:
                 message = email.message_from_file(fobj)
                 raw_payload = message.get_payload(decode=True).decode(encoding)
-            except UnicodeDecodeError:
-                pass
+            except UnicodeDecodeError as exc:
+                exc_msg = str(exc)
             else:
                 break
+    else:
+        raise UnicodeDecodeError(exc_msg)
+    return (message, raw_payload)
 
-    headers = format_headers(message)
-    body = make_urls_sensitive(html.escape(wrap(raw_payload)))
-
+def generate_nav_block(year, month, msgid):
+    "navigation header at top of email messages."
+    mydir = os.path.join("CR", f"{year:04d}-{month:02d}", "eml-files")
     anchor = f"{msgid:05d}"
-
     nxt = prv = ""
     if msg_exists(mydir, year, month, msgid - 1):
         url = url_for("cr_message", year=year, month=f"{month:02d}",
@@ -144,21 +151,31 @@ def email_to_html(year, month, msgid):
         url = url_for("cr_message", year=year, month=f"{month:02d}",
                       msg=(msgid + 1))
         nxt = f' <a href="{url}">Next</a>'
-    up = url_for("new_cr", year=year, month=f"{month:02d}",
-                 filename="maillist.html")
+    uplink = url_for("dates", year=year, month=f"{month:02d}")
 
-    date_url = url_for("new_cr", year=year, month=f"{month:02d}",
-                       filename="dates") + f"#{anchor}"
-    thread_url = url_for("new_cr", year=year, month=f"{month:02d}",
-                           filename="threads") + f"#{anchor}"
+    date_url = (url_for("dates", year=year, month=f"{month:02d}") +
+                f"#{anchor}")
+    thread_url = (url_for("threads", year=year, month=f"{month:02d}") +
+                  f"#{anchor}")
 
-    clean_title = trim_subject_prefix(message["Subject"])
-    nav = (f'''<a href="/">Home</a>'''
-           f''' <a href="/CR">CR Archives</a>'''
-           f''' <a href="{up}">Up</a>{nxt}{prv}'''
-           f''' <a href="{date_url}">Date Index</a>'''
-           f''' <a href="{thread_url}">Thread Index</a>''')
+    return (f'''<a href="/">Home</a>'''
+            f''' <a href="/CR">CR Archives</a>'''
+            f''' <a href="{uplink}">Up</a>{nxt}{prv}'''
+            f''' <a href="{date_url}">Date Index</a>'''
+            f''' <a href="{thread_url}">Thread Index</a>''')
+
+def email_to_html(year, month, msgid):
+    "convert the email referenced by year, month and msgid to html."
+    msg = eml_file(year, month, msgid)
+    mydir = os.path.join("CR", f"{year:04d}-{month:02d}", "eml-files")
+    (message, raw_payload) = read_message(os.path.join(mydir, msg))
+
+    headers = format_headers(message)
+    body = make_urls_sensitive(html.escape(wrap(strip_mime(raw_payload))))
+
+    nav = generate_nav_block(year, month, msgid)
     body = f"""<pre>{headers}\n\n{body}</pre>"""
+    clean_title = trim_subject_prefix(message["Subject"])
 
     return render_template("main.html", title=message["Subject"],
                            clean_title=clean_title, nav=nav, body=body)
@@ -166,28 +183,33 @@ def email_to_html(year, month, msgid):
 @app.route("/CR/<int:year>/<int:month>")
 @app.route("/CR/<int:year>/<int:month>/dates")
 def dates(year, month):
-    dt = datetime.date(year, month, 1)
-    title = dt.strftime("%b %Y Date Index")
-    thread_url = url_for("new_cr", year=year, month=f"{month:02d}",
-                         filename="threads")
+    "new date index"
+    eprint(">> dates:", (year, month))
+
+    date = datetime.date(year, month, 1)
+    title = date.strftime("%b %Y Date Index")
+    thread_url = url_for("threads", year=year, month=f"{month:02d}")
     nav = (f'''<a name="top"><a href="/">Home</a></a>'''
-           f''' <a href="/CR">CR Archives</a>'''
+           f''' <a href="/CR">Up</a>'''
            f''' <a href="{thread_url}">By Thread</a>''')
-    with open(f'''CR/{dt.strftime("%Y-%m")}/generated/dates.body''') as fobj:
+    with open(f'''CR/{date.strftime("%Y-%m")}/generated/dates.body''',
+              encoding="utf-8") as fobj:
         body = fobj.read()
     return render_template("main.html", title=title, clean_title=title,
                            body=body, nav=nav)
 
 @app.route("/CR/<int:year>/<int:month>/threads")
 def threads(year, month):
-    dt = datetime.date(year, month, 1)
-    title = dt.strftime("%b %Y Thread Index")
-    date_url = url_for("new_cr", year=year, month=f"{month:02d}",
-                       filename="dates")
+    "new thread index"
+    eprint(">> threads:", (year, month))
+    date = datetime.date(year, month, 1)
+    title = date.strftime("%b %Y Thread Index")
+    date_url = url_for("dates", year=year, month=f"{month:02d}")
     nav = (f'''<a href="/">Home</a>'''
-           f''' <a href="/CR">CR Archives</a>'''
+           f''' <a href="/CR">Up</a>'''
            f''' <a href="{date_url}">By Date</a>''')
-    with open(f'''CR/{dt.strftime("%Y-%m")}/generated/threads.body''') as fobj:
+    with open(f'''CR/{date.strftime("%Y-%m")}/generated/threads.body''',
+              encoding="utf-8") as fobj:
         body = fobj.read()
     return render_template("main.html", title=title, clean_title=title,
                            body=body, nav=nav)
@@ -195,16 +217,17 @@ def threads(year, month):
 @app.route('/CR/<year>/<month>/<int:msg>')
 def cr_message(year, month, msg):
     "render email as html."
-    # print(">> cr_message:", (year, month, msg), file=sys.stderr)
+    eprint(">> cr_message:", (year, month, msg))
     return email_to_html(int(year), int(month), msg)
 
 @app.route('/<year>-<month>/html/<filename>')
 def old_cr(year, month, filename):
     "convert old archive url structure to new."
-    print(">> old_cr:", (year, month, filename), file=sys.stderr)
+    eprint(">> old_cr:", (year, month, filename))
     if filename in ("index.html", "maillist.html"):
         return redirect(url_for("dates", year=year, month=month),
                         code=301)
+
     if filename == "threads.html":
         return redirect(url_for("threads", year=year, month=month),
                         code=301)
@@ -212,11 +235,13 @@ def old_cr(year, month, filename):
     mat = re.search("msg([0-9]+)[.]html", filename)
     if mat is None:
         abort(404)
-    else:
-        map_to = f"{(int(mat.groups()[0]) + 1):05d}"
-        return redirect(url_for("cr_message", year=year, month=month,
-                                msg=map_to),
-                        code=301)
+        # dead code, but this should make pylint like us again...
+        return redirect("cr_index")
+
+    map_to = f"{(int(mat.groups()[0]) + 1):05d}"
+    return redirect(url_for("cr_message", year=year, month=month,
+                            msg=map_to),
+                    code=301)
 
 @app.route("/CR")
 @app.route("/CR/")
@@ -224,41 +249,34 @@ def old_cr(year, month, filename):
 @app.route("/CR/index")
 def cr_index():
     "templated index"
+    eprint(">> cr_index:")
     title = "Old Classic Rendezvous Archive"
     if os.path.exists("CR/generated/index.body"):
-        with open("CR/generated/index.body") as fobj:
+        with open("CR/generated/index.body", encoding="utf8") as fobj:
             body = fobj.read()
             return render_template("main.html", title=title, clean_title=title,
                                    body=body, nav="")
     else:
-        with open("CR/index.html") as fobj:
+        with open("CR/index.html", encoding="utf-8") as fobj:
             return fobj.read()
 
-@app.route('/CR/<year>/<month>')
-@app.route('/CR/<year>/<month>/<filename>')
-def new_cr(year=None, month=None, filename="index.html"):
-    "basic new archive url format display"
-    if "#" in filename:
-        (filename, anchor) = filename.split("#")
-    else:
-        anchor = ""
-    if year is None or month is None:
-        endpoint = os.path.join("CR", filename)
-    else:
-        endpoint = os.path.join("CR", f"{year}-{month}", "html",
-                                filename)
-    # Rely on MHonArc's presumed Latin-1 encoding for now.
-    with open(endpoint, encoding="latin1") as fobj:
-        return fobj.read()
+@app.route('/api/help')
+def app_help():
+    """Print available functions."""
+    func_list = {}
+    for rule in app.url_map.iter_rules():
+        if rule.endpoint != 'static':
+            func_list[rule.rule] = str(app.view_functions[rule.endpoint])
+    return jsonify(func_list)
 
-# Tutorial Gunicorn wsgi_app
-def application(environ, start_response):
-    """Simplest possible application object"""
-    data = b'Hello, World!\n'
-    status = '200 OK'
-    response_headers = [
-        ('Content-type', 'text/plain'),
-        ('Content-Length', str(len(data)))
-    ]
-    start_response(status, response_headers)
-    return iter([data])
+# # Tutorial Gunicorn wsgi_app
+# def application(environ, start_response):
+#     """Simplest possible application object"""
+#     data = b'Hello, World!\n'
+#     status = '200 OK'
+#     response_headers = [
+#         ('Content-type', 'text/plain'),
+#         ('Content-Length', str(len(data)))
+#     ]
+#     start_response(status, response_headers)
+#     return iter([data])
