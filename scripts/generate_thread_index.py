@@ -26,8 +26,6 @@ def generate_link(r):
 
 def generate_index(records, cur, level):
     "html fragment output"
-    if level >= 2:
-        return
     print(f'''<ul>''')
     for r in records:
         print(f'''<li>''')
