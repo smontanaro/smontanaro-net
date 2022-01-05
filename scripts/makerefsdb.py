@@ -52,6 +52,13 @@ def ensure_db(sqldb):
                 FOREIGN KEY(reference) REFERENCES messageids(messageid)
               )
         ''')
+        cur.execute("create index msgid_index"
+                    "  on messageids"
+                    "  (messageid)")
+        cur.execute("create index msgrefs_index"
+                    "  on msgrefs"
+                    "  (reference)")
+
         conn.commit()
     return conn
 
