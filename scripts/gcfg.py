@@ -15,7 +15,7 @@ wsgi_app                          = None
 
 # pylint: disable=line-too-long
 access_log_format                 = '''%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s"'''
-accesslog                         = None
+accesslog                         = "/tmp/smontanaro.net/server.log"
 capture_output                    = False
 disable_redirect_access_to_syslog = False
 dogstatsd_tags                    = ""
@@ -24,13 +24,13 @@ errorlog                          = "-"
 logconfig_dict                    = {}
 logconfig                         = None
 logger_class                      = gunicorn.glogging.Logger
-loglevel                          = "info"
+loglevel                          = "debug"
 statsd_host                       = None
 statsd_prefix                     = ""
 syslog_addr                       = "udp://localhost:514"
 syslog_facility                   = "user"
-syslog                            = False
-syslog_prefix                     = None
+syslog                            = True
+syslog_prefix                     = "gunicorn:"
 
 # Process Naming
 
@@ -48,11 +48,11 @@ spew                              = False
 
 # SSL
 ca_certs                          = None
-certfile                          = None
+certfile                          = "/etc/letsencrypt/live/smontanaro.net/privkey.pem"
 cert_reqs                         = 0
 ciphers                           = None
 do_handshake_on_connect           = False
-keyfile                           = None
+keyfile                           = "/etc/letsencrypt/live/smontanaro.net/privkey.pem"
 ssl_version                       = "TLS"
 suppress_ragged_eofs              = True
 
@@ -90,9 +90,9 @@ pidfile                           = None
 preload_app                       = False
 raw_env                           = []
 reuse_port                        = False
-forwarded_allow_ips               = ['127.0.0.1']
+forwarded_allow_ips               = '127.0.0.1,150.136.105.184,10.0.0.2'
 paste                             = None
-proxy_allow_ips                   = ['127.0.0.1']
+proxy_allow_ips                   = '*'
 proxy_protocol                    = False
 pythonpath                        = None
 raw_paste_global_conf             = []
@@ -112,7 +112,7 @@ worker_tmp_dir                    = None
 
 backlog                           = 2048
 bind                              = [
-    '0.0.0.0:8000',
+    '0.0.0.0:8080',
 #    '0.0.0.0:443',       # eventually
 ]
 
