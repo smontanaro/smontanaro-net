@@ -60,6 +60,7 @@ ZAP_HEADERS = {
     "delivered-to",
     "domainkey-signature",
     "errors-to",
+    "importance",
     "message-id",
     "mime-version",
     "precedence",
@@ -76,11 +77,12 @@ def format_headers(message):
     cur = conn.cursor()
     for item in message.items():
         # Skip various headers - maybe later insert as comments...
-        if (item[0].lower() in ZAP_HEADERS or
-            item[0][:2].lower() == "x-" or
-            item[0][:5].lower() == "list-"):
+        key = item[0].lower()
+        if (key in ZAP_HEADERS or
+            key[:2] == "x-" or
+            key[:5] == "list-"):
             continue
-        if item[0].lower() in ("in-reply-to", "references"):
+        if key in ("in-reply-to", "references"):
             tags = []
             for tgt_msgid in item[1].split():
                 cur.execute("select year, month, seq from messageids"
@@ -98,6 +100,8 @@ def format_headers(message):
                     tag = f"""<a href="{url}">{html.escape(tgt_msgid)}</a>"""
                 tags.append(tag)
             headers.append(f'''{item[0]}: {" ".join(tags)}''')
+        # elif key == "message-id":
+        #     headers.append(f"<!-- {html.escape(': '.join(item))} -->")
         else:
             headers.append(html.escape(": ".join(item)))
     return CRLF.join(headers)
