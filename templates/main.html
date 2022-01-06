@@ -1,5 +1,7 @@
 <!DOCTYPE html>
 <!--
+        Heavily modified from:
+
 	terrafirma1.0 by nodethirtythree design
 	http://www.nodethirtythree.com
         Design by <a href="http://www.nodethirtythree.com/">NodeThirtyThree</a>.
@@ -16,7 +18,8 @@
   http://androidcss.com/css/css3-floating-button-tutorial/
 -->
 <link rel="stylesheet" type="text/css" href="/static/css/floating.css" />
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.css">
+<!-- <link rel="stylesheet" tyoe="text/css" href="/static/css/font-awesome.css" /> -->
 
 <meta name="keywords" content="" />
 <meta name="description" content="" />
@@ -25,9 +28,9 @@
 
 <a href="#top" class="float"><i class="fa fa-arrow-up my-float"></i></a>
 
-<p>{{ nav|safe }}</p>
 <div id="outer">
 
+  <p><a name="top">{{ nav|safe }}</a></p>
   <h1>{{ title }}</h1>
 
   <div id="primarycontent">
