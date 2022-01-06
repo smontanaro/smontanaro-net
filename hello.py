@@ -13,7 +13,7 @@ import textwrap
 from flask import (Flask, redirect, url_for, render_template,
                    abort, jsonify)
 
-from util import eprint, strip_mime
+from util import strip_mime
 
 CRLF = "\r\n"
 REFDB = os.path.join(os.path.dirname(__file__), "references.db")
@@ -23,13 +23,11 @@ app = Flask(__name__)
 @app.route("/favicon.ico")
 def favicon():
     "websites need these"
-    eprint(">> favicon")
     return redirect(url_for("static", filename="images/favicon.ico"))
 
 @app.route("/")
 def index():
     "index"
-    eprint(">> index")
     body = '''
 <p>Nobody here but us chickens...
 and the <a href="CR">old Classic Rendezvous Archives.</a>
@@ -91,7 +89,8 @@ def format_headers(message):
                 try:
                     (year, month, seq) = cur.fetchone()
                 except (TypeError, IndexError):
-                    eprint(f"failed to locate {tgt_msgid}.")
+                    # pylint: disable=no-member
+                    app.logger.error(f"failed to locate {tgt_msgid}.")
                     tag = html.escape(tgt_msgid)
                 else:
                     url = url_for('cr_message', year=year,
@@ -184,7 +183,6 @@ def email_to_html(year, month, msgid):
 @app.route("/CR/<int:year>/<int:month>/dates")
 def dates(year, month):
     "new date index"
-    eprint(">> dates:", (year, month))
 
     date = datetime.date(year, month, 1)
     title = date.strftime("%b %Y Date Index")
@@ -201,7 +199,7 @@ def dates(year, month):
 @app.route("/CR/<int:year>/<int:month>/threads")
 def threads(year, month):
     "new thread index"
-    eprint(">> threads:", (year, month))
+
     date = datetime.date(year, month, 1)
     title = date.strftime("%b %Y Thread Index")
     date_url = url_for("dates", year=year, month=f"{month:02d}")
@@ -217,13 +215,13 @@ def threads(year, month):
 @app.route('/CR/<year>/<month>/<int:msg>')
 def cr_message(year, month, msg):
     "render email as html."
-    eprint(">> cr_message:", (year, month, msg))
+
     return email_to_html(int(year), int(month), msg)
 
 @app.route('/<year>-<month>/html/<filename>')
 def old_cr(year, month, filename):
     "convert old archive url structure to new."
-    eprint(">> old_cr:", (year, month, filename))
+
     if filename in ("index.html", "maillist.html"):
         return redirect(url_for("dates", year=year, month=month),
                         code=301)
@@ -249,7 +247,7 @@ def old_cr(year, month, filename):
 @app.route("/CR/index")
 def cr_index():
     "templated index"
-    eprint(">> cr_index:")
+
     title = "Old Classic Rendezvous Archive"
     if os.path.exists("CR/generated/index.body"):
         with open("CR/generated/index.body", encoding="utf8") as fobj:
