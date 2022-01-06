@@ -6,3 +6,4 @@ lib*
 pyvenv.cfg
 references.db
 terrafirma
+server.log
