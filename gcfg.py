@@ -2,9 +2,13 @@
 
 "Gunicorn config file"
 
+import os
+
 import gunicorn.glogging
 
 # pylint: disable=invalid-name
+
+IAM_ROOT = os.getuid() == 0
 
 # Config File
 
@@ -15,7 +19,10 @@ wsgi_app                          = None
 
 # pylint: disable=line-too-long
 access_log_format                 = '''%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s"'''
-accesslog                         = "/tmp/smontanaro.net/server.log"
+if IAM_ROOT:
+    accesslog = "/tmp/smontanaro.net/server.log"
+else:
+    accesslog = os.path.join(os.path.dirname(__file__), "server.log")
 capture_output                    = False
 disable_redirect_access_to_syslog = False
 dogstatsd_tags                    = ""
@@ -40,21 +47,27 @@ proc_name                         = None
 # Debugging
 
 check_config                      = False
-print_config                      = True
+print_config                      = False
 reload_engine                     = "auto"
 reload_extra_files                = []
 reload                            = False
 spew                              = False
 
-# SSL
-ca_certs                          = None
-certfile                          = "/etc/letsencrypt/live/smontanaro.net/privkey.pem"
-cert_reqs                         = 0
-ciphers                           = None
-do_handshake_on_connect           = False
-keyfile                           = "/etc/letsencrypt/live/smontanaro.net/privkey.pem"
-ssl_version                       = "TLS"
-suppress_ragged_eofs              = True
+if IAM_ROOT:
+    # SSL
+    LETS_ENCRYPT = "/etc/letsencrypt"
+    SERVER = "smontanaro.net"
+
+    CERT_DIR = os.path.join(LETS_ENCRYPT, "live", SERVER)
+
+    ca_certs                          = None
+    certfile                          = os.path.join(CERT_DIR, "fullchain.pem")
+    cert_reqs                         = 0
+    ciphers                           = None
+    do_handshake_on_connect           = False
+    keyfile                           = os.path.join(CERT_DIR, "privkey.pem")
+    ssl_version                       = "TLS"
+    suppress_ragged_eofs              = True
 
 # Security
 
@@ -82,9 +95,15 @@ limit_request_line                = 4094
 
 # Server Mechanics
 
-chdir                             = "/home/skip/website"
+if IAM_ROOT:
+    chdir                             = "/var/opt/website"
+else:
+    chdir                             = "/home/skip/website"
+
+user = os.getuid()
+group = os.getgid()
+
 daemon                            = False
-group                             = 1002
 initgroups                        = False
 pidfile                           = None
 preload_app                       = False
@@ -105,16 +124,21 @@ sendfile                          = None
 strip_header_spaces               = False
 tmp_upload_dir                    = None
 umask                             = 0
-user                              = 1002
 worker_tmp_dir                    = None
 
 # Server Socket
 
 backlog                           = 2048
-bind                              = [
-    '0.0.0.0:8080',
-#    '0.0.0.0:443',       # eventually
-]
+
+if IAM_ROOT:
+    bind = [
+        '0.0.0.0:443',
+        '0.0.0.0:80',
+    ]
+else:
+    bind = [
+        '0.0.0.0:8080',
+    ]
 
 # Worker Processes
 
