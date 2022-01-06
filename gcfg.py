@@ -20,7 +20,7 @@ wsgi_app                          = None
 # pylint: disable=line-too-long
 access_log_format                 = '''%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s"'''
 if IAM_ROOT:
-    accesslog = "/tmp/smontanaro.net/server.log"
+    accesslog = "/var/log/smontanaro.net.log"
 else:
     accesslog = os.path.join(os.path.dirname(__file__), "server.log")
 capture_output                    = False
@@ -109,7 +109,7 @@ pidfile                           = None
 preload_app                       = False
 raw_env                           = []
 reuse_port                        = False
-forwarded_allow_ips               = '127.0.0.1,150.136.105.184,10.0.0.2'
+forwarded_allow_ips               = '*'
 paste                             = None
 proxy_allow_ips                   = '*'
 proxy_protocol                    = False
