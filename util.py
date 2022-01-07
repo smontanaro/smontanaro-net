@@ -7,15 +7,13 @@
 # http://test.smontanaro.net:8080/CR/2008/11/941
 # http://test.smontanaro.net:8080/CR/2008/11/944
 #
-# Maybe need to strip in quoted sections:
-#
-# http://test.smontanaro.net:8080/CR/2008/11/947
-# http://test.smontanaro.net:8080/CR/2008/11/624
-# http://test.smontanaro.net:8080/CR/2001/09/14
-#
 # MSN too?
 #
 # http://test.smontanaro.net:8080/CR/2001/09/19
+#
+# And AOL?
+#
+# http://test.smontanaro.net:8080/CR/2008/06/12
 
 import re
 
@@ -23,9 +21,10 @@ def strip_footers(payload):
     "strip non-content footers"
     while True:
         new_payload = payload
-        for func in (strip_mime, strip_bikelist_footer,
+        for func in (strip_trailing_whitespace,
+                     strip_mime,
+                     strip_bikelist_footer,
                      strip_trailing_underscores):
-            new_payload = new_payload.rstrip()
             new_payload = func(new_payload)
         if new_payload == payload:
             return payload
@@ -68,14 +67,14 @@ def strip_between(payload, header, footer, tag):
     new_payload = []
     for line in lines:
         if state == "start":
-            if line.startswith(header):
+            if re.match(f"(> )?{header}", line) is not None:
                 state = "stripping"
                 # print(">> elide", tag, state, repr(line))
                 continue
             new_payload.append(line)
         else:  # state == "stripping"
             # print(">> elide", tag, state, repr(line))
-            if line.startswith(footer):
+            if re.match(f"(> )?{footer}", line) is not None:
                 state = "start"
     new_payload = "".join(new_payload)
     # print(">> result:", tag, new_payload == payload)
@@ -86,8 +85,18 @@ def strip_trailing_underscores(payload):
     # Looks like 47 underscores in the most common case.
     underscores = "_" * 47
     lines = re.split(r"(\n+)", payload.rstrip())
-    if lines[-1].startswith(underscores):
+    if re.match(f"(> )?{underscores}", lines[-1]) is not None:
         lines = lines[:-1]
     lines = "".join(lines)
     # print(">> result:", "underscores", lines == payload)
+    return lines
+
+def strip_trailing_whitespace(payload):
+    "strip trailing whitespace at the bottom of the message"
+    underscores = "_" * 47
+    lines = re.split(r"(\n+)", payload.rstrip())
+    while re.match(r">?\s*$", lines[-1]) is not None:
+        del lines[-1]
+    lines = "".join(lines)
+    # print(">> result:", "whitespace", lines == payload)
     return lines
