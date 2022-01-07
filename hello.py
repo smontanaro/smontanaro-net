@@ -13,7 +13,7 @@ import textwrap
 from flask import (Flask, redirect, url_for, render_template,
                    abort, jsonify)
 
-from util import strip_mime
+from util import strip_footers
 
 CRLF = "\r\n"
 REFDB = os.path.join(os.path.dirname(__file__), "references.db")
@@ -58,6 +58,7 @@ ZAP_HEADERS = {
     "content-transfer-encoding",
     "content-type",
     "delivered-to",
+    "dkim-signature",
     "domainkey-signature",
     "errors-to",
     "importance",
@@ -65,6 +66,7 @@ ZAP_HEADERS = {
     "mime-version",
     "precedence",
     "received",
+    "received-spf",
     "reply-to",
     "return-path",
     "sender",
@@ -75,7 +77,8 @@ def format_headers(message):
     headers = []
     conn = sqlite3.connect(REFDB)
     cur = conn.cursor()
-    for item in message.items():
+    last_refs = set()
+    for item in sorted(message.items()):
         # Skip various headers - maybe later insert as comments...
         key = item[0].lower()
         if (key in ZAP_HEADERS or
@@ -85,6 +88,9 @@ def format_headers(message):
         if key in ("in-reply-to", "references"):
             tags = []
             for tgt_msgid in item[1].split():
+                if tgt_msgid in last_refs:
+                    continue
+                last_refs |= set([tgt_msgid])
                 cur.execute("select year, month, seq from messageids"
                             "  where messageid = ?",
                             (tgt_msgid,))
@@ -99,7 +105,8 @@ def format_headers(message):
                                   month=month, msg=seq)
                     tag = f"""<a href="{url}">{html.escape(tgt_msgid)}</a>"""
                 tags.append(tag)
-            headers.append(f'''{item[0]}: {" ".join(tags)}''')
+            if tags:
+                headers.append(f'''{item[0]}: {" ".join(tags)}''')
         # elif key == "message-id":
         #     headers.append(f"<!-- {html.escape(': '.join(item))} -->")
         else:
@@ -174,7 +181,7 @@ def email_to_html(year, month, msgid):
     (message, raw_payload) = read_message(os.path.join(mydir, msg))
 
     headers = format_headers(message)
-    body = make_urls_sensitive(html.escape(wrap(strip_mime(raw_payload))))
+    body = make_urls_sensitive(html.escape(wrap(strip_footers(raw_payload))))
 
     nav = generate_nav_block(year, month, msgid)
     body = f"""<pre>{headers}\n\n{body}</pre>"""
