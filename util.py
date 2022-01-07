@@ -2,12 +2,34 @@
 
 "Some functions to share between parts of the app"
 
-import re
-import sys
+# Maybe need a Juno stripper:
+#
+# http://test.smontanaro.net:8080/CR/2008/11/941
+# http://test.smontanaro.net:8080/CR/2008/11/944
+#
+# Maybe need to strip in quoted sections:
+#
+# http://test.smontanaro.net:8080/CR/2008/11/947
+# http://test.smontanaro.net:8080/CR/2008/11/624
+# http://test.smontanaro.net:8080/CR/2001/09/14
+#
+# MSN too?
+#
+# http://test.smontanaro.net:8080/CR/2001/09/19
 
-def eprint(*args, file=sys.stderr, **kwds):
-    "shorthand"
-    return print(*args, file=file, **kwds)
+import re
+
+def strip_footers(payload):
+    "strip non-content footers"
+    while True:
+        new_payload = payload
+        for func in (strip_mime, strip_bikelist_footer,
+                     strip_trailing_underscores):
+            new_payload = new_payload.rstrip()
+            new_payload = func(new_payload)
+        if new_payload == payload:
+            return payload
+        payload = new_payload
 
 def strip_mime(payload):
     "strip the StripMime Report block."
@@ -25,7 +47,22 @@ def strip_mime(payload):
 
     header = "--- StripMime Report -- processed MIME parts ---"
     footer = "---"
+    return strip_between(payload, header, footer, "mime")
 
+def strip_bikelist_footer(payload):
+    "strip the CR mailing list footer"
+    # The footer looks like this:
+    #
+    # Classicrendezvous mailing list
+    # Classicrendezvous@bikelist.org
+    #  http://www.bikelist.org/mailman/listinfo/classicrendezvous
+
+    header = "Classicrendezvous mailing list"
+    footer = "http://www.bikelist.org/mailman/listinfo/classicrendezvous"
+    return strip_between(payload, header, footer, "bikelist")
+
+def strip_between(payload, header, footer, tag):
+    "strip all lines at the end of the strip between header and footer"
     lines = re.split(r"(\n+)", payload)
     state = "start"
     new_payload = []
@@ -33,9 +70,24 @@ def strip_mime(payload):
         if state == "start":
             if line.startswith(header):
                 state = "stripping"
+                # print(">> elide", tag, state, repr(line))
                 continue
             new_payload.append(line)
         else:  # state == "stripping"
+            # print(">> elide", tag, state, repr(line))
             if line.startswith(footer):
                 state = "start"
-    return "".join(new_payload)
+    new_payload = "".join(new_payload)
+    # print(">> result:", tag, new_payload == payload)
+    return new_payload
+
+def strip_trailing_underscores(payload):
+    "strip trailing underscores at the bottom of the message"
+    # Looks like 47 underscores in the most common case.
+    underscores = "_" * 47
+    lines = re.split(r"(\n+)", payload.rstrip())
+    if lines[-1].startswith(underscores):
+        lines = lines[:-1]
+    lines = "".join(lines)
+    # print(">> result:", "underscores", lines == payload)
+    return lines
