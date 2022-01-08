@@ -2,11 +2,6 @@
 
 "Some functions to share between parts of the app"
 
-# Maybe need a Juno stripper:
-#
-# http://test.smontanaro.net:8080/CR/2008/11/941
-# http://test.smontanaro.net:8080/CR/2008/11/944
-#
 # MSN too?
 #
 # http://test.smontanaro.net:8080/CR/2001/09/19
@@ -24,6 +19,7 @@ def strip_footers(payload):
         for func in (strip_trailing_whitespace,
                      strip_mime,
                      strip_bikelist_footer,
+                     strip_juno,
                      strip_trailing_underscores):
             new_payload = func(new_payload)
         if new_payload == payload:
@@ -59,6 +55,14 @@ def strip_bikelist_footer(payload):
     header = "Classicrendezvous mailing list"
     footer = "http://www.bikelist.org/mailman/listinfo/classicrendezvous"
     return strip_between(payload, header, footer, "bikelist")
+
+def strip_juno(payload):
+    "strip Juno ads"
+    underscores = "_" * 47
+    lines = re.split(r"(\n+)", payload.rstrip())
+    header = "_" * 60
+    footer = "https?://.*juno.com"
+    return strip_between(payload, header, footer, "juno")
 
 def strip_between(payload, header, footer, tag):
     "strip all lines at the end of the strip between header and footer"
