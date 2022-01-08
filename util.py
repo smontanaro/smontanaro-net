@@ -2,15 +2,27 @@
 
 "Some functions to share between parts of the app"
 
-# MSN too?
+# Other possible candidates for footer strippers
+#
+# Yahoo! Mail
+#
+# http://test.smontanaro.net:8080/CR/2006/04/676
+#
+# MSN
 #
 # http://test.smontanaro.net:8080/CR/2001/09/19
 #
-# And AOL?
+# AOL
 #
 # http://test.smontanaro.net:8080/CR/2008/06/12
+#
+# mai2web
+#
+# http://test.smontanaro.net:8080/CR/2006/4/659
 
 import re
+
+QUOTE_PAT = r'(?:>+\s?)?'
 
 def strip_footers(payload):
     "strip non-content footers"
@@ -71,14 +83,14 @@ def strip_between(payload, header, footer, tag):
     new_payload = []
     for line in lines:
         if state == "start":
-            if re.match(f"(> ?)?{header}", line) is not None:
+            if re.match(f"{QUOTE_PAT}{header}", line) is not None:
                 state = "stripping"
                 # print(">> elide", tag, state, repr(line))
                 continue
             new_payload.append(line)
         else:  # state == "stripping"
             # print(">> elide", tag, state, repr(line))
-            if re.match(f"(> ?)?{footer}", line) is not None:
+            if re.match(f"{QUOTE_PAT}{footer}", line) is not None:
                 state = "start"
     new_payload = "".join(new_payload)
     # print(">> result:", tag, new_payload == payload)
@@ -89,7 +101,7 @@ def strip_trailing_underscores(payload):
     # Looks like 47 underscores in the most common case.
     underscores = "_" * 47
     lines = re.split(r"(\n+)", payload.rstrip())
-    if re.match(f"(> ?)?{underscores}", lines[-1]) is not None:
+    if re.match(f"{QUOTE_PAT}{underscores}", lines[-1]) is not None:
         lines = lines[:-1]
     lines = "".join(lines)
     # print(">> result:", "underscores", lines == payload)
@@ -97,10 +109,13 @@ def strip_trailing_underscores(payload):
 
 def strip_trailing_whitespace(payload):
     "strip trailing whitespace at the bottom of the message"
-    underscores = "_" * 47
-    lines = re.split(r"(\n+)", payload.rstrip())
-    while re.match(r">?\s*$", lines[-1]) is not None:
+    lines = re.split(r"(\n+)", payload)
+    pat = f"{QUOTE_PAT}" + r"\s*$"
+    print(">> lines[-1]:", pat, repr(lines[-1]),
+          re.match(pat, lines[-1]))
+    while re.match(pat, lines[-1]) is not None:
+        print(">> del:", repr(lines[-1]))
         del lines[-1]
     lines = "".join(lines)
-    # print(">> result:", "whitespace", lines == payload)
+    print(">> result:", "whitespace", lines == payload)
     return lines
