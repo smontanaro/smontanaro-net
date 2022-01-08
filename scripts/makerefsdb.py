@@ -246,7 +246,8 @@ def main():
                         default=0)
     parser.add_argument("-o", "--one", dest="one", help="Process a single email file",
                         default=None)
-    parser.add_argument("-d", "--database", dest="sqldb", help="SQLite3 database file")
+    parser.add_argument("-d", "--database", dest="sqldb",
+                        help="SQLite3 database file", required=True)
     parser.add_argument("top", help="directory containing email files to process",
                         default=None, nargs="?")
     args = parser.parse_args()
