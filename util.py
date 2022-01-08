@@ -111,11 +111,11 @@ def strip_trailing_whitespace(payload):
     "strip trailing whitespace at the bottom of the message"
     lines = re.split(r"(\n+)", payload)
     pat = f"{QUOTE_PAT}" + r"\s*$"
-    print(">> lines[-1]:", pat, repr(lines[-1]),
+    # print(">> lines[-1]:", pat, repr(lines[-1]),
           re.match(pat, lines[-1]))
     while re.match(pat, lines[-1]) is not None:
-        print(">> del:", repr(lines[-1]))
+        # print(">> del:", repr(lines[-1]))
         del lines[-1]
     lines = "".join(lines)
-    print(">> result:", "whitespace", lines == payload)
+    # print(">> result:", "whitespace", lines == payload)
     return lines
