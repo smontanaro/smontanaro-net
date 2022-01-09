@@ -29,9 +29,11 @@ def strip_footers(payload):
     while True:
         new_payload = payload
         for func in (strip_trailing_whitespace,
+                     strip_cr_index_pwds,
                      strip_mime,
                      strip_bikelist_footer,
                      strip_juno,
+                     strip_msn,
                      strip_trailing_underscores):
             new_payload = func(new_payload)
         if new_payload == payload:
@@ -70,12 +72,23 @@ def strip_bikelist_footer(payload):
 
 def strip_juno(payload):
     "strip Juno ads"
-    underscores = "_" * 47
-    lines = re.split(r"(\n+)", payload.rstrip())
     header = "_" * 60
     footer = "https?://.*juno.com"
     return strip_between(payload, header, footer, "juno")
 
+def strip_msn(payload):
+    "a bit looser, hopefully doesn't zap actual content"
+    header = ".* MSN"
+    footer = ".*https?:.*msn.com"
+    return strip_between(payload, header, footer, "msn")
+
+def strip_cr_index_pwds(payload):
+    "this occurs on occasion. Strip to remove passwords."
+    header = "Passwords for classicrendezvous-index@catfood.phred.org"
+    footer = ".*index%40catfood.phred.org"
+    return strip_between(payload, header, footer, "passwords")
+
+# pylint: disable=unused-argument
 def strip_between(payload, header, footer, tag):
     "strip all lines at the end of the strip between header and footer"
     lines = re.split(r"(\n+)", payload)
@@ -99,9 +112,15 @@ def strip_between(payload, header, footer, tag):
 def strip_trailing_underscores(payload):
     "strip trailing underscores at the bottom of the message"
     # Looks like 47 underscores in the most common case.
-    underscores = "_" * 47
+    underscores = "_{45,50}"
+    hyphens = "-{40,45}"
+    # Juno dumps some cruft at the end of its URL which seems to be
+    # separated from the rest of the URL by a newline. I treat it like
+    # a trailing dashed line.
+    juno_dashes = "[0-9A-Za-z]+/$"
+    dashed_line = f"(?:{hyphens}|{underscores}|{juno_dashes})"
     lines = re.split(r"(\n+)", payload.rstrip())
-    if re.match(f"{QUOTE_PAT}{underscores}", lines[-1]) is not None:
+    if re.match(f"{QUOTE_PAT}{dashed_line}", lines[-1]) is not None:
         lines = lines[:-1]
     lines = "".join(lines)
     # print(">> result:", "underscores", lines == payload)
@@ -109,6 +128,8 @@ def strip_trailing_underscores(payload):
 
 def strip_trailing_whitespace(payload):
     "strip trailing whitespace at the bottom of the message"
+    if not payload:
+        return ""
     lines = re.split(r"(\n+)", payload)
     pat = f"{QUOTE_PAT}" + r"\s*$"
     # print(">> lines[-1]:", pat, repr(lines[-1]),
