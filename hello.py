@@ -266,8 +266,7 @@ def threads(year, month):
 @app.route('/CR/<year>/<month>/<int:msg>')
 def cr_message(year, month, msg):
     "render email as html."
-    txt = email_to_html(int(year), int(month), msg)
-    return f"<pre>\n{txt}\n</pre>"
+    return email_to_html(int(year), int(month), msg)
 
 @app.route('/<year>-<month>/html/<filename>')
 def old_cr(year, month, filename):
