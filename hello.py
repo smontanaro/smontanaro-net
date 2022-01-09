@@ -220,7 +220,15 @@ def email_to_html(year, month, msgid):
     filt.filter_message(message)
     filt.delete_empty_parts()
 
-    body = f"""<pre>{str(message)}</pre>"""
+    # content-type and content-transfer-encoding are necessary when
+    # manipulating message elements, but we prefer not to display
+    # them, so filter them out of the string representation.
+    content_headers = ("content-type", "content-transfer-encoding")
+    nl = '\n'
+    lines = [line
+               for line in re.split(nl, str(message))
+                 if line.lower().split(":", 1)[0] not in content_headers]
+    body = f"""<pre>{nl.join(lines)}</pre>"""
     return render_template("main.html", title=message["Subject"],
                            nav=nav, body=body)
 
