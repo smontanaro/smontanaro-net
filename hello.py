@@ -33,8 +33,7 @@ def index():
 and the <a href="CR">old Classic Rendezvous Archives.</a>
 </p>
 '''
-    return render_template("main.html", title="Hello", nav="",
-                           clean_title="Hello", body=body)
+    return render_template("main.html", title="Hello", nav="", body=body)
 
 def wrap(payload):
     "wrap paragraphs in the payload."
@@ -55,8 +54,6 @@ def make_urls_sensitive(text):
     return "".join(new_text)
 
 ZAP_HEADERS = {
-    "content-transfer-encoding",
-    "content-type",
     "delivered-to",
     "dkim-signature",
     "domainkey-signature",
@@ -72,22 +69,23 @@ ZAP_HEADERS = {
     "sender",
     }
 
-def format_headers(message):
+def filter_headers(message):
     "generate message header block"
-    headers = []
     conn = sqlite3.connect(REFDB)
     cur = conn.cursor()
     last_refs = set()
-    for item in sorted(message.items()):
+    for hdr in message.keys():
         # Skip various headers - maybe later insert as comments...
-        key = item[0].lower()
-        if (key in ZAP_HEADERS or
-            key[:2] == "x-" or
-            key[:5] == "list-"):
+        val = message[hdr]
+        hdr = hdr.lower()
+        if (hdr in ZAP_HEADERS or
+            hdr[:2] == "x-" or
+            hdr[:5] == "list-"):
+            del message[hdr]
             continue
-        if key in ("in-reply-to", "references"):
+        if hdr in ("in-reply-to", "references"):
             tags = []
-            for tgt_msgid in item[1].split():
+            for tgt_msgid in val.split():
                 if tgt_msgid in last_refs:
                     continue
                 last_refs |= set([tgt_msgid])
@@ -106,12 +104,9 @@ def format_headers(message):
                     tag = f"""<a href="{url}">{html.escape(tgt_msgid)}</a>"""
                 tags.append(tag)
             if tags:
-                headers.append(f'''{item[0]}: {" ".join(tags)}''')
-        # elif key == "message-id":
-        #     headers.append(f"<!-- {html.escape(': '.join(item))} -->")
+                message.replace_header(hdr, f"{' '.join(tags)}")
         else:
-            headers.append(html.escape(": ".join(item)))
-    return CRLF.join(headers)
+            message.replace_header(hdr, html.escape(val))
 
 def eml_file(year, month, msgid):
     "compute email file from sequence number"
@@ -139,14 +134,13 @@ def read_message(path):
         with open(path, encoding=encoding) as fobj:
             try:
                 message = email.message_from_file(fobj)
-                raw_payload = message.get_payload(decode=True).decode(encoding)
             except UnicodeDecodeError as exc:
                 exc_msg = str(exc)
             else:
                 break
     else:
         raise UnicodeDecodeError(exc_msg)
-    return (message, raw_payload)
+    return message
 
 def generate_nav_block(year, month, msgid):
     "navigation header at top of email messages."
@@ -174,21 +168,61 @@ def generate_nav_block(year, month, msgid):
             f''' <a href="{date_url}">Date Index</a>'''
             f''' <a href="{thread_url}">Thread Index</a>''')
 
+class MessageFilter:
+    "filter various uninteresting bits from messages"
+    def __init__(self, message):
+        self.message = message
+        self.to_delete = []
+
+    def filter_message(self, message):
+        "filter headers and text body parts"
+        for part in message.walk():
+            filter_headers(part)
+            if part.is_multipart():
+                if part is not self.message:
+                    self.filter_message(part)
+                continue
+
+            for encoding in ("utf-8", "latin-1"):
+                try:
+                    payload = part.get_payload(decode=True)
+                    payload = payload.decode(encoding=encoding)
+                except UnicodeDecodeError:
+                    continue
+                break
+            payload = strip_footers(payload)
+            payload = wrap(payload)
+            payload = html.escape(payload)
+            payload = make_urls_sensitive(payload).strip()
+            part.set_payload(payload)
+            if not payload and part is not self.message:
+                self.to_delete.append(part)
+
+    def delete_empty_parts(self):
+        "if we emptied out parts, remove them altogether"
+        if not self.to_delete:
+            return
+        for part in self.message.walk():
+            if part.is_multipart():
+                payload = part.get_payload()
+                for todel in self.to_delete:
+                    if todel in payload:
+                        payload.remove(todel)
+
 def email_to_html(year, month, msgid):
     "convert the email referenced by year, month and msgid to html."
+    nav = generate_nav_block(year, month, msgid)
     msg = eml_file(year, month, msgid)
     mydir = os.path.join("CR", f"{year:04d}-{month:02d}", "eml-files")
-    (message, raw_payload) = read_message(os.path.join(mydir, msg))
+    message = read_message(os.path.join(mydir, msg))
 
-    headers = format_headers(message)
-    body = make_urls_sensitive(html.escape(wrap(strip_footers(raw_payload))))
+    filt = MessageFilter(message)
+    filt.filter_message(message)
+    filt.delete_empty_parts()
 
-    nav = generate_nav_block(year, month, msgid)
-    body = f"""<pre>{headers}\n\n{body}</pre>"""
-    clean_title = trim_subject_prefix(message["Subject"])
-
+    body = f"""<pre>{str(message)}</pre>"""
     return render_template("main.html", title=message["Subject"],
-                           clean_title=clean_title, nav=nav, body=body)
+                           nav=nav, body=body)
 
 @app.route("/CR/<int:year>/<int:month>")
 @app.route("/CR/<int:year>/<int:month>/dates")
@@ -204,8 +238,7 @@ def dates(year, month):
     with open(f'''CR/{date.strftime("%Y-%m")}/generated/dates.body''',
               encoding="utf-8") as fobj:
         body = fobj.read()
-    return render_template("main.html", title=title, clean_title=title,
-                           body=body, nav=nav)
+    return render_template("main.html", title=title, body=body, nav=nav)
 
 @app.route("/CR/<int:year>/<int:month>/threads")
 def threads(year, month):
@@ -220,14 +253,13 @@ def threads(year, month):
     with open(f'''CR/{date.strftime("%Y-%m")}/generated/threads.body''',
               encoding="utf-8") as fobj:
         body = fobj.read()
-    return render_template("main.html", title=title, clean_title=title,
-                           body=body, nav=nav)
+    return render_template("main.html", title=title, body=body, nav=nav)
 
 @app.route('/CR/<year>/<month>/<int:msg>')
 def cr_message(year, month, msg):
     "render email as html."
-
-    return email_to_html(int(year), int(month), msg)
+    txt = email_to_html(int(year), int(month), msg)
+    return f"<pre>\n{txt}\n</pre>"
 
 @app.route('/<year>-<month>/html/<filename>')
 def old_cr(year, month, filename):
@@ -263,7 +295,7 @@ def cr_index():
     if os.path.exists("CR/generated/index.body"):
         with open("CR/generated/index.body", encoding="utf8") as fobj:
             body = fobj.read()
-            return render_template("main.html", title=title, clean_title=title,
+            return render_template("main.html", title=title,
                                    body=body, nav="")
     else:
         with open("CR/index.html", encoding="utf-8") as fobj:
@@ -277,15 +309,3 @@ def app_help():
         if rule.endpoint != 'static':
             func_list[rule.rule] = str(app.view_functions[rule.endpoint])
     return jsonify(func_list)
-
-# # Tutorial Gunicorn wsgi_app
-# def application(environ, start_response):
-#     """Simplest possible application object"""
-#     data = b'Hello, World!\n'
-#     status = '200 OK'
-#     response_headers = [
-#         ('Content-type', 'text/plain'),
-#         ('Content-Length', str(len(data)))
-#     ]
-#     start_response(status, response_headers)
-#     return iter([data])
