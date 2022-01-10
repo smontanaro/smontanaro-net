@@ -89,14 +89,6 @@ margin-top: 0px;
 padding-top: 0px;
 }
 
-#outer
-{
-position: relative;
-/* width: 747px; */
-margin: 0 auto;
-/* background: #fff url('images/abg.gif') repeat-y; */
-}
-
 #inner
 {
 position: relative;
@@ -231,11 +223,26 @@ padding: 0px 10px 0px 10px;
 margin-bottom: 20px;
 }
 
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+.leftmargin
+{
+    height: 100%;
+    margin: 0px;
+    width: 200px;
+    float: left;
+    /* background: yellow; */
+}
+
 #primarycontent
 {
 position: relative;
 /* width: 480px; */
 float: left;
+/* background: skyblue; */
 }
 
 #primarycontent h3
@@ -288,6 +295,12 @@ position: relative;
 top: -10px;
 background: url('images/a33.gif') repeat-x;
 height: 64px;
+}
+
+ul.no-bullets {
+  list-style-type: none;
+  margin: 0;
+  padding: 5px;
 }
 
 #primarycontent .post .footer ul
