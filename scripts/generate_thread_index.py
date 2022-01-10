@@ -26,7 +26,7 @@ def generate_link(r):
 
 def generate_index(records, cur, level):
     "html fragment output"
-    print(f'''<ul>''')
+    print(f'''<ul class="no-bullets">''')
     for r in records:
         print(f'''<li>''')
         print(generate_link(r))
