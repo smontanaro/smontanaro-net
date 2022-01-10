@@ -234,7 +234,7 @@ def email_to_html(year, month, msgid):
                for line in re.split(nl, str(message))
                  if line.lower().split(":", 1)[0] not in content_headers]
     body = f"""<pre>{nl.join(lines)}</pre>"""
-    return render_template("main.html", title=message["Subject"],
+    return render_template("cr.html", title=message["Subject"],
                            nav=nav, body=body)
 
 @app.route("/CR/<int:year>/<int:month>")
@@ -251,7 +251,7 @@ def dates(year, month):
     with open(f'''CR/{date.strftime("%Y-%m")}/generated/dates.body''',
               encoding="utf-8") as fobj:
         body = fobj.read()
-    return render_template("main.html", title=title, body=body, nav=nav)
+    return render_template("cr.html", title=title, body=body, nav=nav)
 
 @app.route("/CR/<int:year>/<int:month>/threads")
 def threads(year, month):
@@ -266,7 +266,7 @@ def threads(year, month):
     with open(f'''CR/{date.strftime("%Y-%m")}/generated/threads.body''',
               encoding="utf-8") as fobj:
         body = fobj.read()
-    return render_template("main.html", title=title, body=body, nav=nav)
+    return render_template("cr.html", title=title, body=body, nav=nav)
 
 @app.route('/CR/<year>/<month>/<int:msg>')
 def cr_message(year, month, msg):
@@ -307,7 +307,7 @@ def cr_index():
     if os.path.exists("CR/generated/index.body"):
         with open("CR/generated/index.body", encoding="utf8") as fobj:
             body = fobj.read()
-            return render_template("main.html", title=title,
+            return render_template("cr.html", title=title,
                                    body=body, nav="")
     else:
         with open("CR/index.html", encoding="utf-8") as fobj:
@@ -333,7 +333,7 @@ def search():
         query = urllib.parse.quote_plus(
             f"{form.query.data} site:{form.site.data}")
         return redirect(f"https://duckduckgo.com/html?q={query}")
-    return render_template('main.html', form=form)
+    return render_template('cr.html', form=form)
 
 @app.context_processor
 def template_globals():
