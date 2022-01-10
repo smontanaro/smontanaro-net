@@ -9,9 +9,13 @@ import os
 import re
 import sqlite3
 import textwrap
+import urllib.parse
 
 from flask import (Flask, redirect, url_for, render_template,
                    abort, jsonify)
+from flask_wtf import FlaskForm
+from wtforms import StringField, HiddenField
+from wtforms.validators import DataRequired
 
 from util import strip_footers
 
@@ -19,6 +23,7 @@ CRLF = "\r\n"
 REFDB = os.path.join(os.path.dirname(__file__), "references.db")
 
 app = Flask(__name__)
+app.config["SECRET_KEY"] = r"Aw6CNZn*GIEt8Aw6CNZn*GIEt8"
 
 @app.route("/favicon.ico")
 def favicon():
@@ -33,7 +38,7 @@ def index():
 and the <a href="CR">old Classic Rendezvous Archives.</a>
 </p>
 '''
-    return render_template("main.html", title="Hello", nav="", body=body)
+    return render_template("home.html", title="Hello", nav="", body=body)
 
 def wrap(payload):
     "wrap paragraphs in the payload."
@@ -316,3 +321,24 @@ def app_help():
         if rule.endpoint != 'static':
             func_list[rule.rule] = str(app.view_functions[rule.endpoint])
     return jsonify(func_list)
+
+class SearchForm(FlaskForm):
+    query = StringField('search:', validators=[DataRequired()])
+    site = HiddenField('site', default='www.smontanaro.net')
+
+@app.route('/search', methods=['GET', 'POST'])
+def search():
+    form = SearchForm()
+    if form.validate_on_submit():
+        query = urllib.parse.quote_plus(
+            f"{form.query.data} site:{form.site.data}")
+        return redirect(f"https://duckduckgo.com/html?q={query}")
+    return render_template('main.html', form=form)
+
+@app.context_processor
+def template_globals():
+    "Today's date, etc"
+    return {
+        "today": datetime.date.today(),
+        "form": SearchForm(),
+    }
