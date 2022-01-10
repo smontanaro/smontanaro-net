@@ -8,8 +8,6 @@ import gunicorn.glogging
 
 # pylint: disable=invalid-name
 
-IAM_ROOT = os.getuid() == 0
-
 # Config File
 
 config                            = "./gcfg.py"
@@ -19,10 +17,7 @@ wsgi_app                          = None
 
 # pylint: disable=line-too-long
 access_log_format                 = '''%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s"'''
-if IAM_ROOT:
-    accesslog = "/var/log/smontanaro.net.log"
-else:
-    accesslog = os.path.join(os.path.dirname(__file__), "server.log")
+accesslog = os.path.join(os.path.dirname(__file__), "server.log")
 capture_output                    = False
 disable_redirect_access_to_syslog = False
 dogstatsd_tags                    = ""
@@ -53,21 +48,20 @@ reload_extra_files                = []
 reload                            = False
 spew                              = False
 
-if IAM_ROOT:
-    # SSL
-    LETS_ENCRYPT = "/etc/letsencrypt"
-    SERVER = "smontanaro.net"
+# # SSL
+# LETS_ENCRYPT = "/etc/letsencrypt"
+# SERVER = "smontanaro.net"
 
-    CERT_DIR = os.path.join(LETS_ENCRYPT, "live", SERVER)
+# CERT_DIR = os.path.join(LETS_ENCRYPT, "live", SERVER)
 
-    ca_certs                          = None
-    certfile                          = os.path.join(CERT_DIR, "fullchain.pem")
-    cert_reqs                         = 0
-    ciphers                           = None
-    do_handshake_on_connect           = False
-    keyfile                           = os.path.join(CERT_DIR, "privkey.pem")
-    ssl_version                       = "TLS"
-    suppress_ragged_eofs              = True
+# ca_certs                          = None
+# certfile                          = os.path.join(CERT_DIR, "fullchain.pem")
+# cert_reqs                         = 0
+# ciphers                           = None
+# do_handshake_on_connect           = False
+# keyfile                           = os.path.join(CERT_DIR, "privkey.pem")
+# ssl_version                       = "TLS"
+# suppress_ragged_eofs              = True
 
 # Security
 
@@ -95,10 +89,7 @@ limit_request_line                = 4094
 
 # Server Mechanics
 
-if IAM_ROOT:
-    chdir                             = "/var/opt/website"
-else:
-    chdir                             = "/home/skip/website"
+chdir                             = "/home/skip/website"
 
 user = os.getuid()
 group = os.getgid()
@@ -130,15 +121,9 @@ worker_tmp_dir                    = None
 
 backlog                           = 2048
 
-if IAM_ROOT:
-    bind = [
-        '0.0.0.0:443',
-        '0.0.0.0:80',
-    ]
-else:
-    bind = [
-        '0.0.0.0:8080',
-    ]
+bind = [
+    "unix://smontanaro.sock",
+]
 
 # Worker Processes
 
