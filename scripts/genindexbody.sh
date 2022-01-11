@@ -2,7 +2,7 @@
 
 cd CR
 
-echo '<ul class="no-bullets">'
+echo "<ul>"
 
 for yr_mo in 20??-?? ; do
     yr=$(echo $yr_mo | awk -F- '{print $1}')

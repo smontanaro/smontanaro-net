@@ -23,14 +23,14 @@ def generate_link(r):
     return (f'''<a name="{r['seq']:05d}">'''
             f'''<a href="/CR/{r['year']}/{r['month']}/{r['seq']:05d}">'''
             f'''{html.escape(r['subject'])}</a></a>'''
-            f''' {html.escape(r["sender"])}''')
+            f'''&nbsp;&nbsp;{html.escape(r["sender"])}''')
 
 def generate_index(records):
     "html fragment output"
     for (dt, chunk) in itertools.groupby(records, date_key):
         print(f'''<h2>{dt.strftime("%d %b %Y")}</h2>''')
         # print(f'''<a href="#top">Top</a>''')
-        print(f'''<ul class="no-bullets">''')
+        print(f'''<ul>''')
         for r in chunk:
             print(f'''<li>''')
             print(generate_link(r))
