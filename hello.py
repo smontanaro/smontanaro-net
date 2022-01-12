@@ -162,11 +162,13 @@ def generate_nav_block(year, month, msgid):
     thread_url = (url_for("threads", year=year, month=f"{month:02d}") +
                   f"#{anchor}")
 
-    return (f'''<a href="/">Home</a>'''
+    return (f'''<div style="margin: 5px">'''
+            f'''<a href="/">Home</a>'''
             f''' <a href="/CR">CR Archives</a>'''
             f''' <a href="{uplink}">Up</a>{nxt}{prv}'''
             f''' <a href="{date_url}">Date Index</a>'''
-            f''' <a href="{thread_url}">Thread Index</a>''')
+            f''' <a href="{thread_url}">Thread Index</a>'''
+            f'''</div>''')
 
 class MessageFilter:
     "filter various uninteresting bits from messages"
@@ -232,11 +234,13 @@ def email_to_html(year, month, msgid):
     return render_template("main.html", title=message["Subject"],
                            nav=nav, body=body)
 
-@app.route("/CR/<int:year>/<int:month>")
-@app.route("/CR/<int:year>/<int:month>/dates")
+@app.route("/CR/<year>/<month>")
+@app.route("/CR/<year>/<month>/dates")
 def dates(year, month):
     "new date index"
 
+    year = int(year)
+    month = int(month)
     date = datetime.date(year, month, 1)
     title = date.strftime("%b %Y Date Index")
     thread_url = url_for("threads", year=year, month=f"{month:02d}")
@@ -248,10 +252,12 @@ def dates(year, month):
         body = fobj.read()
     return render_template("main.html", title=title, body=body, nav=nav)
 
-@app.route("/CR/<int:year>/<int:month>/threads")
+@app.route("/CR/<year>/<month>/threads")
 def threads(year, month):
     "new thread index"
 
+    year = int(year)
+    month = int(month)
     date = datetime.date(year, month, 1)
     title = date.strftime("%b %Y Thread Index")
     date_url = url_for("dates", year=year, month=f"{month:02d}")
@@ -277,7 +283,7 @@ def old_cr(year, month, filename):
                         code=301)
 
     if filename == "threads.html":
-        return redirect(url_for("threads", year=year, month=month),
+        return redirect(url_for("threads", year=year, month=f"{month:02d}"),
                         code=301)
 
     mat = re.search("msg([0-9]+)[.]html", filename)

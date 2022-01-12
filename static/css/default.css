@@ -1,15 +1,9 @@
 /*
+   terrafirma1.0 by nodethirtythree design
+   http://www.nodethirtythree.com
 
-	terrafirma1.0 by nodethirtythree design
-	http://www.nodethirtythree.com
-
+   grid layout started with https://grid.layoutit.com/
 */
-
-*
-{
-padding: 0px;
-margin: 5px;
-}
 
 body
 {
@@ -20,10 +14,16 @@ color: #0C0C0C;
 line-height: 18px;
 }
 
-a
-{
-color: #0078FF;
-text-decoration: underline;
+.container {
+    display: grid;
+    grid-template-columns: 0.3fr 1.5fr;
+    grid-template-rows: 0.05fr 10.0fr 0.05fr;
+    gap: 5px 5px;
+    grid-auto-flow: row;
+    grid-template-areas:
+        "header ."
+        "left main"
+        "footer .";
 }
 
 a:hover
@@ -267,74 +267,8 @@ margin-bottom: 30px;
 position: relative;
 }
 
-#primarycontent .post .date
-{
-position: absolute;
-right: 15px;
-top: 0px;
-line-height: 35px;
-color: #AFAFA4;
-font-weight: bold;
-}
-
-#primarycontent .post .content
-{
-margin-bottom: 0px;
-}
-
-#primarycontent .post .footer
-{
-position: relative;
-top: -10px;
-background: url('images/a33.gif') repeat-x;
-height: 64px;
-}
-
-#primarycontent .post .footer ul
-{
-list-style: none;
-position: absolute;
-right: 15px;
-bottom: 15px;
-}
-
-#primarycontent .post .footer ul li
-{
-display: inline;
-line-height: 14px;
-padding-left: 17px;
-margin-left: 25px;
-background-repeat: no-repeat;
-background-position: 0px 2px;
-}
-
-#primarycontent .post .footer ul li.printerfriendly
-{
-background-image: url('images/a41.gif');
-}
-
-#primarycontent .post .footer ul li.comments
-{
-background-image: url('images/a36.gif');
-}
-
-#primarycontent .post .footer ul li.readmore
-{
-background-image: url('images/a38.gif');
-}
-
-#footer
-{
-position: relative;
-clear: both;
-height: 66px;
-text-align: center;
-line-height: 66px;
-background-image: url('images/a50.gif');
-color: #A8A88D;
-}
-
-#footer a
-{
-color: #8C8C73;
+ul.no-bullets {
+  list-style-type: none;
+  /* margin: 0; */
+  padding: 5px;
 }

@@ -17,19 +17,22 @@ def thread_key(record):
     "groupby key func"
     return record["messageid"]
 
-def generate_link(r):
+def generate_link(r, ind):
     "HTML for a single message"
-    return (f'''<a name="{r['seq']:05d}">'''
+    return (f'''{ind}<a name="{r['seq']:05d}">'''
             f'''<a href="/CR/{r['year']}/{r['month']}/{r['seq']:05d}">'''
             f'''{html.escape(r['subject'])}</a></a>'''
             f'''&nbsp;&nbsp;{html.escape(r["sender"])}''')
 
 def generate_index(records, cur, level):
     "html fragment output"
-    print(f'''<ul>''')
+
+    ul_ind = "  " * level
+    li_ind = "  " * (level + 1)
+    print(f'''{ul_ind}<ul style="column-count: 1" class="no-bullets">''')
     for r in records:
-        print(f'''<li>''')
-        print(generate_link(r))
+        print(f'''{li_ind}<li>''')
+        print(generate_link(r, li_ind + "  "))
         # Find any direct references to this message.
         refs = cur.execute("select distinct m.messageid, m.subject,"
                            " m.sender, m.year, m.month, m.seq"
@@ -41,14 +44,8 @@ def generate_index(records, cur, level):
                            (r["messageid"],)).fetchall()
         if refs:
             generate_index(refs, cur, level + 1)
-            # print(f'''<ul>''')
-            # for ref in refs:
-            #     print(f'''<li>''')
-            #     print(generate_link(ref))
-            #     print(f'''</li>''')
-            # print(f'''</ul>''')
-        print(f'''</li>''')
-    print("</ul>")
+        print(f'''{li_ind}</li>''')
+    print(f"{ul_ind}</ul>")
 
 def main():
     "see __doc__"
