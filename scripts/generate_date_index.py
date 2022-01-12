@@ -23,7 +23,7 @@ def generate_link(r):
     return (f'''<a name="{r['seq']:05d}">'''
             f'''<a href="/CR/{r['year']}/{r['month']}/{r['seq']:05d}">'''
             f'''{html.escape(r['subject'])}</a></a>'''
-            f'''&nbsp;&nbsp;{html.escape(r["sender"])}''')
+            f''' {html.escape(r["sender"])}''')
 
 def generate_index(records):
     "html fragment output"

@@ -9,9 +9,13 @@ import os
 import re
 import sqlite3
 import textwrap
+import urllib.parse
 
 from flask import (Flask, redirect, url_for, render_template,
                    abort, jsonify)
+from flask_wtf import FlaskForm
+from wtforms import StringField, HiddenField
+from wtforms.validators import DataRequired
 
 from util import strip_footers
 
@@ -19,6 +23,7 @@ CRLF = "\r\n"
 REFDB = os.path.join(os.path.dirname(__file__), "references.db")
 
 app = Flask(__name__)
+app.config["SECRET_KEY"] = r"Aw6CNZn*GIEt8Aw6CNZn*GIEt8"
 
 @app.route("/favicon.ico")
 def favicon():
@@ -33,7 +38,7 @@ def index():
 and the <a href="CR">old Classic Rendezvous Archives.</a>
 </p>
 '''
-    return render_template("main.html", title="Hello", nav="", body=body)
+    return render_template("home.html", title="Hello", nav="", body=body)
 
 def wrap(payload):
     "wrap paragraphs in the payload."
@@ -231,7 +236,7 @@ def email_to_html(year, month, msgid):
                for line in re.split(nl, str(message))
                  if line.lower().split(":", 1)[0] not in content_headers]
     body = f"""<pre>{nl.join(lines)}</pre>"""
-    return render_template("main.html", title=message["Subject"],
+    return render_template("cr.html", title=message["Subject"],
                            nav=nav, body=body)
 
 @app.route("/CR/<year>/<month>")
@@ -250,7 +255,7 @@ def dates(year, month):
     with open(f'''CR/{date.strftime("%Y-%m")}/generated/dates.body''',
               encoding="utf-8") as fobj:
         body = fobj.read()
-    return render_template("main.html", title=title, body=body, nav=nav)
+    return render_template("cr.html", title=title, body=body, nav=nav)
 
 @app.route("/CR/<year>/<month>/threads")
 def threads(year, month):
@@ -267,7 +272,7 @@ def threads(year, month):
     with open(f'''CR/{date.strftime("%Y-%m")}/generated/threads.body''',
               encoding="utf-8") as fobj:
         body = fobj.read()
-    return render_template("main.html", title=title, body=body, nav=nav)
+    return render_template("cr.html", title=title, body=body, nav=nav)
 
 @app.route('/CR/<year>/<month>/<int:msg>')
 def cr_message(year, month, msg):
@@ -308,7 +313,7 @@ def cr_index():
     if os.path.exists("CR/generated/index.body"):
         with open("CR/generated/index.body", encoding="utf8") as fobj:
             body = fobj.read()
-            return render_template("main.html", title=title,
+            return render_template("cr.html", title=title,
                                    body=body, nav="")
     else:
         with open("CR/index.html", encoding="utf-8") as fobj:
@@ -322,3 +327,24 @@ def app_help():
         if rule.endpoint != 'static':
             func_list[rule.rule] = str(app.view_functions[rule.endpoint])
     return jsonify(func_list)
+
+class SearchForm(FlaskForm):
+    query = StringField('search:', validators=[DataRequired()])
+    site = HiddenField('site', default='www.smontanaro.net')
+
+@app.route('/search', methods=['GET', 'POST'])
+def search():
+    form = SearchForm()
+    if form.validate_on_submit():
+        query = urllib.parse.quote_plus(
+            f"{form.query.data} site:{form.site.data}")
+        return redirect(f"https://duckduckgo.com/html?q={query}")
+    return render_template('cr.html', form=form)
+
+@app.context_processor
+def template_globals():
+    "Today's date, etc"
+    return {
+        "today": datetime.date.today(),
+        "form": SearchForm(),
+    }
