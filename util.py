@@ -16,9 +16,13 @@
 #
 # http://test.smontanaro.net:8080/CR/2008/06/12
 #
-# mai2web
+# mail2web
 #
 # http://test.smontanaro.net:8080/CR/2006/4/659
+#
+# Yahoo! Auctions
+#
+# http://test.smontanaro.net:8080/CR/2001/5/00019
 
 import re
 
