@@ -36,7 +36,7 @@ def generate_index(records, cur, level):
         # Find any direct references to this message.
         refs = cur.execute("select distinct m.messageid, m.subject,"
                            " m.sender, m.year, m.month, m.seq"
-                           "  from messageids m"
+                           "  from messages m"
                            "  join msgrefs r"
                            "  on r.messageid = m.messageid"
                            "  where r.reference = ?"
@@ -70,7 +70,7 @@ def main():
     # # https://stackoverflow.com/questions/1923259/full-outer-join-with-sqlite
     # records = cur.execute("select distinct m.year, m.month, m.seq,"
     #                       "    m.messageid, r.reference"
-    #                       "  from messageids m"
+    #                       "  from messages m"
     #                       "  left join msgrefs r"
     #                       "    on m.messageid = r.reference"
     #                       "  where m.year = ?"
@@ -79,7 +79,7 @@ def main():
     #                       "select distinct m.year, m.month, m.seq,"
     #                       "    m.messageid, null"
     #                       "  from msgrefs r"
-    #                       "  left join messageids m"
+    #                       "  left join messages m"
     #                       "    on r.reference = m.messageid"
     #                       "  where r.reference is null"
     #                       "    and m.year = ?"
@@ -89,7 +89,7 @@ def main():
 
     records = cur.execute("select distinct m.messageid, m.subject,"
                           " m.sender, m.year, m.month, m.seq"
-                          "  from messageids m"
+                          "  from messages m"
                           "  where m.year = ?"
                           "    and m.month = ?"
                           "order by m.ts",

@@ -53,7 +53,7 @@ def main():
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
     records = cur.execute("select m.*"
-                          "  from messageids m"
+                          "  from messages m"
                           "  where m.year = ?"
                           "    and m.month = ?"
                           "  order by m.ts",
