@@ -4,29 +4,31 @@
 
 # Other possible candidates for footer strippers
 #
-# Yahoo! Mail
+# Yahoo!
 #
-# http://test.smontanaro.net:8080/CR/2006/04/676
+# http://localhost:8080/CR/2006/04/676
+# http://localhost:8080/CR/2006/02/143
+# http://localhost:8080/CR/2006/02/144
+# http://localhost:8080/CR/2006/02/153
+# http://localhost:8080/CR/2006/02/154
+# http://localhost:8080/CR/2001/5/00019
+# http://localhost:8080/CR/2006/02/156
 #
 # MSN
 #
-# http://test.smontanaro.net:8080/CR/2001/09/19
+# http://localhost:8080/CR/2001/09/19
 #
 # AOL
 #
-# http://test.smontanaro.net:8080/CR/2008/06/12
+# http://localhost:8080/CR/2008/06/12
 #
 # mail2web
 #
-# http://test.smontanaro.net:8080/CR/2006/4/659
-#
-# Yahoo! Auctions
-#
-# http://test.smontanaro.net:8080/CR/2001/5/00019
+# http://localhost:8080/CR/2006/4/659
 
 import re
 
-QUOTE_PAT = r'(?:>+\s?)?'
+QUOTE_PAT = r'(?:(?:>\s?)*)?'
 
 def strip_footers(payload):
     "strip non-content footers"
