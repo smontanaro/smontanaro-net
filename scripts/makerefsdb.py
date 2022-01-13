@@ -8,7 +8,6 @@ Process References: headers in email files from emaildir, adding to sqldb
 import argparse
 import datetime
 import email.errors
-import glob
 import os
 import re
 import sqlite3
@@ -17,6 +16,8 @@ import sys
 import arrow
 import dateutil.parser
 import dateutil.tz
+
+import util
 
 def convert_ts_bytes(stamp):
     "SQLite3 converter for tz-aware datetime objects"
@@ -32,7 +33,7 @@ def ensure_db(sqldb):
     if create:
         cur = conn.cursor()
         cur.execute('''
-            create table messageids
+            create table messages
               (
                 messageid TEXT PRIMARY KEY,
                 filename TEXT,
@@ -41,6 +42,7 @@ def ensure_db(sqldb):
                 year INTEGER,
                 month INTEGER,
                 seq INTEGER,
+                is_root INTEGER,
                 ts timestamp
               )
         ''')
@@ -49,16 +51,26 @@ def ensure_db(sqldb):
               (
                 messageid TEXT,
                 reference TEXT,
-                FOREIGN KEY(reference) REFERENCES messageids(messageid)
+                FOREIGN KEY(reference) REFERENCES messages(messageid)
+              )
+        ''')
+        cur.execute('''
+            create table msgreplies
+              (
+                messageid TEXT,
+                parent TEXT,
+                FOREIGN KEY(parent) REFERENCES messages(messageid)
               )
         ''')
         cur.execute("create index msgid_index"
-                    "  on messageids"
+                    "  on messages"
                     "  (messageid)")
         cur.execute("create index msgrefs_index"
                     "  on msgrefs"
                     "  (reference)")
-
+        cur.execute("create index msgreplies_index"
+                    "  on msgreplies"
+                    "  (parent)")
         conn.commit()
     return conn
 
@@ -172,7 +184,7 @@ def insert_references(message, conn, filename, verbose):
     try:
         stamp = parse_date(datestr)
     except dateutil.parser.ParserError as exc:
-        cur.execute("select max(timestamp) from messageids"
+        cur.execute("select max(timestamp) from messages"
                     "  where year <= ? and month <= ?",
                     (year, month))
         stamp = dateutil.parser.parse(cur.fetchone()[0]) + ONE_SEC
@@ -186,31 +198,32 @@ def insert_references(message, conn, filename, verbose):
     cur.execute("delete from msgrefs"
                 "  where messageid = ?",
                 (msgid,))
-    cur.execute("delete from messageids"
+    cur.execute("delete from msgreplies"
                 "  where messageid = ?",
                 (msgid,))
-    cur.execute("insert into messageids"
-                "  values (?, ?, ?, ?, ?, ?, ?, ?)",
-                (msgid, filename, sender, subject, year, month, seq, stamp))
+    cur.execute("delete from messages"
+                "  where messageid = ?",
+                (msgid,))
+    cur.execute("insert into messages"
+                "  values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                (msgid, filename, sender, subject, year, month, seq,
+                 0, stamp))
     nrecs += 1
     if verbose > 2:
         print("  >>", msgid)
 
-    reply_ref = None
     if message["In-Reply-To"] is not None:
-        reply_ref = message["In-Reply-To"].strip()
-        cur.execute("insert into msgrefs"
+        parent = message["In-Reply-To"].strip()
+        cur.execute("insert into msgreplies"
                     "  values (?, ?)",
-                    (msgid, reply_ref))
+                    (msgid, parent))
         nrecs += 1
         if verbose > 3:
-            print("    :", reply_ref)
+            print("    :", parent)
 
     if message["References"] is not None:
-        for reference in re.findall("<[^\s>]+>", message["References"]):
+        for reference in re.findall(r"<[^\s>]+>", message["References"]):
             reference = reference.strip()
-            if reference == reply_ref:
-                continue
             cur.execute("insert into msgrefs"
                         "  values (?, ?)",
                         (msgid, reference))
@@ -236,6 +249,30 @@ def process_one_file(filename, conn, verbose):
     if message.defects:
         raise ValueError(f"message parse errors {message.defects} in {filename}")
     return insert_references(message, conn, filename, verbose)
+
+def mark_thread_roots(conn):
+    "identify those messages which start threads."
+    cur = conn.cursor()
+    # find all messages which have replies
+    cur.execute("select distinct m.messageid from messages m"
+                " join msgreplies r"
+                " on r.parent = m.messageid")
+    result = cur.fetchall()
+    print(">>", len(result), "parent messages")
+    # for each of them, if they are their own thread root, set that
+    # bit in the messages table.
+    roots = set()
+    for row in result:
+        msgid = row[0]
+        if util.get_thread_root(msgid, cur) == msgid:
+            roots.add(msgid)
+    print(">>", len(roots), "roots")
+    for msgid in roots:
+        cur.execute("update messages"
+                    "  set is_root = 1"
+                    "  where messageid = ?",
+                    (msgid,))
+    conn.commit()
 
 def main():
     "see __doc__"
@@ -269,26 +306,28 @@ def main():
             return 1
         return 0
 
-    last_dir = ""
-    for email_dir in sorted(glob.glob(f"{args.top}/**/eml-files")):
-        records = nfiles = 0
-        dirpath = os.path.dirname(email_dir)
-        if args.verbose and last_dir != dirpath:
-            last_dir = dirpath
-        for filename in sorted(glob.glob(f"{email_dir}/classicrendezvous.*.eml")):
+    records = nfiles = 0
+    for (dirpath, _dirnames, filenames) in os.walk(args.top):
+        for fname in filenames:
+            if not fname.endswith(".eml"):
+                continue
+            path = os.path.join(dirpath, fname)
             try:
-                nrecs = process_one_file(filename, conn, args.verbose)
+                nrecs = process_one_file(path, conn, args.verbose)
             except ValueError:
-                print(f"failed to process message {filename}", file=sys.stderr)
+                print(f"failed to process file {path}", file=sys.stderr)
                 continue
             nfiles += 1
             if args.verbose > 1:
-                print("  >>", filename, nrecs)
+                print("  >>", fname, nrecs)
             records += nrecs
         if args.verbose:
             print(">>", dirpath, records, nfiles)
+
+    mark_thread_roots(conn)
+
     cur = conn.cursor()
-    cur.execute("select count(*) from messageids")
+    cur.execute("select count(*) from messages")
     print(f"{cur.fetchone()[0]} total message ids")
     cur.execute("select count(*) from msgrefs")
     print(f"{cur.fetchone()[0]} total references")

@@ -19,6 +19,8 @@ from wtforms.validators import DataRequired
 
 from util import strip_footers
 
+FLASK_DEBUG = os.environ.get("FLASK_ENV") == "development"
+
 CRLF = "\r\n"
 REFDB = os.path.join(os.path.dirname(__file__), "references.db")
 
@@ -64,7 +66,6 @@ ZAP_HEADERS = {
     "domainkey-signature",
     "errors-to",
     "importance",
-    "message-id",
     "mime-version",
     "precedence",
     "received",
@@ -73,6 +74,9 @@ ZAP_HEADERS = {
     "return-path",
     "sender",
     }
+
+if not FLASK_DEBUG:
+    ZAP_HEADERS.add("message-id")
 
 def filter_headers(message):
     "generate message header block"
@@ -348,3 +352,8 @@ def template_globals():
         "today": datetime.date.today(),
         "form": SearchForm(),
     }
+
+if FLASK_DEBUG:
+    @app.route("/env")
+    def printenv():
+        return jsonify(dict(os.environ))
