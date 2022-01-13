@@ -34,7 +34,7 @@ debug : FORCE
 	ls -l $(REFDB) CR/2002-10/generated/threads.body
 
 $(REFDB).new : FORCE
-	python scripts/makerefsdb -v -d $(REFDB).new CR
+	python scripts/makerefsdb.py -v -d $(REFDB).new CR
 	@echo "Replace $(REFDB) with $(REFDB).new when ready"
 
 FORCE :
