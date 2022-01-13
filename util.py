@@ -25,6 +25,10 @@
 # mail2web
 #
 # http://localhost:8080/CR/2006/4/659
+#
+# Virgin Media???
+#
+# https://localhost:8080/CR/2007/07/00004
 
 import re
 
