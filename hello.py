@@ -98,7 +98,7 @@ def filter_headers(message):
                 if tgt_msgid in last_refs:
                     continue
                 last_refs |= set([tgt_msgid])
-                cur.execute("select year, month, seq from messageids"
+                cur.execute("select year, month, seq from messages"
                             "  where messageid = ?",
                             (tgt_msgid,))
                 try:
