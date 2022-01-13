@@ -20,8 +20,10 @@ def date_key(record):
 
 def generate_link(r):
     "HTML for a single message"
+    root = "(T)&nbsp;" if r['is_root'] else ""
     return (f'''<a name="{r['seq']:05d}">'''
-            f'''<a href="/CR/{r['year']}/{r['month']}/{r['seq']:05d}">'''
+            f'''{root}'''
+            f'''<a href="/CR/{r['year']}/{r['month']:02d}/{r['seq']:05d}">'''
             f'''{html.escape(r['subject'])}</a></a>'''
             f''' {html.escape(r["sender"])}''')
 

@@ -19,7 +19,9 @@ def thread_key(record):
 
 def generate_link(r, ind):
     "HTML for a single message"
+    root = "(T)&nbsp;" if r['is_root'] else ""
     return (f'''{ind}<a name="{r['seq']:05d}">'''
+            f'''{root}'''
             f'''<a href="/CR/{r['year']}/{r['month']:02d}/{r['seq']:05d}">'''
             f'''{html.escape(r['subject'])}</a></a>'''
             f''' {html.escape(r["sender"])}''')
@@ -35,7 +37,7 @@ def generate_index(records, cur, level):
         print(generate_link(r, li_ind + "  "))
         # Find any direct references to this message.
         refs = cur.execute("select distinct m.messageid, m.subject,"
-                           " m.sender, m.year, m.month, m.seq"
+                           " m.sender, m.year, m.month, m.seq, m.is_root"
                            "  from messages m"
                            "  join msgrefs r"
                            "  on r.messageid = m.messageid"
@@ -88,7 +90,7 @@ def main():
     #                       (args.year, args.month, args.year, args.month).fetchall())
 
     records = cur.execute("select distinct m.messageid, m.subject,"
-                          " m.sender, m.year, m.month, m.seq"
+                          " m.sender, m.year, m.month, m.seq, m.is_root"
                           "  from messages m"
                           "  where m.year = ?"
                           "    and m.month = ?"
