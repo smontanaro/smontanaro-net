@@ -73,6 +73,7 @@ ZAP_HEADERS = {
     "reply-to",
     "return-path",
     "sender",
+    "user-agent",
     }
 
 if not FLASK_DEBUG:
