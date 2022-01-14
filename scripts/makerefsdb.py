@@ -17,8 +17,6 @@ import arrow
 import dateutil.parser
 import dateutil.tz
 
-import util
-
 def convert_ts_bytes(stamp):
     "SQLite3 converter for tz-aware datetime objects"
     stamp = stamp.decode("utf-8")
@@ -175,6 +173,9 @@ def insert_references(message, conn, filename, verbose):
     if not msgid:
         return nrecs
 
+    if verbose > 1:
+        print("  >>", msgid)
+
     cur = conn.cursor()
     try:
         (year, month, seq) = decompose_filename(filename)
@@ -212,24 +213,28 @@ def insert_references(message, conn, filename, verbose):
     if verbose > 2:
         print("  >>", msgid)
 
+    ref_list = []
+    if message["References"] is not None:
+        ref_list = [ref.strip() for ref in
+                        re.findall(r"<[^\s>]+>", message["References"])]
     if message["In-Reply-To"] is not None:
-        parent = message["In-Reply-To"].strip()
+        in_reply_to = message["In-Reply-To"].strip()
+        if in_reply_to not in ref_list:
+            ref_list.append(in_reply_to)
+
+    for (parent, child) in zip(ref_list[:-1], ref_list[1:]):
         cur.execute("insert into msgreplies"
+                    " values (?, ?)",
+                    (child, parent))
+
+    for reference in ref_list:
+        cur.execute("insert into msgrefs"
                     "  values (?, ?)",
-                    (msgid, parent))
+                    (msgid, reference))
         nrecs += 1
         if verbose > 3:
-            print("    :", parent)
+            print("    :", reference)
 
-    if message["References"] is not None:
-        for reference in re.findall(r"<[^\s>]+>", message["References"]):
-            reference = reference.strip()
-            cur.execute("insert into msgrefs"
-                        "  values (?, ?)",
-                        (msgid, reference))
-            nrecs += 1
-            if verbose > 3:
-                print("    :", reference)
     cur.close()
     conn.commit()
     return nrecs
@@ -253,26 +258,19 @@ def process_one_file(filename, conn, verbose):
 def mark_thread_roots(conn):
     "identify those messages which start threads."
     cur = conn.cursor()
-    # find all messages which have replies
-    cur.execute("select distinct m.messageid from messages m"
-                " join msgreplies r"
-                " on r.parent = m.messageid")
-    result = cur.fetchall()
-    print(">>", len(result), "parent messages")
-    # for each of them, if they are their own thread root, set that
-    # bit in the messages table.
-    roots = set()
-    for row in result:
-        msgid = row[0]
-        if util.get_thread_root(msgid, cur) == msgid:
-            roots.add(msgid)
-    print(">>", len(roots), "roots")
-    for msgid in roots:
-        cur.execute("update messages"
-                    "  set is_root = 1"
-                    "  where messageid = ?",
-                    (msgid,))
+
+    # messages which are parents but don't have parents are roots
+    cur.execute("update messages"
+                "  set is_root = 1"
+                "  where messageid in"
+                "   (select r.parent"
+                "      from msgreplies r"
+                "      where r.parent not in"
+                "        (select messageid from msgreplies))")
     conn.commit()
+    return cur.execute("select count(*)"
+                       "  from messages"
+                       "  where is_root = 1").fetchone()[0]
 
 def main():
     "see __doc__"
@@ -324,8 +322,8 @@ def main():
         if args.verbose:
             print(">>", dirpath, records, nfiles)
 
-    mark_thread_roots(conn)
-
+    nroots = mark_thread_roots(conn)
+    print(nroots, "thread roots identified")
     cur = conn.cursor()
     cur.execute("select count(*) from messages")
     print(f"{cur.fetchone()[0]} total message ids")
