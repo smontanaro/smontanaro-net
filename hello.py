@@ -61,6 +61,8 @@ def make_urls_sensitive(text):
     return "".join(new_text)
 
 ZAP_HEADERS = {
+    "content-disposition",
+    "content-language",
     "delivered-to",
     "dkim-signature",
     "domainkey-signature",
@@ -68,6 +70,7 @@ ZAP_HEADERS = {
     "importance",
     "mime-version",
     "precedence",
+    "priority",
     "received",
     "received-spf",
     "reply-to",
@@ -95,7 +98,7 @@ def filter_headers(message):
             continue
         if hdr in ("in-reply-to", "references"):
             tags = []
-            for tgt_msgid in val.split():
+            for tgt_msgid in re.findall(r"<[^\s>]+>", val):
                 if tgt_msgid in last_refs:
                     continue
                 last_refs |= set([tgt_msgid])
@@ -106,7 +109,7 @@ def filter_headers(message):
                     (year, month, seq) = cur.fetchone()
                 except (TypeError, IndexError):
                     # pylint: disable=no-member
-                    app.logger.error(f"failed to locate {tgt_msgid}.")
+                    app.logger.warning(f"failed to locate {tgt_msgid}.")
                     tag = html.escape(tgt_msgid)
                 else:
                     url = url_for('cr_message', year=year,
@@ -334,6 +337,7 @@ def app_help():
     return jsonify(func_list)
 
 class SearchForm(FlaskForm):
+    "simple form used to search Brave for archived list messages"
     query = StringField('search:', validators=[DataRequired()])
     site = HiddenField('site', default='www.smontanaro.net')
 
