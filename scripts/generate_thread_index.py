@@ -3,15 +3,11 @@
 "generate thread index similar to what MhonARC would do"
 
 import argparse
-import datetime
 import html
 import sqlite3
 import sys
 
-def convert_ts_bytes(stamp):
-    "SQLite3 converter for tz-aware datetime objects"
-    stamp = stamp.decode("utf-8")
-    return datetime.datetime.fromisoformat(stamp)
+import util
 
 def thread_key(record):
     "groupby key func"
@@ -35,7 +31,7 @@ def generate_index(records, cur, level):
     for r in records:
         print(f'''{li_ind}<li>''')
         print(generate_link(r, li_ind + "  "))
-        # Find any direct references to this message.
+        # Find any references where this message is the parent
         refs = cur.execute("select distinct m.messageid, m.subject,"
                            " m.sender, m.year, m.month, m.seq, m.is_root"
                            "  from messages m"
@@ -60,7 +56,7 @@ def main():
     parser.add_argument("month", type=int)
     args = parser.parse_args()
 
-    sqlite3.register_converter("TIMESTAMP", convert_ts_bytes)
+    sqlite3.register_converter("TIMESTAMP", util.convert_ts_bytes)
     conn = sqlite3.connect(args.sqldb, detect_types=(sqlite3.PARSE_DECLTYPES
                                                      | sqlite3.PARSE_COLNAMES))
     conn.row_factory = sqlite3.Row
