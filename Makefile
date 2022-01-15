@@ -37,6 +37,9 @@ $(REFDB).new : FORCE
 	python scripts/makerefsdb.py -v -d $(REFDB).new CR
 	@echo "Replace $(REFDB) with $(REFDB).new when ready"
 
+lint : FORCE
+	pylint *.py scripts/*.py
+
 FORCE :
 
 .PHONY : FORCE all debug
