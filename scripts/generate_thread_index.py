@@ -50,8 +50,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-v", "--verbose", dest="verbose", action="count",
                         default=0)
-    parser.add_argument("-d", "--database", dest="sqldb", help="SQLite3 database file",
-                        required=True)
+    parser.add_argument("-d", "--database", dest="sqldb",
+                        help="SQLite3 database file", required=True)
     parser.add_argument("year", type=int)
     parser.add_argument("month", type=int)
     args = parser.parse_args()
@@ -61,36 +61,11 @@ def main():
                                                      | sqlite3.PARSE_COLNAMES))
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
-
-    # # Yikes! SQLite doesn's support right joins or full outer joins. I
-    # # didn't come up with this query. Stack Overflow to the rescue:
-    # #
-    # # https://stackoverflow.com/questions/1923259/full-outer-join-with-sqlite
-    # records = cur.execute("select distinct m.year, m.month, m.seq,"
-    #                       "    m.messageid, r.reference"
-    #                       "  from messages m"
-    #                       "  left join msgrefs r"
-    #                       "    on m.messageid = r.reference"
-    #                       "  where m.year = ?"
-    #                       "    and m.month = ?"
-    #                       "union all"
-    #                       "select distinct m.year, m.month, m.seq,"
-    #                       "    m.messageid, null"
-    #                       "  from msgrefs r"
-    #                       "  left join messages m"
-    #                       "    on r.reference = m.messageid"
-    #                       "  where r.reference is null"
-    #                       "    and m.year = ?"
-    #                       "    and m.month = ?"
-    #                       "order by m.messageid, m.ts",
-    #                       (args.year, args.month, args.year, args.month).fetchall())
-
-    records = cur.execute("select distinct m.messageid, m.subject,"
-                          " m.sender, m.year, m.month, m.seq, m.is_root"
+    records = cur.execute("select m.*"
                           "  from messages m"
                           "  where m.year = ?"
                           "    and m.month = ?"
-                          "order by m.ts",
+                          "  order by m.ts",
                           (args.year, args.month)).fetchall()
 
     generate_index(records, cur, 0)
