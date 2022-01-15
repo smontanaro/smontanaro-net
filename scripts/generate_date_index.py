@@ -39,8 +39,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-v", "--verbose", dest="verbose", action="count",
                         default=0)
-    parser.add_argument("-d", "--database", dest="sqldb", help="SQLite3 database file",
-                        required=True)
+    parser.add_argument("-d", "--database", dest="sqldb",
+                        help="SQLite3 database file", required=True)
     parser.add_argument("year", type=int)
     parser.add_argument("month", type=int)
     args = parser.parse_args()
