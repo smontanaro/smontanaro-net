@@ -33,7 +33,7 @@ def favicon():
     return redirect(url_for("static", filename="images/favicon.ico"))
 
 @app.route("/robots.txt")
-def favicon():
+def robots():
     "websites need these"
     return redirect(url_for("static", filename="txt/robots.txt"))
 
