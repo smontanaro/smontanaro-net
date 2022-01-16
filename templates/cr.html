@@ -1,5 +1,7 @@
 {% extends "home.html" %}
+{% block nav %}
+<a href="/">Home</a>&nbsp;<a href="/CR">CR Archives</a>&nbsp;{{ nav|safe }}
+{% endblock %}
 {% block left %}
-  <a href="/">Home</a>
   {% include 'search.html' %}
 {% endblock %}
