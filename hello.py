@@ -258,7 +258,7 @@ def email_to_html(year, month, msgid):
 OLDEST_MONTH = (2000, 3)
 NEWEST_MONTH = (2011, 2)
 
-def _month_url(start_year, start_month, offset ):
+def _month_url(start_year, start_month, offset, what):
     "previous month - often month +/- 1, but not always (we have gaps)"
 
     day = 1 if offset == -1 else monthrange(start_year, start_month)[1]
@@ -269,7 +269,7 @@ def _month_url(start_year, start_month, offset ):
     while OLDEST_MONTH <= (dt.year, dt.month) <= NEWEST_MONTH:
         path = dt.strftime(f"CR/{dt.year}-{dt.month:02d}")
         if os.path.exists(path):
-            prev_url = url_for('dates', year=dt.year,
+            prev_url = url_for(what, year=dt.year,
                                month=f"{dt.month:02d}")
             return (f'<a href="{prev_url}">{arrow}</a>&nbsp;')
         day = 1 if offset == -1 else monthrange(dt.year, dt.month)[1]
@@ -285,17 +285,18 @@ def dates(year, month):
     month = int(month)
     date = datetime.date(year, month, 1)
 
-    prev_url = _month_url(year, month, -1)
-    nxt_url = _month_url(year, month, +1)
+    prev_url = _month_url(year, month, -1, "dates")
+    next_url = _month_url(year, month, +1, "dates")
 
-    title = date.strftime(f"{prev_url}%b %Y Date Index{nxt_url}")
+    title = date.strftime(f"%b %Y Date Index")
     thread_url = url_for("threads", year=year, month=f"{month:02d}")
     nav = (f''' <a href="{thread_url}">By Thread</a>''')
 
     with open(f'''CR/{date.strftime("%Y-%m")}/generated/dates.body''',
               encoding="utf-8") as fobj:
         body = fobj.read()
-    return render_template("cr.html", title=title, body=body, nav=nav)
+    return render_template("cr.html", title=title, body=body, nav=nav,
+                           prev=prev_url, next=next_url)
 
 @app.route("/CR/<year>/<month>/threads")
 def threads(year, month):
@@ -304,13 +305,18 @@ def threads(year, month):
     year = int(year)
     month = int(month)
     date = datetime.date(year, month, 1)
+
+    prev_url = _month_url(year, month, -1, "threads")
+    next_url = _month_url(year, month, +1, "threads")
+
     title = date.strftime("%b %Y Thread Index")
     date_url = url_for("dates", year=year, month=f"{month:02d}")
     nav = (f''' <a href="{date_url}">By Date</a>''')
     with open(f'''CR/{date.strftime("%Y-%m")}/generated/threads.body''',
               encoding="utf-8") as fobj:
         body = fobj.read()
-    return render_template("cr.html", title=title, body=body, nav=nav)
+    return render_template("cr.html", title=title, body=body, nav=nav,
+                           prev=prev_url, next=next_url)
 
 @app.route('/CR/<year>/<month>/<int:msg>')
 def cr_message(year, month, msg):
