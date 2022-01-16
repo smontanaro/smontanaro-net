@@ -36,6 +36,7 @@ line-height: 18px;
     grid-area: nav;
     grid-column: 1 / span 2;
     text-align: left;
+    font-weight: bold;
 }
 
 .left {
