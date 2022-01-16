@@ -3,16 +3,12 @@
 "generate date index similar to what MhonARC would do"
 
 import argparse
-import datetime
 import html
 import itertools
 import sqlite3
 import sys
 
-def convert_ts_bytes(stamp):
-    "SQLite3 converter for tz-aware datetime objects"
-    stamp = stamp.decode("utf-8")
-    return datetime.datetime.fromisoformat(stamp)
+import util
 
 def date_key(record):
     "groupby key func"
@@ -20,8 +16,10 @@ def date_key(record):
 
 def generate_link(r):
     "HTML for a single message"
+    root = "(T)&nbsp;" if r['is_root'] else ""
     return (f'''<a name="{r['seq']:05d}">'''
-            f'''<a href="/CR/{r['year']}/{r['month']}/{r['seq']:05d}">'''
+            f'''{root}'''
+            f'''<a href="/CR/{r['year']}/{r['month']:02d}/{r['seq']:05d}">'''
             f'''{html.escape(r['subject'])}</a></a>'''
             f''' {html.escape(r["sender"])}''')
 
@@ -29,11 +27,11 @@ def generate_index(records):
     "html fragment output"
     for (dt, chunk) in itertools.groupby(records, date_key):
         print(f'''<h2>{dt.strftime("%d %b %Y")}</h2>''')
-        print(f'''<ul style="column-count: 2" class="no-bullets">''')
+        print('''<ul style="column-count: 2" class="no-bullets">''')
         for r in chunk:
-            print(f'''<li>''')
+            print('''<li>''')
             print(generate_link(r))
-            print(f'''</li>''')
+            print('''</li>''')
         print("</ul>")
 
 def main():
@@ -41,13 +39,13 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-v", "--verbose", dest="verbose", action="count",
                         default=0)
-    parser.add_argument("-d", "--database", dest="sqldb", help="SQLite3 database file",
-                        required=True)
+    parser.add_argument("-d", "--database", dest="sqldb",
+                        help="SQLite3 database file", required=True)
     parser.add_argument("year", type=int)
     parser.add_argument("month", type=int)
     args = parser.parse_args()
 
-    sqlite3.register_converter("TIMESTAMP", convert_ts_bytes)
+    sqlite3.register_converter("TIMESTAMP", util.convert_ts_bytes)
     conn = sqlite3.connect(args.sqldb, detect_types=(sqlite3.PARSE_DECLTYPES
                                                      | sqlite3.PARSE_COLNAMES))
     conn.row_factory = sqlite3.Row

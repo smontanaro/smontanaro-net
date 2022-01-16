@@ -2,6 +2,7 @@
 
 "Return to Flask..."
 
+from calendar import monthrange
 import datetime
 import email
 import html
@@ -18,6 +19,11 @@ from wtforms import StringField, HiddenField
 from wtforms.validators import DataRequired
 
 from util import strip_footers
+
+ONE_DAY = datetime.timedelta(days=1)
+
+LEFT_ARROW = "\N{LEFTWARDS ARROW}"
+RIGHT_ARROW = "\N{RIGHTWARDS ARROW}"
 
 FLASK_DEBUG = os.environ.get("FLASK_ENV") == "development"
 
@@ -66,6 +72,8 @@ def make_urls_sensitive(text):
     return "".join(new_text)
 
 ZAP_HEADERS = {
+    "content-disposition",
+    "content-language",
     "delivered-to",
     "dkim-signature",
     "domainkey-signature",
@@ -73,6 +81,7 @@ ZAP_HEADERS = {
     "importance",
     "mime-version",
     "precedence",
+    "priority",
     "received",
     "received-spf",
     "reply-to",
@@ -100,7 +109,7 @@ def filter_headers(message):
             continue
         if hdr in ("in-reply-to", "references"):
             tags = []
-            for tgt_msgid in val.split():
+            for tgt_msgid in re.findall(r"<[^\s>]+>", val):
                 if tgt_msgid in last_refs:
                     continue
                 last_refs |= set([tgt_msgid])
@@ -111,7 +120,7 @@ def filter_headers(message):
                     (year, month, seq) = cur.fetchone()
                 except (TypeError, IndexError):
                     # pylint: disable=no-member
-                    app.logger.error(f"failed to locate {tgt_msgid}.")
+                    app.logger.warning(f"failed to locate {tgt_msgid}.")
                     tag = html.escape(tgt_msgid)
                 else:
                     url = url_for('cr_message', year=year,
@@ -177,13 +186,9 @@ def generate_nav_block(year, month, msgid):
     thread_url = (url_for("threads", year=year, month=f"{month:02d}") +
                   f"#{anchor}")
 
-    return (f'''<div style="margin: 5px">'''
-            f'''<a href="/">Home</a>'''
-            f''' <a href="/CR">CR Archives</a>'''
-            f''' <a href="{uplink}">Up</a>{nxt}{prv}'''
-            f''' <a href="{date_url}">Date Index</a>'''
-            f''' <a href="{thread_url}">Thread Index</a>'''
-            f'''</div>''')
+    return (f'''<a href="{uplink}">Up</a>{nxt}{prv}'''
+            f'''&nbsp;<a href="{date_url}">Date Index</a>'''
+            f'''&nbsp;<a href="{thread_url}">Thread Index</a>''')
 
 class MessageFilter:
     "filter various uninteresting bits from messages"
@@ -249,6 +254,28 @@ def email_to_html(year, month, msgid):
     return render_template("cr.html", title=message["Subject"],
                            nav=nav, body=body)
 
+# boundaries of the archive - should be discovered
+OLDEST_MONTH = (2000, 3)
+NEWEST_MONTH = (2011, 2)
+
+def _month_url(start_year, start_month, offset ):
+    "previous month - often month +/- 1, but not always (we have gaps)"
+
+    day = 1 if offset == -1 else monthrange(start_year, start_month)[1]
+    arrow = LEFT_ARROW if offset == -1 else RIGHT_ARROW
+    dt = datetime.date(start_year, start_month, day)
+    dt += ONE_DAY * offset
+
+    while OLDEST_MONTH <= (dt.year, dt.month) <= NEWEST_MONTH:
+        path = dt.strftime(f"CR/{dt.year}-{dt.month:02d}")
+        if os.path.exists(path):
+            prev_url = url_for('dates', year=dt.year,
+                               month=f"{dt.month:02d}")
+            return (f'<a href="{prev_url}">{arrow}</a>&nbsp;')
+        day = 1 if offset == -1 else monthrange(dt.year, dt.month)[1]
+        dt = dt.replace(day=day) + ONE_DAY * offset
+    return ""
+
 @app.route("/CR/<year>/<month>")
 @app.route("/CR/<year>/<month>/dates")
 def dates(year, month):
@@ -257,11 +284,14 @@ def dates(year, month):
     year = int(year)
     month = int(month)
     date = datetime.date(year, month, 1)
-    title = date.strftime("%b %Y Date Index")
+
+    prev_url = _month_url(year, month, -1)
+    nxt_url = _month_url(year, month, +1)
+
+    title = date.strftime(f"{prev_url}%b %Y Date Index{nxt_url}")
     thread_url = url_for("threads", year=year, month=f"{month:02d}")
-    nav = (f'''<a name="top"><a href="/">Home</a></a>'''
-           f''' <a href="/CR">Up</a>'''
-           f''' <a href="{thread_url}">By Thread</a>''')
+    nav = (f''' <a href="{thread_url}">By Thread</a>''')
+
     with open(f'''CR/{date.strftime("%Y-%m")}/generated/dates.body''',
               encoding="utf-8") as fobj:
         body = fobj.read()
@@ -276,9 +306,7 @@ def threads(year, month):
     date = datetime.date(year, month, 1)
     title = date.strftime("%b %Y Thread Index")
     date_url = url_for("dates", year=year, month=f"{month:02d}")
-    nav = (f'''<a href="/">Home</a>'''
-           f''' <a href="/CR">Up</a>'''
-           f''' <a href="{date_url}">By Date</a>''')
+    nav = (f''' <a href="{date_url}">By Date</a>''')
     with open(f'''CR/{date.strftime("%Y-%m")}/generated/threads.body''',
               encoding="utf-8") as fobj:
         body = fobj.read()
@@ -339,6 +367,7 @@ def app_help():
     return jsonify(func_list)
 
 class SearchForm(FlaskForm):
+    "simple form used to search Brave for archived list messages"
     query = StringField('search:', validators=[DataRequired()])
     site = HiddenField('site', default='www.smontanaro.net')
 

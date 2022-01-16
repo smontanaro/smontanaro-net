@@ -30,6 +30,7 @@
 #
 # https://localhost:8080/CR/2007/07/00004
 
+import datetime
 import re
 
 QUOTE_PAT = r'(?:(?:>\s?)*)?'
@@ -151,47 +152,7 @@ def strip_trailing_whitespace(payload):
     # print(">> result:", "whitespace", lines == payload)
     return lines
 
-def get_thread_root(msgid, cur):
-    """return the root of the message tree in which msgid resides."""
-
-    while True:
-        cur.execute("select parent"
-                    "  from msgreplies"
-                    "  where messageid = ?",
-                    (msgid,))
-        result = cur.fetchone()
-        if not result:
-            return msgid
-        msgid = result[0]
-
-# def build_thread_tree(msgid, cur, associations=None, ids=None):
-#     "return a structure containing the thread(s) involving msgid."
-#     if associations is None:
-#         associations = set()
-#     if ids is None:
-#         ids = set()
-#     if msgid in ids:
-#         return (associations, ids)
-#     ids.add(msgid)
-#     to_do = set()
-#     # Find descendants
-#     cur.execute("select messageid, reference"
-#                 "  from msgrefs"
-#                 "  where messageid = ?",
-#                 (msgid,))
-#     for pair in cur.fetchall():
-#         associations.add(pair)
-#         to_do.add(pair[1])
-#     # ... and ancestors
-#     cur.execute("select messageid, reference"
-#                 "  from msgrefs"
-#                 "  where reference = ?",
-#                 (msgid,))
-#     for pair in cur.fetchall():
-#         associations.add(pair)
-#         to_do.add(pair[0])
-
-#     to_do -= ids
-#     for ref in to_do:
-#         build_thread_tree(ref, cur, associations, ids)
-#     return (associations, ids)
+def convert_ts_bytes(stamp):
+    "SQLite3 converter for tz-aware datetime objects"
+    stamp = stamp.decode("utf-8")
+    return datetime.datetime.fromisoformat(stamp)
