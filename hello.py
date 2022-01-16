@@ -258,20 +258,23 @@ def email_to_html(year, month, msgid):
 OLDEST_MONTH = (2000, 3)
 NEWEST_MONTH = (2011, 2)
 
-def _month(start_year, start_month, offset ):
+def _month_url(start_year, start_month, offset ):
     "previous month - often month +/- 1, but not always (we have gaps)"
 
     day = 1 if offset == -1 else monthrange(start_year, start_month)[1]
+    arrow = LEFT_ARROW if offset == -1 else RIGHT_ARROW
     dt = datetime.date(start_year, start_month, day)
     dt += ONE_DAY * offset
 
     while OLDEST_MONTH <= (dt.year, dt.month) <= NEWEST_MONTH:
         path = dt.strftime(f"CR/{dt.year}-{dt.month:02d}")
         if os.path.exists(path):
-            return (dt.year, dt.month)
+            prev_url = url_for('dates', year=dt.year,
+                               month=f"{dt.month:02d}")
+            return (f'<a href="{prev_url}">{arrow}</a>&nbsp;')
         day = 1 if offset == -1 else monthrange(dt.year, dt.month)[1]
         dt = dt.replace(day=day) + ONE_DAY * offset
-    raise OSError
+    return ""
 
 @app.route("/CR/<year>/<month>")
 @app.route("/CR/<year>/<month>/dates")
@@ -282,22 +285,8 @@ def dates(year, month):
     month = int(month)
     date = datetime.date(year, month, 1)
 
-    try:
-        (yr, mo) = _month(year, month, -1)
-    except OSError:
-        prev_url = ""
-    else:
-        prev_url = url_for('dates', year=yr, month=f"{mo:02d}")
-        prev_url = (f'''<a href="{prev_url}">'''
-                    f'''{LEFT_ARROW}</a>&nbsp;''')
-    try:
-        (yr, mo) = _month(year, month, +1)
-    except OSError:
-        nxt_url = ""
-    else:
-        nxt_url = url_for('dates', year=yr, month=f"{mo:02d}")
-        nxt_url = (f'''&nbsp;<a href="{nxt_url}">'''
-                   f'''{RIGHT_ARROW}</a>''')
+    prev_url = _month_url(year, month, -1)
+    nxt_url = _month_url(year, month, +1)
 
     title = date.strftime(f"{prev_url}%b %Y Date Index{nxt_url}")
     thread_url = url_for("threads", year=year, month=f"{month:02d}")
