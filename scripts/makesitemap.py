@@ -10,7 +10,7 @@ import arrow
 
 TEMPLATE = """
 <url>
-  <loc>http://www.smontanaro.net/{htmlfile}</loc>
+  <loc>http://www.smontanaro.net/{year}/{month}/{msg}</loc>
   <lastmod>{lastmod}</lastmod>
   <priority>{priority}</priority>
 </url>
@@ -46,19 +46,29 @@ def swallow(exceptions):
     finally:
         pass
 
-def main(args):
+def main():
     "see __doc__"
 
     with swallow((BrokenPipeError, KeyboardInterrupt)):
         print(HEADER)
         for line in sys.stdin:
-            htmlfile = line.strip()
-            lastmod = arrow.get(os.path.getmtime(htmlfile))
+            emlfile = line.strip()
+            dpath, fpath = os.path.split(emlfile)
+            year, month = dpath.split("/")[1].split("-")
+            msg = int(fpath.split(".")[2], 10)
+            msg = f"{msg:04d}"
+            lastmod = arrow.get(os.path.getmtime(emlfile))
             lastmod = lastmod.replace(microsecond=0)
-            priority = PRIORITIES.get(os.path.split(htmlfile)[-1], 0.5)
-            print(TEMPLATE.format(**locals()))
+            priority = 1.0
+            print(f"""
+<url>
+  <loc>http://www.smontanaro.net/{year}/{month}/{msg}</loc>
+  <lastmod>{lastmod}</lastmod>
+  <priority>{priority}</priority>
+</url>
+""".strip())
         print(FOOTER)
     return 0
 
 if __name__ == "__main__":
-    sys.exit(main(sys.argv[1:]))
+    sys.exit(main())
