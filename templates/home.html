@@ -24,11 +24,12 @@
 </head>
 <body>
 
-<p><a name="top">{{ nav|safe }}</a></p>
-
 <div class="container">
   <div class="header" style="margin: 5px;">
     <h1 id="header">{{ title|safe }}</h1>
+  </div>
+  <div class="nav" style="margin: 5px;">
+    {% block nav %}{% endblock %}
   </div>
   <div class="left" style="margin: 5px;">
     {% block left %}{% endblock %}
