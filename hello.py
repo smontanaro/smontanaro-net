@@ -2,6 +2,7 @@
 
 "Return to Flask..."
 
+from calendar import monthrange
 import datetime
 import email
 import html
@@ -18,6 +19,11 @@ from wtforms import StringField, HiddenField
 from wtforms.validators import DataRequired
 
 from util import strip_footers
+
+ONE_DAY = datetime.timedelta(days=1)
+
+LEFT_ARROW = "\N{LEFTWARDS ARROW}"
+RIGHT_ARROW = "\N{RIGHTWARDS ARROW}"
 
 FLASK_DEBUG = os.environ.get("FLASK_ENV") == "development"
 
@@ -180,13 +186,9 @@ def generate_nav_block(year, month, msgid):
     thread_url = (url_for("threads", year=year, month=f"{month:02d}") +
                   f"#{anchor}")
 
-    return (f'''<div style="margin: 5px">'''
-            f'''<a href="/">Home</a>'''
-            f''' <a href="/CR">CR Archives</a>'''
-            f''' <a href="{uplink}">Up</a>{nxt}{prv}'''
-            f''' <a href="{date_url}">Date Index</a>'''
-            f''' <a href="{thread_url}">Thread Index</a>'''
-            f'''</div>''')
+    return (f'''<a href="{uplink}">Up</a>{nxt}{prv}'''
+            f'''&nbsp;<a href="{date_url}">Date Index</a>'''
+            f'''&nbsp;<a href="{thread_url}">Thread Index</a>''')
 
 class MessageFilter:
     "filter various uninteresting bits from messages"
@@ -252,6 +254,25 @@ def email_to_html(year, month, msgid):
     return render_template("cr.html", title=message["Subject"],
                            nav=nav, body=body)
 
+# boundaries of the archive - should be discovered
+OLDEST_MONTH = (2000, 3)
+NEWEST_MONTH = (2011, 2)
+
+def _month(start_year, start_month, offset ):
+    "previous month - often month +/- 1, but not always (we have gaps)"
+
+    day = 1 if offset == -1 else monthrange(start_year, start_month)[1]
+    dt = datetime.date(start_year, start_month, day)
+    dt += ONE_DAY * offset
+
+    while OLDEST_MONTH <= (dt.year, dt.month) <= NEWEST_MONTH:
+        path = dt.strftime(f"CR/{dt.year}-{dt.month:02d}")
+        if os.path.exists(path):
+            return (dt.year, dt.month)
+        day = 1 if offset == -1 else monthrange(dt.year, dt.month)[1]
+        dt = dt.replace(day=day) + ONE_DAY * offset
+    raise OSError
+
 @app.route("/CR/<year>/<month>")
 @app.route("/CR/<year>/<month>/dates")
 def dates(year, month):
@@ -260,11 +281,28 @@ def dates(year, month):
     year = int(year)
     month = int(month)
     date = datetime.date(year, month, 1)
-    title = date.strftime("%b %Y Date Index")
+
+    try:
+        (yr, mo) = _month(year, month, -1)
+    except OSError:
+        prev_url = ""
+    else:
+        prev_url = url_for('dates', year=yr, month=f"{mo:02d}")
+        prev_url = (f'''<a href="{prev_url}">'''
+                    f'''{LEFT_ARROW}</a>&nbsp;''')
+    try:
+        (yr, mo) = _month(year, month, +1)
+    except OSError:
+        nxt_url = ""
+    else:
+        nxt_url = url_for('dates', year=yr, month=f"{mo:02d}")
+        nxt_url = (f'''&nbsp;<a href="{nxt_url}">'''
+                   f'''{RIGHT_ARROW}</a>''')
+
+    title = date.strftime(f"{prev_url}%b %Y Date Index{nxt_url}")
     thread_url = url_for("threads", year=year, month=f"{month:02d}")
-    nav = (f'''<a name="top"><a href="/">Home</a></a>'''
-           f''' <a href="/CR">Up</a>'''
-           f''' <a href="{thread_url}">By Thread</a>''')
+    nav = (f''' <a href="{thread_url}">By Thread</a>''')
+
     with open(f'''CR/{date.strftime("%Y-%m")}/generated/dates.body''',
               encoding="utf-8") as fobj:
         body = fobj.read()
@@ -279,9 +317,7 @@ def threads(year, month):
     date = datetime.date(year, month, 1)
     title = date.strftime("%b %Y Thread Index")
     date_url = url_for("dates", year=year, month=f"{month:02d}")
-    nav = (f'''<a href="/">Home</a>'''
-           f''' <a href="/CR">Up</a>'''
-           f''' <a href="{date_url}">By Date</a>''')
+    nav = (f''' <a href="{date_url}">By Date</a>''')
     with open(f'''CR/{date.strftime("%Y-%m")}/generated/threads.body''',
               encoding="utf-8") as fobj:
         body = fobj.read()
