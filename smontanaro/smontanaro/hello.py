@@ -30,8 +30,7 @@ FLASK_DEBUG = os.environ.get("FLASK_ENV") == "development"
 CRLF = "\r\n"
 REFDB = os.path.join(os.path.dirname(__file__), "references.db")
 
-app = Flask(__name__)
-app.config["SECRET_KEY"] = r"Aw6CNZn*GIEt8Aw6CNZn*GIEt8"
+from smontanaro import app
 
 @app.route("/favicon.ico")
 def favicon():
