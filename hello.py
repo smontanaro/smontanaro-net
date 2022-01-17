@@ -374,9 +374,9 @@ def app_help():
 
 class SearchForm(FlaskForm):
     "simple form used to search Brave for archived list messages"
-    query = StringField('search:', validators=[DataRequired()])
+    query = StringField('Search:', validators=[DataRequired()])
     site = HiddenField('site', default='smontanaro.net')
-    engine = RadioField('engine', choices=[
+    engine = RadioField('Engine:', choices=[
         ('Brave', 'Brave'),
         ('DuckDuckGo', 'DuckDuckGo'),
         ('Google', 'Google'),
