@@ -195,10 +195,14 @@ class MessageFilter:
     def __init__(self, message):
         self.message = message
         self.to_delete = []
+        self.seen_parts = set()
 
     def filter_message(self, message):
         "filter headers and text body parts"
         for part in message.walk():
+            if part in self.seen_parts:
+                return
+            self.seen_parts.add(part)
             filter_headers(part)
             if part.is_multipart():
                 if part is not self.message:
