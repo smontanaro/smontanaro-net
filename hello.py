@@ -271,7 +271,7 @@ def _month_url(start_year, start_month, offset, what):
         if os.path.exists(path):
             prev_url = url_for(what, year=dt.year,
                                month=f"{dt.month:02d}")
-            return (f'<a href="{prev_url}">{arrow}</a>&nbsp;')
+            return f'<a href="{prev_url}">{arrow}</a>&nbsp;'
         day = 1 if offset == -1 else monthrange(dt.year, dt.month)[1]
         dt = dt.replace(day=day) + ONE_DAY * offset
     return ""
@@ -288,7 +288,7 @@ def dates(year, month):
     prev_url = _month_url(year, month, -1, "dates")
     next_url = _month_url(year, month, +1, "dates")
 
-    title = date.strftime(f"%b %Y Date Index")
+    title = date.strftime("%b %Y Date Index")
     thread_url = url_for("threads", year=year, month=f"{month:02d}")
     nav = (f''' <a href="{thread_url}">By Thread</a>''')
 
@@ -381,9 +381,9 @@ class SearchForm(FlaskForm):
 def search():
     form = SearchForm()
     if form.validate_on_submit():
-        query = urllib.parse.quote_plus(
-            f"{form.query.data} site:{form.site.data}")
-        return redirect(f"https://duckduckgo.com/html?q={query}")
+        query = urllib.parse.quote_plus(f"{form.query.data}")
+        query += f"+site:{form.site.data}"
+        return redirect(f"https://search.brave.com/search?q={query}")
     return render_template('cr.html', form=form)
 
 @app.context_processor
