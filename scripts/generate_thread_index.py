@@ -27,7 +27,7 @@ def generate_index(records, cur, level):
 
     ul_ind = "  " * level
     li_ind = "  " * (level + 1)
-    print(f'''{ul_ind}<ul style="column-count: 1" class="no-bullets">''')
+    print(f'''{ul_ind}<ul style="column-count: auto; column-width: 250px" class="no-bullets">''')
     for r in records:
         print(f'''{li_ind}<li>''')
         print(generate_link(r, li_ind + "  "))
