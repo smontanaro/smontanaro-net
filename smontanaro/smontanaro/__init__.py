@@ -5,4 +5,5 @@ from flask import Flask
 app = Flask(__name__)
 app.config["SECRET_KEY"] = r"Aw6CNZn*GIEt8Aw6CNZn*GIEt8"
 
-from .views import (favicon, robots, index, app_help)
+# This import forces definition of all the routes.
+from .views import index
