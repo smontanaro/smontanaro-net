@@ -13,7 +13,7 @@ import textwrap
 import urllib.parse
 
 from flask import (Flask, redirect, url_for, render_template,
-                   abort, jsonify, request)
+                   abort, jsonify)
 from flask_wtf import FlaskForm
 from wtforms import StringField, HiddenField
 from wtforms.validators import DataRequired
@@ -375,25 +375,15 @@ def app_help():
 class SearchForm(FlaskForm):
     "simple form used to search Brave for archived list messages"
     query = StringField('search:', validators=[DataRequired()])
-    site = HiddenField('site', default='smontanaro.net')
-
-SEARCH = {
-    "DuckDuckGo": "https://search.duckduckgo.com/",
-    "Bing": "https://bing.com/search",
-    "Google": "https://google.com/search",
-    "Brave": "https://search.brave.com/search",
-}
+    site = HiddenField('site', default='www.smontanaro.net')
 
 @app.route('/search', methods=['GET', 'POST'])
 def search():
     form = SearchForm()
     if form.validate_on_submit():
-        print(dir(form.query))
-        print(request.form)
         query = urllib.parse.quote_plus(f"{form.query.data}")
         query += f"+site:{form.site.data}"
-        engine = SEARCH.get(form.search.data, SEARCH["Brave"])
-        return redirect(f"{engine}?q={query}")
+        return redirect(f"https://search.brave.com/search?q={query}")
     return render_template('cr.html', form=form)
 
 @app.context_processor
