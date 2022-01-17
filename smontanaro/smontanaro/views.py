@@ -18,17 +18,19 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, HiddenField, RadioField
 from wtforms.validators import DataRequired
 
-from util import strip_footers
+from .util import strip_footers
 
 ONE_DAY = datetime.timedelta(days=1)
+CRLF = "\r\n"
 
 LEFT_ARROW = "\N{LEFTWARDS ARROW}"
 RIGHT_ARROW = "\N{RIGHTWARDS ARROW}"
 
 FLASK_DEBUG = os.environ.get("FLASK_ENV") == "development"
 
-CRLF = "\r\n"
-REFDB = os.path.join(os.path.dirname(__file__), "references.db")
+CRDIR = os.environ["CRDIR"]
+REFDB = os.path.join(CRDIR, "references.db")
+CR = os.path.join(CRDIR, "CR")
 
 from smontanaro import app
 
@@ -167,7 +169,7 @@ def read_message(path):
 
 def generate_nav_block(year, month, msgid):
     "navigation header at top of email messages."
-    mydir = os.path.join("CR", f"{year:04d}-{month:02d}", "eml-files")
+    mydir = os.path.join(CR, f"{year:04d}-{month:02d}", "eml-files")
     anchor = f"{msgid:05d}"
     nxt = prv = ""
     if msg_exists(mydir, year, month, msgid - 1):
@@ -238,7 +240,7 @@ def email_to_html(year, month, msgid):
     "convert the email referenced by year, month and msgid to html."
     nav = generate_nav_block(year, month, msgid)
     msg = eml_file(year, month, msgid)
-    mydir = os.path.join("CR", f"{year:04d}-{month:02d}", "eml-files")
+    mydir = os.path.join(CR, f"{year:04d}-{month:02d}", "eml-files")
     message = read_message(os.path.join(mydir, msg))
 
     filt = MessageFilter(message)
@@ -270,7 +272,7 @@ def _month_url(start_year, start_month, offset, what):
     dt += ONE_DAY * offset
 
     while OLDEST_MONTH <= (dt.year, dt.month) <= NEWEST_MONTH:
-        path = dt.strftime(f"CR/{dt.year}-{dt.month:02d}")
+        path = dt.strftime(f"{CR}/{dt.year}-{dt.month:02d}")
         if os.path.exists(path):
             prev_url = url_for(what, year=dt.year,
                                month=f"{dt.month:02d}")
@@ -295,7 +297,7 @@ def dates(year, month):
     thread_url = url_for("threads", year=year, month=f"{month:02d}")
     nav = (f''' <a href="{thread_url}">By Thread</a>''')
 
-    with open(f'''CR/{date.strftime("%Y-%m")}/generated/dates.body''',
+    with open(f'''{CR}/{date.strftime("%Y-%m")}/generated/dates.body''',
               encoding="utf-8") as fobj:
         body = fobj.read()
     return render_template("cr.html", title=title, body=body, nav=nav,
@@ -315,7 +317,7 @@ def threads(year, month):
     title = date.strftime("%b %Y Thread Index")
     date_url = url_for("dates", year=year, month=f"{month:02d}")
     nav = (f''' <a href="{date_url}">By Date</a>''')
-    with open(f'''CR/{date.strftime("%Y-%m")}/generated/threads.body''',
+    with open(f'''{CR}/{date.strftime("%Y-%m")}/generated/threads.body''',
               encoding="utf-8") as fobj:
         body = fobj.read()
     return render_template("cr.html", title=title, body=body, nav=nav,
@@ -360,13 +362,13 @@ def cr_index():
     "templated index"
 
     title = "Old Classic Rendezvous Archive"
-    if os.path.exists("CR/generated/index.body"):
-        with open("CR/generated/index.body", encoding="utf8") as fobj:
+    if os.path.exists(f"{CR}/generated/index.body"):
+        with open(f"{CR}/generated/index.body", encoding="utf8") as fobj:
             body = fobj.read()
             return render_template("cr.html", title=title,
                                    body=body, nav="")
     else:
-        with open("CR/index.html", encoding="utf-8") as fobj:
+        with open(f"{CR}/index.html", encoding="utf-8") as fobj:
             return fobj.read()
 
 @app.route('/api/help')

@@ -1,0 +1,232 @@
+#!/usr/bin/env python
+
+"Some functions to share between parts of the app"
+
+# Other possible candidates for footer strippers
+#
+# Yahoo!
+#
+# http://localhost:8080/CR/2006/04/676
+# http://localhost:8080/CR/2006/02/143
+# http://localhost:8080/CR/2006/02/144
+# http://localhost:8080/CR/2006/02/153
+# http://localhost:8080/CR/2006/02/154
+# http://localhost:8080/CR/2001/5/00019
+# http://localhost:8080/CR/2006/02/156
+#
+# MSN
+#
+# http://localhost:8080/CR/2001/09/19
+#
+# AOL
+#
+# http://localhost:8080/CR/2008/06/12
+#
+# mail2web
+#
+# http://localhost:8080/CR/2006/4/659
+#
+# Virgin Media???
+#
+# https://localhost:8080/CR/2007/07/00004
+
+import datetime
+import re
+
+import arrow
+import dateutil.parser
+
+QUOTE_PAT = r'(?:(?:>\s?)*)?'
+
+def strip_footers(payload):
+    "strip non-content footers"
+    while True:
+        new_payload = payload
+        for func in (strip_trailing_whitespace,
+                     strip_cr_index_pwds,
+                     strip_mime,
+                     strip_bikelist_footer,
+                     strip_juno,
+                     strip_msn,
+                     strip_trailing_underscores):
+            new_payload = func(new_payload)
+        if new_payload == payload:
+            return payload
+        payload = new_payload
+
+def strip_mime(payload):
+    "strip the StripMime Report block."
+    # The StripMime block looks like this:
+    #
+    # --- StripMime Report -- processed MIME parts ---
+    # multipart/alternative
+    #   text/plain (text body -- kept)
+    #   text/html
+    # ---
+    #
+
+    # I am just stripping from the first line to the last and
+    # sweeping away anything in the middle.
+
+    header = "--- StripMime Report -- processed MIME parts ---"
+    footer = "---"
+    return strip_between(payload, header, footer, "mime")
+
+def strip_bikelist_footer(payload):
+    "strip the CR mailing list footer"
+    # The footer looks like this:
+    #
+    # Classicrendezvous mailing list
+    # Classicrendezvous@bikelist.org
+    #  http://www.bikelist.org/mailman/listinfo/classicrendezvous
+
+    header = "Classicrendezvous mailing list"
+    footer = "http://www.bikelist.org/mailman/listinfo/classicrendezvous"
+    return strip_between(payload, header, footer, "bikelist")
+
+def strip_juno(payload):
+    "strip Juno ads"
+    header = "_" * 60
+    footer = "https?://.*juno.com"
+    return strip_between(payload, header, footer, "juno")
+
+def strip_msn(payload):
+    "a bit looser, hopefully doesn't zap actual content"
+    header = ".* MSN"
+    footer = ".*https?:.*msn.com"
+    return strip_between(payload, header, footer, "msn")
+
+def strip_cr_index_pwds(payload):
+    "this occurs on occasion. Strip to remove passwords."
+    header = "Passwords for classicrendezvous-index@catfood.phred.org"
+    footer = ".*index%40catfood.phred.org"
+    return strip_between(payload, header, footer, "passwords")
+
+# pylint: disable=unused-argument
+def strip_between(payload, header, footer, tag):
+    "strip all lines at the end of the strip between header and footer"
+    lines = re.split(r"(\n+)", payload)
+    state = "start"
+    new_payload = []
+    for line in lines:
+        if state == "start":
+            if re.match(f"{QUOTE_PAT}{header}", line) is not None:
+                state = "stripping"
+                # print(">> elide", tag, state, repr(line))
+                continue
+            new_payload.append(line)
+        else:  # state == "stripping"
+            # print(">> elide", tag, state, repr(line))
+            if re.match(f"{QUOTE_PAT}{footer}", line) is not None:
+                state = "start"
+    new_payload = "".join(new_payload)
+    # print(">> result:", tag, new_payload == payload)
+    return new_payload
+
+def strip_trailing_underscores(payload):
+    "strip trailing underscores at the bottom of the message"
+    # Looks like 47 underscores in the most common case.
+    underscores = "_{45,50}"
+    hyphens = "-{40,45}"
+    # Juno dumps some cruft at the end of its URL which seems to be
+    # separated from the rest of the URL by a newline. I treat it like
+    # a trailing dashed line.
+    juno_dashes = "[0-9A-Za-z]+/$"
+    dashed_line = f"(?:{hyphens}|{underscores}|{juno_dashes})"
+    lines = re.split(r"(\n+)", payload.rstrip())
+    if re.match(f"{QUOTE_PAT}{dashed_line}", lines[-1]) is not None:
+        lines = lines[:-1]
+    lines = "".join(lines)
+    # print(">> result:", "underscores", lines == payload)
+    return lines
+
+def strip_trailing_whitespace(payload):
+    "strip trailing whitespace at the bottom of the message"
+    if not payload:
+        return ""
+    lines = re.split(r"(\n+)", payload)
+    pat = f"{QUOTE_PAT}" + r"\s*$"
+    # print(">> lines[-1]:", pat, repr(lines[-1]),
+    #       re.match(pat, lines[-1]))
+    while lines and re.match(pat, lines[-1]) is not None:
+        # print(">> del:", repr(lines[-1]))
+        del lines[-1]
+    lines = "".join(lines)
+    # print(">> result:", "whitespace", lines == payload)
+    return lines
+
+def convert_ts_bytes(stamp):
+    "SQLite3 converter for tz-aware datetime objects"
+    stamp = stamp.decode("utf-8")
+    return datetime.datetime.fromisoformat(stamp)
+
+TZMAP = {
+    # dumb heuristics - keep these first
+    "+0000 GMT": "UTC",
+    " 0 (GMT)": " UTC",
+    " -800": " -0800",
+    # more typical mappings (leading space to avoid stuff like "(EST)")
+    " EST": " America/New_York",
+    " EDT": " America/New_York",
+    " CST": " America/Chicago",
+    " CDT": " America/Chicago",
+    " MST": " America/Denver",
+    " MDT": " America/Denver",
+    " PST": " America/Los_Angeles",
+    " PDT": " America/Los_Angeles",
+    " Pacific Daylight Time": " America/Los_Angeles",
+}
+
+ARROW_FORMATS = [
+    "YYYY/MM/DD ddd A hh:mm:ss ZZZ",
+    "ddd, DD MMM YYYY HH:mm:ss ZZZ",
+    "ddd, D MMM YYYY HH:mm:ss ZZZ",
+    "YYYY/MM/DD ddd A hh:mm:ss ZZ",
+    "ddd, DD MMM YYYY HH:mm:ss ZZ",
+    "ddd, D MMM YYYY HH:mm:ss ZZ",
+    "YYYY/MM/DD ddd A hh:mm:ss Z",
+    "ddd, DD MMM YYYY HH:mm:ss Z",
+    "ddd, D MMM YYYY HH:mm:ss Z",
+    "DD MMM YYYY HH:mm:ss ZZZ",
+    "D MMM YYYY HH:mm:ss ZZZ",
+]
+
+TZINFOS = {
+    "EST": dateutil.tz.gettz("America/New_York"),
+    "EDT": dateutil.tz.gettz("America/New_York"),
+    "CST": dateutil.tz.gettz("America/Chicago"),
+    "CDT": dateutil.tz.gettz("America/Chicago"),
+    "MST": dateutil.tz.gettz("America/Denver"),
+    "MDT": dateutil.tz.gettz("America/Denver"),
+    "PST": dateutil.tz.gettz("America/Los_Angeles"),
+    "PDT": dateutil.tz.gettz("America/Los_Angeles"),
+    "SGT": dateutil.tz.gettz("Asia/Singapore"),
+    "UT": dateutil.tz.UTC,
+}
+
+def parse_date(timestring):
+    "A few tries to parse message dates"
+    timestring = timestring.strip()
+    if timestring.lower().startswith("date:"):
+        # print(f"strip leading 'date:' from {timestring}")
+        timestring = timestring.split(maxsplit=1)[1].strip()
+    timestring = timestring.strip()
+    # map obsolete names since arrow appears not to do that.
+    timestring = timestring.strip()
+    for obsolete, name in TZMAP.items():
+        tzs = timestring.replace(obsolete, name)
+        if tzs != timestring:
+            #print(f"{timestring} -> {tzs}")
+            timestring = tzs
+            break
+    if timestring.endswith(")"):
+        timestring = re.sub(r"\s*\([^)]*\)$", "", timestring)
+    try:
+        timestamp = dateutil.parser.parse(timestring, tzinfos=TZINFOS)
+    except dateutil.parser.ParserError:
+        # try arrow with its format capability
+        try:
+            timestamp = arrow.get(timestring, ARROW_FORMATS).datetime
+        except arrow.parser.ParserError as exc:
+            raise dateutil.parser.ParserError(str(exc))
+    return timestamp
