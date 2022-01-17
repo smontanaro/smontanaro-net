@@ -20,6 +20,10 @@ from wtforms.validators import DataRequired
 
 from .util import strip_footers
 
+# Flask docs say this is a-ok: https://flask.palletsprojects.com/en/2.0.x/patterns/packages/
+#pylint disable=cyclic-import
+from . import app
+
 ONE_DAY = datetime.timedelta(days=1)
 CRLF = "\r\n"
 
@@ -31,8 +35,6 @@ FLASK_DEBUG = os.environ.get("FLASK_ENV") == "development"
 CRDIR = os.environ["CRDIR"]
 REFDB = os.path.join(CRDIR, "references.db")
 CR = os.path.join(CRDIR, "CR")
-
-from smontanaro import app
 
 @app.route("/favicon.ico")
 def favicon():
