@@ -15,7 +15,7 @@ import urllib.parse
 from flask import (Flask, redirect, url_for, render_template,
                    abort, jsonify)
 from flask_wtf import FlaskForm
-from wtforms import StringField, HiddenField
+from wtforms import StringField, HiddenField, RadioField
 from wtforms.validators import DataRequired
 
 from util import strip_footers
@@ -375,7 +375,19 @@ def app_help():
 class SearchForm(FlaskForm):
     "simple form used to search Brave for archived list messages"
     query = StringField('search:', validators=[DataRequired()])
-    site = HiddenField('site', default='www.smontanaro.net')
+    site = HiddenField('site', default='smontanaro.net')
+    engine = RadioField('engine', choices=[
+        ('Brave', 'Brave'),
+        ('DuckDuckGo', 'DuckDuckGo'),
+        ('Google', 'Google'),
+    ], default='Brave')
+
+SEARCH = {
+    "DuckDuckGo": "https://search.duckduckgo.com/",
+    "Bing": "https://bing.com/search",
+    "Google": "https://google.com/search",
+    "Brave": "https://search.brave.com/search",
+}
 
 @app.route('/search', methods=['GET', 'POST'])
 def search():
@@ -383,7 +395,8 @@ def search():
     if form.validate_on_submit():
         query = urllib.parse.quote_plus(f"{form.query.data}")
         query += f"+site:{form.site.data}"
-        return redirect(f"https://search.brave.com/search?q={query}")
+        engine = SEARCH.get(form.engine.data, SEARCH["Brave"])
+        return redirect(f"{engine}?q={query}")
     return render_template('cr.html', form=form)
 
 @app.context_processor
