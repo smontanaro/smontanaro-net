@@ -145,7 +145,7 @@ def strip_trailing_whitespace(payload):
     pat = f"{QUOTE_PAT}" + r"\s*$"
     # print(">> lines[-1]:", pat, repr(lines[-1]),
     #       re.match(pat, lines[-1]))
-    while re.match(pat, lines[-1]) is not None:
+    while lines and re.match(pat, lines[-1]) is not None:
         # print(">> del:", repr(lines[-1]))
         del lines[-1]
     lines = "".join(lines)
