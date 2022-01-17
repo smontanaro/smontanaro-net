@@ -6,4 +6,4 @@ export FLASK_ENV=development
 
 cd smontanaro
 
-flask run -h localhost -p 8080
+flask run -h 0.0.0.0 -p 8080
