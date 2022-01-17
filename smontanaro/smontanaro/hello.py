@@ -12,7 +12,7 @@ import sqlite3
 import textwrap
 import urllib.parse
 
-from flask import (Flask, redirect, url_for, render_template,
+from flask import (redirect, url_for, render_template,
                    abort, jsonify)
 from flask_wtf import FlaskForm
 from wtforms import StringField, HiddenField, RadioField
