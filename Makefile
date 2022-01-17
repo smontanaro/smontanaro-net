@@ -22,7 +22,7 @@ $(DATES) $(THREADS) &: hello.py scripts/gen-bodies.sh \
 	scripts/generate_date_index.py scripts/generate_thread_index.py \
 	$(REFDB)
 	mkdir -p $(GENDIRS)
-	bash scripts/gen-bodies.sh
+	PYTHONPATH=$$PWD bash scripts/gen-bodies.sh
 
 debug : FORCE
 	@echo $(MAKE_VERSION)

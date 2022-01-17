@@ -27,7 +27,7 @@ def generate_index(records):
     "html fragment output"
     for (dt, chunk) in itertools.groupby(records, date_key):
         print(f'''<h2>{dt.strftime("%d %b %Y")}</h2>''')
-        print('''<ul style="column-count: 2" class="no-bullets">''')
+        print('''<ul style="column-count: auto; column-width: 250px;" class="no-bullets">''')
         for r in chunk:
             print('''<li>''')
             print(generate_link(r))
