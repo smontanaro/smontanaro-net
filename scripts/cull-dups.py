@@ -33,6 +33,11 @@ def main():
                   not first.startswith("classicrendezvous")):
                 delete = first
                 pairs[digest] = fname
+            elif (fname.startswith("classicrendezvous") and
+                  first.startswith("classicrendezvous")):
+                both = sorted([fname, first])
+                delete = both[1]
+                pairs[digest] = both[0]
             else:
                 print("Hmmm...", first, fname, file=sys.stderr)
                 continue
