@@ -327,6 +327,9 @@ def cr_message(year, month, msg):
 def old_cr(year, month, filename):
     "convert old archive url structure to new."
 
+    # will arrive as a string, but we want an int to force formatting
+    month = int(month, 10)
+
     if filename in ("index.html", "maillist.html"):
         return redirect(url_for("dates", year=year, month=month),
                         code=301)
