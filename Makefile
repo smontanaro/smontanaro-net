@@ -38,7 +38,7 @@ $(REFDB).new : FORCE
 	@echo "Replace $(REFDB) with $(REFDB).new when ready"
 
 lint : FORCE
-	pylint *.py scripts/*.py
+	PYTHONPATH=$$PWD/smontanaro pylint *.py scripts/*.py
 
 FORCE :
 
