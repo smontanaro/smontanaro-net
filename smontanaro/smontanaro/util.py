@@ -257,7 +257,15 @@ class Message(email.message.Message):
             if not FLASK_DEBUG:
                 headers = "\n".join([hdr for hdr in headers.split("\n")
                                            if hdr.split(":")[0].lower() not in self.content_headers])
-            body = self.get_payload(decode=True).decode(self.get_content_charset())
+            for charset in ("utf-8", "latin-1"):
+                try:
+                    body = self.get_payload(decode=True).decode(self.get_content_charset(charset))
+                except UnicodeDecodeError as exc:
+                    continue
+                else:
+                    break
+            else:
+                raise exc
             body = self.body_to_html(body)
             return f"{headers}<br>\n<br>\n{body}\n"
 
