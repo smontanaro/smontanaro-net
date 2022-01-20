@@ -154,16 +154,22 @@ def trim_subject_prefix(subject):
 
 def read_message(path):
     "read an email message from path, trying encodings"
-    for encoding in ("utf-8", "latin-1"):
-        with open(path, encoding=encoding) as fobj:
-            try:
-                message = email.message_from_file(fobj)
-            except UnicodeDecodeError as exc:
-                exc_msg = str(exc)
-            else:
-                break
-    else:
-        raise UnicodeDecodeError(exc_msg)
+    try:
+        for encoding in ("utf-8", "latin-1"):
+            with open(path, encoding=encoding) as fobj:
+                try:
+                    message = email.message_from_file(fobj)
+                except UnicodeDecodeError as exc:
+                    exc_msg = str(exc)
+                else:
+                    break
+        else:
+            raise UnicodeDecodeError(exc_msg)
+    except FileNotFoundError:
+        app.logger.error("File not found: %s", path)
+        abort(404)
+        # dead code, but this should make pylint like us again...
+        return None
     return message
 
 def generate_nav_block(year, month, msgid):
