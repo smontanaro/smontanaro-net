@@ -40,6 +40,9 @@ $(REFDB).new : FORCE
 lint : FORCE
 	PYTHONPATH=$$PWD/smontanaro pylint *.py scripts/*.py
 
+test : FORCE
+	bash test.sh
+
 FORCE :
 
 .PHONY : FORCE all debug
