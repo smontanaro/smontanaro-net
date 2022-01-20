@@ -275,8 +275,15 @@ class Message(email.message.Message):
         if self.get_content_maintype() == "multipart":
             html = []
             for part in self.walk():
+                if part == self:
+                    continue
                 html.append(part.as_html())
             return "".join(html)
+
+        if self.get_content_maintype() == "image":
+            app.logger.warning("Can't render images")
+            return ('''<br><br><div style="font-size: 16pt ; font-weight: bold">'''
+                    '''Image elided - can't yet render images</div>''')
 
         raise ValueError(f"Unrecognized content type: {self.get_content_type()}")
 
