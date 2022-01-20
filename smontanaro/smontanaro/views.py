@@ -12,26 +12,27 @@ import sqlite3
 import textwrap
 import urllib.parse
 
-from flask import (Flask, redirect, url_for, render_template,
+from flask import (redirect, url_for, render_template,
                    abort, jsonify)
 from flask_wtf import FlaskForm
 from wtforms import StringField, HiddenField, RadioField
 from wtforms.validators import DataRequired
 
-from util import strip_footers
+from .util import strip_footers, read_message
+
+# Flask docs say this is a-ok: https://flask.palletsprojects.com/en/2.0.x/patterns/packages/
+#pylint disable=cyclic-import
+from . import app, FLASK_DEBUG
 
 ONE_DAY = datetime.timedelta(days=1)
+CRLF = "\r\n"
 
 LEFT_ARROW = "\N{LEFTWARDS ARROW}"
 RIGHT_ARROW = "\N{RIGHTWARDS ARROW}"
 
-FLASK_DEBUG = os.environ.get("FLASK_ENV") == "development"
-
-CRLF = "\r\n"
-REFDB = os.path.join(os.path.dirname(__file__), "references.db")
-
-app = Flask(__name__)
-app.config["SECRET_KEY"] = r"Aw6CNZn*GIEt8Aw6CNZn*GIEt8"
+CRDIR = os.environ["CRDIR"]
+REFDB = os.path.join(CRDIR, "references.db")
+CR = os.path.join(CRDIR, "CR")
 
 @app.route("/favicon.ico")
 def favicon():
@@ -53,23 +54,6 @@ and the <a href="CR">old Classic Rendezvous Archives.</a>
 '''
     return render_template("home.html", title="Hello", nav="", body=body)
 
-def wrap(payload):
-    "wrap paragraphs in the payload."
-    pl_list = re.split("(\n+)", payload)
-    for (i, chunk) in enumerate(pl_list):
-        if chunk and (re.match(r"\s", chunk) is None):
-            pl_list[i] = "\n".join(textwrap.wrap(chunk, width=74))
-    return "".join(pl_list)
-
-def make_urls_sensitive(text):
-    "<a>-ify words which look like urls (just https?)."
-    new_text = []
-    for word in re.split(r"(\s+)", text):
-        if re.match("https?://", word):
-            new_text.append(f"""<a href="{word}">{word}</a>""")
-        else:
-            new_text.append(word)
-    return "".join(new_text)
 
 ZAP_HEADERS = {
     "content-disposition",
@@ -129,6 +113,8 @@ def filter_headers(message):
                 tags.append(tag)
             if tags:
                 message.replace_header(hdr, f"{' '.join(tags)}")
+        elif hdr == "content-type":
+            pass                # preserve as-is for later calcuations
         else:
             message.replace_header(hdr, html.escape(val))
 
@@ -152,29 +138,9 @@ def trim_subject_prefix(subject):
     words = PFX_MATCHER.split(subject)
     return " ".join([word for word in words if word])
 
-def read_message(path):
-    "read an email message from path, trying encodings"
-    try:
-        for encoding in ("utf-8", "latin-1"):
-            with open(path, encoding=encoding) as fobj:
-                try:
-                    message = email.message_from_file(fobj)
-                except UnicodeDecodeError as exc:
-                    exc_msg = str(exc)
-                else:
-                    break
-        else:
-            raise UnicodeDecodeError(exc_msg)
-    except FileNotFoundError:
-        app.logger.error("File not found: %s", path)
-        abort(404)
-        # dead code, but this should make pylint like us again...
-        return None
-    return message
-
 def generate_nav_block(year, month, msgid):
     "navigation header at top of email messages."
-    mydir = os.path.join("CR", f"{year:04d}-{month:02d}", "eml-files")
+    mydir = os.path.join(CR, f"{year:04d}-{month:02d}", "eml-files")
     anchor = f"{msgid:05d}"
     nxt = prv = ""
     if msg_exists(mydir, year, month, msgid - 1):
@@ -215,17 +181,10 @@ class MessageFilter:
                     self.filter_message(part)
                 continue
 
-            for encoding in ("utf-8", "latin-1"):
-                try:
-                    payload = part.get_payload(decode=True)
-                    payload = payload.decode(encoding=encoding)
-                except UnicodeDecodeError:
-                    continue
-                break
+
+            payload = message.get_payload(decode=True).decode(
+                message.get_content_charset("utf-8"))
             payload = strip_footers(payload)
-            payload = wrap(payload)
-            payload = html.escape(payload)
-            payload = make_urls_sensitive(payload).strip()
             part.set_payload(payload)
             if not payload and part is not self.message:
                 self.to_delete.append(part)
@@ -245,24 +204,15 @@ def email_to_html(year, month, msgid):
     "convert the email referenced by year, month and msgid to html."
     nav = generate_nav_block(year, month, msgid)
     msg = eml_file(year, month, msgid)
-    mydir = os.path.join("CR", f"{year:04d}-{month:02d}", "eml-files")
+    mydir = os.path.join(CR, f"{year:04d}-{month:02d}", "eml-files")
     message = read_message(os.path.join(mydir, msg))
 
     filt = MessageFilter(message)
     filt.filter_message(message)
     filt.delete_empty_parts()
 
-    # content-type and content-transfer-encoding are necessary when
-    # manipulating message elements, but we prefer not to display
-    # them, so filter them out of the string representation.
-    content_headers = ("content-type", "content-transfer-encoding")
-    nl = '\n'
-    lines = [line
-               for line in re.split(nl, str(message))
-                 if line.lower().split(":", 1)[0] not in content_headers]
-    body = f"""<pre>{nl.join(lines)}</pre>"""
     return render_template("cr.html", title=message["Subject"],
-                           nav=nav, body=body)
+                           nav=nav, body=message.as_html())
 
 # boundaries of the archive - should be discovered
 OLDEST_MONTH = (2000, 3)
@@ -277,7 +227,7 @@ def _month_url(start_year, start_month, offset, what):
     dt += ONE_DAY * offset
 
     while OLDEST_MONTH <= (dt.year, dt.month) <= NEWEST_MONTH:
-        path = dt.strftime(f"CR/{dt.year}-{dt.month:02d}")
+        path = dt.strftime(f"{CR}/{dt.year}-{dt.month:02d}")
         if os.path.exists(path):
             prev_url = url_for(what, year=dt.year,
                                month=f"{dt.month:02d}")
@@ -302,7 +252,7 @@ def dates(year, month):
     thread_url = url_for("threads", year=year, month=f"{month:02d}")
     nav = (f''' <a href="{thread_url}">By Thread</a>''')
 
-    with open(f'''CR/{date.strftime("%Y-%m")}/generated/dates.body''',
+    with open(f'''{CR}/{date.strftime("%Y-%m")}/generated/dates.body''',
               encoding="utf-8") as fobj:
         body = fobj.read()
     return render_template("cr.html", title=title, body=body, nav=nav,
@@ -322,7 +272,7 @@ def threads(year, month):
     title = date.strftime("%b %Y Thread Index")
     date_url = url_for("dates", year=year, month=f"{month:02d}")
     nav = (f''' <a href="{date_url}">By Date</a>''')
-    with open(f'''CR/{date.strftime("%Y-%m")}/generated/threads.body''',
+    with open(f'''{CR}/{date.strftime("%Y-%m")}/generated/threads.body''',
               encoding="utf-8") as fobj:
         body = fobj.read()
     return render_template("cr.html", title=title, body=body, nav=nav,
@@ -367,23 +317,14 @@ def cr_index():
     "templated index"
 
     title = "Old Classic Rendezvous Archive"
-    if os.path.exists("CR/generated/index.body"):
-        with open("CR/generated/index.body", encoding="utf8") as fobj:
+    if os.path.exists(f"{CR}/generated/index.body"):
+        with open(f"{CR}/generated/index.body", encoding="utf8") as fobj:
             body = fobj.read()
             return render_template("cr.html", title=title,
                                    body=body, nav="")
     else:
-        with open("CR/index.html", encoding="utf-8") as fobj:
+        with open(f"{CR}/index.html", encoding="utf-8") as fobj:
             return fobj.read()
-
-@app.route('/api/help')
-def app_help():
-    """Print available functions."""
-    func_list = {}
-    for rule in app.url_map.iter_rules():
-        if rule.endpoint != 'static':
-            func_list[rule.rule] = str(app.view_functions[rule.endpoint])
-    return jsonify(func_list)
 
 class SearchForm(FlaskForm):
     "simple form used to search Brave for archived list messages"
@@ -424,3 +365,12 @@ if FLASK_DEBUG:
     @app.route("/env")
     def printenv():
         return jsonify(dict(os.environ))
+
+    @app.route('/api/help')
+    def app_help():
+        """Print available functions."""
+        func_list = {}
+        for rule in app.url_map.iter_rules():
+            if rule.endpoint != 'static':
+                func_list[rule.rule] = str(app.view_functions[rule.endpoint])
+        return jsonify(func_list)

@@ -8,7 +8,7 @@ import itertools
 import sqlite3
 import sys
 
-import util
+from smontanaro import util
 
 def date_key(record):
     "groupby key func"

@@ -7,7 +7,7 @@ import html
 import sqlite3
 import sys
 
-import util
+from smontanaro import util
 
 def thread_key(record):
     "groupby key func"
