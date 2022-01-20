@@ -36,7 +36,8 @@ syslog_prefix                     = "gunicorn:"
 
 # Process Naming
 
-default_proc_name                 = "hello"
+## make sure to update /etc/systemd/system/smontanaro.service
+default_proc_name                 = "smontanaro"
 proc_name                         = None
 
 # Debugging
@@ -98,7 +99,7 @@ daemon                            = False
 initgroups                        = False
 pidfile                           = None
 preload_app                       = False
-raw_env                           = []
+raw_env                           = [f"CRDIR={os.path.join(chdir, 'CR')}"]
 reuse_port                        = False
 forwarded_allow_ips               = '*'
 paste                             = None
