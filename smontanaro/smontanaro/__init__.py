@@ -2,6 +2,10 @@
 
 "top level of pkg"
 
+import os
+
+FLASK_DEBUG = os.environ.get("FLASK_ENV") == "development"
+
 from flask import Flask
 
 app = Flask(__name__)
