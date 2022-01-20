@@ -181,9 +181,11 @@ class MessageFilter:
                     self.filter_message(part)
                 continue
 
-
-            payload = message.get_payload(decode=True).decode(
-                message.get_content_charset("utf-8"))
+            payload = message.get_payload(decode=True)
+            if payload is None:
+                # multipart/mixed, for example
+                continue
+            payload = payload.decode(message.get_content_charset("utf-8"))
             payload = strip_footers(payload)
             part.set_payload(payload)
             if not payload and part is not self.message:
