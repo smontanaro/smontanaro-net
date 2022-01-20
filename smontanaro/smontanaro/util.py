@@ -38,8 +38,9 @@ import sys
 
 import arrow
 import dateutil.parser
+from flask import abort
 
-from . import FLASK_DEBUG
+from . import app, FLASK_DEBUG
 
 QUOTE_PAT = r'(?:(?:>\s?)*)?'
 
@@ -256,7 +257,7 @@ class Message(email.message.Message):
             if not FLASK_DEBUG:
                 headers = "\n".join([hdr for hdr in headers.split("\n")
                                            if hdr.split(":")[0].lower() not in self.content_headers])
-            body = self.get_payload(decode=True).decode(self.get_content_charset("utf-8"))
+            body = self.get_payload(decode=True).decode(self.get_content_charset())
             body = self.body_to_html(body)
             return f"{headers}<br>\n<br>\n{body}\n"
 
@@ -308,12 +309,19 @@ class Message(email.message.Message):
         main_msg = self.make_urls_sensitive(html.escape(main_msg))
 
         if len(appended) == 3:
-            sep, reference = appended[1:]
-            reference = read_message_string(reference)
-            print(repr(reference.get_payload(decode=True)))
-            reference = f"<br>{sep}<br>{reference.as_html()}"
+            sep, ref = appended[1:]
+            ref = read_message_string(ref)
+
+            # the reference message might well be incomplete. if it
+            # lacks a charset, override the various content-type
+            # parameters (but not the content-type itself for now)
+            # from the parent message.
+            if ref.get_charset() is None:
+                for key, val in self.get_params()[1:]:
+                    ref.set_param(key, val)
+            ref = f"<br>{sep}<br>{ref.as_html()}"
         else:
-            reference = ""
+            ref = ""
             # force quoted text start a line
             main_msg = main_msg.replace("\n&gt;", "<br>\n&gt;")
             # what if the last paragraph is nothing but a quoted chunk?
@@ -331,7 +339,7 @@ class Message(email.message.Message):
             main_msg = "\n\n".join(chunks)
             main_msg = self.split_into_paras(self.handle_sig(main_msg))
 
-        return f"{main_msg}{reference}"
+        return f"{main_msg}{ref}"
 
     def split_into_paras(self, body):
         "use multiple blank lines to indicate paragraphs"
@@ -396,13 +404,19 @@ def read_message_string(raw):
 
 def read_message(path):
     "read an email message from path, trying encodings"
-    for encoding in ("utf-8", "latin-1"):
-        with open(path, encoding=encoding) as fobj:
-            try:
-                return read_message_string(fobj.read())
-            except UnicodeDecodeError as exc:
-                exc_msg = str(exc)
-            else:
-                break
-    else:
-        raise UnicodeDecodeError(exc_msg)
+    try:
+        for encoding in ("utf-8", "latin-1"):
+            with open(path, encoding=encoding) as fobj:
+                try:
+                    return read_message_string(fobj.read())
+                except UnicodeDecodeError as exc:
+                    exc_msg = str(exc)
+                else:
+                    break
+        else:
+            raise UnicodeDecodeError(exc_msg)
+    except FileNotFoundError:
+        app.logger.error("File not found: %s", path)
+        abort(404)
+        # keep pylint happy
+        return path
