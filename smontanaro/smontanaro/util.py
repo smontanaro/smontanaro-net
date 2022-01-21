@@ -34,7 +34,6 @@ import datetime
 import email.message
 import html
 import re
-import sys
 
 import arrow
 import dateutil.parser
@@ -252,12 +251,15 @@ class Message(email.message.Message):
         "return string in HTML form"
 
         if self.get_content_type() == "text/plain":
-            headers = "<br>\n".join(f"{key}: {val}" for (key, val) in self.items())
-            # zap "content-type and content-transfer-encoding" if we aren't debugging
+            headers = "<br>\n".join(f"{key}: {val}"
+                                      for (key, val) in self.items())
+            # zap "content-type and content-transfer-encoding" if we
+            # aren't debugging
             if not FLASK_DEBUG:
                 headers = "\n".join([hdr for hdr in headers.split("\n")
-                                           if hdr.split(":")[0].lower() not in self.content_headers])
-            body = self.get_payload(decode=True).decode(self.get_content_charset())
+                                           if hdr.split(":")[0].lower()
+                                              not in self.content_headers])
+            body = self.decode(self.get_payload(decode=True))
             body = self.body_to_html(body)
             return f"{headers}<br>\n<br>\n{body}\n"
 
@@ -265,10 +267,17 @@ class Message(email.message.Message):
             return self.as_string()
 
         if self.get_content_maintype() == "multipart":
-            html = []
+            rendered_html = []
             for part in self.walk():
-                html.append(part.as_html())
-            return "".join(html)
+                if part == self:
+                    continue
+                rendered_html.append(part.as_html())
+            return "".join(rendered_html)
+
+        if self.get_content_maintype() == "image":
+            app.logger.warning("Can't render images")
+            return ('''<br><br><div style="font-size: 16pt ; font-weight: bold">'''
+                    '''Image elided - can't yet render images</div>''')
 
         raise ValueError(f"Unrecognized content type: {self.get_content_type()}")
 
@@ -325,7 +334,7 @@ class Message(email.message.Message):
             # force quoted text start a line
             main_msg = main_msg.replace("\n&gt;", "<br>\n&gt;")
             # what if the last paragraph is nothing but a quoted chunk?
-            chunks = re.split("\n\s*\n+", main_msg)
+            chunks = re.split(r"\n\s*\n+", main_msg)
             is_quote = True
             term = "\n"
             last_chunk = chunks[-1].split(term)
@@ -341,11 +350,13 @@ class Message(email.message.Message):
 
         return f"{main_msg}{ref}"
 
+    #pylint: disable=no-self-use
     def split_into_paras(self, body):
         "use multiple blank lines to indicate paragraphs"
-        paras = "</p>\n<p>".join(re.split("\n\s*\n+", body))
+        paras = "</p>\n<p>".join(re.split(r"\n\s*\n+", body))
         return f"<p>\n{paras}\n</p>\n"
 
+    #pylint: disable=no-self-use
     def handle_sig(self, body):
         "preserve formatting (approximately) of any trailing e-sig."
 
@@ -361,7 +372,7 @@ class Message(email.message.Message):
         # It's only got a few short lines, but it's not separated from
         # the message body by white space or a dashed line.
 
-        parts = re.split("(\n\s*\n+)", body.rstrip())
+        parts = re.split(r"(\n\s*\n+)", body.rstrip())
         sig = parts[-1].split("\n")
         if (sig and
             # starts with leadding dashes
@@ -384,6 +395,7 @@ class Message(email.message.Message):
             parts[-1] = "\n".join(chunks)
         return "".join(parts)
 
+    #pylint: disable=no-self-use
     def make_urls_sensitive(self, text):
         "<a>-ify words which look like urls (just https? or leading www)."
         new_text = []
@@ -396,6 +408,16 @@ class Message(email.message.Message):
             else:
                 new_text.append(word)
         return "".join(new_text)
+
+    def decode(self, payload):
+        "decode payload, trying a couple different fallback encodings..."
+        msg = "Couldn't decode payload"
+        for encoding in ("utf-8", "latin-1"):
+            try:
+                return payload.decode(self.get_content_charset(encoding))
+            except UnicodeDecodeError as exc:
+                msg = str(exc)
+        raise UnicodeDecodeError(msg)
 
 
 def read_message_string(raw):

@@ -4,12 +4,10 @@
 
 from calendar import monthrange
 import datetime
-import email
 import html
 import os
 import re
 import sqlite3
-import textwrap
 import urllib.parse
 
 from flask import (redirect, url_for, render_template,
@@ -181,9 +179,11 @@ class MessageFilter:
                     self.filter_message(part)
                 continue
 
-
-            payload = message.get_payload(decode=True).decode(
-                message.get_content_charset("utf-8"))
+            payload = message.get_payload(decode=True)
+            if payload is None:
+                # multipart/mixed, for example
+                continue
+            payload = message.decode(payload)
             payload = strip_footers(payload)
             part.set_payload(payload)
             if not payload and part is not self.message:
@@ -317,14 +317,10 @@ def cr_index():
     "templated index"
 
     title = "Old Classic Rendezvous Archive"
-    if os.path.exists(f"{CR}/generated/index.body"):
-        with open(f"{CR}/generated/index.body", encoding="utf8") as fobj:
-            body = fobj.read()
-            return render_template("cr.html", title=title,
-                                   body=body, nav="")
-    else:
-        with open(f"{CR}/index.html", encoding="utf-8") as fobj:
-            return fobj.read()
+    with open(f"{CR}/generated/index.body", encoding="utf8") as fobj:
+        body = fobj.read()
+        return render_template("cr.html", title=title,
+                               body=body, nav="")
 
 class SearchForm(FlaskForm):
     "simple form used to search Brave for archived list messages"
