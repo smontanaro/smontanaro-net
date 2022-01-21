@@ -100,7 +100,7 @@ initgroups                        = False
 pidfile                           = None
 preload_app                       = False
 raw_env                           = [
-    f"CRDIR={os.path.join(chdir, 'CR')}",
+    f"CRDIR={chdir}",
     f"PYTHONPATH={os.environ.get('PYTHONPATH','.')}:{os.path.join(chdir, 'smontanaro')}",
 ]
 reuse_port                        = False
