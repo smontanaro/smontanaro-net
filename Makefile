@@ -42,6 +42,8 @@ lint : FORCE
 
 test : FORCE
 	bash test.sh
+	@sleep 1
+	@diff localhost.exp localhost.act
 
 FORCE :
 
