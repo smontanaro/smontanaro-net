@@ -11,18 +11,19 @@ GENDIRS = $(foreach dir,$(MONTHS),$(dir)/generated)
 DATES = $(foreach dir,$(GENDIRS),$(dir)/dates.body)
 THREADS = $(foreach dir,$(GENDIRS),$(dir)/threads.body)
 REFDB = references.db
+VIEWS = smontanaro/smontanaro/views.py
 
 all : CR/generated/index.body $(DATES) $(THREADS)
 
-CR/generated/index.body : hello.py scripts/genindexbody.sh
+CR/generated/index.body : $(VIEWS) scripts/genindexbody.sh
 	mkdir -p CR/generated
-	bash scripts/genindexbody.sh  > CR/generated/index.body
+	CRDIR=$${PWD} PYTHONPATH=$${PWD}/smontanaro bash scripts/genindexbody.sh  > CR/generated/index.body
 
-$(DATES) $(THREADS) &: hello.py scripts/gen-bodies.sh \
+$(DATES) $(THREADS) &: $(VIEWS) scripts/gen-bodies.sh \
 	scripts/generate_date_index.py scripts/generate_thread_index.py \
 	$(REFDB)
 	mkdir -p $(GENDIRS)
-	PYTHONPATH=$$PWD bash scripts/gen-bodies.sh
+	CRDIR=$${PWD} PYTHONPATH=$${PWD}/smontanaro bash scripts/gen-bodies.sh
 
 debug : FORCE
 	@echo $(MAKE_VERSION)
