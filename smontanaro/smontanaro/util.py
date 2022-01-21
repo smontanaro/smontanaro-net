@@ -34,14 +34,38 @@ import datetime
 import email.message
 import html
 import re
+import sqlite3
 
 import arrow
 import dateutil.parser
-from flask import abort
+from flask import abort, url_for
 
-from . import app, FLASK_DEBUG
+from . import app, FLASK_DEBUG, REFDB
 
 QUOTE_PAT = r'(?:(?:>\s?)*)?'
+
+ZAP_HEADERS = {
+    "content-disposition",
+    "content-language",
+    "delivered-to",
+    "dkim-signature",
+    "domainkey-signature",
+    "errors-to",
+    "importance",
+    "mime-version",
+    "precedence",
+    "priority",
+    "received",
+    "received-spf",
+    "reply-to",
+    "return-path",
+    "sender",
+    "user-agent",
+    }
+
+if not FLASK_DEBUG:
+    ZAP_HEADERS.add("message-id")
+
 
 def strip_footers(payload):
     "strip non-content footers"
@@ -275,6 +299,7 @@ class Message(email.message.Message):
             return "".join(rendered_html)
 
         if self.get_content_maintype() == "image":
+            # pylint: disable=no-member
             app.logger.warning("Can't render images")
             return ('''<br><br><div style="font-size: 16pt ; font-weight: bold">'''
                     '''Image elided - can't yet render images</div>''')
@@ -419,6 +444,87 @@ class Message(email.message.Message):
                 msg = str(exc)
         raise UnicodeDecodeError(msg)
 
+    def filter_headers(self):
+        "generate self header block"
+        conn = sqlite3.connect(REFDB)
+        cur = conn.cursor()
+        last_refs = set()
+        for (hdr, val) in self.items():
+            # Skip various headers - maybe later insert as comments...
+            hdr = hdr.lower()
+            if (hdr in ZAP_HEADERS or
+                hdr[:2] == "x-" or
+                hdr[:5] == "list-"):
+                del self[hdr]
+                continue
+            if hdr in ("in-reply-to", "references"):
+                tags = []
+                for tgt_msgid in re.findall(r"<[^\s>]+>", val):
+                    if tgt_msgid in last_refs:
+                        continue
+                    last_refs |= set([tgt_msgid])
+                    cur.execute("select year, month, seq from messages"
+                                "  where messageid = ?",
+                                (tgt_msgid,))
+                    try:
+                        (year, month, seq) = cur.fetchone()
+                    except (TypeError, IndexError):
+                        # pylint: disable=no-member
+                        app.logger.warning(f"failed to locate {tgt_msgid}.")
+                        tag = html.escape(tgt_msgid)
+                    else:
+                        url = url_for('cr_message', year=year,
+                                      month=month, msg=seq)
+                        tag = f"""<a href="{url}">{html.escape(tgt_msgid)}</a>"""
+                    tags.append(tag)
+                if tags:
+                    self.replace_header(hdr, f"{' '.join(tags)}")
+            elif hdr == "content-type":
+                pass                # preserve as-is for later calcuations
+            else:
+                self.replace_header(hdr, html.escape(val))
+
+
+class MessageFilter:
+    "filter various uninteresting bits from messages"
+    def __init__(self, message):
+        self.message = message
+        self.to_delete = []
+        self.seen_parts = set()
+
+    def filter_message(self, message):
+        "filter headers and text body parts"
+        for part in message.walk():
+            if part in self.seen_parts:
+                return
+            self.seen_parts.add(part)
+            part.filter_headers()
+            if part.is_multipart():
+                if part is not self.message:
+                    self.filter_message(part)
+                continue
+
+            payload = message.get_payload(decode=True)
+            if payload is None:
+                # multipart/mixed, for example
+                continue
+            payload = message.decode(payload)
+            payload = strip_footers(payload)
+            part.set_payload(payload)
+            if not payload and part is not self.message:
+                self.to_delete.append(part)
+
+    def delete_empty_parts(self):
+        "if we emptied out parts, remove them altogether"
+        if not self.to_delete:
+            return
+        for part in self.message.walk():
+            if part.is_multipart():
+                payload = part.get_payload()
+                for todel in self.to_delete:
+                    if todel in payload:
+                        payload.remove(todel)
+
 
 def read_message_string(raw):
     "construct Message from string."
@@ -438,6 +544,7 @@ def read_message(path):
         else:
             raise UnicodeDecodeError(exc_msg)
     except FileNotFoundError:
+        # pylint: disable=no-member
         app.logger.error("File not found: %s", path)
         abort(404)
         # keep pylint happy

@@ -4,23 +4,20 @@
 
 from calendar import monthrange
 import datetime
-import html
 import os
 import re
-import sqlite3
 import urllib.parse
 
-from flask import (redirect, url_for, render_template,
-                   abort, jsonify)
+from flask import redirect, url_for, render_template, abort, jsonify
 from flask_wtf import FlaskForm
 from wtforms import StringField, HiddenField, RadioField
 from wtforms.validators import DataRequired
 
-from .util import strip_footers, read_message
+from .util import read_message, MessageFilter
 
 # Flask docs say this is a-ok: https://flask.palletsprojects.com/en/2.0.x/patterns/packages/
 #pylint disable=cyclic-import
-from . import app, FLASK_DEBUG
+from . import app, FLASK_DEBUG, CRDIR
 
 ONE_DAY = datetime.timedelta(days=1)
 CRLF = "\r\n"
@@ -28,8 +25,6 @@ CRLF = "\r\n"
 LEFT_ARROW = "\N{LEFTWARDS ARROW}"
 RIGHT_ARROW = "\N{RIGHTWARDS ARROW}"
 
-CRDIR = os.environ["CRDIR"]
-REFDB = os.path.join(CRDIR, "references.db")
 CR = os.path.join(CRDIR, "CR")
 
 @app.route("/favicon.ico")
@@ -52,69 +47,6 @@ and the <a href="CR">old Classic Rendezvous Archives.</a>
 '''
     return render_template("home.html", title="Hello", nav="", body=body)
 
-
-ZAP_HEADERS = {
-    "content-disposition",
-    "content-language",
-    "delivered-to",
-    "dkim-signature",
-    "domainkey-signature",
-    "errors-to",
-    "importance",
-    "mime-version",
-    "precedence",
-    "priority",
-    "received",
-    "received-spf",
-    "reply-to",
-    "return-path",
-    "sender",
-    "user-agent",
-    }
-
-if not FLASK_DEBUG:
-    ZAP_HEADERS.add("message-id")
-
-def filter_headers(message):
-    "generate message header block"
-    conn = sqlite3.connect(REFDB)
-    cur = conn.cursor()
-    last_refs = set()
-    for hdr in message.keys():
-        # Skip various headers - maybe later insert as comments...
-        val = message[hdr]
-        hdr = hdr.lower()
-        if (hdr in ZAP_HEADERS or
-            hdr[:2] == "x-" or
-            hdr[:5] == "list-"):
-            del message[hdr]
-            continue
-        if hdr in ("in-reply-to", "references"):
-            tags = []
-            for tgt_msgid in re.findall(r"<[^\s>]+>", val):
-                if tgt_msgid in last_refs:
-                    continue
-                last_refs |= set([tgt_msgid])
-                cur.execute("select year, month, seq from messages"
-                            "  where messageid = ?",
-                            (tgt_msgid,))
-                try:
-                    (year, month, seq) = cur.fetchone()
-                except (TypeError, IndexError):
-                    # pylint: disable=no-member
-                    app.logger.warning(f"failed to locate {tgt_msgid}.")
-                    tag = html.escape(tgt_msgid)
-                else:
-                    url = url_for('cr_message', year=year,
-                                  month=month, msg=seq)
-                    tag = f"""<a href="{url}">{html.escape(tgt_msgid)}</a>"""
-                tags.append(tag)
-            if tags:
-                message.replace_header(hdr, f"{' '.join(tags)}")
-        elif hdr == "content-type":
-            pass                # preserve as-is for later calcuations
-        else:
-            message.replace_header(hdr, html.escape(val))
 
 def eml_file(year, month, msgid):
     "compute email file from sequence number"
@@ -159,46 +91,6 @@ def generate_nav_block(year, month, msgid):
     return (f'''<a href="{uplink}">Up</a>{nxt}{prv}'''
             f'''&nbsp;<a href="{date_url}">Date Index</a>'''
             f'''&nbsp;<a href="{thread_url}">Thread Index</a>''')
-
-class MessageFilter:
-    "filter various uninteresting bits from messages"
-    def __init__(self, message):
-        self.message = message
-        self.to_delete = []
-        self.seen_parts = set()
-
-    def filter_message(self, message):
-        "filter headers and text body parts"
-        for part in message.walk():
-            if part in self.seen_parts:
-                return
-            self.seen_parts.add(part)
-            filter_headers(part)
-            if part.is_multipart():
-                if part is not self.message:
-                    self.filter_message(part)
-                continue
-
-            payload = message.get_payload(decode=True)
-            if payload is None:
-                # multipart/mixed, for example
-                continue
-            payload = message.decode(payload)
-            payload = strip_footers(payload)
-            part.set_payload(payload)
-            if not payload and part is not self.message:
-                self.to_delete.append(part)
-
-    def delete_empty_parts(self):
-        "if we emptied out parts, remove them altogether"
-        if not self.to_delete:
-            return
-        for part in self.message.walk():
-            if part.is_multipart():
-                payload = part.get_payload()
-                for todel in self.to_delete:
-                    if todel in payload:
-                        payload.remove(todel)
 
 def email_to_html(year, month, msgid):
     "convert the email referenced by year, month and msgid to html."
