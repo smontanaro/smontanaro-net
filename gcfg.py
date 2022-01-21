@@ -99,7 +99,10 @@ daemon                            = False
 initgroups                        = False
 pidfile                           = None
 preload_app                       = False
-raw_env                           = [f"CRDIR={os.path.join(chdir, 'CR')}"]
+raw_env                           = [
+    f"CRDIR={os.path.join(chdir, 'CR')}",
+    f"PYTHONPATH={os.environ.get('PYTHONPATH','.')}:{os.path.join(chdir, 'smontanaro')}",
+]
 reuse_port                        = False
 forwarded_allow_ips               = '*'
 paste                             = None
