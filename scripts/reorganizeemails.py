@@ -16,61 +16,8 @@ def map_emails(src, dst):
     "pair up emails in src and dst directories by message-id."
 
     message_ids = {}
-    source_files = 0
-    for (dirpath, _dirnames, filenames) in os.walk(src):
-        for filename in filenames:
-            fname = os.path.join(dirpath, filename)
-            with open(fname, "rb") as fobj:
-                msg = email.message_from_bytes(fobj.read())
-                if msg.defects:
-                    print(f"defective message file {fname}: {msg.defects}. Skipping",
-                          file=sys.stderr)
-                    continue
-            source_files += 1
-            message_id = msg["message-id"]
-            if message_id not in message_ids:
-                message_ids[message_id] = {
-                    "source": {
-                        "filename": filename,
-                        "message": msg,
-                        },
-                    "destination": {},
-                }
-            else:
-                print(f"unexpected key: {message_id} -> {message_ids[message_id]}. Skipping",
-                      file=sys.stderr)
-                continue
-
-    dest_files = 0
-    dups = 0
-    for (dirpath, _dirnames, filenames) in os.walk(dst):
-        for filename in filenames:
-            fname = os.path.join(dirpath, filename)
-            with open(fname, "rb") as fobj:
-                msg = email.message_from_bytes(fobj.read())
-                if msg.defects:
-                    print(f"defective message file {fname}: {msg.defects}. Skipping",
-                          file=sys.stderr)
-                    continue
-            dest_files += 1
-            message_id = msg["message-id"]
-            if message_id in message_ids:
-                dstd = message_ids[message_id]["destination"]
-                if dstd:
-                    dups += 1
-                    print("duplicate", message_id, filename, "and", dstd["filename"],
-                          file=sys.stderr)
-                else:
-                    dstd["filename"] = filename
-                    dstd["message"] = msg
-            else:
-                message_ids[message_id] = {
-                    "source": {},
-                    "destination": {
-                        "filename": filename,
-                        "message": msg,
-                        },
-                }
+    source_files = scan_dir(src, "source", message_ids)
+    dest_files = scan_dir(dst, "destination", message_ids)
 
     no_dst_mapping = 0
     no_src_mapping = 0
@@ -84,12 +31,44 @@ def map_emails(src, dst):
             no_src_mapping += 1
 
     print("Found", source_files, "source messages")
-    print("Found", dest_files, "destination messages", dups, "duplicates")
+    print("Found", dest_files, "destination messages")
     print("Found", len(message_ids), "distinct message ids")
     print(no_dst_mapping, "can't be mapped to existing source names")
     print(no_src_mapping, "can't be mapped to existing destination names")
 
     return message_ids
+
+def scan_dir(dirname, which, message_ids):
+    "scan dirname looking for message-ids and such to id duplicates."
+    nfiles = 0
+    assert which in ("source", "destination")
+    for (dirpath, _dirnames, filenames) in os.walk(dirname):
+        for filename in filenames:
+            fname = os.path.join(dirpath, filename)
+            with open(fname, "rb") as fobj:
+                msg = email.message_from_bytes(fobj.read())
+                if msg.defects:
+                    print(f"defective message file {fname}: "
+                          f"{msg.defects}. Skipping",
+                          file=sys.stderr)
+                    continue
+            nfiles += 1
+            message_id = msg["message-id"]
+            if message_id not in message_ids:
+                message_ids[message_id] = {
+                    "source": {},
+                    "destination": {},
+
+                }
+            dct = message_ids[message_id]
+            if dct[which]:
+                print(f"Already have a key for {message_id} ({dct}). "
+                      "Skipping",
+                      file=sys.stderr)
+                continue
+            dct[which]["filename"] = filename
+            dct[which]["message"] = msg
+    return nfiles
 
 def map_extras(message_ids, dst):
     "map dest files which have no corresponding source files"
