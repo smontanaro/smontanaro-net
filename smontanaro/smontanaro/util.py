@@ -351,8 +351,10 @@ class Message(email.message.Message):
             # parameters (but not the content-type itself for now)
             # from the parent message.
             if ref.get_charset() is None:
-                for key, val in self.get_params()[1:]:
-                    ref.set_param(key, val)
+                params = self.get_params()
+                if params is not None:
+                    for key, val in params[1:]:
+                        ref.set_param(key, val)
             ref = f"<br>{sep}<br>{ref.as_html()}"
         else:
             ref = ""
@@ -436,13 +438,13 @@ class Message(email.message.Message):
 
     def decode(self, payload):
         "decode payload, trying a couple different fallback encodings..."
-        msg = "Couldn't decode payload"
-        for encoding in ("utf-8", "latin-1"):
+        for charset in (self.get_content_charset("us-ascii"), "utf-8", "latin-1"):
             try:
-                return payload.decode(self.get_content_charset(encoding))
+                return payload.decode(charset)
             except UnicodeDecodeError as exc:
-                msg = str(exc)
-        raise UnicodeDecodeError(msg)
+                exc_args = exc.args
+        else:
+            raise UnicodeDecodeError(*exc_args)
 
     def filter_headers(self):
         "generate self header block"
