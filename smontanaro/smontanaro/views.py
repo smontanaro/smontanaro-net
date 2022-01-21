@@ -4,12 +4,10 @@
 
 from calendar import monthrange
 import datetime
-import email
 import html
 import os
 import re
 import sqlite3
-import textwrap
 import urllib.parse
 
 from flask import (redirect, url_for, render_template,
@@ -185,7 +183,7 @@ class MessageFilter:
             if payload is None:
                 # multipart/mixed, for example
                 continue
-            payload = payload.decode(message.get_content_charset("utf-8"))
+            payload = message.decode(payload)
             payload = strip_footers(payload)
             part.set_payload(payload)
             if not payload and part is not self.message:
