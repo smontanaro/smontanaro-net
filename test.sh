@@ -28,12 +28,15 @@ done  > $RAW
 
 # grab a few random pages
 
+# Shuffle is a little Python script I wrote years ago. I'm sure there
+# is a more standard line randomizer, but I'm too lazy to look for
+# it...
 for d in $(find CR/ -name '20??-??' \
                | shuffle \
-               | head -13) ; do
+               | head -11) ; do
     find $d -name '*.eml' \
         | shuffle \
-        | head -3
+        | head -5
 done \
     | sed -e 's:/eml-files/classicrendezvous.[0-9]*.:/:' \
           -e 's/[.]eml//' \
