@@ -45,12 +45,9 @@
 127.0.0.1 - - "GET /CR/2004/9/01067 HTTP/1.1" 200 -
 WARNING in views: failed to locate <000901c49d38$f4e16c80$2f01a8c0@D1KBTP11>.
 127.0.0.1 - - "GET /CR/2004/9/1064 HTTP/1.1" 200 -
-ERROR in util: File not found: /home/skip/src/smontanaro.net/CR/2004-09/eml-files/classicrendezvous.10409.1806.eml
-127.0.0.1 - - "GET /CR/2004/9/1806 HTTP/1.1" 404 -
-ERROR in util: File not found: /home/skip/src/smontanaro.net/CR/2004-09/eml-files/classicrendezvous.10409.1957.eml
-127.0.0.1 - - "GET /CR/2004/9/1957 HTTP/1.1" 404 -
-ERROR in util: File not found: /home/skip/src/smontanaro.net/CR/2004-09/eml-files/classicrendezvous.10409.1958.eml
-127.0.0.1 - - "GET /CR/2004/9/1958 HTTP/1.1" 404 -
+127.0.0.1 - - "GET /CR/2004/9/1806 HTTP/1.1" 200 -
+127.0.0.1 - - "GET /CR/2004/9/1957 HTTP/1.1" 200 -
+127.0.0.1 - - "GET /CR/2004/9/1958 HTTP/1.1" 200 -
 127.0.0.1 - - "GET /CR/2005/11/dates HTTP/1.1" 200 -
 127.0.0.1 - - "GET /CR/2005/11/threads HTTP/1.1" 200 -
 127.0.0.1 - - "GET /CR/2005/12/dates HTTP/1.1" 200 -
