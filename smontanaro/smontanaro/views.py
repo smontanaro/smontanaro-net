@@ -317,14 +317,10 @@ def cr_index():
     "templated index"
 
     title = "Old Classic Rendezvous Archive"
-    if os.path.exists(f"{CR}/generated/index.body"):
-        with open(f"{CR}/generated/index.body", encoding="utf8") as fobj:
-            body = fobj.read()
-            return render_template("cr.html", title=title,
-                                   body=body, nav="")
-    else:
-        with open(f"{CR}/index.html", encoding="utf-8") as fobj:
-            return fobj.read()
+    with open(f"{CR}/generated/index.body", encoding="utf8") as fobj:
+        body = fobj.read()
+        return render_template("cr.html", title=title,
+                               body=body, nav="")
 
 class SearchForm(FlaskForm):
     "simple form used to search Brave for archived list messages"
