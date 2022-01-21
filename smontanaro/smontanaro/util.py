@@ -259,15 +259,7 @@ class Message(email.message.Message):
                 headers = "\n".join([hdr for hdr in headers.split("\n")
                                            if hdr.split(":")[0].lower()
                                               not in self.content_headers])
-            for charset in ("utf-8", "latin-1"):
-                try:
-                    body = self.get_payload(decode=True).decode(self.get_content_charset(charset))
-                except UnicodeDecodeError as exc:
-                    continue
-                else:
-                    break
-            else:
-                raise exc
+            body = self.decode(self.get_payload(decode=True))
             body = self.body_to_html(body)
             return f"{headers}<br>\n<br>\n{body}\n"
 
