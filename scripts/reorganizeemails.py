@@ -91,7 +91,7 @@ def map_emails(src, dst):
 
     return message_ids
 
-def map_extras(message_ids, src, dst):
+def map_extras(message_ids, dst):
     "map dest files which have no corresponding source files"
     source_names = []
     for dct in message_ids.values():
@@ -134,7 +134,7 @@ def main():
     args = parser.parse_args()
 
     message_ids = map_emails(args.source, args.destination)
-    map_extras(message_ids, args.source, args.destination)
+    map_extras(message_ids, args.destination)
 
     return 0
 
