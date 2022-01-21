@@ -12,15 +12,6 @@ sleep 3
 
 sed -e 's/localhost:[0-9][0-9]*/localhost:5001/' < localhost.urls \
     | while read url ; do
-    echo $url
-    echo "*** $url ***" >> localhost.act
-    echo "*** $url ***" >> localhost.raw
-    curl -s $url 2>> localhost.act >> localhost.raw
-done
+    curl -s $url
+done  2> localhost.act > localhost.raw
 pkill -f flask
-
-if cmp -s localhost.act localhost.exp ; then
-    exit 0
-else
-    exit 1
-fi
