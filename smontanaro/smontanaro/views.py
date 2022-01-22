@@ -13,19 +13,17 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, HiddenField, RadioField
 from wtforms.validators import DataRequired
 
-from .util import read_message, MessageFilter
+from .util import email_to_html
 
 # Flask docs say this is a-ok: https://flask.palletsprojects.com/en/2.0.x/patterns/packages/
 #pylint disable=cyclic-import
-from . import app, FLASK_DEBUG, CRDIR
+from . import app, FLASK_DEBUG, CR
 
 ONE_DAY = datetime.timedelta(days=1)
 CRLF = "\r\n"
 
 LEFT_ARROW = "\N{LEFTWARDS ARROW}"
 RIGHT_ARROW = "\N{RIGHTWARDS ARROW}"
-
-CR = os.path.join(CRDIR, "CR")
 
 @app.route("/favicon.ico")
 def favicon():
@@ -40,71 +38,7 @@ def robots():
 @app.route("/")
 def index():
     "index"
-    body = '''
-<p>Nobody here but us chickens...
-and the <a href="CR">old Classic Rendezvous Archives.</a>
-</p>
-'''
-    return render_template("home.html", title="Hello", nav="", body=body)
-
-
-def eml_file(year, month, msgid):
-    "compute email file from sequence number"
-    # MHonARC was written in Perl, so of course Y2k
-    perl_yr = year - 1900
-    return f"classicrendezvous.{perl_yr:3d}{month:02d}.{(msgid):04d}.eml"
-
-def msg_exists(mydir, year, month, msgid):
-    "test to see if there is an email message to which we should href"
-    name = eml_file(year, month, msgid)
-    full_path = os.path.join(mydir, name)
-    if os.path.exists(full_path):
-        return full_path
-    return ""
-
-PFX_MATCHER = re.compile(r"\[classicrendezvous\]|\[cr\]|re:|\s+", flags=re.I)
-def trim_subject_prefix(subject):
-    "Trim prefix detritus like [CR], Re:, etc"
-    words = PFX_MATCHER.split(subject)
-    return " ".join([word for word in words if word])
-
-def generate_nav_block(year, month, msgid):
-    "navigation header at top of email messages."
-    mydir = os.path.join(CR, f"{year:04d}-{month:02d}", "eml-files")
-    anchor = f"{msgid:05d}"
-    nxt = prv = ""
-    if msg_exists(mydir, year, month, msgid - 1):
-        url = url_for("cr_message", year=year, month=f"{month:02d}",
-                      msg=(msgid - 1))
-        prv = f' <a href="{url}">Prev</a>'
-    if msg_exists(mydir, year, month, msgid + 1):
-        url = url_for("cr_message", year=year, month=f"{month:02d}",
-                      msg=(msgid + 1))
-        nxt = f' <a href="{url}">Next</a>'
-    uplink = url_for("dates", year=year, month=f"{month:02d}")
-
-    date_url = (url_for("dates", year=year, month=f"{month:02d}") +
-                f"#{anchor}")
-    thread_url = (url_for("threads", year=year, month=f"{month:02d}") +
-                  f"#{anchor}")
-
-    return (f'''<a href="{uplink}">Up</a>{nxt}{prv}'''
-            f'''&nbsp;<a href="{date_url}">Date Index</a>'''
-            f'''&nbsp;<a href="{thread_url}">Thread Index</a>''')
-
-def email_to_html(year, month, msgid):
-    "convert the email referenced by year, month and msgid to html."
-    nav = generate_nav_block(year, month, msgid)
-    msg = eml_file(year, month, msgid)
-    mydir = os.path.join(CR, f"{year:04d}-{month:02d}", "eml-files")
-    message = read_message(os.path.join(mydir, msg))
-
-    filt = MessageFilter(message)
-    filt.filter_message(message)
-    filt.delete_empty_parts()
-
-    return render_template("cr.html", title=message["Subject"],
-                           nav=nav, body=message.as_html())
+    return render_template("main.html", title="Home", nav="")
 
 # boundaries of the archive - should be discovered
 OLDEST_MONTH = (2000, 3)
@@ -269,4 +203,4 @@ if FLASK_DEBUG:
         if func is None:
             raise RuntimeError('Not running with the Werkzeug Server')
         func()
-        return 'Server shutting down...'
+        return 'Server shutting down...\n'
