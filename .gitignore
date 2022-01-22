@@ -9,3 +9,4 @@ terrafirma
 server.log
 *,cover
 .coverage
+htmlcov
