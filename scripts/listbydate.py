@@ -8,7 +8,7 @@ import email
 import os
 import sys
 
-from smontanaro.util import parse_date
+from smontanaro.dates import parse_date
 
 def main():
     fdir = sys.argv[1]

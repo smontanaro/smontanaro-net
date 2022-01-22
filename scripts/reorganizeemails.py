@@ -10,7 +10,7 @@ import email
 import os
 import sys
 
-from smontanaro.util import parse_date
+from smontanaro.dates import parse_date
 
 def map_emails(src, dst):
     "pair up emails in src and dst directories by message-id."

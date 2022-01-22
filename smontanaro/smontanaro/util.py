@@ -30,20 +30,17 @@
 #
 # https://localhost:8080/CR/2007/07/00004
 
-import datetime
 import email.message
 import html
+import logging
 import os
+import pickle
 import re
 import sqlite3
 
-import arrow
-import dateutil.parser
-from flask import abort, url_for, render_template
+from flask import abort, url_for
 
-from . import app, FLASK_DEBUG, REFDB, CR
-
-QUOTE_PAT = r'(?:(?:>\s?)*)?'
+CRLF = "\r\n"
 
 ZAP_HEADERS = {
     "content-disposition",
@@ -64,214 +61,10 @@ ZAP_HEADERS = {
     "user-agent",
     }
 
-if not FLASK_DEBUG:
-    ZAP_HEADERS.add("message-id")
-
-
-def strip_footers(payload):
-    "strip non-content footers"
-    while True:
-        new_payload = payload
-        for func in (strip_trailing_whitespace,
-                     strip_cr_index_pwds,
-                     strip_mime,
-                     strip_bikelist_footer,
-                     strip_juno,
-                     strip_yp,
-                     strip_msn,
-                     strip_trailing_underscores):
-            new_payload = func(new_payload)
-        if new_payload == payload:
-            return payload
-        payload = new_payload
-
-def strip_mime(payload):
-    "strip the StripMime Report block."
-    # The StripMime block looks like this:
-    #
-    # --- StripMime Report --...
-    # multipart/alternative
-    #   text/plain (text body -- kept)
-    #   text/html
-    # ---
-    #
-
-    # I am just stripping from the first line to the last and
-    # sweeping away anything in the middle.
-
-    header = "--- StripMime Report --"
-    footer = "---"
-    return strip_between(payload, header, footer, "mime")
-
-def strip_bikelist_footer(payload):
-    "strip the CR mailing list footer"
-    # The footer looks like this:
-    #
-    # Classicrendezvous mailing list
-    # Classicrendezvous@bikelist.org
-    #  http://www.bikelist.org/mailman/listinfo/classicrendezvous
-
-    header = "Classicrendezvous mailing list"
-    footer = "http://www.bikelist.org/mailman/listinfo/classicrendezvous"
-    return strip_between(payload, header, footer, "bikelist")
-
-def strip_yp(payload):
-    "strip Yellow Pages ads"
-    header = "(?i).*get a jump"
-    footer = "(?i).*yellowpages.(lycos|aol).com"
-    return strip_between(payload, header, footer, "yp")
-
-def strip_juno(payload):
-    "strip Juno ads"
-    header = "_" * 60
-    footer = "https?://.*juno.com"
-    return strip_between(payload, header, footer, "juno")
-
-def strip_msn(payload):
-    "a bit looser, hopefully doesn't zap actual content"
-    header = ".* MSN"
-    footer = ".*https?:.*msn.com"
-    return strip_between(payload, header, footer, "msn")
-
-def strip_cr_index_pwds(payload):
-    "this occurs on occasion. Strip to remove passwords."
-    header = "Passwords for classicrendezvous-index@catfood.phred.org"
-    footer = ".*index%40catfood.phred.org"
-    return strip_between(payload, header, footer, "passwords")
-
-# pylint: disable=unused-argument
-def strip_between(payload, header, footer, tag):
-    "strip all lines at the end of the strip between header and footer"
-    lines = re.split(r"(\n+)", payload)
-    state = "start"
-    new_payload = []
-    # print(tag, repr(header), repr(footer))
-    for line in lines:
-        if state == "start":
-            if re.match(f"{QUOTE_PAT}{header}", line) is not None:
-                state = "stripping"
-                # print(">> elide", tag, state, repr(line))
-                continue
-            new_payload.append(line)
-        else:  # state == "stripping"
-            # print(">> elide", tag, state, repr(line))
-            if re.match(f"{QUOTE_PAT}{footer}", line) is not None:
-                state = "start"
-    new_payload = "".join(new_payload)
-    # print(">> result:", tag, "unchanged" if new_payload == payload else "stripped")
-    return new_payload
-
-def strip_trailing_underscores(payload):
-    "strip trailing underscores at the bottom of the message"
-    # Looks like 47 underscores in the most common case.
-    underscores = "_{35,50}"
-    hyphens = "-{35,45}"
-    # Juno dumps some cruft at the end of its URL which seems to be
-    # separated from the rest of the URL by a newline. I treat it like
-    # a trailing dashed line.
-    juno_dashes = "[0-9A-Za-z]+/$"
-    dashed_line = f"(?:{hyphens}|{underscores}|{juno_dashes})"
-    lines = re.split(r"(\n+)", payload.rstrip())
-    if re.match(f"{QUOTE_PAT}{dashed_line}", lines[-1]) is not None:
-        lines = lines[:-1]
-    lines = "".join(lines)
-    # print(">> result:", "underscores", lines == payload)
-    return lines
-
-def strip_trailing_whitespace(payload):
-    "strip trailing whitespace at the bottom of the message"
-    if not payload:
-        return ""
-    lines = re.split(r"(\n+)", payload)
-    pat = f"{QUOTE_PAT}" + r"\s*$"
-    # print(">> lines[-1]:", pat, repr(lines[-1]),
-    #       re.match(pat, lines[-1]))
-    while lines and re.match(pat, lines[-1]) is not None:
-        # print(">> del:", repr(lines[-1]))
-        del lines[-1]
-    lines = "".join(lines)
-    # print(">> result:", "whitespace", lines == payload)
-    return lines
-
-def convert_ts_bytes(stamp):
-    "SQLite3 converter for tz-aware datetime objects"
-    stamp = stamp.decode("utf-8")
-    return datetime.datetime.fromisoformat(stamp)
-
-TZMAP = {
-    # dumb heuristics - keep these first
-    "+0000 GMT": "UTC",
-    " 0 (GMT)": " UTC",
-    " -800": " -0800",
-    # more typical mappings (leading space to avoid stuff like "(EST)")
-    " EST": " America/New_York",
-    " EDT": " America/New_York",
-    " CST": " America/Chicago",
-    " CDT": " America/Chicago",
-    " MST": " America/Denver",
-    " MDT": " America/Denver",
-    " PST": " America/Los_Angeles",
-    " PDT": " America/Los_Angeles",
-    " Pacific Daylight Time": " America/Los_Angeles",
-}
-
-ARROW_FORMATS = [
-    "YYYY/MM/DD ddd A hh:mm:ss ZZZ",
-    "ddd, DD MMM YYYY HH:mm:ss ZZZ",
-    "ddd, D MMM YYYY HH:mm:ss ZZZ",
-    "YYYY/MM/DD ddd A hh:mm:ss ZZ",
-    "ddd, DD MMM YYYY HH:mm:ss ZZ",
-    "ddd, D MMM YYYY HH:mm:ss ZZ",
-    "YYYY/MM/DD ddd A hh:mm:ss Z",
-    "ddd, DD MMM YYYY HH:mm:ss Z",
-    "ddd, D MMM YYYY HH:mm:ss Z",
-    "DD MMM YYYY HH:mm:ss ZZZ",
-    "D MMM YYYY HH:mm:ss ZZZ",
-]
-
-TZINFOS = {
-    "EST": dateutil.tz.gettz("America/New_York"),
-    "EDT": dateutil.tz.gettz("America/New_York"),
-    "CST": dateutil.tz.gettz("America/Chicago"),
-    "CDT": dateutil.tz.gettz("America/Chicago"),
-    "MST": dateutil.tz.gettz("America/Denver"),
-    "MDT": dateutil.tz.gettz("America/Denver"),
-    "PST": dateutil.tz.gettz("America/Los_Angeles"),
-    "PDT": dateutil.tz.gettz("America/Los_Angeles"),
-    "SGT": dateutil.tz.gettz("Asia/Singapore"),
-    "UT": dateutil.tz.UTC,
-}
-
-def parse_date(timestring):
-    "A few tries to parse message dates"
-    timestring = timestring.strip()
-    if timestring.lower().startswith("date:"):
-        # print(f"strip leading 'date:' from {timestring}")
-        timestring = timestring.split(maxsplit=1)[1].strip()
-    timestring = timestring.strip()
-    # map obsolete names since arrow appears not to do that.
-    timestring = timestring.strip()
-    for obsolete, name in TZMAP.items():
-        tzs = timestring.replace(obsolete, name)
-        if tzs != timestring:
-            #print(f"{timestring} -> {tzs}")
-            timestring = tzs
-            break
-    if timestring.endswith(")"):
-        timestring = re.sub(r"\s*\([^)]*\)$", "", timestring)
-    try:
-        timestamp = dateutil.parser.parse(timestring, tzinfos=TZINFOS)
-    except dateutil.parser.ParserError:
-        # try arrow with its format capability
-        try:
-            timestamp = arrow.get(timestring, ARROW_FORMATS).datetime
-        except arrow.parser.ParserError as exc:
-            raise dateutil.parser.ParserError(str(exc))
-    return timestamp
-
 class Message(email.message.Message):
     "subclass to add as_html() method"
     content_headers = ("content-type", "content-transfer-encoding")
+    app = None
     def as_html(self):
         "return string in HTML form"
 
@@ -280,7 +73,7 @@ class Message(email.message.Message):
                                       for (key, val) in self.items())
             # zap "content-type and content-transfer-encoding" if we
             # aren't debugging
-            if not FLASK_DEBUG:
+            if not self.app.config["DEBUG"]:
                 headers = "\n".join([hdr for hdr in headers.split("\n")
                                            if hdr.split(":")[0].lower()
                                               not in self.content_headers])
@@ -301,7 +94,7 @@ class Message(email.message.Message):
 
         if self.get_content_maintype() == "image":
             # pylint: disable=no-member
-            app.logger.warning("Can't render images")
+            logging.warning("Can't render images")
             return ('''<br><br><div style="font-size: 16pt ; font-weight: bold">'''
                     '''Image elided - can't yet render images</div>''')
 
@@ -448,7 +241,7 @@ class Message(email.message.Message):
 
     def filter_headers(self):
         "generate self header block"
-        conn = sqlite3.connect(REFDB)
+        conn = sqlite3.connect(self.app.config["REFDB"])
         cur = conn.cursor()
         last_refs = set()
         for (hdr, val) in self.items():
@@ -472,7 +265,7 @@ class Message(email.message.Message):
                         (year, month, seq) = cur.fetchone()
                     except (TypeError, IndexError):
                         # pylint: disable=no-member
-                        app.logger.warning(f"failed to locate {tgt_msgid}.")
+                        logging.warning("failed to locate %s.", tgt_msgid)
                         tag = html.escape(tgt_msgid)
                     else:
                         url = url_for('cr_message', year=year,
@@ -487,85 +280,39 @@ class Message(email.message.Message):
                 self.replace_header(hdr, html.escape(val))
 
 
-class MessageFilter:
-    "filter various uninteresting bits from messages"
-    def __init__(self, message):
-        self.message = message
-        self.to_delete = []
-        self.seen_parts = set()
-
-    def filter_message(self, message):
-        "filter headers and text body parts"
-        for part in message.walk():
-            if part in self.seen_parts:
-                return
-            self.seen_parts.add(part)
-            part.filter_headers()
-            if part.is_multipart():
-                if part is not self.message:
-                    self.filter_message(part)
-                continue
-
-            payload = message.get_payload(decode=True)
-            if payload is None:
-                # multipart/mixed, for example
-                continue
-            payload = message.decode(payload)
-            payload = strip_footers(payload)
-            part.set_payload(payload)
-            if not payload and part is not self.message:
-                self.to_delete.append(part)
-
-    def delete_empty_parts(self):
-        "if we emptied out parts, remove them altogether"
-        if not self.to_delete:
-            return
-        for part in self.message.walk():
-            if part.is_multipart():
-                payload = part.get_payload()
-                for todel in self.to_delete:
-                    if todel in payload:
-                        payload.remove(todel)
-
-
 def read_message_string(raw):
     "construct Message from string."
     return email.message_from_string(raw, _class=Message)
 
 def read_message(path):
     "read an email message from path, trying encodings"
+    pckf = os.path.splitext(path)[0] + ".pck"
+    if os.path.exists(pckf):
+        logging.info("loading pickled message: %s", pckf)
+        with open(pckf, "rb") as pobj:
+            return pickle.load(pobj)
+
     try:
         for encoding in ("utf-8", "latin-1"):
             with open(path, encoding=encoding) as fobj:
                 try:
-                    return read_message_string(fobj.read())
+                    msg = read_message_string(fobj.read())
                 except UnicodeDecodeError as exc:
                     exc_msg = str(exc)
                 else:
-                    break
-        else:
-            raise UnicodeDecodeError(exc_msg)
+                    # Cache message for future use - way faster than
+                    # parsing the message from the .eml file.
+                    with open(pckf, "wb") as pobj:
+                        pickle.dump(msg, pobj)
+                    return msg
+        raise UnicodeDecodeError(exc_msg)
     except FileNotFoundError:
         # pylint: disable=no-member
-        app.logger.error("File not found: %s", path)
+        logging.error("File not found: %s", path)
         abort(404)
         # keep pylint happy
         return path
 
-
-def eml_file(year, month, msgid):
-    "compute email file from sequence number"
-    # MHonARC was written in Perl, so of course Y2k
-    perl_yr = year - 1900
-    return f"classicrendezvous.{perl_yr:3d}{month:02d}.{(msgid):04d}.eml"
-
-def msg_exists(mydir, year, month, msgid):
-    "test to see if there is an email message to which we should href"
-    name = eml_file(year, month, msgid)
-    full_path = os.path.join(mydir, name)
-    if os.path.exists(full_path):
-        return full_path
-    return ""
 
 PFX_MATCHER = re.compile(r"\[classicrendezvous\]|\[cr\]|re:|\s+", flags=re.I)
 def trim_subject_prefix(subject):
@@ -573,40 +320,7 @@ def trim_subject_prefix(subject):
     words = PFX_MATCHER.split(subject)
     return " ".join([word for word in words if word])
 
-def generate_nav_block(year, month, msgid):
-    "navigation header at top of email messages."
-    mydir = os.path.join(CR, f"{year:04d}-{month:02d}", "eml-files")
-    anchor = f"{msgid:05d}"
-    nxt = prv = ""
-    if msg_exists(mydir, year, month, msgid - 1):
-        url = url_for("cr_message", year=year, month=f"{month:02d}",
-                      msg=(msgid - 1))
-        prv = f' <a href="{url}">Prev</a>'
-    if msg_exists(mydir, year, month, msgid + 1):
-        url = url_for("cr_message", year=year, month=f"{month:02d}",
-                      msg=(msgid + 1))
-        nxt = f' <a href="{url}">Next</a>'
-    uplink = url_for("dates", year=year, month=f"{month:02d}")
-
-    date_url = (url_for("dates", year=year, month=f"{month:02d}") +
-                f"#{anchor}")
-    thread_url = (url_for("threads", year=year, month=f"{month:02d}") +
-                  f"#{anchor}")
-
-    return (f'''<a href="{uplink}">Up</a>{nxt}{prv}'''
-            f'''&nbsp;<a href="{date_url}">Date Index</a>'''
-            f'''&nbsp;<a href="{thread_url}">Thread Index</a>''')
-
-def email_to_html(year, month, msgid):
-    "convert the email referenced by year, month and msgid to html."
-    nav = generate_nav_block(year, month, msgid)
-    msg = eml_file(year, month, msgid)
-    mydir = os.path.join(CR, f"{year:04d}-{month:02d}", "eml-files")
-    message = read_message(os.path.join(mydir, msg))
-
-    filt = MessageFilter(message)
-    filt.filter_message(message)
-    filt.delete_empty_parts()
-
-    return render_template("cr.html", title=message["Subject"],
-                           nav=nav, body=message.as_html())
+def init_app(app):
+    if not app.config["DEBUG"]:
+        ZAP_HEADERS.add("message-id")
+    Message.app = app

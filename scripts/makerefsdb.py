@@ -16,7 +16,7 @@ import sys
 import dateutil.parser
 import dateutil.tz
 
-from smontanaro.util import parse_date
+from smontanaro.dates import parse_date
 
 ONE_SEC = datetime.timedelta(seconds=1)
 
