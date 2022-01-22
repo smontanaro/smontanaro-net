@@ -13,7 +13,7 @@ MSGIDS=/tmp/localhost.msgids
 rm -f $ACT $MSGIDS $RAW
 
 export PORT=5001 HOST=localhost
-(bash run.sh 2>&1 \
+(DOCOVER=true bash run.sh 2>&1 \
      | egrep -v 'Running on|Debugger PIN' \
      | sed -e 's;.../.../.... ..:..:... ;;' \
            -e 's/^.....-..-.. ..:..:..,.... //' \
