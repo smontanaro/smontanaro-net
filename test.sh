@@ -18,9 +18,10 @@ export PORT=5001 HOST=localhost
      | sed -e 's;.../.../.... ..:..:... ;;' \
            -e 's/^.....-..-.. ..:..:..,.... //' \
      > $ACT) &
-sleep 3
+sleep 2
 
 sed -e 's/localhost:[0-9][0-9]*/localhost:5001/' < localhost.urls \
+    | egrep -v '^ *#' \
     | while read url ; do
     echo "*** $url ***"
     curl -s $url
@@ -33,10 +34,10 @@ done  > $RAW
 # it...
 for d in $(find CR/ -name '20??-??' \
                | shuffle \
-               | head -11) ; do
+               | head -7) ; do
     find $d -name '*.eml' \
         | shuffle \
-        | head -5
+        | head -3
 done \
     | sed -e 's:/eml-files/classicrendezvous.[0-9]*.:/:' \
           -e 's/[.]eml//' \
@@ -49,7 +50,7 @@ done \
     echo '127.0.0.1 - - "GET /'${uri}' HTTP/1.1" 200 -' >> localhost.exp
 done >> $RAW
 
-sleep 2
+sleep 1
 
 # More potentially deceptive diffs. Save these warnings, realizing we
 # expect them on occasion.
@@ -63,3 +64,9 @@ fi
 
 # more-or-less graceful server shutdown
 curl -s http://${HOST}:${PORT}/shutdown
+
+# The dates module is only used by a couple auxiliary scripts.
+PYTHONPATH=$PWD/smontanaro coverage run -a --rcfile=.coveragerc \
+         scripts/listbydate.py CR/2000-03 >/dev/null
+PYTHONPATH=$PWD/smontanaro coverage run -a --rcfile=.coveragerc \
+         scripts/generate_date_index.py -d references.db 2000 3 >/dev/null
