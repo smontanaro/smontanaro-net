@@ -17,7 +17,7 @@ export PORT=5001 HOST=localhost
      | egrep -v 'Running on|Debugger PIN' \
      | sed -e 's;.../.../.... ..:..:... ;;' \
            -e 's/^.....-..-.. ..:..:..,.... //' \
-     | tee $ACT) &
+     > $ACT) &
 sleep 3
 
 sed -e 's/localhost:[0-9][0-9]*/localhost:5001/' < localhost.urls \
