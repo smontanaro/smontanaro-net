@@ -9,4 +9,9 @@ HOST=${HOST:-0.0.0.0}
 
 cd smontanaro
 
-flask run -h 0.0.0.0 -p $PORT
+CMD="$(which flask) run -h 0.0.0.0 -p $PORT"
+if [ "x$DOCOVER" = "xtrue" ] ; then
+    coverage run $CMD
+else
+    $CMD
+fi
