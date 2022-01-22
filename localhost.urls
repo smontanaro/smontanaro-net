@@ -36,6 +36,7 @@ http://localhost:8080/CR/2003/09/dates#00385
 http://localhost:8080/CR/2003/09/threads
 http://localhost:8080/CR/2004/09/31
 http://localhost:8080/CR/2004/09/32
+http://localhost:8080/CR/2004-09/html/msg00032.html
 http://localhost:8080/CR/2004/9/01067
 http://localhost:8080/CR/2004/9/1806
 http://localhost:8080/CR/2004/9/1957
@@ -44,3 +45,7 @@ http://localhost:8080/CR/2005/11/dates
 http://localhost:8080/CR/2005/11/threads
 http://localhost:8080/CR/2005/12/dates
 http://localhost:8080/CR/2011/2/1601
+http://localhost:8080/CR/2008/09/0204
+http://localhost:8080/CR/2000/09/0076
+http://localhost:8080/CR/2009/09/0004
+http://localhost:8080/CR/2009/09/01323
