@@ -288,7 +288,7 @@ def read_message(path):
     "read an email message from path, trying encodings"
     pckf = os.path.splitext(path)[0] + ".pck"
     if os.path.exists(pckf):
-        logging.info("loading pickled message: %s", pckf)
+        logging.root.debug("loading pickled message: %s", pckf)
         with open(pckf, "rb") as pobj:
             return pickle.load(pobj)
 
@@ -308,7 +308,7 @@ def read_message(path):
         raise UnicodeDecodeError(exc_msg)
     except FileNotFoundError:
         # pylint: disable=no-member
-        logging.error("File not found: %s", path)
+        logging.root.error("File not found: %s", path)
         abort(404)
         # keep pylint happy
         return path
@@ -323,4 +323,6 @@ def trim_subject_prefix(subject):
 def init_app(app):
     if not app.config["DEBUG"]:
         ZAP_HEADERS.add("message-id")
+    else:
+        logging.root.setLevel("DEBUG")
     Message.app = app
