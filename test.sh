@@ -61,4 +61,5 @@ if [ -s $MSGIDS ] ; then
     echo "Note warnings in localhost.msgids"
 fi
 
-pkill -f flask
+# more-or-less graceful server shutdown
+curl -s http://${HOST}:${PORT}/shutdown

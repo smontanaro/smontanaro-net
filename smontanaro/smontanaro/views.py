@@ -8,7 +8,7 @@ import os
 import re
 import urllib.parse
 
-from flask import redirect, url_for, render_template, abort, jsonify
+from flask import redirect, url_for, render_template, abort, jsonify, request
 from flask_wtf import FlaskForm
 from wtforms import StringField, HiddenField, RadioField
 from wtforms.validators import DataRequired
@@ -262,3 +262,11 @@ if FLASK_DEBUG:
             if rule.endpoint != 'static':
                 func_list[rule.rule] = str(app.view_functions[rule.endpoint])
         return jsonify(func_list)
+
+    @app.get('/shutdown')
+    def shutdown():
+        func = request.environ.get('werkzeug.server.shutdown')
+        if func is None:
+            raise RuntimeError('Not running with the Werkzeug Server')
+        func()
+        return 'Server shutting down...'
