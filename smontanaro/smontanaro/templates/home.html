@@ -35,7 +35,9 @@
     {% block left %}{% endblock %}
   </div>
   <div class="main" style="margin: 5px;">
+    {% block body %}
     {{ body|safe }}
+    {% endblock %}
   </div>
   <div class="footer" style="margin: 5px;>
     {% block copyright %}
