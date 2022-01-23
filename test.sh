@@ -13,11 +13,7 @@ MSGIDS=/tmp/localhost.msgids
 rm -f $ACT $MSGIDS $RAW
 
 export PORT=5001 HOST=localhost
-(DOCOVER=true bash run.sh 2>&1 \
-     | egrep -v 'Running on|Debugger PIN' \
-     | sed -e 's;.../.../.... ..:..:... ;;' \
-           -e 's/^.....-..-.. ..:..:..,.... //' \
-     > $ACT) &
+(DOCOVER=true bash run.sh > /tmp/$$.tmp 2>&1) &
 sleep 2
 
 sed -e 's/localhost:[0-9][0-9]*/localhost:5001/' < localhost.urls \
@@ -52,6 +48,13 @@ done >> $RAW
 
 sleep 1
 
+pkill -f flask
+
+egrep -v 'Running on|Debugger PIN|^INFO:werkzeug:127.0.0.1' < /tmp/$$.tmp \
+    | sed -e 's;.../.../.... ..:..:... ;;' \
+          -e 's/^.....-..-.. ..:..:..,.... //' \
+          > $ACT
+
 # More potentially deceptive diffs. Save these warnings, realizing we
 # expect them on occasion.
 egrep 'WARNING in views: failed to locate' $ACT > $MSGIDS
@@ -62,11 +65,10 @@ if [ -s $MSGIDS ] ; then
     echo "Note warnings in localhost.msgids"
 fi
 
-# more-or-less graceful server shutdown
-curl -s http://${HOST}:${PORT}/shutdown
-
 # The dates module is only used by a couple auxiliary scripts.
 PYTHONPATH=$PWD/smontanaro coverage run -a --rcfile=.coveragerc \
          scripts/listbydate.py CR/2000-03 >/dev/null
 PYTHONPATH=$PWD/smontanaro coverage run -a --rcfile=.coveragerc \
          scripts/generate_date_index.py -d references.db 2000 3 >/dev/null
+
+coverage html
