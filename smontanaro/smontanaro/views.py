@@ -155,11 +155,6 @@ def init_app(app):
             "form": SearchForm(),
         }
 
-    @app.route("/remote")
-    def req():
-        "so I can determine my external ip address"
-        return jsonify(request.remote_addr)
-
     if app.config["DEBUG"]:
         @app.route("/env")
         def printenv():
