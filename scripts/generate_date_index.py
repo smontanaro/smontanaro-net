@@ -16,7 +16,7 @@ def date_key(record):
 
 def generate_link(r):
     "HTML for a single message"
-    root = "(T)&nbsp;" if r['is_root'] else ""
+    root = "" # "(T)&nbsp;" if r['is_root'] else ""
     return (f'''<a name="{r['seq']:05d}">'''
             f'''{root}'''
             f'''<a href="/CR/{r['year']}/{r['month']:02d}/{r['seq']:05d}">'''
@@ -26,10 +26,11 @@ def generate_link(r):
 def generate_index(records):
     "html fragment output"
 
-    print('<p>')
-    print('"(T)" is part of an incomplete attempt to allow browsing a complete thread.')
-    print("As you can probably tell, it's not exactly working yet.")
-    print('</p>')
+    if False:
+        print('<p>')
+        print('"(T)" is part of an incomplete attempt to allow browsing a complete thread.')
+        print("As you can probably tell, it's not exactly working yet.")
+        print('</p>')
 
     for (dt, chunk) in itertools.groupby(records, date_key):
         print(f'''<h2>{dt.strftime("%d %b %Y")}</h2>''')
