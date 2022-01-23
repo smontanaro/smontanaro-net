@@ -155,11 +155,11 @@ def init_app(app):
             "form": SearchForm(),
         }
 
-    @app.route("/env")
-    def printenv():
-        return jsonify(dict(os.environ))
-
     if app.config["DEBUG"]:
+        @app.route("/env")
+        def printenv():
+            return jsonify(dict(os.environ))
+
         @app.route('/api/help')
         def app_help():
             """Print available functions."""
