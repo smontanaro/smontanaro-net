@@ -1,59 +1,20 @@
- * Serving Flask app 'smontanaro' (lazy loading)
+ * Serving Flask app 'smontanaro:create_app' (lazy loading)
  * Environment: development
  * Debug mode: on
-   WARNING: This is a development server. Do not use it in a production deployment.
- * Restarting with stat
- * Debugger is active!
-127.0.0.1 - - "GET /CR HTTP/1.1" 308 -
+127.0.0.1 - - "GET /favicon.ico HTTP/1.1" 302 -
+127.0.0.1 - - "GET /robots.txt HTTP/1.1" 302 -
+127.0.0.1 - - "GET /env HTTP/1.1" 200 -
+127.0.0.1 - - "GET /api/help HTTP/1.1" 200 -
+127.0.0.1 - - "GET / HTTP/1.1" 200 -
 127.0.0.1 - - "GET /CR/ HTTP/1.1" 200 -
+127.0.0.1 - - "GET /2001-05/html/threads.html HTTP/1.1" 301 -
+127.0.0.1 - - "GET /2003-09/html/maillist.html HTTP/1.1" 301 -
+127.0.0.1 - - "GET /2004-09/html/msg00032.html HTTP/1.1" 301 -
 127.0.0.1 - - "GET /CR/2000/03/dates HTTP/1.1" 200 -
 127.0.0.1 - - "GET /CR/2000/03/threads HTTP/1.1" 200 -
 127.0.0.1 - - "GET /CR/2000/06/dates HTTP/1.1" 200 -
-127.0.0.1 - - "GET /CR/2001/05/24 HTTP/1.1" 200 -
-127.0.0.1 - - "GET /CR/2001/05/25 HTTP/1.1" 200 -
-127.0.0.1 - - "GET /CR/2001/05/26 HTTP/1.1" 200 -
-127.0.0.1 - - "GET /CR/2003/09/384 HTTP/1.1" 200 -
-127.0.0.1 - - "GET /CR/2003/09/385 HTTP/1.1" 200 -
-127.0.0.1 - - "GET /CR/2003/09/386 HTTP/1.1" 200 -
-127.0.0.1 - - "GET /CR/2003/09/389 HTTP/1.1" 200 -
-127.0.0.1 - - "GET /CR/2003/09/390 HTTP/1.1" 200 -
-127.0.0.1 - - "GET /CR/2003/09/967 HTTP/1.1" 200 -
-127.0.0.1 - - "GET /CR/2003/09/968 HTTP/1.1" 200 -
-127.0.0.1 - - "GET /CR/2003/09/969 HTTP/1.1" 200 -
-127.0.0.1 - - "GET /CR/2003/09/971 HTTP/1.1" 200 -
-127.0.0.1 - - "GET /CR/2003/09/972 HTTP/1.1" 200 -
-127.0.0.1 - - "GET /CR/2003/09/974 HTTP/1.1" 200 -
-127.0.0.1 - - "GET /CR/2003/09/975 HTTP/1.1" 200 -
-127.0.0.1 - - "GET /CR/2003/09/976 HTTP/1.1" 200 -
-127.0.0.1 - - "GET /CR/2003/09/977 HTTP/1.1" 200 -
-127.0.0.1 - - "GET /CR/2003/09/978 HTTP/1.1" 200 -
-127.0.0.1 - - "GET /CR/2003/09/979 HTTP/1.1" 200 -
-127.0.0.1 - - "GET /CR/2003/09/980 HTTP/1.1" 200 -
-127.0.0.1 - - "GET /CR/2003/09/981 HTTP/1.1" 200 -
-127.0.0.1 - - "GET /CR/2003/09/982 HTTP/1.1" 200 -
-127.0.0.1 - - "GET /CR/2003/09/983 HTTP/1.1" 200 -
-127.0.0.1 - - "GET /CR/2003/09/984 HTTP/1.1" 200 -
-127.0.0.1 - - "GET /CR/2003/09/985 HTTP/1.1" 200 -
-127.0.0.1 - - "GET /CR/2003/09/986 HTTP/1.1" 200 -
-127.0.0.1 - - "GET /CR/2003/09/987 HTTP/1.1" 200 -
-127.0.0.1 - - "GET /CR/2003/09/988 HTTP/1.1" 200 -
-127.0.0.1 - - "GET /CR/2003/09/dates HTTP/1.1" 200 -
-127.0.0.1 - - "GET /CR/2003/09/dates HTTP/1.1" 200 -
-127.0.0.1 - - "GET /CR/2003/09/threads HTTP/1.1" 200 -
-127.0.0.1 - - "GET /CR/2004/09/31 HTTP/1.1" 200 -
-127.0.0.1 - - "GET /CR/2004/09/32 HTTP/1.1" 200 -
-127.0.0.1 - - "GET /2004-09/html/msg00032.html HTTP/1.1" 301 -
-127.0.0.1 - - "GET /CR/2004/09/0032 HTTP/1.1" 200 -
-127.0.0.1 - - "GET /CR/2004/9/01067 HTTP/1.1" 200 -
-127.0.0.1 - - "GET /CR/2004/9/1806 HTTP/1.1" 200 -
-127.0.0.1 - - "GET /CR/2004/9/1957 HTTP/1.1" 200 -
-127.0.0.1 - - "GET /CR/2004/9/1958 HTTP/1.1" 200 -
-127.0.0.1 - - "GET /CR/2005/11/dates HTTP/1.1" 200 -
-127.0.0.1 - - "GET /CR/2005/11/threads HTTP/1.1" 200 -
-127.0.0.1 - - "GET /CR/2005/12/dates HTTP/1.1" 200 -
-WARNING in util: Can't render images
-127.0.0.1 - - "GET /CR/2011/2/1601 HTTP/1.1" 200 -
-127.0.0.1 - - "GET /CR/2008/09/0204 HTTP/1.1" 200 -
-127.0.0.1 - - "GET /CR/2000/09/0076 HTTP/1.1" 200 -
-127.0.0.1 - - "GET /CR/2009/09/0004 HTTP/1.1" 200 -
+File not found: /home/skip/src/smontanaro.net/CR/2000-09/eml-files/classicrendezvous.10009.9999.eml
+127.0.0.1 - - "GET /CR/2000/09/9999 HTTP/1.1" 404 -
+127.0.0.1 - - "GET /CR/2001/01/0307 HTTP/1.1" 200 -
 127.0.0.1 - - "GET /CR/2009/09/01323 HTTP/1.1" 200 -
+127.0.0.1 - - "GET /CR/2011/2/01601 HTTP/1.1" 200 -
