@@ -13,33 +13,28 @@ THREADS = $(foreach dir,$(GENDIRS),$(dir)/threads.body)
 REFDB = references.db
 VIEWS = smontanaro/smontanaro/views.py
 
+export CRDIR = $(PWD)
+export PYTHONPATH = $(PWD)/smontanaro
+
 all : CR/generated/index.body $(DATES) $(THREADS)
 
 CR/generated/index.body : $(VIEWS) scripts/genindexbody.sh
 	mkdir -p CR/generated
-	CRDIR=$${PWD} PYTHONPATH=$${PWD}/smontanaro bash scripts/genindexbody.sh  > CR/generated/index.body
+	bash scripts/genindexbody.sh  > CR/generated/index.body
 
 $(DATES) $(THREADS) &: $(VIEWS) scripts/gen-bodies.sh \
 	scripts/generate_date_index.py scripts/generate_thread_index.py \
 	$(REFDB)
 	mkdir -p $(GENDIRS)
-	CRDIR=$${PWD} PYTHONPATH=$${PWD}/smontanaro bash scripts/gen-bodies.sh
-
-debug : FORCE
-	@echo $(MAKE_VERSION)
-	@echo $(MONTHS)
-	@echo $(GENDIRS)
-	@echo $(DATES)
-	@echo $(THREADS)
-	@echo $(REFDB)
-	ls -l $(REFDB) CR/2002-10/generated/threads.body
+	bash scripts/gen-bodies.sh
 
 $(REFDB).new : FORCE
-	PYTHONPATH=$$PWD/smontanaro CRDIR=$$PWD/CR python scripts/makerefsdb.py -v -d $(REFDB).new CR
+	python scripts/makerefsdb.py -v -d $(REFDB).new CR
 	@echo "Replace $(REFDB) with $(REFDB).new when ready"
 
 lint : FORCE
-	PYTHONPATH=$$PWD/smontanaro pylint smontanaro/smontanaro/*.py scripts/*.py
+	pylint smontanaro/smontanaro/*.py scripts/*.py \
+	| sed -e '/duplicate-code/,/^--------------------/d'
 
 test : FORCE
 	bash test.sh
