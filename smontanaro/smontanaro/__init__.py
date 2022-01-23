@@ -10,7 +10,7 @@ from dynaconf import FlaskDynaconf
 from . import util
 from . import views
 
-def create_app(test_config=None):
+def create_app(_arg1, _arg2): # test_config=None):
     "create and configure app"
     app = Flask(__name__)
     FlaskDynaconf(app, settings_files=["settings.toml", ".secrets.toml"])
@@ -24,12 +24,12 @@ def create_app(test_config=None):
         "DEBUG": os.environ.get("FLASK_ENV") == "development",
     })
 
-    if test_config is None:
-        # load the instance config, if it exists, when not testing
-        app.config.from_pyfile('config.py', silent=True)
-    else:
-        # load the test config if passed in
-        app.config.from_mapping(test_config)
+    # if test_config is None:
+    #     # load the instance config, if it exists, when not testing
+    #     app.config.from_pyfile('config.py', silent=True)
+    # else:
+    #     # load the test config if passed in
+    #     app.config.from_mapping(test_config)
 
     util.init_app(app)
     views.init_app(app)
