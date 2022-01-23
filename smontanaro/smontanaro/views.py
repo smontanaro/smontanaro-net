@@ -155,6 +155,13 @@ def init_app(app):
             "form": SearchForm(),
         }
 
+    @app.route("/request")
+    def req():
+        result = {}
+        for (key, val) in request.environ.items():
+            result[key] = str(val)
+        return jsonify(result)
+
     if app.config["DEBUG"]:
         @app.route("/env")
         def printenv():
