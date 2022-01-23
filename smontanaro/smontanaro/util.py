@@ -31,6 +31,7 @@
 # https://localhost:8080/CR/2007/07/00004
 
 import email.message
+import gzip
 import html
 import logging
 import os
@@ -286,10 +287,10 @@ def read_message_string(raw):
 
 def read_message(path):
     "read an email message from path, trying encodings"
-    pckf = os.path.splitext(path)[0] + ".pck"
-    if os.path.exists(pckf):
-        logging.root.debug("loading pickled message: %s", pckf)
-        with open(pckf, "rb") as pobj:
+    pckgz = os.path.splitext(path)[0] + ".pck.gz"
+    if os.path.exists(pckgz):
+        logging.root.debug("loading pickled message: %s", pckgz)
+        with gzip.open(pckgz, "rb") as pobj:
             return pickle.load(pobj)
 
     try:
@@ -302,7 +303,7 @@ def read_message(path):
                 else:
                     # Cache message for future use - way faster than
                     # parsing the message from the .eml file.
-                    with open(pckf, "wb") as pobj:
+                    with gzip.open(pckgz, "wb") as pobj:
                         pickle.dump(msg, pobj)
                     return msg
         raise UnicodeDecodeError(exc_msg)
