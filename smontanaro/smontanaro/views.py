@@ -159,7 +159,8 @@ def init_app(app):
     def req():
         result = {}
         for (key, val) in request.environ.items():
-            result[key] = str(val)
+            if val == str(val):
+                result[key] = str(val)
         return jsonify(result)
 
     if app.config["DEBUG"]:
