@@ -4,6 +4,7 @@
 
 from calendar import monthrange
 import datetime
+import html
 import os
 import re
 import urllib.parse
@@ -14,7 +15,7 @@ from wtforms import StringField, HiddenField, RadioField
 from wtforms.validators import DataRequired
 
 from .strip import strip_footers
-from .util import read_message
+from .util import read_message, trim_subject_prefix
 from .exc import NoResponse
 
 SEARCH = {
@@ -57,11 +58,9 @@ def init_cr(app, CR):
     def cr_index():
         "templated index"
 
-        title = "Old Classic Rendezvous Archive"
         with open(f"{CR}/generated/index.body", encoding="utf8") as fobj:
-            body = fobj.read()
-            return render_template("cr.html", title=title,
-                                   body=body, nav="")
+            return render_template("cr.html", body=fobj.read(), nav="",
+                                   title="Old Classic Rendezvous Archive")
 
     @app.route("/CR/<year>/<month>")
     @app.route("/CR/<year>/<month>/dates")
@@ -115,8 +114,7 @@ def init_cr(app, CR):
 
         day = 1 if offset == -1 else monthrange(start_year, start_month)[1]
         arrow = LEFT_ARROW if offset == -1 else RIGHT_ARROW
-        dt = datetime.date(start_year, start_month, day)
-        dt += ONE_DAY * offset
+        dt = datetime.date(start_year, start_month, day) + ONE_DAY * offset
 
         while OLDEST_MONTH <= (dt.year, dt.month) <= NEWEST_MONTH:
             path = dt.strftime(f"{CR}/{dt.year}-{dt.month:02d}")
@@ -130,8 +128,8 @@ def init_cr(app, CR):
 
     def generate_nav_block(year, month, msgid):
         "navigation header at top of email messages."
+
         mydir = os.path.join(CR, f"{year:04d}-{month:02d}", "eml-files")
-        anchor = f"{msgid:05d}"
         nxt = prv = ""
         if msg_exists(mydir, year, month, msgid - 1):
             url = url_for("cr_message", year=year, month=f"{month:02d}",
@@ -143,14 +141,12 @@ def init_cr(app, CR):
             nxt = f' <a href="{url}">Next</a>'
         uplink = url_for("dates", year=year, month=f"{month:02d}")
 
-        date_url = (url_for("dates", year=year, month=f"{month:02d}") +
-                    f"#{anchor}")
-        thread_url = (url_for("threads", year=year, month=f"{month:02d}") +
-                      f"#{anchor}")
+        date_url = (url_for("dates", year=year, month=f"{month:02d}"))
+        thread_url = (url_for("threads", year=year, month=f"{month:02d}"))
 
-        return (f'''<a href="{uplink}">Up</a>{nxt}{prv}'''
-                f'''&nbsp;<a href="{date_url}">Date Index</a>'''
-                f'''&nbsp;<a href="{thread_url}">Thread Index</a>''')
+        return (f'<a href="{uplink}">Up</a>{nxt}{prv}'
+                f'&nbsp;<a href="{date_url}#{msgid:05d}">Date Index</a>'
+                f'&nbsp;<a href="{thread_url}#{msgid:05d}">Thread Index</a>')
 
     def email_to_html(year, month, msgid):
         "convert the email referenced by year, month and msgid to html."
@@ -163,7 +159,10 @@ def init_cr(app, CR):
         filt.filter_message(message)
         filt.delete_empty_parts()
 
-        return render_template("cr.html", title=message["Subject"],
+        title = html.escape(message["Subject"])
+        clean = html.escape(trim_subject_prefix(message["Subject"]))
+
+        return render_template("cr.html", title=title, page_title=clean,
                                nav=nav, body=message.as_html())
 
 def init_redirect(app):
