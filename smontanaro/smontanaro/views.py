@@ -155,13 +155,12 @@ def init_app(app):
             "form": SearchForm(),
         }
 
-    @app.route("/request")
-    def req():
-        result = {}
-        for (key, val) in request.environ.items():
-            if val == str(val):
-                result[key] = str(val)
-        return jsonify(result)
+    @app.route("/request/<header>")
+    def req(header):
+        if not header.startswith("HTTP_"):
+            abort(444)
+            return ""
+        return request.environ.get(header, "???")
 
     if app.config["DEBUG"]:
         @app.route("/env")
