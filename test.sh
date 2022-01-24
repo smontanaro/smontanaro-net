@@ -5,22 +5,31 @@
 
 # We diddle with localhost.exp toward the end. Make sure it's in
 # a pristine state when we start.
-git restore localhost.exp
-ACT=/tmp/localhost.act
+ACT=localhost.act
+TMPACT=${ACT}.tmp
 RAW=/tmp/localhost.raw
-MSGIDS=/tmp/localhost.msgids
+WARNINGS=localhost.warnings
 
-rm -f $ACT $MSGIDS $RAW
+dateit () {
+    while read line ; do
+        echo "$(date +%T.%N) ${line}"
+    done
+}
 
+export PYTHONPATH=$PWD/smontanaro
 export PORT=5001 HOST=localhost
-(DOCOVER=true bash run.sh > /tmp/$$.tmp 2>&1) &
+(DOCOVER=true bash run.sh 2>&1 | dateit > /tmp/$$.tmp) &
 sleep 2
 
+rm -f localhost.comments
 sed -e 's/localhost:[0-9][0-9]*/localhost:5001/' < localhost.urls \
-    | egrep -v '^ *#' \
-    | while read url ; do
-    echo "*** $url ***"
-    curl -s $url
+    | while read line ; do
+    if [ "x${line:0:1}" = "x#" ] ; then
+        echo "${line}" | dateit >> localhost.comments
+    else
+        echo "*** $line ***"
+        curl -s $line
+    fi
 done  > $RAW
 
 # grab a few random pages
@@ -42,27 +51,29 @@ done \
     url="http://${HOST}:${PORT}/${uri}"
     echo "*** $url ***"
     curl -s $url
-    # avoid spurious diffs
-    echo '127.0.0.1 - - "GET /'${uri}' HTTP/1.1" 200 -' >> localhost.exp
 done >> $RAW
 
 sleep 1
 
-pkill -f flask
+pkill -f gunicorn
 
-egrep -v 'Running on|Debugger PIN|^INFO:werkzeug:127.0.0.1' < /tmp/$$.tmp \
-    | sed -e 's;.../.../.... ..:..:... ;;' \
-          -e 's/^.....-..-.. ..:..:..,.... //' \
-          > $ACT
+sort localhost.comments /tmp/$$.tmp \
+    | sed -e 's/^[0-9][0-9]:[0-9][0-9]:[0-9][0-9][.0-9]* //' \
+          -e 's;.../.../....:..:..:.. -..... ;;' \
+          -e 's;^.[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] [0-9][0-9]:[0-9][0-9]:[0-9][0-9] -[0-9]*. .[0-9]*. .INFO.;[INFO];' \
+    | awk -f filter.awk \
+          > $TMPACT
+rm localhost.comments /tmp/$$.tmp
 
 # More potentially deceptive diffs. Save these warnings, realizing we
 # expect them on occasion.
-egrep 'WARNING in views: failed to locate' $ACT > $MSGIDS
-egrep -v 'WARNING in views: failed to locate' $ACT > /tmp/$$.tmp
-mv /tmp/$$.tmp $ACT
+egrep '(WARNING|ERROR):' $TMPACT | sort > $WARNINGS
+egrep -v '(WARNING|ERROR):' $TMPACT > $ACT
 
-if [ -s $MSGIDS ] ; then
-    echo "Note warnings in localhost.msgids"
+rm -f $TMPACT
+
+if [ -s $WARNINGS ] ; then
+    echo "Note warnings in ${WARNINGS}"
 fi
 
 # The dates module is only used by a couple auxiliary scripts.
@@ -72,3 +83,5 @@ PYTHONPATH=$PWD/smontanaro coverage run -a --rcfile=.coveragerc \
          scripts/generate_date_index.py -d references.db 2000 3 >/dev/null
 
 coverage html
+
+diff localhost.exp $ACT && echo "success" || echo "failure"

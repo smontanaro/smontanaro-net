@@ -14,14 +14,11 @@
 127.0.0.1 - - "GET /CR/2000/03/dates HTTP/1.1" 200 4073 "-" "curl/7.68.0"
 127.0.0.1 - - "GET /CR/2000/03/threads HTTP/1.1" 200 3957 "-" "curl/7.68.0"
 127.0.0.1 - - "GET /CR/2000/06/dates HTTP/1.1" 200 3183 "-" "curl/7.68.0"
-File not found: /home/skip/src/smontanaro.net/CR/2000-09/eml-files/classicrendezvous.10009.9999.eml
+# file doesn't exist
 127.0.0.1 - - "GET /CR/2000/09/9999 HTTP/1.1" 404 232 "-" "curl/7.68.0"
 # multipart/mixed
-DEBUG:root:loading pickled message: /home/skip/src/smontanaro.net/CR/2001-01/eml-files/classicrendezvous.10101.0307.pck.gz
 127.0.0.1 - - "GET /CR/2001/01/0307 HTTP/1.1" 200 3355 "-" "curl/7.68.0"
-DEBUG:root:loading pickled message: /home/skip/src/smontanaro.net/CR/2009-09/eml-files/classicrendezvous.10909.1323.pck.gz
 127.0.0.1 - - "GET /CR/2009/09/01323 HTTP/1.1" 200 4517 "-" "curl/7.68.0"
-DEBUG:root:loading pickled message: /home/skip/src/smontanaro.net/CR/2011-02/eml-files/classicrendezvous.11102.1601.pck.gz
 127.0.0.1 - - "GET /CR/2011/2/1601 HTTP/1.1" 200 12761 "-" "curl/7.68.0"
 # non-standard response
 127.0.0.1 - - "GET /request/junk HTTP/1.1" 444 11 "-" "curl/7.68.0"

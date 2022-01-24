@@ -13,8 +13,10 @@ BEGIN {
 / 200 .*curl/ {
     if (end == 1)
         next
-    else
+    else {
         print
+        next
+    }
 }
 
 { print }
