@@ -17,4 +17,8 @@ File not found: /home/skip/src/smontanaro.net/CR/2000-09/eml-files/classicrendez
 127.0.0.1 - - "GET /CR/2000/09/9999 HTTP/1.1" 404 -
 127.0.0.1 - - "GET /CR/2001/01/0307 HTTP/1.1" 200 -
 127.0.0.1 - - "GET /CR/2009/09/01323 HTTP/1.1" 200 -
-127.0.0.1 - - "GET /CR/2011/2/01601 HTTP/1.1" 200 -
+WARNING:root:Can't render images
+127.0.0.1 - - "GET /CR/2011/2/1601 HTTP/1.1" 200 -
+127.0.0.1 - - "GET /request/junk HTTP/1.1" 444 -
+127.0.0.1 - - "GET /request/HTTP_USER_AGENT HTTP/1.1" 200 -
+127.0.0.1 - - "GET /search?query=Baylis HTTP/1.1" 200 -
