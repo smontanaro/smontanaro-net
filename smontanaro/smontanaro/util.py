@@ -265,8 +265,8 @@ class Message(email.message.Message):
                     try:
                         (year, month, seq) = cur.fetchone()
                     except (TypeError, IndexError):
+                        # the occasional message-id isn't in the archive. That's ok.
                         # pylint: disable=no-member
-                        logging.warning("failed to locate %s.", tgt_msgid)
                         tag = html.escape(tgt_msgid)
                     else:
                         url = url_for('cr_message', year=year,
