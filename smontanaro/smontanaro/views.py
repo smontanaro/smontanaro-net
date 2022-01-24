@@ -33,10 +33,7 @@ NEWEST_MONTH = (2011, 2)
 LEFT_ARROW = "\N{LEFTWARDS ARROW}"
 RIGHT_ARROW = "\N{RIGHTWARDS ARROW}"
 
-
-def init_app(app):
-    CR = app.config["CR"]
-
+def init_simple(app):
     @app.route("/favicon.ico")
     def favicon():
         "websites need these"
@@ -51,6 +48,20 @@ def init_app(app):
     def index():
         "index"
         return render_template("main.html", title="Home", nav="")
+
+def init_cr(app, CR):
+    @app.route("/CR")
+    @app.route("/CR/")
+    @app.route("/CR/index.html")
+    @app.route("/CR/index")
+    def cr_index():
+        "templated index"
+
+        title = "Old Classic Rendezvous Archive"
+        with open(f"{CR}/generated/index.body", encoding="utf8") as fobj:
+            body = fobj.read()
+            return render_template("cr.html", title=title,
+                                   body=body, nav="")
 
     @app.route("/CR/<year>/<month>")
     @app.route("/CR/<year>/<month>/dates")
@@ -99,6 +110,63 @@ def init_app(app):
         "render email as html."
         return email_to_html(int(year), int(month), msg)
 
+    def month_url(start_year, start_month, offset, what):
+        "previous month - often month +/- 1, but not always (we have gaps)"
+
+        day = 1 if offset == -1 else monthrange(start_year, start_month)[1]
+        arrow = LEFT_ARROW if offset == -1 else RIGHT_ARROW
+        dt = datetime.date(start_year, start_month, day)
+        dt += ONE_DAY * offset
+
+        while OLDEST_MONTH <= (dt.year, dt.month) <= NEWEST_MONTH:
+            path = dt.strftime(f"{CR}/{dt.year}-{dt.month:02d}")
+            if os.path.exists(path):
+                prev_url = url_for(what, year=dt.year,
+                                   month=f"{dt.month:02d}")
+                return f'<a href="{prev_url}">{arrow}</a>&nbsp;'
+            day = 1 if offset == -1 else monthrange(dt.year, dt.month)[1]
+            dt = dt.replace(day=day) + ONE_DAY * offset
+        return ""
+
+    def generate_nav_block(year, month, msgid):
+        "navigation header at top of email messages."
+        mydir = os.path.join(CR, f"{year:04d}-{month:02d}", "eml-files")
+        anchor = f"{msgid:05d}"
+        nxt = prv = ""
+        if msg_exists(mydir, year, month, msgid - 1):
+            url = url_for("cr_message", year=year, month=f"{month:02d}",
+                          msg=(msgid - 1))
+            prv = f' <a href="{url}">Prev</a>'
+        if msg_exists(mydir, year, month, msgid + 1):
+            url = url_for("cr_message", year=year, month=f"{month:02d}",
+                          msg=(msgid + 1))
+            nxt = f' <a href="{url}">Next</a>'
+        uplink = url_for("dates", year=year, month=f"{month:02d}")
+
+        date_url = (url_for("dates", year=year, month=f"{month:02d}") +
+                    f"#{anchor}")
+        thread_url = (url_for("threads", year=year, month=f"{month:02d}") +
+                      f"#{anchor}")
+
+        return (f'''<a href="{uplink}">Up</a>{nxt}{prv}'''
+                f'''&nbsp;<a href="{date_url}">Date Index</a>'''
+                f'''&nbsp;<a href="{thread_url}">Thread Index</a>''')
+
+    def email_to_html(year, month, msgid):
+        "convert the email referenced by year, month and msgid to html."
+        nav = generate_nav_block(year, month, msgid)
+        msg = eml_file(year, month, msgid)
+        mydir = os.path.join(CR, f"{year:04d}-{month:02d}", "eml-files")
+        message = read_message(os.path.join(mydir, msg))
+
+        filt = MessageFilter(message)
+        filt.filter_message(message)
+        filt.delete_empty_parts()
+
+        return render_template("cr.html", title=message["Subject"],
+                               nav=nav, body=message.as_html())
+
+def init_redirect(app):
     @app.route('/<year>-<month>/html/<filename>')
     def old_cr(year, month, filename):
         "convert old archive url structure to new."
@@ -125,19 +193,44 @@ def init_app(app):
                                 msg=map_to),
                         code=301)
 
-    @app.route("/CR")
-    @app.route("/CR/")
-    @app.route("/CR/index.html")
-    @app.route("/CR/index")
-    def cr_index():
-        "templated index"
+def init_extra(app):
+    @app.route("/request/<header>")
+    def req(header):
+        if not header.startswith("HTTP_"):
+            raise NoResponse
+        return request.environ.get(header, "???")
 
-        title = "Old Classic Rendezvous Archive"
-        with open(f"{CR}/generated/index.body", encoding="utf8") as fobj:
-            body = fobj.read()
-            return render_template("cr.html", title=title,
-                                   body=body, nav="")
+    @app.context_processor
+    def template_globals():
+        "Today's date, etc"
+        return {
+            "today": datetime.date.today(),
+            "form": SearchForm(),
+        }
 
+def init_debug(app):
+    @app.route("/env")
+    def printenv():
+        return jsonify(dict(os.environ))
+
+    @app.route('/api/help')
+    def app_help():
+        """Print available functions."""
+        func_list = {}
+        for rule in app.url_map.iter_rules():
+            if rule.endpoint != 'static':
+                func_list[rule.rule] = str(app.view_functions[rule.endpoint])
+        return jsonify(func_list)
+
+    @app.get('/shutdown')
+    def shutdown():
+        func = request.environ.get('werkzeug.server.shutdown')
+        if func is None:
+            raise RuntimeError('Not running with the Werkzeug Server')
+        func()
+        return 'Server shutting down...\n'
+
+def init_search(app):
     @app.route('/search', methods=['GET', 'POST'])
     def search():
         form = SearchForm()
@@ -148,100 +241,17 @@ def init_app(app):
             return redirect(f"{engine}?q={query}")
         return render_template('cr.html', form=form)
 
-    @app.context_processor
-    def template_globals():
-        "Today's date, etc"
-        return {
-            "today": datetime.date.today(),
-            "form": SearchForm(),
-        }
+def init_app(app):
+    CR = app.config["CR"]
 
-    @app.route("/request/<header>")
-    def req(header):
-        if not header.startswith("HTTP_"):
-            raise NoResponse
-        return request.environ.get(header, "???")
+    init_simple(app)
+    init_cr(app, CR)
+    init_redirect(app)
+    init_extra(app)
+    init_search(app)
 
     if app.config["DEBUG"]:
-        @app.route("/env")
-        def printenv():
-            return jsonify(dict(os.environ))
-
-        @app.route('/api/help')
-        def app_help():
-            """Print available functions."""
-            func_list = {}
-            for rule in app.url_map.iter_rules():
-                if rule.endpoint != 'static':
-                    func_list[rule.rule] = str(app.view_functions[rule.endpoint])
-            return jsonify(func_list)
-
-        @app.get('/shutdown')
-        def shutdown():
-            func = request.environ.get('werkzeug.server.shutdown')
-            if func is None:
-                raise RuntimeError('Not running with the Werkzeug Server')
-            func()
-            return 'Server shutting down...\n'
-
-    def month_url(start_year, start_month, offset, what):
-        "previous month - often month +/- 1, but not always (we have gaps)"
-
-        day = 1 if offset == -1 else monthrange(start_year, start_month)[1]
-        arrow = LEFT_ARROW if offset == -1 else RIGHT_ARROW
-        dt = datetime.date(start_year, start_month, day)
-        dt += ONE_DAY * offset
-
-        while OLDEST_MONTH <= (dt.year, dt.month) <= NEWEST_MONTH:
-            path = dt.strftime(f"{app.config['CR']}/{dt.year}-{dt.month:02d}")
-            if os.path.exists(path):
-                prev_url = url_for(what, year=dt.year,
-                                   month=f"{dt.month:02d}")
-                return f'<a href="{prev_url}">{arrow}</a>&nbsp;'
-            day = 1 if offset == -1 else monthrange(dt.year, dt.month)[1]
-            dt = dt.replace(day=day) + ONE_DAY * offset
-        return ""
-
-    def generate_nav_block(year, month, msgid):
-        "navigation header at top of email messages."
-        mydir = os.path.join(app.config["CR"],
-                             f"{year:04d}-{month:02d}", "eml-files")
-        anchor = f"{msgid:05d}"
-        nxt = prv = ""
-        if msg_exists(mydir, year, month, msgid - 1):
-            url = url_for("cr_message", year=year, month=f"{month:02d}",
-                          msg=(msgid - 1))
-            prv = f' <a href="{url}">Prev</a>'
-        if msg_exists(mydir, year, month, msgid + 1):
-            url = url_for("cr_message", year=year, month=f"{month:02d}",
-                          msg=(msgid + 1))
-            nxt = f' <a href="{url}">Next</a>'
-        uplink = url_for("dates", year=year, month=f"{month:02d}")
-
-        date_url = (url_for("dates", year=year, month=f"{month:02d}") +
-                    f"#{anchor}")
-        thread_url = (url_for("threads", year=year, month=f"{month:02d}") +
-                      f"#{anchor}")
-
-        return (f'''<a href="{uplink}">Up</a>{nxt}{prv}'''
-                f'''&nbsp;<a href="{date_url}">Date Index</a>'''
-                f'''&nbsp;<a href="{thread_url}">Thread Index</a>''')
-
-    def email_to_html(year, month, msgid):
-        "convert the email referenced by year, month and msgid to html."
-        nav = generate_nav_block(year, month, msgid)
-        msg = eml_file(year, month, msgid)
-        mydir = os.path.join(app.config["CR"],
-                             f"{year:04d}-{month:02d}", "eml-files")
-        message = read_message(os.path.join(mydir, msg))
-
-        filt = MessageFilter(message)
-        filt.filter_message(message)
-        filt.delete_empty_parts()
-
-        return render_template("cr.html", title=message["Subject"],
-                               nav=nav, body=message.as_html())
-
+        init_debug(app)
 
 class SearchForm(FlaskForm):
     "simple form used to search Brave for archived list messages"
