@@ -7,11 +7,10 @@ PORT=${PORT:-8080}
 HOST=${HOST:-localhost}
 
 RCFILE=$PWD/.coveragerc
-cd smontanaro
 
-CMD="$(which flask) run -h $HOST -p $PORT"
+CMD="$(which gunicorn) --error-logfile=/dev/stderr --access-logfile=/dev/stderr --bind $HOST:$PORT wsgi:app"
 if [ "x$DOCOVER" = "xtrue" ] ; then
-    coverage run -a --rcfile=$RCFILE  $CMD --no-reload
+    coverage run -a --rcfile=$RCFILE $CMD
 else
     $CMD
 fi

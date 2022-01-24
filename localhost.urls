@@ -7,6 +7,8 @@ http://localhost:8080/CR/
 http://localhost:8080/2001-05/html/threads.html
 http://localhost:8080/2003-09/html/maillist.html
 http://localhost:8080/2004-09/html/msg00032.html
+# bogus charset
+http://localhost:8080/CR/2005/06/0640
 http://localhost:8080/CR/2000/03/dates
 http://localhost:8080/CR/2000/03/threads
 http://localhost:8080/CR/2000/06/dates
@@ -22,3 +24,4 @@ http://localhost:8080/request/junk
 http://localhost:8080/request/HTTP_USER_AGENT
 # search
 http://localhost:8080/search?query=Baylis
+### end - place new lines above this ###

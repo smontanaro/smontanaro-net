@@ -24,13 +24,6 @@ def generate_link(r, ind):
 
 def generate_index(records, cur, level):
     "html fragment output"
-
-    if False:
-        print('<p>')
-        print('"(T)" is part of an incomplete attempt to allow browsing a complete thread.')
-        print("As you can probably tell, it's not exactly working yet.")
-        print('</p>')
-
     ul_ind = "  " * level
     li_ind = "  " * (level + 1)
     print(f'''{ul_ind}<ul style="column-count: auto; column-width: 300px" class="no-bullets">''')

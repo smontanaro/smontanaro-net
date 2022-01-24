@@ -289,7 +289,6 @@ def read_message(path):
     "read an email message from path, trying encodings"
     pckgz = os.path.splitext(path)[0] + ".pck.gz"
     if os.path.exists(pckgz):
-        logging.root.debug("loading pickled message: %s", pckgz)
         with gzip.open(pckgz, "rb") as pobj:
             return pickle.load(pobj)
 
