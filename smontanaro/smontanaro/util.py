@@ -236,9 +236,9 @@ class Message(email.message.Message):
         for charset in (self.get_content_charset("us-ascii"), "utf-8", "latin-1"):
             try:
                 return payload.decode(charset)
-            except UnicodeDecodeError as exc:
-                exc_args = exc.args
-        raise UnicodeDecodeError(*exc_args)
+            except (LookupError, UnicodeDecodeError) as exc:
+                last_exc = exc
+        raise last_exc
 
     def filter_headers(self):
         "generate self header block"
