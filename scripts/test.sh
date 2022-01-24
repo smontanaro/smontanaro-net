@@ -18,7 +18,7 @@ dateit () {
 
 export PYTHONPATH=$PWD/smontanaro
 export PORT=5001 HOST=localhost
-(DOCOVER=true bash run.sh 2>&1 | dateit > /tmp/$$.tmp) &
+(DOCOVER=true bash $(dirname $0)/run.sh 2>&1 | dateit > /tmp/$$.tmp) &
 sleep 2
 
 rm -f localhost.comments
@@ -61,7 +61,7 @@ sort localhost.comments /tmp/$$.tmp \
     | sed -e 's/^[0-9][0-9]:[0-9][0-9]:[0-9][0-9][.0-9]* //' \
           -e 's;.../.../....:..:..:.. -..... ;;' \
           -e 's;^.[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] [0-9][0-9]:[0-9][0-9]:[0-9][0-9] -[0-9]*. .[0-9]*. .INFO.;[INFO];' \
-    | awk -f filter.awk \
+    | awk -f $(dirname $0)/filter.awk \
           > $TMPACT
 rm localhost.comments /tmp/$$.tmp
 

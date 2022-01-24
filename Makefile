@@ -37,7 +37,7 @@ lint : FORCE
 	| sed -e '/duplicate-code/,/^--------------------/d'
 
 test : FORCE
-	bash test.sh
+	bash scripts/test.sh
 
 FORCE :
 
