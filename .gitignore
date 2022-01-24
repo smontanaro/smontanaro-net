@@ -10,3 +10,4 @@ server.log
 *,cover
 .coverage
 htmlcov
+localhost.act

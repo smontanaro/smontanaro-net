@@ -6,7 +6,6 @@
 # We diddle with localhost.exp toward the end. Make sure it's in
 # a pristine state when we start.
 ACT=localhost.act
-TMPACT=${ACT}.tmp
 RAW=/tmp/localhost.raw
 WARNINGS=localhost.warnings
 
@@ -62,19 +61,8 @@ sort localhost.comments /tmp/$$.tmp \
           -e 's;.../.../....:..:..:.. -..... ;;' \
           -e 's;^.[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] [0-9][0-9]:[0-9][0-9]:[0-9][0-9] -[0-9]*. .[0-9]*. .INFO.;[INFO];' \
     | awk -f $(dirname $0)/filter.awk \
-          > $TMPACT
+          > $ACT
 rm localhost.comments /tmp/$$.tmp
-
-# More potentially deceptive diffs. Save these warnings, realizing we
-# expect them on occasion.
-egrep '(WARNING|ERROR):' $TMPACT | sort > $WARNINGS
-egrep -v '(WARNING|ERROR):' $TMPACT > $ACT
-
-rm -f $TMPACT
-
-if [ -s $WARNINGS ] ; then
-    echo "Note warnings in ${WARNINGS}"
-fi
 
 # The dates module is only used by a couple auxiliary scripts.
 PYTHONPATH=$PWD/smontanaro coverage run -a --rcfile=.coveragerc \
@@ -84,4 +72,4 @@ PYTHONPATH=$PWD/smontanaro coverage run -a --rcfile=.coveragerc \
 
 coverage html
 
-diff localhost.exp $ACT && echo "success" || echo "failure"
+diff -u localhost.exp $ACT && echo "success" || echo "failure"
