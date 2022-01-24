@@ -16,3 +16,9 @@ http://localhost:8080/CR/2000/09/9999
 http://localhost:8080/CR/2001/01/0307
 http://localhost:8080/CR/2009/09/01323
 http://localhost:8080/CR/2011/2/1601
+# non-standard response
+http://localhost:8080/request/junk
+# proper /request
+http://localhost:8080/request/HTTP_USER_AGENT
+# search
+http://localhost:8080/search?query=Baylis
