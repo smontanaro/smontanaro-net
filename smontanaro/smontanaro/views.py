@@ -15,6 +15,7 @@ from wtforms.validators import DataRequired
 
 from .strip import strip_footers
 from .util import read_message
+from .exc import NoResponse
 
 SEARCH = {
     "DuckDuckGo": "https://search.duckduckgo.com/",
@@ -158,8 +159,7 @@ def init_app(app):
     @app.route("/request/<header>")
     def req(header):
         if not header.startswith("HTTP_"):
-            abort(444)
-            return ""
+            raise NoResponse
         return request.environ.get(header, "???")
 
     if app.config["DEBUG"]:
