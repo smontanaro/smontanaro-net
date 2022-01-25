@@ -82,7 +82,7 @@ def init_cr(app, CR):
         with open(f'''{CR}/{date.strftime("%Y-%m")}/generated/dates.body''',
                   encoding="utf-8") as fobj:
             body = fobj.read()
-        return render_template("cr.html", title=title, body=body, nav=nav,
+        return render_template("index.html", title=title, body=body, nav=nav,
                                prev=prev_url, next=next_url)
 
     @app.route("/CR/<year>/<month>/threads")
@@ -102,7 +102,7 @@ def init_cr(app, CR):
         with open(f'''{CR}/{date.strftime("%Y-%m")}/generated/threads.body''',
                   encoding="utf-8") as fobj:
             body = fobj.read()
-        return render_template("cr.html", title=title, body=body, nav=nav,
+        return render_template("index.html", title=title, body=body, nav=nav,
                                prev=prev_url, next=next_url)
 
     @app.route('/CR/<year>/<month>/<int:msg>')
