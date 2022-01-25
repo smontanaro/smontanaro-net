@@ -15,8 +15,8 @@ def ensure_db(sqldb):
                                                 | sqlite3.PARSE_COLNAMES))
     if create:
         create_main_tables(conn)
-        create_main_indexes(conn)
         create_topic_tables(conn)
+        create_main_indexes(conn)
         create_topic_indexes(conn)
     return conn
 
@@ -69,16 +69,12 @@ def create_main_indexes(conn):
 
 def create_topic_tables(conn):
     cur = conn.cursor()
-    # select t.topic, m.subject, m.year, m.month, m.seq from
-    #   topics t join messages m
-    #     on t.messageid = m.messageid
-    #   order by m.year, m.month, m.seq
-    cur.execute(
-        "create table topics ("
-        "  topic TEXT,"          # topic name
-        "  messageid TEXT,"
-        "  FOREIGN KEY(messageid) REFERENCES messages(messageid)"
-        ")"
+    cur.execute("""
+        create table topics (
+          topic TEXT,
+          messageid TEXT,
+          FOREIGN KEY(messageid) REFERENCES messages(messageid)
+        )"""
     )
     conn.commit()
 
