@@ -14,6 +14,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, HiddenField, RadioField
 from wtforms.validators import DataRequired
 
+from .db import ensure_db
 from .strip import strip_footers
 from .util import read_message, trim_subject_prefix
 from .exc import NoResponse
@@ -240,17 +241,26 @@ def init_search(app):
             return redirect(f"{engine}?q={query}")
         return render_template('cr.html', form=form)
 
-def init_app(app):
-    CR = app.config["CR"]
+def init_topics(app):
+    @app.route('/topics')
+    @app.route('/topics/<topic>')
+    def topics(topic=""):
+        "list topics or display entries for a specific topic"
+        conn = ensure_db(app.config["REFDB"])
+        cur = conn.cursor()
+        cur.execute("""
+          select distinct topic from topics
+          order by topic
+        """)
+        topics = [t[0] for t in cur.fetchall()]
 
-    init_simple(app)
-    init_cr(app, CR)
-    init_redirect(app)
-    init_extra(app)
-    init_search(app)
-
-    if app.config["DEBUG"]:
-        init_debug(app)
+        if not topic:
+            msgrefs = []
+        else:
+            msgrefs=[(yr, mo, seq, trim_subject_prefix(subj))
+                        for (yr, mo, seq, subj) in get_topic(topic, conn)]
+        return render_template("topics.html", topics=topics, msgrefs=msgrefs,
+                               topic=topic)
 
 class SearchForm(FlaskForm):
     "simple form used to search Brave for archived list messages"
@@ -315,3 +325,26 @@ class MessageFilter:
                 for todel in self.to_delete:
                     if todel in payload:
                         payload.remove(todel)
+
+def get_topic(topic, conn):
+    cur = conn.cursor()
+    return cur.execute("""
+      select m.year, m.month, m.seq, m.subject from
+        topics t join messages m
+          on t.messageid = m.messageid
+        where t.topic = ?
+        order by m.year, m.month, m.seq
+    """, (topic,)).fetchall()
+
+def init_app(app):
+    CR = app.config["CR"]
+
+    init_simple(app)
+    init_cr(app, CR)
+    init_redirect(app)
+    init_extra(app)
+    init_search(app)
+    init_topics(app)
+
+    if app.config["DEBUG"]:
+        init_debug(app)
