@@ -25,5 +25,5 @@ http://localhost:8080/request/HTTP_USER_AGENT
 # search
 http://localhost:8080/search?query=Baylis
 # topics
-http://localost:8080/topics/BVVW
+http://localhost:8080/topics/BVVW
 ### end - place new lines above this ###
