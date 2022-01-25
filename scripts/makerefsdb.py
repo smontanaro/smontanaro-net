@@ -10,70 +10,15 @@ import datetime
 import email.errors
 import os
 import re
-import sqlite3
 import sys
 
 import dateutil.parser
 import dateutil.tz
 
 from smontanaro.dates import parse_date
+from smontanaro.db import ensure_db
 
 ONE_SEC = datetime.timedelta(seconds=1)
-
-def convert_ts_bytes(stamp):
-    "SQLite3 converter for tz-aware datetime objects"
-    stamp = stamp.decode("utf-8")
-    return datetime.datetime.fromisoformat(stamp)
-
-def ensure_db(sqldb):
-    "make sure the database and its schema exist"
-    create = not os.path.exists(sqldb)
-    sqlite3.register_converter("TIMESTAMP", convert_ts_bytes)
-    conn = sqlite3.connect(sqldb, detect_types=(sqlite3.PARSE_DECLTYPES
-                                                | sqlite3.PARSE_COLNAMES))
-    if create:
-        cur = conn.cursor()
-        cur.execute('''
-            create table messages
-              (
-                messageid TEXT PRIMARY KEY,
-                filename TEXT,
-                sender TEXT,
-                subject TEXT,
-                year INTEGER,
-                month INTEGER,
-                seq INTEGER,
-                is_root INTEGER,
-                ts timestamp
-              )
-        ''')
-        cur.execute('''
-            create table msgrefs
-              (
-                messageid TEXT,
-                reference TEXT,
-                FOREIGN KEY(reference) REFERENCES messages(messageid)
-              )
-        ''')
-        cur.execute('''
-            create table msgreplies
-              (
-                messageid TEXT,
-                parent TEXT,
-                FOREIGN KEY(parent) REFERENCES messages(messageid)
-              )
-        ''')
-        cur.execute("create index msgid_index"
-                    "  on messages"
-                    "  (messageid)")
-        cur.execute("create index msgrefs_index"
-                    "  on msgrefs"
-                    "  (reference)")
-        cur.execute("create index msgreplies_index"
-                    "  on msgreplies"
-                    "  (parent)")
-        conn.commit()
-    return conn
 
 def decompose_filename(filename):
     "Extract year, month and sequence number from filename."
