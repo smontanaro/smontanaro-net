@@ -156,12 +156,13 @@ def init_cr(app, CR):
         mydir = os.path.join(CR, f"{year:04d}-{month:02d}", "eml-files")
         message = read_message(os.path.join(mydir, msg))
 
+        # Grab the subject before we sanitize any headers.
+        title = message["Subject"]
+        clean = trim_subject_prefix(title)
+
         filt = MessageFilter(message)
         filt.filter_message(message)
         filt.delete_empty_parts()
-
-        title = html.escape(message["Subject"])
-        clean = html.escape(trim_subject_prefix(message["Subject"]))
 
         return render_template("cr.html", title=title, page_title=clean,
                                nav=nav, body=message.as_html())
