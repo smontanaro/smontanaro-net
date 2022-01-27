@@ -50,7 +50,7 @@ def init_simple(app):
     @app.route("/")
     def index():
         "index"
-        return render_template("main.html", title="Home", nav="")
+        return render_template("main.jinja", title="Home", nav="")
 
 def init_cr(app, CR):
     @app.route("/CR")
@@ -61,7 +61,7 @@ def init_cr(app, CR):
         "templated index"
 
         with open(f"{CR}/generated/index.body", encoding="utf8") as fobj:
-            return render_template("cr.html", body=fobj.read(), nav="",
+            return render_template("cr.jinja", body=fobj.read(), nav="",
                                    title="Old Classic Rendezvous Archive")
 
     @app.route("/CR/<year>/<month>")
@@ -83,7 +83,7 @@ def init_cr(app, CR):
         with open(f'''{CR}/{date.strftime("%Y-%m")}/generated/dates.body''',
                   encoding="utf-8") as fobj:
             body = fobj.read()
-        return render_template("index.html", title=title, body=body, nav=nav,
+        return render_template("index.jinja", title=title, body=body, nav=nav,
                                prev=prev_url, next=next_url)
 
     @app.route("/CR/<year>/<month>/threads")
@@ -103,7 +103,7 @@ def init_cr(app, CR):
         with open(f'''{CR}/{date.strftime("%Y-%m")}/generated/threads.body''',
                   encoding="utf-8") as fobj:
             body = fobj.read()
-        return render_template("index.html", title=title, body=body, nav=nav,
+        return render_template("index.jinja", title=title, body=body, nav=nav,
                                prev=prev_url, next=next_url)
 
     @app.route('/CR/<year>/<month>/<int:seq>')
@@ -166,7 +166,7 @@ def init_cr(app, CR):
         filt.filter_message(message)
         filt.delete_empty_parts()
 
-        return render_template("cr.html", title=title, page_title=clean,
+        return render_template("cr.jinja", title=title, page_title=clean,
                                nav=nav, body=message.as_html(),
                                year=year, month=month, seq=seq,
                                topics=get_topics_for(msgid))
@@ -256,7 +256,7 @@ def init_search(app):
             query += f"+site:{search_form.site.data}"
             engine = SEARCH.get(search_form.engine.data, SEARCH["Brave"])
             return redirect(f"{engine}?q={query}")
-        return render_template('cr.html', search_form=search_form)
+        return render_template('cr.jinja', search_form=search_form)
 
 def init_topics(app):
     @app.route('/topics')
@@ -276,7 +276,7 @@ def init_topics(app):
         else:
             msgrefs=[(yr, mo, seq, trim_subject_prefix(subj))
                         for (yr, mo, seq, subj) in get_topic(topic, conn)]
-        return render_template("topics.html", topics=topics, msgrefs=msgrefs,
+        return render_template("topics.jinja", topics=topics, msgrefs=msgrefs,
                                topic=topic)
 
     @app.route('/addtopic', methods=['GET', 'POST'])
@@ -309,7 +309,7 @@ def init_topics(app):
                                     year=topic_form.year.data,
                                     month=topic_form.month.data,
                                     seq=topic_form.seq.data))
-        return render_template('cr.html', topic_form=topic_form,
+        return render_template('cr.jinja', topic_form=topic_form,
                                message="Thanks for your submission.")
 
     def save_topic_record(record):
