@@ -1,16 +1,18 @@
-{% extends "cr.html" %}
+{% extends "home.jinja" %}
 {% block nav %}
 <a href="/">Home</a>&nbsp;<a href="/CR">CR Archives</a>
+{% endblock %}
+{% block left %}
+  {% include "search.jinja" %}
+  {% include "stuff.jinja" %}
 {% endblock %}
 {% block body %}
 <h1>Archive Topics</h1>
 
 <div style="fontweight: bold">
   Note: These topics are constructed by hand (snobs might say
-  "curated"). You can help expand these topics and the messages they
-  contain by sending message links and (new or existing) topic names
-  to
-  <a href="mailto:skip.montanaro@gmail.com?subject=CR+Archive+Topic+Submission">Skip</a>.
+  "curated"). You can help expand these topics contain by using the
+  form at the top of each message page to submit your suggestions.
 </div>
 
 {% if topic %}
@@ -30,7 +32,8 @@
   <h2>Known Topics</h2>
   {% endif %}
 
-  <ul class="no-bullets" style="padding-left: 0em">
+  <ul class="no-bullets"
+      style="padding-left: 0em; column-count: auto; column-width: 200px">
   {% for topic in topics %}
     <li><a href="/topics/{% filter urlencode %}{{topic}}{% endfilter %}">{{ topic }}</a>
   {% endfor %}

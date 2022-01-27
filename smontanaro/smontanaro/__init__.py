@@ -24,6 +24,10 @@ def create_app(test_config=None):
         "SECRET_KEY": r"Aw6CNZn*GIEt8Aw6CNZn*GIEt8",
         "DEBUG": os.environ.get("FLASK_ENV") == "development",
     })
+    topic_file = "topic-debug.csv" if app.config["DEBUG"] else "topic.csv"
+    app.config.from_mapping({
+        "TOPICFILE": topic_file,
+    })
 
     if test_config is None:
         # load the instance config, if it exists, when not testing

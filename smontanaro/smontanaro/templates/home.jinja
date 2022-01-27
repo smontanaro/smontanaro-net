@@ -36,16 +36,17 @@
     {% block left %}{% endblock %}
   </div>
   <div class="main" style="margin: 5px;">
+    {% block topic %}{% endblock %}
     {% block body %}
-    {{ body|safe }}
+        {{ body|safe }}
     {% endblock %}
   </div>
   <div class="footer" style="margin: 5px;>
     {% block copyright %}
-<!--
-    &copy; 2000-2011 Dale Brown.
-    &copy; 2021-{{ today.strftime("%Y") }} Skip Montanaro.
--->
+              <!--
+              &copy; 2000-2011 Dale Brown.
+              &copy; 2021-{{ today.strftime("%Y") }} Skip Montanaro.
+              -->
     {% endblock %}
   </div>
 </div>

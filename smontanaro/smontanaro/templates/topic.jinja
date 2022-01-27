@@ -1,0 +1,20 @@
+<div>
+    {% if note %}
+        <div>{{ note }}</div>
+    {% endif %}
+
+    {% if topics %}Topics:
+        {% for topic in topics %}
+            <a href="/topics/{{ topic|urlencode }}">{{ topic }}</a>
+        {% endfor %}
+    {% endif %}
+
+    <form action="/addtopic" method="post">
+        {{ topic_form.csrf_token() }}
+        {{ topic_form.year(value=year) }}
+        {{ topic_form.month(value=month) }}
+        {{ topic_form.seq(value=seq) }}
+        {{ topic_form.topic.label() }} {{ topic_form.topic }}
+        <input name="topic" type="submit", label="Add Topic(s)">
+    </form>
+</div>
