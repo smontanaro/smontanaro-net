@@ -1,4 +1,4 @@
-{% extends "crtop.jinja" %}
+{% extends "home.jinja" %}
 
 {% block nav %}
     <a href="/">Home</a>&nbsp;<a href="/CR">CR Archives</a>&nbsp;{{ nav|safe }}
@@ -7,9 +7,4 @@
 {% block left %}
     {% include "search.jinja" %}
     {% include "stuff.jinja" %}
-{% endblock %}
-
-{% block topic %}
-    {% include "topic.jinja" %}
-    <hr />
 {% endblock %}

@@ -10,7 +10,8 @@ import re
 import sqlite3
 import urllib.parse
 
-from flask import redirect, url_for, render_template, abort, jsonify, request
+from flask import (redirect, url_for, render_template, abort, jsonify, request,
+                   current_app)
 from flask_wtf import FlaskForm
 from wtforms import StringField, HiddenField, RadioField
 from wtforms.validators import DataRequired
@@ -36,7 +37,9 @@ NEWEST_MONTH = (2011, 2)
 LEFT_ARROW = "\N{LEFTWARDS ARROW}"
 RIGHT_ARROW = "\N{RIGHTWARDS ARROW}"
 
-def init_simple(app):
+def init_simple():
+    app = current_app
+
     @app.route("/favicon.ico")
     def favicon():
         "websites need these"
@@ -52,17 +55,9 @@ def init_simple(app):
         "index"
         return render_template("main.jinja", title="Home", nav="")
 
-def init_cr(app, CR):
-    @app.route("/CR")
-    @app.route("/CR/")
-    @app.route("/CR/index.html")
-    @app.route("/CR/index")
-    def cr_index():
-        "templated index"
-
-        with open(f"{CR}/generated/index.body", encoding="utf8") as fobj:
-            return render_template("cr.jinja", body=fobj.read(), nav="",
-                                   title="Old Classic Rendezvous Archive")
+def init_indexes():
+    app = current_app
+    CR = app.config["CR"]
 
     @app.route("/CR/<year>/<month>")
     @app.route("/CR/<year>/<month>/dates")
@@ -106,11 +101,6 @@ def init_cr(app, CR):
         return render_template("index.jinja", title=title, body=body, nav=nav,
                                prev=prev_url, next=next_url)
 
-    @app.route('/CR/<year>/<month>/<int:seq>')
-    def cr_message(year, month, seq):
-        "render email as html."
-        return email_to_html(int(year), int(month), seq)
-
     def month_url(start_year, start_month, offset, what):
         "previous month - often month +/- 1, but not always (we have gaps)"
 
@@ -127,6 +117,26 @@ def init_cr(app, CR):
             day = 1 if offset == -1 else monthrange(dt.year, dt.month)[1]
             dt = dt.replace(day=day) + ONE_DAY * offset
         return ""
+
+def init_cr():
+    app = current_app
+    CR = app.config["CR"]
+
+    @app.route("/CR")
+    @app.route("/CR/")
+    @app.route("/CR/index.html")
+    @app.route("/CR/index")
+    def cr_index():
+        "templated index"
+
+        with open(f"{CR}/generated/index.body", encoding="utf8") as fobj:
+            return render_template("crtop.jinja", body=fobj.read(), nav="",
+                                   title="Old Classic Rendezvous Archive")
+
+    @app.route('/CR/<year>/<month>/<int:seq>')
+    def cr_message(year, month, seq):
+        "render email as html."
+        return email_to_html(int(year), int(month), seq)
 
     def generate_nav_block(year, month, seq):
         "navigation header at top of email messages."
@@ -150,7 +160,9 @@ def init_cr(app, CR):
                 f'&nbsp;<a href="{date_url}#{seq:05d}">Date Index</a>'
                 f'&nbsp;<a href="{thread_url}#{seq:05d}">Thread Index</a>')
 
-    def email_to_html(year, month, seq):
+    global email_to_html
+
+    def email_to_html(year, month, seq, note=""):
         "convert the email referenced by year, month and seq to html."
         nav = generate_nav_block(year, month, seq)
         msg = eml_file(year, month, seq)
@@ -169,7 +181,8 @@ def init_cr(app, CR):
         return render_template("cr.jinja", title=title, page_title=clean,
                                nav=nav, body=message.as_html(),
                                year=year, month=month, seq=seq,
-                               topics=get_topics_for(msgid))
+                               topics=get_topics_for(msgid),
+                               note=note)
 
     def get_topics_for(msgid):
         "return list of topics associated with msgid"
@@ -182,7 +195,9 @@ def init_cr(app, CR):
         """, (msgid,))
         return [t[0] for t in cur.fetchall()]
 
-def init_redirect(app):
+def init_redirect():
+    app = current_app
+
     @app.route('/<year>-<month>/html/<filename>')
     def old_cr(year, month, filename):
         "convert old archive url structure to new."
@@ -209,7 +224,9 @@ def init_redirect(app):
                                 seq=map_to),
                         code=301)
 
-def init_extra(app):
+def init_extra():
+    app = current_app
+
     @app.route("/request/<header>")
     def req(header):
         if not header.startswith("HTTP_"):
@@ -225,7 +242,9 @@ def init_extra(app):
             "topic_form": TopicForm(),
         }
 
-def init_debug(app):
+def init_debug():
+    app = current_app
+
     @app.route("/env")
     def printenv():
         return jsonify(dict(os.environ))
@@ -247,7 +266,9 @@ def init_debug(app):
         func()
         return 'Server shutting down...\n'
 
-def init_search(app):
+def init_search():
+    app = current_app
+
     @app.route('/search', methods=['GET', 'POST'])
     def search():
         search_form = SearchForm()
@@ -258,7 +279,9 @@ def init_search(app):
             return redirect(f"{engine}?q={query}")
         return render_template('cr.jinja', search_form=search_form)
 
-def init_topics(app):
+def init_topics():
+    app = current_app
+
     @app.route('/topics')
     @app.route('/topics/<topic>')
     def show_topics(topic=""):
@@ -305,12 +328,11 @@ def init_topics(app):
                 "seq": seq,
                 "message-id": msgid,
             })
-            return redirect(url_for("cr_message",
-                                    year=topic_form.year.data,
-                                    month=topic_form.month.data,
-                                    seq=topic_form.seq.data))
-        return render_template('cr.jinja', topic_form=topic_form,
-                               message="Thanks for your submission.")
+            return email_to_html(year=int(topic_form.year.data, 10),
+                                 month=int(topic_form.month.data, 10),
+                                 seq=int(topic_form.seq.data, 10),
+                                 note="Thanks for your submission.")
+        return render_template('cr.jinja', topic_form=topic_form)
 
     def save_topic_record(record):
         "write submitted topic details to CSV file."
@@ -406,14 +428,14 @@ def get_topic(topic, conn):
     """, (topic,)).fetchall()
 
 def init_app(app):
-    CR = app.config["CR"]
+    with app.app_context():
+        init_simple()
+        init_indexes()
+        init_cr()
+        init_redirect()
+        init_extra()
+        init_search()
+        init_topics()
 
-    init_simple(app)
-    init_cr(app, CR)
-    init_redirect(app)
-    init_extra(app)
-    init_search(app)
-    init_topics(app)
-
-    if app.config["DEBUG"]:
-        init_debug(app)
+        if app.config["DEBUG"]:
+            init_debug()
