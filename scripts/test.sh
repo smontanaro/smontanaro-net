@@ -70,6 +70,17 @@ PYTHONPATH=$PWD/smontanaro coverage run -a --rcfile=.coveragerc \
 PYTHONPATH=$PWD/smontanaro coverage run -a --rcfile=.coveragerc \
          scripts/generate_date_index.py -d references.db 2000 3 >/dev/null
 
+if [ -r .coverage -a -r smontanaro/.coverage ] ; then
+    echo combine
+    coverage combine .coverage smontanaro/.coverage
+elif [ -r smontanaro/.coverage ] ; then
+     echo rename
+     mv smontanaro/.coverage .coverage
+else
+    :
+fi
+
+rm -rf htmlcov
 coverage html
 
 diff -u localhost.exp $ACT && echo "success" || echo "failure"
