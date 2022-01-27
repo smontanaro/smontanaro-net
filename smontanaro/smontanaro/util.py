@@ -270,7 +270,7 @@ class Message(email.message.Message):
                         tag = html.escape(tgt_msgid)
                     else:
                         url = url_for('cr_message', year=year,
-                                      month=month, msg=seq)
+                                      month=month, seq=seq)
                         tag = f"""<a href="{url}">{html.escape(tgt_msgid)}</a>"""
                     tags.append(tag)
                 if tags:

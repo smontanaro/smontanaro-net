@@ -1,7 +1,7 @@
 <form action="/search" method="post">
-    {{ form.csrf_token() }}
-    {{ form.site }}
-    {{ form.query.label() }} {{ form.query }}
-    {{ form.engine.label() }} {{ form.engine }}
+    {{ search_form.csrf_token() }}
+    {{ search_form.site }}
+    {{ search_form.query.label() }} {{ search_form.query }}
+    {{ search_form.engine.label() }} {{ search_form.engine }}
     <input name="search" type="submit", label="Search">
 </form>

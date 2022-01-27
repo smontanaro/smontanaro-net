@@ -36,6 +36,7 @@
     {% block left %}{% endblock %}
   </div>
   <div class="main" style="margin: 5px;">
+    {% block topic %}{% endblock %}
     {% block body %}
     {{ body|safe }}
     {% endblock %}

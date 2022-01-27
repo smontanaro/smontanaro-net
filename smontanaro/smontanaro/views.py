@@ -3,10 +3,11 @@
 "Return to Flask..."
 
 from calendar import monthrange
+import csv
 import datetime
-import html
 import os
 import re
+import sqlite3
 import urllib.parse
 
 from flask import redirect, url_for, render_template, abort, jsonify, request
@@ -105,10 +106,10 @@ def init_cr(app, CR):
         return render_template("index.html", title=title, body=body, nav=nav,
                                prev=prev_url, next=next_url)
 
-    @app.route('/CR/<year>/<month>/<int:msg>')
-    def cr_message(year, month, msg):
+    @app.route('/CR/<year>/<month>/<int:seq>')
+    def cr_message(year, month, seq):
         "render email as html."
-        return email_to_html(int(year), int(month), msg)
+        return email_to_html(int(year), int(month), seq)
 
     def month_url(start_year, start_month, offset, what):
         "previous month - often month +/- 1, but not always (we have gaps)"
@@ -127,18 +128,18 @@ def init_cr(app, CR):
             dt = dt.replace(day=day) + ONE_DAY * offset
         return ""
 
-    def generate_nav_block(year, month, msgid):
+    def generate_nav_block(year, month, seq):
         "navigation header at top of email messages."
 
         mydir = os.path.join(CR, f"{year:04d}-{month:02d}", "eml-files")
         nxt = prv = ""
-        if msg_exists(mydir, year, month, msgid - 1):
+        if msg_exists(mydir, year, month, seq - 1):
             url = url_for("cr_message", year=year, month=f"{month:02d}",
-                          msg=(msgid - 1))
+                          seq=(seq - 1))
             prv = f' <a href="{url}">Prev</a>'
-        if msg_exists(mydir, year, month, msgid + 1):
+        if msg_exists(mydir, year, month, seq + 1):
             url = url_for("cr_message", year=year, month=f"{month:02d}",
-                          msg=(msgid + 1))
+                          seq=(seq + 1))
             nxt = f' <a href="{url}">Next</a>'
         uplink = url_for("dates", year=year, month=f"{month:02d}")
 
@@ -146,17 +147,18 @@ def init_cr(app, CR):
         thread_url = (url_for("threads", year=year, month=f"{month:02d}"))
 
         return (f'<a href="{uplink}">Up</a>{nxt}{prv}'
-                f'&nbsp;<a href="{date_url}#{msgid:05d}">Date Index</a>'
-                f'&nbsp;<a href="{thread_url}#{msgid:05d}">Thread Index</a>')
+                f'&nbsp;<a href="{date_url}#{seq:05d}">Date Index</a>'
+                f'&nbsp;<a href="{thread_url}#{seq:05d}">Thread Index</a>')
 
-    def email_to_html(year, month, msgid):
-        "convert the email referenced by year, month and msgid to html."
-        nav = generate_nav_block(year, month, msgid)
-        msg = eml_file(year, month, msgid)
+    def email_to_html(year, month, seq):
+        "convert the email referenced by year, month and seq to html."
+        nav = generate_nav_block(year, month, seq)
+        msg = eml_file(year, month, seq)
         mydir = os.path.join(CR, f"{year:04d}-{month:02d}", "eml-files")
         message = read_message(os.path.join(mydir, msg))
 
-        # Grab the subject before we sanitize any headers.
+        # Grab these before we sanitize any headers.
+        msgid = message["Message-ID"]
         title = message["Subject"]
         clean = trim_subject_prefix(title)
 
@@ -165,7 +167,20 @@ def init_cr(app, CR):
         filt.delete_empty_parts()
 
         return render_template("cr.html", title=title, page_title=clean,
-                               nav=nav, body=message.as_html())
+                               nav=nav, body=message.as_html(),
+                               year=year, month=month, seq=seq,
+                               topics=get_topics_for(msgid))
+
+    def get_topics_for(msgid):
+        "return list of topics associated with msgid"
+        conn = ensure_db(app.config["REFDB"])
+        cur = conn.cursor()
+        cur.execute("""
+        select distinct topic from topics
+          where messageid = ?
+          order by topic
+        """, (msgid,))
+        return [t[0] for t in cur.fetchall()]
 
 def init_redirect(app):
     @app.route('/<year>-<month>/html/<filename>')
@@ -191,7 +206,7 @@ def init_redirect(app):
 
         map_to = f"{(int(mat.groups()[0]) + 1):05d}"
         return redirect(url_for("cr_message", year=year, month=month,
-                                msg=map_to),
+                                seq=map_to),
                         code=301)
 
 def init_extra(app):
@@ -206,7 +221,8 @@ def init_extra(app):
         "Today's date, etc"
         return {
             "today": datetime.date.today(),
-            "form": SearchForm(),
+            "search_form": SearchForm(),
+            "topic_form": TopicForm(),
         }
 
 def init_debug(app):
@@ -234,18 +250,18 @@ def init_debug(app):
 def init_search(app):
     @app.route('/search', methods=['GET', 'POST'])
     def search():
-        form = SearchForm()
-        if form.validate_on_submit():
-            query = urllib.parse.quote_plus(f"{form.query.data}")
-            query += f"+site:{form.site.data}"
-            engine = SEARCH.get(form.engine.data, SEARCH["Brave"])
+        search_form = SearchForm()
+        if search_form.validate_on_submit():
+            query = urllib.parse.quote_plus(f"{search_form.query.data}")
+            query += f"+site:{search_form.site.data}"
+            engine = SEARCH.get(search_form.engine.data, SEARCH["Brave"])
             return redirect(f"{engine}?q={query}")
-        return render_template('cr.html', form=form)
+        return render_template('cr.html', search_form=search_form)
 
 def init_topics(app):
     @app.route('/topics')
     @app.route('/topics/<topic>')
-    def topics(topic=""):
+    def show_topics(topic=""):
         "list topics or display entries for a specific topic"
         conn = ensure_db(app.config["REFDB"])
         cur = conn.cursor()
@@ -262,6 +278,58 @@ def init_topics(app):
                         for (yr, mo, seq, subj) in get_topic(topic, conn)]
         return render_template("topics.html", topics=topics, msgrefs=msgrefs,
                                topic=topic)
+
+    @app.route('/addtopic', methods=['GET', 'POST'])
+    def addtopic():
+        "display/process form to associate topics with a message."
+        topic_form = TopicForm()
+        if topic_form.validate_on_submit():
+            topic = urllib.parse.unquote_plus(f"{topic_form.topic.data}")
+            year = topic_form.year.data
+            month = topic_form.month.data
+            seq = topic_form.seq.data
+
+            conn = sqlite3.connect(app.config["REFDB"])
+            cur = conn.cursor()
+            cur.execute("""
+            select messageid from messages
+              where year = ?
+                and month = ?
+                and seq = ?
+            """, (year, month, seq))
+            msgid = cur.fetchone()[0]
+            save_topic_record({
+                "topic": topic,
+                "year": year,
+                "month": month,
+                "seq": seq,
+                "message-id": msgid,
+            })
+            return redirect(url_for("cr_message",
+                                    year=topic_form.year.data,
+                                    month=topic_form.month.data,
+                                    seq=topic_form.seq.data))
+        return render_template('cr.html', topic_form=topic_form,
+                               message="Thanks for your submission.")
+
+    def save_topic_record(record):
+        "write submitted topic details to CSV file."
+        fieldnames = ["topic", "message-id", "year", "month", "seq"]
+        topicfile = app.config["TOPICFILE"]
+        writeheader = (not os.path.exists(topicfile) or
+                       os.path.getsize(topicfile) == 0)
+        with open(topicfile, "a") as fobj:
+            writer = csv.DictWriter(fobj, fieldnames)
+            if writeheader:
+                writer.writeheader()
+            writer.writerow(record)
+
+class TopicForm(FlaskForm):
+    "simple form used to add topics to a message"
+    topic = StringField('Add Topic(s):', validators=[DataRequired()])
+    year = HiddenField('year')
+    month = HiddenField('month')
+    seq = HiddenField('seq')
 
 class SearchForm(FlaskForm):
     "simple form used to search Brave for archived list messages"
