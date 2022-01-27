@@ -20,10 +20,13 @@ def create_app(test_config=None):
     app.config.from_mapping({
         "CRDIR": crdir,
         "REFDB": os.path.join(crdir, "references.db"),
-        "TOPICFILE": os.path.join(crdir, "topics.csv"),
         "CR": os.path.join(crdir, "CR"),
         "SECRET_KEY": r"Aw6CNZn*GIEt8Aw6CNZn*GIEt8",
         "DEBUG": os.environ.get("FLASK_ENV") == "development",
+    })
+    topic_file = "topic-debug.csv" if app.config["DEBUG"] else "topic.csv"
+    app.config.from_mapping({
+        "TOPICFILE": topic_file,
     })
 
     if test_config is None:
