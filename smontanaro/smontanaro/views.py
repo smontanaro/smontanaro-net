@@ -336,8 +336,11 @@ def init_topics():
 
     def save_topic_record(record):
         "write submitted topic details to CSV file."
-        fieldnames = ["topic", "message-id", "year", "month", "seq"]
+        fieldnames = ["topic", "message-id", "year", "month", "seq", "ip"]
         topicfile = app.config["TOPICFILE"]
+        record["ip"] = (request.environ.get("HTTP_X_REAL_IP") or
+                        request.environ.get("REMOTE_ADDR") or
+                        "unknown")
         writeheader = (not os.path.exists(topicfile) or
                        os.path.getsize(topicfile) == 0)
         with open(topicfile, "a") as fobj:
