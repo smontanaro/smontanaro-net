@@ -160,8 +160,8 @@ def init_cr():
                 f'&nbsp;<a href="{date_url}#{seq:05d}">Date Index</a>'
                 f'&nbsp;<a href="{thread_url}#{seq:05d}">Thread Index</a>')
 
+    # pylint: disable=global-variable-not-assigned
     global email_to_html
-
     def email_to_html(year, month, seq, note=""):
         "convert the email referenced by year, month and seq to html."
         nav = generate_nav_block(year, month, seq)
@@ -328,6 +328,7 @@ def init_topics():
                 "seq": seq,
                 "message-id": msgid,
             })
+            # pylint: disable=undefined-variable
             return email_to_html(year=int(topic_form.year.data, 10),
                                  month=int(topic_form.month.data, 10),
                                  seq=int(topic_form.seq.data, 10),
