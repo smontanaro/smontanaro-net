@@ -30,4 +30,7 @@ WARNING:root:Can't render images
 127.0.0.1 - - "GET /search?query=Baylis HTTP/1.1" 200 3108 "-" "curl/7.68.0"
 # topics
 127.0.0.1 - - "GET /topics/BVVW HTTP/1.1" 200 4561 "-" "curl/7.68.0"
+# url mapping
+127.0.0.1 - - "GET /CR/2008/02/1388 HTTP/1.1" 200 5674 "-" "curl/7.68.0"
+127.0.0.1 - - "GET /CR/2004/05/0026 HTTP/1.1" 200 4612 "-" "curl/7.68.0"
 ### end - place new lines above this ###

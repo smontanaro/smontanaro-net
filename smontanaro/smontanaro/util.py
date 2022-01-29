@@ -30,6 +30,7 @@
 #
 # https://localhost:8080/CR/2007/07/00004
 
+import csv
 import email.message
 import gzip
 import html
@@ -38,6 +39,8 @@ import os
 import pickle
 import re
 import sqlite3
+import sys
+import urllib.parse
 
 from flask import abort, url_for
 
@@ -66,6 +69,8 @@ class Message(email.message.Message):
     "subclass to add as_html() method"
     content_headers = ("content-type", "content-transfer-encoding")
     app = None
+    urlmap = {}
+
     def as_html(self):
         "return string in HTML form"
 
@@ -217,18 +222,67 @@ class Message(email.message.Message):
             parts[-1] = "\n".join(chunks)
         return "".join(parts)
 
-    #pylint: disable=no-self-use
+    @classmethod
+    def initialize_urlmap(cls):
+        "make sure urlmap is populated"
+        urlmap = cls.urlmap
+        if urlmap:
+            return
+        with open(os.path.join(cls.app.config["CRDIR"], "urlmap.csv")) as fobj:
+            rdr = csv.DictReader(fobj)
+            for row in rdr:
+                # eprint("urlmap:", row["old"], "->", row["new"])
+                urlmap[row["old"]] = row["new"]
+
+    def map_url_prefix(self, url):
+        "try ever-shrinking prefixes of url in the map"
+        parts = urllib.parse.urlparse(url)
+        # we don't want query, fragment or params.
+        parts = parts._replace(query="", fragment="", params="")
+        while parts.path >= "/":
+            prefix = urllib.parse.urlunparse(parts)
+            # eprint("try:", prefix)
+            if (target := self.urlmap.get(prefix)) is not None:
+                # eprint(">>", url, "->", target)
+                return target
+            path = "/".join(parts.path.split("/")[:-1])
+            parts = parts._replace(path=path)
+        # no mapping for this bad boy...
+        # eprint(">> no mapping found for", url)
+        return url
+
+    def map_url(self, word):
+        "map a single word, possibly returning an <a...> construct"
+        if re.search("https?://|www[.]", word) is None:
+            return word
+
+        if word[0:4] == "&lt;" and word[-4:] == "&gt;":
+            # discard surrounding <...>. i think that notion came from
+            # the olden days. not sure why it was needed though.
+            word = word[4:-4]
+
+        if re.match("www[.]", word):
+            word = f"http://{word}"
+
+        # wool jersey used ".../gallery/v/..." and ".../gallery/..." - remove the "v"
+        word = word.replace("/gallery/v/", "/gallery/")
+
+        target = self.map_url_prefix(word)
+        mapped = "&nbsp;(mapped)" if target != word else ""
+        if re.match("https?://", word):
+            word = f"""<a target="_blank" href="{target}">{word}</a>{mapped}"""
+        return word
+
     def make_urls_sensitive(self, text):
-        "<a>-ify words which look like urls (just https? or leading www)."
+        """
+        <a>-ify words which look like urls (just https? or leading www).
+        Also map defunct URLs to current ones where known.
+        """
+
         new_text = []
+        self.initialize_urlmap()
         for word in re.split(r"(\s+)", text):
-            if re.match("https?://", word):
-                new_text.append(f"""<a target="_blank" href="{word}">{word}</a>""")
-            elif re.match("www[.]", word):
-                # assume website, HTTPS Everywhere or similar will map to https
-                new_text.append(f"""<a target="_blank" href="http://{word}">{word}</a>""")
-            else:
-                new_text.append(word)
+            new_text.append(self.map_url(word))
         return "".join(new_text)
 
     def decode(self, payload):
@@ -288,7 +342,8 @@ def read_message_string(raw):
 def read_message(path):
     "read an email message from path, trying encodings"
     pckgz = os.path.splitext(path)[0] + ".pck.gz"
-    if os.path.exists(pckgz):
+    if (os.path.exists(pckgz) and
+        os.path.getmtime(pckgz) > os.path.getmtime(path)):
         with gzip.open(pckgz, "rb") as pobj:
             return pickle.load(pobj)
 
@@ -298,14 +353,14 @@ def read_message(path):
                 try:
                     msg = read_message_string(fobj.read())
                 except UnicodeDecodeError as exc:
-                    exc_msg = str(exc)
+                    last_ext = exc
                 else:
                     # Cache message for future use - way faster than
                     # parsing the message from the .eml file.
                     with gzip.open(pckgz, "wb") as pobj:
                         pickle.dump(msg, pobj)
                     return msg
-        raise UnicodeDecodeError(exc_msg)
+        raise last_exc
     except FileNotFoundError:
         # pylint: disable=no-member
         logging.root.error("File not found: %s", path)
@@ -313,6 +368,8 @@ def read_message(path):
         # keep pylint happy
         return path
 
+def eprint(*args, file=sys.stderr, **kwds):
+    print(*args, file=file, **kwds)
 
 PFX_MATCHER = re.compile(r"\[classicrendezvous\]|\[cr\]|re:|\s+", flags=re.I)
 def trim_subject_prefix(subject):
