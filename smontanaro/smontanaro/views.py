@@ -18,7 +18,7 @@ from wtforms.validators import DataRequired
 
 from .db import ensure_db
 from .strip import strip_footers
-from .util import read_message, trim_subject_prefix
+from .util import read_message, trim_subject_prefix, eprint
 from .exc import NoResponse
 
 SEARCH = {
@@ -72,13 +72,11 @@ def init_indexes():
         next_url = month_url(year, month, +1, "dates")
 
         title = date.strftime("%b %Y Date Index")
-        thread_url = url_for("threads", year=year, month=f"{month:02d}")
-        nav = (f''' <a href="{thread_url}">By Thread</a>''')
-
         with open(f'''{CR}/{date.strftime("%Y-%m")}/generated/dates.body''',
                   encoding="utf-8") as fobj:
             body = fobj.read()
-        return render_template("index.jinja", title=title, body=body, nav=nav,
+        nav_list = [(("threads", dict(year=year, month=f"{month:02d}")), "By Thread")]
+        return render_template("index.jinja", title=title, body=body, nav=nav_list,
                                prev=prev_url, next=next_url)
 
     @app.route("/CR/<year>/<month>/threads")
@@ -93,12 +91,11 @@ def init_indexes():
         next_url = month_url(year, month, +1, "threads")
 
         title = date.strftime("%b %Y Thread Index")
-        date_url = url_for("dates", year=year, month=f"{month:02d}")
-        nav = (f''' <a href="{date_url}">By Date</a>''')
         with open(f'''{CR}/{date.strftime("%Y-%m")}/generated/threads.body''',
                   encoding="utf-8") as fobj:
             body = fobj.read()
-        return render_template("index.jinja", title=title, body=body, nav=nav,
+        nav_list = [(("dates", dict(year=year, month=f"{month:02d}")), "By Date")]
+        return render_template("index.jinja", title=title, body=body, nav=nav_list,
                                prev=prev_url, next=next_url)
 
     def month_url(start_year, start_month, offset, what):
@@ -138,33 +135,41 @@ def init_cr():
         "render email as html."
         return email_to_html(int(year), int(month), seq)
 
-    def generate_nav_block(year, month, seq):
+    def generate_nav_items(year, month, seq):
         "navigation header at top of email messages."
+        eprint(url_for("index"), url_for("cr_index"))
+        nav_list = [
+            ("index", 'Home'),
+            ("cr_index", "CR"),
+            (("dates", dict(year=year, month=f"{month:02d}")), 'Up'),
+        ]
 
         mydir = os.path.join(CR, f"{year:04d}-{month:02d}", "eml-files")
-        nxt = prv = ""
         if msg_exists(mydir, year, month, seq - 1):
-            url = url_for("cr_message", year=year, month=f"{month:02d}",
-                          seq=(seq - 1))
-            prv = f' <a href="{url}">Prev</a>'
+            nav_list.append((("cr_message",
+                              dict(year=year, month=f"{month:02d}", seq=(seq - 1))),
+                             'Prev'))
         if msg_exists(mydir, year, month, seq + 1):
-            url = url_for("cr_message", year=year, month=f"{month:02d}",
-                          seq=(seq + 1))
-            nxt = f' <a href="{url}">Next</a>'
-        uplink = url_for("dates", year=year, month=f"{month:02d}")
+            nav_list.append((("cr_message",
+                              dict(year=year, month=f"{month:02d}", seq=(seq + 1))),
+                             'Next'))
 
-        date_url = (url_for("dates", year=year, month=f"{month:02d}"))
-        thread_url = (url_for("threads", year=year, month=f"{month:02d}"))
+        nav_list.append((("dates",
+                          dict(year=year, month=f"{month:02d}", anchor_=f"{seq:05d}")),
+                         'Date Index'))
+        nav_list.append((("threads",
+                          dict(year=year, month=f"{month:02d}", anchor_=f"{seq:05d}")),
+                          'Thread Index'))
 
-        return (f'<a href="{uplink}">Up</a>{nxt}{prv}'
-                f'&nbsp;<a href="{date_url}#{seq:05d}">Date Index</a>'
-                f'&nbsp;<a href="{thread_url}#{seq:05d}">Thread Index</a>')
+        eprint(">>", nav_list)
+
+        return nav_list
 
     # pylint: disable=global-variable-not-assigned
     global email_to_html
     def email_to_html(year, month, seq, note=""):
         "convert the email referenced by year, month and seq to html."
-        nav = generate_nav_block(year, month, seq)
+        nav = generate_nav_items(year, month, seq)
         msg = eml_file(year, month, seq)
         mydir = os.path.join(CR, f"{year:04d}-{month:02d}", "eml-files")
         message = read_message(os.path.join(mydir, msg))
