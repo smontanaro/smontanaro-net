@@ -353,7 +353,7 @@ def read_message(path):
                 try:
                     msg = read_message_string(fobj.read())
                 except UnicodeDecodeError as exc:
-                    last_exc = exc
+                    last_ext = exc
                 else:
                     # Cache message for future use - way faster than
                     # parsing the message from the .eml file.

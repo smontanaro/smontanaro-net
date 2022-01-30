@@ -4,8 +4,8 @@
 
 import os
 
-from flask_bootstrap import Bootstrap5
 from flask import Flask
+from dynaconf import FlaskDynaconf
 
 from . import util
 from . import views
@@ -14,8 +14,7 @@ from . import exc
 def create_app(test_config=None):
     "create and configure app"
     app = Flask(__name__)
-    # pylint: disable=unused-variable
-    bootstrap = Bootstrap5(app)
+    FlaskDynaconf(app, settings_files=["settings.toml", ".secrets.toml"])
 
     crdir = os.environ.get("CRDIR", os.getcwd())
     app.config.from_mapping({
