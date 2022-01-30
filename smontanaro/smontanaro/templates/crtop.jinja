@@ -1,7 +1,14 @@
 {% extends "home.jinja" %}
 
 {% block nav %}
-    <a href="/">Home</a>&nbsp;<a href="/CR">CR Archives</a>&nbsp;{{ nav|safe }}
+    {% from 'bootstrap4/nav.html' import render_nav_item %}
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="navbar-nav mr-auto">
+            {% for (target, text) in nav %}
+                {{ render_nav_item(target, text) }}
+            {% endfor %}
+        </div>
+    </nav>
 {% endblock %}
 
 {% block left %}

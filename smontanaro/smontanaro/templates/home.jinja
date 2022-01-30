@@ -1,61 +1,36 @@
-<!DOCTYPE html>
-<!--
-        Heavily modified from:
+{% extends "base.jinja" %}
 
-	terrafirma1.0 by nodethirtythree design
-	http://www.nodethirtythree.com
-        Design by <a href="http://www.nodethirtythree.com/">NodeThirtyThree</a>.
--->
-<html>
-<head>
-  <title>{{ page_title|d(title)|safe }}</title>
-<meta http-equiv="content-type" content="text/html; charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-{% block meta %}{% endblock %}
-<link rel="stylesheet" type="text/css" href="/static/css/default.css" />
+{% block content %}
+    <div class="container">
+        <div class="nav" style="margin: 5px;">
+            {% block nav %}
+            {% endblock %}
+        </div>
+        <div class="header" style="margin: 5px;">
+            <h1 id="header">{{ prev|safe }}{{ title }}{{ next|safe }}</h1>
+        </div>
+        <div class="left" style="margin: 5px;">
+            {% block left %}{% endblock %}
+        </div>
+        <div class="main" style="margin: 5px;">
+            {% block topic %}{% endblock %}
+            {% block body %}
+                {{ body|safe }}
+            {% endblock %}
+        </div>
+        <div class="footer" style="margin: 5px;">
+            {% block copyright %}
+                <!--
+                     &copy; 2000-2011 Dale Brown.
+                     &copy; 2021-{{ today.strftime("%Y") }} Skip Montanaro.
+                -->
+            {% endblock %}
+        </div>
+    </div>
 
-<!--
-  Floating button CSS and font nicked from
-  http://androidcss.com/css/css3-floating-button-tutorial/
--->
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.css">
-<link rel="stylesheet" type="text/css" href="/static/css/floating.css" />
-<meta name="keywords" content="" />
-<meta name="description" content="" />
-</head>
-<body>
-
-<div class="container">
-  <div class="header" style="margin: 5px;">
-    <h1 id="header">{{ prev|safe }}{{ title }}{{ next|safe }}</h1>
-  </div>
-  <div class="nav" style="margin: 5px;">
-    {% block nav %}{% endblock %}
-  </div>
-  <div class="left" style="margin: 5px;">
-    {% block left %}{% endblock %}
-  </div>
-  <div class="main" style="margin: 5px;">
-    {% block topic %}{% endblock %}
-    {% block body %}
-        {{ body|safe }}
-    {% endblock %}
-  </div>
-  <div class="footer" style="margin: 5px;>
-    {% block copyright %}
-              <!--
-              &copy; 2000-2011 Dale Brown.
-              &copy; 2021-{{ today.strftime("%Y") }} Skip Montanaro.
-              -->
-    {% endblock %}
-  </div>
-</div>
-
-<div style="font-size: 2.0rem;">
-  <a href="#top" class="float">
-    <i class="fa fa-arrow-up my-float"></i>
-  </a>
-</div>
-
-</body>
-</html>
+    <div style="font-size: 2.0rem;">
+        <a href="#top" class="float">
+            <i class="fa fa-arrow-up my-float"></i>
+        </a>
+    </div>
+{% endblock %}
