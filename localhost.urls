@@ -12,6 +12,9 @@ http://localhost:8080/CR/2005/06/0640
 http://localhost:8080/CR/2000/03/dates
 http://localhost:8080/CR/2000/03/threads
 http://localhost:8080/CR/2000/06/dates
+# no content-type, quotes original message
+http://localhost:8080/CR/2002/04/0346
+http://localhost:8080/CR/2001/01/0656
 # file doesn't exist
 http://localhost:8080/CR/2000/09/9999
 # multipart/mixed
