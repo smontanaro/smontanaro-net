@@ -236,20 +236,29 @@ class Message(email.message.Message):
 
     def map_url_prefix(self, url):
         "try ever-shrinking prefixes of url in the map"
+        # this is called after html escape.  restore url in case it
+        # has special characters
+        url = html.unescape(url)
         parts = urllib.parse.urlparse(url)
         # we don't want query, fragment or params.
         parts = parts._replace(query="", fragment="", params="")
+        # if the URL lacks a path, make it "/" so we traverse the
+        # while loop once.
+        if not parts.path:
+            parts = parts._replace(path="/")
         while parts.path >= "/":
             prefix = urllib.parse.urlunparse(parts)
             # eprint("try:", prefix)
             if (target := self.urlmap.get(prefix)) is not None:
                 # eprint(">>", url, "->", target)
-                return target
+                # now we have to re-escape...
+                return html.escape(target)
+
             path = "/".join(parts.path.split("/")[:-1])
             parts = parts._replace(path=path)
         # no mapping for this bad boy...
         # eprint(">> no mapping found for", url)
-        return url
+        return html.escape(url)
 
     def map_url(self, word):
         "map a single word, possibly returning an <a...> construct"
@@ -353,7 +362,7 @@ def read_message(path):
                 try:
                     msg = read_message_string(fobj.read())
                 except UnicodeDecodeError as exc:
-                    last_ext = exc
+                    last_exc = exc
                 else:
                     # Cache message for future use - way faster than
                     # parsing the message from the .eml file.
