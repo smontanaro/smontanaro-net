@@ -6,7 +6,7 @@ lib*
 pyvenv.cfg
 references.db
 terrafirma
-server.log
+server.log*
 *,cover
 .coverage
 htmlcov
