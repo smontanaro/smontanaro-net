@@ -1,37 +1,42 @@
 [INFO] Starting gunicorn 20.1.0
 [INFO] Using worker: sync
-127.0.0.1 - - "GET /favicon.ico HTTP/1.1" 302 258 "-" "curl/7.68.0"
-127.0.0.1 - - "GET /robots.txt HTTP/1.1" 302 250 "-" "curl/7.68.0"
-127.0.0.1 - - "GET /env HTTP/1.1" 200 5054 "-" "curl/7.68.0"
-127.0.0.1 - - "GET /api/help HTTP/1.1" 200 1607 "-" "curl/7.68.0"
-127.0.0.1 - - "GET / HTTP/1.1" 200 2090 "-" "curl/7.68.0"
-127.0.0.1 - - "GET /CR/ HTTP/1.1" 200 17017 "-" "curl/7.68.0"
-127.0.0.1 - - "GET /2001-05/html/threads.html HTTP/1.1" 301 244 "-" "curl/7.68.0"
-127.0.0.1 - - "GET /2003-09/html/maillist.html HTTP/1.1" 301 238 "-" "curl/7.68.0"
-127.0.0.1 - - "GET /2004-09/html/msg00032.html HTTP/1.1" 301 232 "-" "curl/7.68.0"
+127.0.0.1 - - "GET /favicon.ico HTTP/1.1" 302 <size> "-" "curl/7.68.0"
+127.0.0.1 - - "GET /robots.txt HTTP/1.1" 302 <size> "-" "curl/7.68.0"
+127.0.0.1 - - "GET /env HTTP/1.1" 200 <size> "-" "curl/7.68.0"
+127.0.0.1 - - "GET /api/help HTTP/1.1" 200 <size> "-" "curl/7.68.0"
+127.0.0.1 - - "GET / HTTP/1.1" 200 <size> "-" "curl/7.68.0"
+127.0.0.1 - - "GET /CR/ HTTP/1.1" 200 <size> "-" "curl/7.68.0"
+127.0.0.1 - - "GET /2001-05/html/threads.html HTTP/1.1" 301 <size> "-" "curl/7.68.0"
+127.0.0.1 - - "GET /2003-09/html/maillist.html HTTP/1.1" 301 <size> "-" "curl/7.68.0"
+127.0.0.1 - - "GET /2004-09/html/msg00032.html HTTP/1.1" 301 <size> "-" "curl/7.68.0"
+# invalid old-style message url
+127.0.0.1 - - "GET /2004-09/html/msg.html HTTP/1.1" 404 <size> "-" "curl/7.68.0"
 # bogus charset
-127.0.0.1 - - "GET /CR/2005/06/0640 HTTP/1.1" 200 6347 "-" "curl/7.68.0"
-127.0.0.1 - - "GET /CR/2000/03/dates HTTP/1.1" 200 4717 "-" "curl/7.68.0"
-127.0.0.1 - - "GET /CR/2000/03/threads HTTP/1.1" 200 4601 "-" "curl/7.68.0"
-127.0.0.1 - - "GET /CR/2000/06/dates HTTP/1.1" 200 3827 "-" "curl/7.68.0"
+127.0.0.1 - - "GET /CR/2005/06/0640 HTTP/1.1" 200 <size> "-" "curl/7.68.0"
+127.0.0.1 - - "GET /CR/2000/03/dates HTTP/1.1" 200 <size> "-" "curl/7.68.0"
+127.0.0.1 - - "GET /CR/2000/03/threads HTTP/1.1" 200 <size> "-" "curl/7.68.0"
+127.0.0.1 - - "GET /CR/2000/06/dates HTTP/1.1" 200 <size> "-" "curl/7.68.0"
+# no content-type, quotes original message
+127.0.0.1 - - "GET /CR/2002/04/0346 HTTP/1.1" 200 <size> "-" "curl/7.68.0"
+127.0.0.1 - - "GET /CR/2001/01/0656 HTTP/1.1" 200 <size> "-" "curl/7.68.0"
 # file doesn't exist
 File not found: /home/skip/src/smontanaro.net/CR/2000-09/eml-files/classicrendezvous.10009.9999.eml
-127.0.0.1 - - "GET /CR/2000/09/9999 HTTP/1.1" 404 232 "-" "curl/7.68.0"
+127.0.0.1 - - "GET /CR/2000/09/9999 HTTP/1.1" 404 <size> "-" "curl/7.68.0"
 # multipart/mixed
-127.0.0.1 - - "GET /CR/2001/01/0307 HTTP/1.1" 200 4573 "-" "curl/7.68.0"
-127.0.0.1 - - "GET /CR/2009/09/01323 HTTP/1.1" 200 5736 "-" "curl/7.68.0"
+127.0.0.1 - - "GET /CR/2001/01/0307 HTTP/1.1" 200 <size> "-" "curl/7.68.0"
+127.0.0.1 - - "GET /CR/2009/09/01323 HTTP/1.1" 200 <size> "-" "curl/7.68.0"
 WARNING:root:Can't render images
-127.0.0.1 - - "GET /CR/2011/2/1601 HTTP/1.1" 200 13980 "-" "curl/7.68.0"
+127.0.0.1 - - "GET /CR/2011/2/1601 HTTP/1.1" 200 <size> "-" "curl/7.68.0"
 # non-standard response
-127.0.0.1 - - "GET /request/junk HTTP/1.1" 444 11 "-" "curl/7.68.0"
+127.0.0.1 - - "GET /request/junk HTTP/1.1" 444 <size> "-" "curl/7.68.0"
 # proper /request
-127.0.0.1 - - "GET /request/HTTP_USER_AGENT HTTP/1.1" 200 11 "-" "curl/7.68.0"
+127.0.0.1 - - "GET /request/HTTP_USER_AGENT HTTP/1.1" 200 <size> "-" "curl/7.68.0"
 # search
-127.0.0.1 - - "GET /search?query=Baylis HTTP/1.1" 200 3534 "-" "curl/7.68.0"
+127.0.0.1 - - "GET /search?query=Baylis HTTP/1.1" 200 <size> "-" "curl/7.68.0"
 # topics
-127.0.0.1 - - "GET /topics/BVVW HTTP/1.1" 200 4963 "-" "curl/7.68.0"
+127.0.0.1 - - "GET /topics/BVVW HTTP/1.1" 200 <size> "-" "curl/7.68.0"
 # url mapping
-127.0.0.1 - - "GET /CR/2008/02/1388 HTTP/1.1" 200 6100 "-" "curl/7.68.0"
-127.0.0.1 - - "GET /CR/2004/05/0026 HTTP/1.1" 200 5038 "-" "curl/7.68.0"
-127.0.0.1 - - "GET /CR/2006/10/0181 HTTP/1.1" 200 6185 "-" "curl/7.68.0"
+127.0.0.1 - - "GET /CR/2008/02/1388 HTTP/1.1" 200 <size> "-" "curl/7.68.0"
+127.0.0.1 - - "GET /CR/2004/05/0026 HTTP/1.1" 200 <size> "-" "curl/7.68.0"
+127.0.0.1 - - "GET /CR/2006/10/0181 HTTP/1.1" 200 <size> "-" "curl/7.68.0"
 ### end - place new lines above this ###
