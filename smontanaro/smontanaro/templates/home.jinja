@@ -26,22 +26,24 @@
 
     <body>
         <div class="container">
-            <div class="header" style="margin: 5px;">
+            {% block title %}
+            <div class="header" style="margin: 15px;">
                 <h1 id="header">{{ prev|safe }}{{ title }}{{ next|safe }}</h1>
             </div>
-            <div class="nav" style="margin: 5px;">
+            {% endblock %}
+            <div class="nav" style="margin: 15px;">
                 {% block nav %}{% endblock %}
             </div>
             <div class="left" style="margin: 5px;">
                 {% block left %}{% endblock %}
             </div>
-            <div class="main" style="margin: 5px;">
+            <div class="main" style="margin: 15px;">
                 {% block topic %}{% endblock %}
                 {% block body %}
                     {{ body|safe }}
                 {% endblock %}
             </div>
-            <div class="footer" style="margin: 5px;">
+            <div class="footer" style="margin: 15px;">
                 {% block copyright %}
                     <!--
                          &copy; 2000-2011 Dale Brown.
