@@ -2,7 +2,7 @@
 [INFO] Using worker: sync
 127.0.0.1 - - "GET /favicon.ico HTTP/1.1" 302 258 "-" "curl/7.68.0"
 127.0.0.1 - - "GET /robots.txt HTTP/1.1" 302 250 "-" "curl/7.68.0"
-127.0.0.1 - - "GET /env HTTP/1.1" 200 5080 "-" "curl/7.68.0"
+127.0.0.1 - - "GET /env HTTP/1.1" 200 5054 "-" "curl/7.68.0"
 127.0.0.1 - - "GET /api/help HTTP/1.1" 200 1607 "-" "curl/7.68.0"
 127.0.0.1 - - "GET / HTTP/1.1" 200 2090 "-" "curl/7.68.0"
 127.0.0.1 - - "GET /CR/ HTTP/1.1" 200 17017 "-" "curl/7.68.0"
@@ -33,4 +33,5 @@ WARNING:root:Can't render images
 # url mapping
 127.0.0.1 - - "GET /CR/2008/02/1388 HTTP/1.1" 200 6100 "-" "curl/7.68.0"
 127.0.0.1 - - "GET /CR/2004/05/0026 HTTP/1.1" 200 5038 "-" "curl/7.68.0"
+127.0.0.1 - - "GET /CR/2006/10/0181 HTTP/1.1" 200 6185 "-" "curl/7.68.0"
 ### end - place new lines above this ###
