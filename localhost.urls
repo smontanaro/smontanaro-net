@@ -7,6 +7,8 @@ http://localhost:8080/CR/
 http://localhost:8080/2001-05/html/threads.html
 http://localhost:8080/2003-09/html/maillist.html
 http://localhost:8080/2004-09/html/msg00032.html
+# invalid old-style message url
+http://localhost:8080/2004-09/html/msg.html
 # bogus charset
 http://localhost:8080/CR/2005/06/0640
 http://localhost:8080/CR/2000/03/dates
