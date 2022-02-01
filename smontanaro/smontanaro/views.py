@@ -40,6 +40,11 @@ RIGHT_ARROW = "\N{RIGHTWARDS ARROW}"
 def init_simple():
     app = current_app
 
+    @app.route("/about")
+    def about():
+        "websites need these"
+        return render_template("about.jinja")
+
     @app.route("/favicon.ico")
     def favicon():
         "websites need these"
@@ -262,14 +267,6 @@ def init_debug():
             if rule.endpoint != 'static':
                 func_list[rule.rule] = str(app.view_functions[rule.endpoint])
         return jsonify(func_list)
-
-    @app.get('/shutdown')
-    def shutdown():
-        func = request.environ.get('werkzeug.server.shutdown')
-        if func is None:
-            raise RuntimeError('Not running with the Werkzeug Server')
-        func()
-        return 'Server shutting down...\n'
 
 def init_search():
     app = current_app
