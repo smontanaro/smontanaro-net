@@ -4,7 +4,6 @@
 
 import os
 
-from flask_bootstrap import Bootstrap5
 from flask import Flask
 
 from . import util
@@ -14,8 +13,6 @@ from . import exc
 def create_app(test_config=None):
     "create and configure app"
     app = Flask(__name__)
-    # pylint: disable=unused-variable
-    bootstrap = Bootstrap5(app)
 
     crdir = os.environ.get("CRDIR", os.getcwd())
     app.config.from_mapping({
