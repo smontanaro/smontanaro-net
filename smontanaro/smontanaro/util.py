@@ -240,13 +240,13 @@ class Message(email.message.Message):
         # has special characters
         url = html.unescape(url)
         parts = urllib.parse.urlparse(url)
-        # we don't want query, fragment or params.
-        parts = parts._replace(query="", fragment="", params="")
+        # we don't want fragment or params.
+        parts = parts._replace(fragment="", params="")
         # if the URL lacks a path, make it "/" so we traverse the
         # while loop once.
         if not parts.path:
             parts = parts._replace(path="/")
-        while parts.path >= "/":
+        while parts.path >= "/" or parts.query != "":
             prefix = urllib.parse.urlunparse(parts)
             # eprint("try:", prefix)
             if (target := self.urlmap.get(prefix)) is not None:
@@ -254,8 +254,12 @@ class Message(email.message.Message):
                 # now we have to re-escape...
                 return html.escape(target)
 
-            path = "/".join(parts.path.split("/")[:-1])
-            parts = parts._replace(path=path)
+            # zero out query before shortening path
+            if parts.query:
+                parts = parts._replace(query="")
+            else:
+                path = "/".join(parts.path.split("/")[:-1])
+                parts = parts._replace(path=path)
         # no mapping for this bad boy...
         # eprint(">> no mapping found for", url)
         return html.escape(url)

@@ -39,4 +39,6 @@ WARNING:root:Can't render images
 127.0.0.1 - - "GET /CR/2008/02/1388 HTTP/1.1" 200 <size> "-" "curl/7.68.0"
 127.0.0.1 - - "GET /CR/2004/05/0026 HTTP/1.1" 200 <size> "-" "curl/7.68.0"
 127.0.0.1 - - "GET /CR/2006/10/0181 HTTP/1.1" 200 <size> "-" "curl/7.68.0"
+# url mapping with query
+127.0.0.1 - - "GET /CR/2006/11/1740 HTTP/1.1" 200 <size> "-" "curl/7.68.0"
 ### end - place new lines above this ###
