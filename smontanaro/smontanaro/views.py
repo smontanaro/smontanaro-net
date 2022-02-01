@@ -80,7 +80,7 @@ def init_indexes():
         with open(f'''{CR}/{date.strftime("%Y-%m")}/generated/dates.body''',
                   encoding="utf-8") as fobj:
             body = fobj.read()
-        nav_list = [(("threads", dict(year=year, month=f"{month:02d}")), "By Thread")]
+        nav_list = [("threads", dict(year=year, month=f"{month:02d}"), "By Thread")]
         return render_template("index.jinja", title=title, body=body, nav=nav_list,
                                prev=prev_url, next=next_url)
 
@@ -99,7 +99,7 @@ def init_indexes():
         with open(f'''{CR}/{date.strftime("%Y-%m")}/generated/threads.body''',
                   encoding="utf-8") as fobj:
             body = fobj.read()
-        nav_list = [(("dates", dict(year=year, month=f"{month:02d}")), "By Date")]
+        nav_list = [("dates", dict(year=year, month=f"{month:02d}"), "By Date")]
         return render_template("index.jinja", title=title, body=body, nav=nav_list,
                                prev=prev_url, next=next_url)
 
@@ -142,31 +142,28 @@ def init_cr():
 
     def generate_nav_items(year, month, seq):
         "navigation header at top of email messages."
-        eprint(url_for("index"), url_for("cr_index"))
         nav_list = [
-            ("index", 'Home'),
-            ("cr_index", "CR"),
-            (("dates", dict(year=year, month=f"{month:02d}")), 'Up'),
+            ("index", {}, 'Home'),
+            ("cr_index", {}, "CR"),
+            ("dates", dict(year=year, month=f"{month:02d}"), 'Up'),
         ]
 
         mydir = os.path.join(CR, f"{year:04d}-{month:02d}", "eml-files")
         if msg_exists(mydir, year, month, seq - 1):
-            nav_list.append((("cr_message",
-                              dict(year=year, month=f"{month:02d}", seq=(seq - 1))),
+            nav_list.append(("cr_message",
+                              dict(year=year, month=f"{month:02d}", seq=(seq - 1)),
                              'Prev'))
         if msg_exists(mydir, year, month, seq + 1):
-            nav_list.append((("cr_message",
-                              dict(year=year, month=f"{month:02d}", seq=(seq + 1))),
+            nav_list.append(("cr_message",
+                              dict(year=year, month=f"{month:02d}", seq=(seq + 1)),
                              'Next'))
 
-        nav_list.append((("dates",
-                          dict(year=year, month=f"{month:02d}", anchor_=f"{seq:05d}")),
+        nav_list.append(("dates",
+                          dict(year=year, month=f"{month:02d}", anchor_=f"{seq:05d}"),
                          'Date Index'))
-        nav_list.append((("threads",
-                          dict(year=year, month=f"{month:02d}", anchor_=f"{seq:05d}")),
+        nav_list.append(("threads",
+                          dict(year=year, month=f"{month:02d}", anchor_=f"{seq:05d}"),
                           'Thread Index'))
-
-        eprint(">>", nav_list)
 
         return nav_list
 
