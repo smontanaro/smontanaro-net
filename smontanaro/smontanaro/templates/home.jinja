@@ -1,31 +1,59 @@
 {% extends "base.jinja" %}
 
+{#
+pulled from https://github.com/greyli/bootstrap-flask code then
+whittled down to almost nothing
+#}
+
+{% macro render_nav_item(endpoint, kwargs, text, anchor) %}
+    <li class="nav-item">
+        <a class="nav-link" href="{{ url_for(endpoint, **kwargs) }}{{ anchor }}">
+            {{ text }}
+        </a>
+    </li>
+{% endmacro %}
+
 {% block content %}
     <div class="container">
-        <div class="nav" style="margin: 5px;">
-            {% block nav %}
+
+        <div class="navbar" style="margin: 5px;">
+            <nav class="navbar navbar-expand-lg navbar-light bg-light">
+                <div class="container-fluid">
+                    <ul class="nav nav-fill justify-content-center">
+                        {% for (endpoint, kwargs, text, anchor) in nav %}
+                            {{ render_nav_item(endpoint, kwargs, text, anchor) }}
+                        {% endfor %}
+                    </ul>
+                </div>
+            </nav>
+        </div>
+
+        <div class="header" style="margin: 15px;">
+            {% block title %}
+                <h1 id="header">{{ prev|safe }}{{ title }}{{ next|safe }}</h1>
             {% endblock %}
         </div>
-        <div class="header" style="margin: 5px;">
-            <h1 id="header">{{ prev|safe }}{{ title }}{{ next|safe }}</h1>
-        </div>
+
         <div class="left" style="margin: 5px;">
             {% block left %}{% endblock %}
         </div>
+
         <div class="main" style="margin: 5px;">
             {% block topic %}{% endblock %}
             {% block body %}
                 {{ body|safe }}
             {% endblock %}
         </div>
+
         <div class="footer" style="margin: 5px;">
-            {% block copyright %}
+            {% block footer %}
                 <!--
                      &copy; 2000-2011 Dale Brown.
                      &copy; 2021-{{ today.strftime("%Y") }} Skip Montanaro.
                 -->
             {% endblock %}
         </div>
+
     </div>
 
     <div style="font-size: 2.0rem;">

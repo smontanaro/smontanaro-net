@@ -1,28 +1,5 @@
 {% extends "home.jinja" %}
 
-{#
-    pulled from https://github.com/greyli/bootstrap-flask code and
-    fixed by adding kwargs argument
-#}
-
-{% macro render_nav_item(endpoint, kwargs, text, badge='', use_li=False) %}
-    {% set active = True if request.endpoint and request.endpoint == endpoint else False %}
-    <a class="nav-item nav-link{% if active %} active" aria-current="page{% endif %}"
-       href="{{ url_for(endpoint, **kwargs) }}">
-        {{ text }}
-    </a>
-{% endmacro %}
-
-{% block nav %}
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <div class="navbar-nav mr-auto">
-            {% for (endpoint, kwargs, text) in nav %}
-                {{ render_nav_item(endpoint, kwargs, text) }}
-            {% endfor %}
-        </div>
-    </nav>
-{% endblock %}
-
 {% block left %}
     {% include "search.jinja" %}
     {% include "stuff.jinja" %}
