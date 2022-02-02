@@ -29,8 +29,8 @@ def generate_index(records):
         print(f'''<h2>{dt.strftime("%d %b %Y")}</h2>''')
         print('''<ul style="column-count: auto; column-width: 300px;" class="no-bullets">''')
         for r in chunk:
-            print('''<li>''')
-            print(generate_link(r))
+            print('''<li>''', end="")
+            print(generate_link(r), end="")
             print('''</li>''')
         print("</ul>")
 
