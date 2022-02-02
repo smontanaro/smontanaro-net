@@ -31,6 +31,7 @@
 # https://localhost:8080/CR/2007/07/00004
 
 import csv
+import datetime
 import email.message
 import gzip
 import html
@@ -70,6 +71,7 @@ class Message(email.message.Message):
     content_headers = ("content-type", "content-transfer-encoding")
     app = None
     urlmap = {}
+    urlmaptime = datetime.datetime.fromtimestamp(0)
 
     def as_html(self):
         "return string in HTML form"
@@ -225,10 +227,13 @@ class Message(email.message.Message):
     @classmethod
     def initialize_urlmap(cls):
         "make sure urlmap is populated"
+        mapfile = os.path.join(cls.app.config["CRDIR"], "urlmap.csv")
+        stamp = os.path.getmtime(mapfile)
         urlmap = cls.urlmap
-        if urlmap:
+        if urlmap and stamp < cls.urlmaptime:
             return
-        with open(os.path.join(cls.app.config["CRDIR"], "urlmap.csv")) as fobj:
+        cls.urlmaptime = stamp
+        with open(mapfile) as fobj:
             rdr = csv.DictReader(fobj)
             for row in rdr:
                 # eprint("urlmap:", row["old"], "->", row["new"])
