@@ -40,7 +40,7 @@ RIGHT_ARROW = "\N{RIGHTWARDS ARROW}"
 def init_simple():
     app = current_app
 
-    @app.route("/about")
+    @app.route("/CR/about")
     def about():
         "websites need these"
         return render_template("about.jinja")
@@ -77,13 +77,17 @@ def init_indexes():
         next_url = month_url(year, month, +1, "dates")
 
         title = date.strftime("%b %Y Date Index")
-        thread_url = url_for("threads", year=year, month=f"{month:02d}")
-        nav = (f''' <a href="{thread_url}">By Thread</a>''')
-
         with open(f'''{CR}/{date.strftime("%Y-%m")}/generated/dates.body''',
                   encoding="utf-8") as fobj:
             body = fobj.read()
-        return render_template("index.jinja", title=title, body=body, nav=nav,
+        nav_list = (generate_nav_items() +
+                    [(
+                        "threads",
+                        dict(year=year, month=f"{month:02d}"),
+                        "By Thread",
+                        ""
+                    )])
+        return render_template("index.jinja", title=title, body=body, nav=nav_list,
                                prev=prev_url, next=next_url)
 
     @app.route("/CR/<year>/<month>/threads")
@@ -98,12 +102,17 @@ def init_indexes():
         next_url = month_url(year, month, +1, "threads")
 
         title = date.strftime("%b %Y Thread Index")
-        date_url = url_for("dates", year=year, month=f"{month:02d}")
-        nav = (f''' <a href="{date_url}">By Date</a>''')
         with open(f'''{CR}/{date.strftime("%Y-%m")}/generated/threads.body''',
                   encoding="utf-8") as fobj:
             body = fobj.read()
-        return render_template("index.jinja", title=title, body=body, nav=nav,
+        nav_list = (generate_nav_items() +
+                    [(
+                        "dates",
+                        dict(year=year, month=f"{month:02d}"),
+                        "By Date",
+                        ""
+                    )])
+        return render_template("index.jinja", title=title, body=body, nav=nav_list,
                                prev=prev_url, next=next_url)
 
     def month_url(start_year, start_month, offset, what):
@@ -135,41 +144,70 @@ def init_cr():
         "templated index"
 
         with open(f"{CR}/generated/index.body", encoding="utf8") as fobj:
-            return render_template("crtop.jinja", body=fobj.read(), nav="",
-                                   title="Old Classic Rendezvous Archive")
+            return render_template("crtop.jinja", body=fobj.read(),
+                                   title="Old Classic Rendezvous Archive",
+                                   nav=generate_nav_items())
 
     @app.route('/CR/<year>/<month>/<int:seq>')
     def cr_message(year, month, seq):
         "render email as html."
         return email_to_html(int(year), int(month), seq)
 
-    def generate_nav_block(year, month, seq):
+    global generate_nav_items
+    def generate_nav_items(*, year=None, month=None, seq=None):
         "navigation header at top of email messages."
+        nav_list = [
+            ("index", {}, 'Home', ""),
+            ("cr_index", {}, "CR", ""),
+        ]
+        if year is not None:
+            nav_list.append(
+                (
+                    "dates",
+                    dict(year=year, month=f"{month:02d}"),
+                    'Up',
+                    ""
+                ))
 
-        mydir = os.path.join(CR, f"{year:04d}-{month:02d}", "eml-files")
-        nxt = prv = ""
-        if msg_exists(mydir, year, month, seq - 1):
-            url = url_for("cr_message", year=year, month=f"{month:02d}",
-                          seq=(seq - 1))
-            prv = f' <a href="{url}">Prev</a>'
-        if msg_exists(mydir, year, month, seq + 1):
-            url = url_for("cr_message", year=year, month=f"{month:02d}",
-                          seq=(seq + 1))
-            nxt = f' <a href="{url}">Next</a>'
-        uplink = url_for("dates", year=year, month=f"{month:02d}")
+            mydir = os.path.join(CR, f"{year:04d}-{month:02d}", "eml-files")
+            if msg_exists(mydir, year, month, seq - 1):
+                nav_list.append(
+                    (
+                        "cr_message",
+                        dict(year=year, month=f"{month:02d}", seq=(seq - 1)),
+                        'Prev',
+                        ""
+                    ))
+            if msg_exists(mydir, year, month, seq + 1):
+                nav_list.append(
+                    (
+                        "cr_message",
+                        dict(year=year, month=f"{month:02d}", seq=(seq + 1)),
+                        'Next',
+                        ""
+                    ))
+            nav_list.append(
+                (
+                    "dates",
+                    dict(year=year, month=f"{month:02d}"),
+                    'Date Index',
+                    f"#{seq:05d}"
+                ))
+            nav_list.append(
+                (
+                    "threads",
+                    dict(year=year, month=f"{month:02d}"),
+                    'Thread Index',
+                    f"#{seq:05d}"
+                ))
 
-        date_url = (url_for("dates", year=year, month=f"{month:02d}"))
-        thread_url = (url_for("threads", year=year, month=f"{month:02d}"))
-
-        return (f'<a href="{uplink}">Up</a>{nxt}{prv}'
-                f'&nbsp;<a href="{date_url}#{seq:05d}">Date Index</a>'
-                f'&nbsp;<a href="{thread_url}#{seq:05d}">Thread Index</a>')
+        return nav_list
 
     # pylint: disable=global-variable-not-assigned
     global email_to_html
     def email_to_html(year, month, seq, note=""):
         "convert the email referenced by year, month and seq to html."
-        nav = generate_nav_block(year, month, seq)
+        nav = generate_nav_items(year=year, month=month, seq=seq)
         msg = eml_file(year, month, seq)
         mydir = os.path.join(CR, f"{year:04d}-{month:02d}", "eml-files")
         message = read_message(os.path.join(mydir, msg))
@@ -297,7 +335,7 @@ def init_topics():
             msgrefs=[(yr, mo, seq, trim_subject_prefix(subj))
                         for (yr, mo, seq, subj) in get_topic(topic, conn)]
         return render_template("topics.jinja", topics=topics, msgrefs=msgrefs,
-                               topic=topic)
+                               topic=topic, nav=generate_nav_items())
 
     @app.route('/addtopic', methods=['GET', 'POST'])
     def addtopic():
@@ -330,7 +368,8 @@ def init_topics():
                                  month=int(topic_form.month.data, 10),
                                  seq=int(topic_form.seq.data, 10),
                                  note="Thanks for your submission.")
-        return render_template('cr.jinja', topic_form=topic_form)
+        return render_template('cr.jinja', topic_form=topic_form,
+                               nav=generate_nav_items(year=year, month=month, seq=seq))
 
     def save_topic_record(record):
         "write submitted topic details to CSV file."
