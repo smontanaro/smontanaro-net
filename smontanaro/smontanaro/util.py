@@ -355,7 +355,9 @@ def read_message_string(raw):
 def read_message_bytes(raw):
     "construct Message from byte string."
     msg = email.message_from_bytes(raw, _class=Message)
-    if (b"=0A" in msg.get_payload(decode=True) and
+    payload = msg.get_payload(decode=True)
+    if (isinstance(payload, bytes) and
+        b"=0A" in payload and
         "Content-Transfer-Encoding" not in msg):
         msg["Content-Transfer-Encoding"] = "quoted-printable"
         assert b"=0A" not in msg.get_payload(decode=True)
