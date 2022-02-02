@@ -40,7 +40,7 @@ RIGHT_ARROW = "\N{RIGHTWARDS ARROW}"
 def init_simple():
     app = current_app
 
-    @app.route("/about")
+    @app.route("/CR/about")
     def about():
         "websites need these"
         return render_template("about.jinja")

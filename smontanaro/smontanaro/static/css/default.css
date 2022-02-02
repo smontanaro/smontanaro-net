@@ -20,7 +20,7 @@ line-height: 18px;
     gap: 5px 5px;
     grid-auto-flow: row;
     grid-template-areas:
-        "navbar ."
+        "menubar ."
         "header ."
         "left main"
         "footer .";
@@ -32,8 +32,8 @@ line-height: 18px;
     text-align: center;
 }
 
-.navbar {
-    grid-area: navbar;
+.menubar {
+    grid-area: menubar;
     grid-column: 1 / span 2;
     text-align: left;
     font-weight: bold;
