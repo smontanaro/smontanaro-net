@@ -18,6 +18,7 @@ from wtforms.validators import DataRequired
 
 from .db import ensure_db
 from .strip import strip_footers
+# pylint: disable=unused-import
 from .util import read_message, trim_subject_prefix, eprint
 from .exc import NoResponse
 
