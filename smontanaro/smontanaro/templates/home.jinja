@@ -24,6 +24,7 @@ whittled down to almost nothing
                             {{ render_nav_item(endpoint, kwargs, text, anchor) }}
                         {% endfor %}
                     </ul>
+                    {% block navbar_extra %}{% endblock %}
                 </div>
             </nav>
         </div>

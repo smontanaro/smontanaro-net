@@ -1,0 +1,15 @@
+<form class="d-flex" action="/CR/filter_date" method="POST">
+    <select id="in_out" class="form-select" name="in_out"><option value="keep">Keep</option><option selected value="toss">Toss</option></select>
+    {# {{ filter_form.in_out }} #}
+    <input name="pattern" class="form-control me-2" type="search" placeholder="Filter Pattern" aria-label="">
+    {# {{ filter_form.pattern }} #}
+    {{ filter_form.csrf_token }}
+    {{ filter_form.year(value=year) }}
+    {{ filter_form.month(value=month) }}
+    <button class="btn btn-outline-success" type="submit">Filter</button>
+</form>
+
+{#
+<input name="pattern" class="form-control me-2" type="search" placeholder="Filter Pattern" aria-label="Search">
+</form>
+#}

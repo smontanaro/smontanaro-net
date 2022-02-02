@@ -13,12 +13,13 @@ import urllib.parse
 from flask import (redirect, url_for, render_template, abort, jsonify, request,
                    current_app)
 from flask_wtf import FlaskForm
-from wtforms import StringField, HiddenField, RadioField
+from wtforms import StringField, HiddenField, RadioField, SelectField
 from wtforms.validators import DataRequired
 
 from .db import ensure_db
 from .strip import strip_footers
-from .util import read_message, trim_subject_prefix
+# pylint: disable=unused-import
+from .util import read_message, trim_subject_prefix, eprint
 from .exc import NoResponse
 
 SEARCH = {
@@ -66,7 +67,8 @@ def init_indexes():
 
     @app.route("/CR/<year>/<month>")
     @app.route("/CR/<year>/<month>/dates")
-    def dates(year, month):
+    @app.route("/CR/<year>/<month>/dates/<pattern>/<in_out>")
+    def dates(year, month, pattern=".*", in_out="keep"):
         "new date index"
 
         year = int(year)
@@ -79,7 +81,24 @@ def init_indexes():
         title = date.strftime("%b %Y Date Index")
         with open(f'''{CR}/{date.strftime("%Y-%m")}/generated/dates.body''',
                   encoding="utf-8") as fobj:
-            body = fobj.read()
+            lines = list(fobj)
+
+        # note that the filtering process relies on the format of the
+        # output from generate_date_index.py. if that changes this
+        # probably will have to as well.
+        filter_lines = []
+        if in_out == "keep":
+            # make sure we keep the other formatting bits we need.
+            pattern = f"({pattern})|</?ul.*>|<h2>"
+        for line in lines:
+            if in_out == "keep":
+                if re.search(pattern, line, re.I) is not None:
+                    filter_lines.append(line)
+            else:               # toss
+                if re.search(pattern, line, re.I) is None:
+                    filter_lines.append(line)
+        body = "\n".join(filter_lines)
+
         nav_list = (generate_nav_items() +
                     [(
                         "threads",
@@ -87,7 +106,7 @@ def init_indexes():
                         "By Thread",
                         ""
                     )])
-        return render_template("index.jinja", title=title, body=body, nav=nav_list,
+        return render_template("dates.jinja", title=title, body=body, nav=nav_list,
                                prev=prev_url, next=next_url)
 
     @app.route("/CR/<year>/<month>/threads")
@@ -283,6 +302,7 @@ def init_extra():
             "today": datetime.date.today(),
             "search_form": SearchForm(),
             "topic_form": TopicForm(),
+            "filter_form": FilterForm(),
         }
 
 def init_debug():
@@ -313,6 +333,23 @@ def init_search():
             engine = SEARCH.get(search_form.engine.data, SEARCH["Brave"])
             return redirect(f"{engine}?q={query}")
         return render_template('cr.jinja', search_form=search_form)
+
+def init_filter():
+    app = current_app
+
+    @app.route('/CR/filter_date', methods=['GET', 'POST'])
+    def filter_date():
+        filter_form = FilterForm()
+        if filter_form.validate_on_submit():
+            pattern = filter_form.pattern.data
+            in_out = filter_form.in_out.data
+            year = int(filter_form.year.data)
+            month = int(filter_form.month.data)
+            return redirect(url_for("dates", year=year, month=f"{month:02d}",
+                                    pattern=pattern, in_out=in_out))
+        return render_template('filter.jinja', filter_form=filter_form,
+                               year=filter_form.year.data,
+                               month=filter_form.month.data)
 
 def init_topics():
     app = current_app
@@ -385,6 +422,16 @@ def init_topics():
             if writeheader:
                 writer.writeheader()
             writer.writerow(record)
+
+class FilterForm(FlaskForm):
+    "For filtering (out) uninteresting subjects"
+    pattern = StringField("Filter:", validators=[DataRequired()])
+    in_out = SelectField("Keep or Toss:", choices=[
+        ('keep', 'Keep'),
+        ('toss', 'Toss'),
+    ], default='toss')
+    year = HiddenField('year')
+    month = HiddenField('month')
 
 class TopicForm(FlaskForm):
     "simple form used to add topics to a message"
@@ -476,6 +523,7 @@ def init_app(app):
         init_extra()
         init_search()
         init_topics()
+        init_filter()
 
         if app.config["DEBUG"]:
             init_debug()
