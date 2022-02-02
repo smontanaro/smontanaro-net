@@ -352,6 +352,17 @@ def read_message_string(raw):
     "construct Message from string."
     return email.message_from_string(raw, _class=Message)
 
+def read_message_bytes(raw):
+    "construct Message from byte string."
+    msg = email.message_from_bytes(raw, _class=Message)
+    payload = msg.get_payload(decode=True)
+    if (isinstance(payload, bytes) and
+        b"=0A" in payload and
+        "Content-Transfer-Encoding" not in msg):
+        msg["Content-Transfer-Encoding"] = "quoted-printable"
+        assert b"=0A" not in msg.get_payload(decode=True)
+    return msg
+
 def read_message(path):
     "read an email message from path, trying encodings"
     pckgz = os.path.splitext(path)[0] + ".pck.gz"
@@ -361,19 +372,13 @@ def read_message(path):
             return pickle.load(pobj)
 
     try:
-        for encoding in ("utf-8", "latin-1"):
-            with open(path, encoding=encoding) as fobj:
-                try:
-                    msg = read_message_string(fobj.read())
-                except UnicodeDecodeError as exc:
-                    last_exc = exc
-                else:
-                    # Cache message for future use - way faster than
-                    # parsing the message from the .eml file.
-                    with gzip.open(pckgz, "wb") as pobj:
-                        pickle.dump(msg, pobj)
-                    return msg
-        raise last_exc
+        with open(path, "rb") as fobj:
+            msg = read_message_bytes(fobj.read())
+            # Cache message for future use - way faster than
+            # parsing the message from the .eml file.
+            with gzip.open(pckgz, "wb") as pobj:
+                pickle.dump(msg, pobj)
+            return msg
     except FileNotFoundError:
         # pylint: disable=no-member
         logging.root.error("File not found: %s", path)

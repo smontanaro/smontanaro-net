@@ -37,4 +37,6 @@ http://localhost:8080/CR/2004/05/0026
 http://localhost:8080/CR/2006/10/0181
 # url mapping with query
 http://localhost:8080/CR/2006/11/1740
+# quoted-printable encoding, but missing header
+http://localhost:8080/CR/2008/05/1123
 ### end - place new lines above this ###
