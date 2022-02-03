@@ -107,7 +107,7 @@ def init_indexes():
                         ""
                     )])
         return render_template("dates.jinja", title=title, body=body, nav=nav_list,
-                               prev=prev_url, next=next_url)
+                               prev=prev_url, next=next_url, year=year, month=month)
 
     @app.route("/CR/<year>/<month>/threads")
     def threads(year, month):
@@ -347,9 +347,7 @@ def init_filter():
             month = int(filter_form.month.data)
             return redirect(url_for("dates", year=year, month=f"{month:02d}",
                                     pattern=pattern, in_out=in_out))
-        return render_template('filter.jinja', filter_form=filter_form,
-                               year=filter_form.year.data,
-                               month=filter_form.month.data)
+        return render_template('filter.jinja', filter_form=filter_form)
 
 def init_topics():
     app = current_app
