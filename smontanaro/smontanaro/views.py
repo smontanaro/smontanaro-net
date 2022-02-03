@@ -87,15 +87,13 @@ def init_indexes():
         # output from generate_date_index.py. if that changes this
         # probably will have to as well.
         filter_lines = []
-        if in_out == "keep":
-            # make sure we keep the other formatting bits we need.
-            pattern = f"({pattern})|</?ul.*>|<h2>"
+        full_pat = f"({pattern})|</?ul.*>|<h2>" if in_out == "keep" else pattern
         for line in lines:
             if in_out == "keep":
-                if re.search(pattern, line, re.I) is not None:
+                if re.search(full_pat, line, re.I) is not None:
                     filter_lines.append(line)
             else:               # toss
-                if re.search(pattern, line, re.I) is None:
+                if re.search(full_pat, line, re.I) is None:
                     filter_lines.append(line)
         body = "\n".join(filter_lines)
 
@@ -106,8 +104,11 @@ def init_indexes():
                         "By Thread",
                         ""
                     )])
+        if pattern == ".*":
+            pattern = ""
         return render_template("dates.jinja", title=title, body=body, nav=nav_list,
-                               prev=prev_url, next=next_url, year=year, month=month)
+                               prev=prev_url, next=next_url, year=year, month=month,
+                               pattern=pattern, in_out=in_out)
 
     @app.route("/CR/<year>/<month>/threads")
     def threads(year, month):
