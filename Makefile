@@ -33,7 +33,7 @@ $(REFDB).new : FORCE
 	@echo "Replace $(REFDB) with $(REFDB).new when ready"
 
 lint : FORCE
-	pylint smontanaro/smontanaro/*.py scripts/*.py \
+	pylint --rcfile=.pylintrc smontanaro/smontanaro/*.py scripts/*.py \
 	| sed -e '/duplicate-code/,/^--------------------/d'
 
 test : FORCE

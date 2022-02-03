@@ -13,7 +13,7 @@ import urllib.parse
 from flask import (redirect, url_for, render_template, abort, jsonify, request,
                    current_app)
 from flask_wtf import FlaskForm
-from wtforms import StringField, HiddenField, RadioField, SelectField
+from wtforms import StringField, HiddenField, SelectField
 from wtforms.validators import DataRequired
 
 from .db import ensure_db
@@ -23,7 +23,7 @@ from .util import read_message, trim_subject_prefix, eprint
 from .exc import NoResponse
 
 SEARCH = {
-    "DuckDuckGo": "https://search.duckduckgo.com/",
+    "DuckDuckGo": "https://duckduckgo.com/",
     "Bing": "https://bing.com/search",
     "Google": "https://google.com/search",
     "Brave": "https://search.brave.com/search",
@@ -107,7 +107,7 @@ def init_indexes():
                         ""
                     )])
         return render_template("dates.jinja", title=title, body=body, nav=nav_list,
-                               prev=prev_url, next=next_url)
+                               prev=prev_url, next=next_url, year=year, month=month)
 
     @app.route("/CR/<year>/<month>/threads")
     def threads(year, month):
@@ -347,15 +347,13 @@ def init_filter():
             month = int(filter_form.month.data)
             return redirect(url_for("dates", year=year, month=f"{month:02d}",
                                     pattern=pattern, in_out=in_out))
-        return render_template('filter.jinja', filter_form=filter_form,
-                               year=filter_form.year.data,
-                               month=filter_form.month.data)
+        return render_template('filter.jinja', filter_form=filter_form)
 
 def init_topics():
     app = current_app
 
-    @app.route('/topics')
-    @app.route('/topics/<topic>')
+    @app.route('/CR/topics')
+    @app.route('/CR/topics/<topic>')
     def show_topics(topic=""):
         "list topics or display entries for a specific topic"
         conn = ensure_db(app.config["REFDB"])
@@ -444,9 +442,10 @@ class SearchForm(FlaskForm):
     "simple form used to search Brave for archived list messages"
     query = StringField('Search:', validators=[DataRequired()])
     site = HiddenField('site', default='smontanaro.net')
-    engine = RadioField('Engine:', choices=[
+    engine = SelectField('Engine:', choices=[
         ('Brave', 'Brave'),
         ('DuckDuckGo', 'DuckDuckGo'),
+        ('Bing', 'Bing'),
         ('Google', 'Google'),
     ], default='Brave')
 
