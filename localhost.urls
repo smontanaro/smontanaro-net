@@ -30,7 +30,7 @@ http://localhost:8080/request/HTTP_USER_AGENT
 # search
 http://localhost:8080/search?query=Baylis
 # topics
-http://localhost:8080/topics/BVVW
+http://localhost:8080/CR/topics/BVVW
 # url mapping
 http://localhost:8080/CR/2008/02/1388
 http://localhost:8080/CR/2004/05/0026
