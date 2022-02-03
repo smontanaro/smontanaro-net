@@ -13,7 +13,7 @@ import urllib.parse
 from flask import (redirect, url_for, render_template, abort, jsonify, request,
                    current_app)
 from flask_wtf import FlaskForm
-from wtforms import StringField, HiddenField, RadioField, SelectField
+from wtforms import StringField, HiddenField, SelectField
 from wtforms.validators import DataRequired
 
 from .db import ensure_db
@@ -23,7 +23,7 @@ from .util import read_message, trim_subject_prefix, eprint
 from .exc import NoResponse
 
 SEARCH = {
-    "DuckDuckGo": "https://search.duckduckgo.com/",
+    "DuckDuckGo": "https://duckduckgo.com/",
     "Bing": "https://bing.com/search",
     "Google": "https://google.com/search",
     "Brave": "https://search.brave.com/search",
@@ -354,8 +354,8 @@ def init_filter():
 def init_topics():
     app = current_app
 
-    @app.route('/topics')
-    @app.route('/topics/<topic>')
+    @app.route('/CR/topics')
+    @app.route('/CR/topics/<topic>')
     def show_topics(topic=""):
         "list topics or display entries for a specific topic"
         conn = ensure_db(app.config["REFDB"])
@@ -444,9 +444,10 @@ class SearchForm(FlaskForm):
     "simple form used to search Brave for archived list messages"
     query = StringField('Search:', validators=[DataRequired()])
     site = HiddenField('site', default='smontanaro.net')
-    engine = RadioField('Engine:', choices=[
+    engine = SelectField('Engine:', choices=[
         ('Brave', 'Brave'),
         ('DuckDuckGo', 'DuckDuckGo'),
+        ('Bing', 'Bing'),
         ('Google', 'Google'),
     ], default='Brave')
 
