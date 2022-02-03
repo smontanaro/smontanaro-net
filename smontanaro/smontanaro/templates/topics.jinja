@@ -32,7 +32,7 @@
   <ul class="no-bullets"
       style="padding-left: 0em; column-count: auto; column-width: 200px">
   {% for topic in topics %}
-    <li><a href="/topics/{% filter urlencode %}{{topic}}{% endfilter %}">{{ topic }}</a>
+    <li><a href="/CR/topics/{% filter urlencode %}{{topic}}{% endfilter %}">{{ topic }}</a>
   {% endfor %}
   </ul>
 {% endif %}
