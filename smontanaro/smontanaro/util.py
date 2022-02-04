@@ -397,7 +397,7 @@ def eprint(*args, file=sys.stderr, **kwds):
 PFX_MATCHER = re.compile(r"\[classicrendezvous\]|\[cr\]|re:|\s+", flags=re.I)
 def trim_subject_prefix(subject):
     "Trim prefix detritus like [CR], Re:, etc"
-    words = PFX_MATCHER.split(subject)
+    words = PFX_MATCHER.split(str(subject))
     return " ".join([word for word in words if word])
 
 def init_app(app):
