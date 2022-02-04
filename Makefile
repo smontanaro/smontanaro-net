@@ -39,6 +39,9 @@ lint : FORCE
 test : FORCE
 	bash scripts/test.sh
 
+pytest : FORCE
+	pytest
+
 FORCE :
 
 .PHONY : FORCE all debug
