@@ -9,7 +9,7 @@ import pytest
 from smontanaro import create_app
 from smontanaro.db import ensure_db
 from smontanaro.dates import parse_date
-from smontanaro.util import read_message
+from smontanaro.util import read_message, trim_subject_prefix
 from smontanaro.views import MessageFilter
 
 @pytest.fixture
@@ -143,3 +143,9 @@ def test_next_msg():
     # next month
     result = next_msg(2003, 7, 1216, +1)
     assert result["month"] == 8 and result["seq"] == 1
+
+def test_trim_subj():
+    mfile = "CR/2001-01/eml-files/classicrendezvous.10101.0091.eml"
+    msg = read_message(mfile)
+    exp = "Cinelli Myths � aluminium bars, fastback seatstay design"
+    assert trim_subject_prefix(msg["Subject"]) == exp
