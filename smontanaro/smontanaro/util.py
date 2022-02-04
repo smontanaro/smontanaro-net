@@ -350,7 +350,7 @@ class Message(email.message.Message):
             elif hdr == "content-type":
                 pass                # preserve as-is for later calcuations
             else:
-                self.replace_header(hdr, html.escape(val))
+                self.replace_header(hdr, html.escape(str(val)))
 
 
 def read_message_string(raw):
