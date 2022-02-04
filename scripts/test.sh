@@ -30,27 +30,6 @@ sed -e 's/localhost:[0-9][0-9]*/localhost:5001/' < localhost.urls \
     fi
 done  > $RAW
 
-# grab a few random pages
-
-# Shuffle is a little Python script I wrote years ago. I'm sure there
-# is a more standard line randomizer, but I'm too lazy to look for
-# it...
-for d in $(find CR/ -name '20??-??' \
-               | shuffle \
-               | head -7) ; do
-    find $d -name '*.eml' \
-        | shuffle \
-        | head -3
-done \
-    | sed -e 's:/eml-files/classicrendezvous.[0-9]*.:/:' \
-          -e 's/[.]eml//' \
-    | tr -- '-' / \
-    | while read uri ; do
-    url="http://${HOST}:${PORT}/${uri}"
-    echo "*** $url ***"
-    curl -s $url
-done >> $RAW
-
 sleep 1
 
 pkill -f gunicorn
