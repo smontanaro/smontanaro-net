@@ -13,7 +13,7 @@
 127.0.0.1 - - "GET /2004-09/html/msg.html HTTP/1.1" 404 <size> "-" "curl/7.68.0"
 # bogus charset
 127.0.0.1 - - "GET /CR/2005/06/0640 HTTP/1.1" 200 <size> "-" "curl/7.68.0"
-127.0.0.1 - - "GET /CR/2000/03/dates HTTP/1.1" 200 <size> "-" "curl/7.68.0"
+# a couple different indexes
 127.0.0.1 - - "GET /CR/2000/03/threads HTTP/1.1" 200 <size> "-" "curl/7.68.0"
 127.0.0.1 - - "GET /CR/2000/06/dates HTTP/1.1" 200 <size> "-" "curl/7.68.0"
 # no content-type, quotes original message
@@ -37,11 +37,8 @@ WARNING:root:Can't render images
 127.0.0.1 - - "GET /CR/topics/BVVW HTTP/1.1" 200 <size> "-" "curl/7.68.0"
 127.0.0.1 - - "GET /CR/topics HTTP/1.1" 200 <size> "-" "curl/7.68.0"
 # url mapping
-127.0.0.1 - - "GET /CR/2008/02/1388 HTTP/1.1" 200 <size> "-" "curl/7.68.0"
 127.0.0.1 - - "GET /CR/2004/05/0026 HTTP/1.1" 200 <size> "-" "curl/7.68.0"
-127.0.0.1 - - "GET /CR/2006/10/0181 HTTP/1.1" 200 <size> "-" "curl/7.68.0"
 # url mapping with query
 127.0.0.1 - - "GET /CR/2006/11/1740 HTTP/1.1" 200 <size> "-" "curl/7.68.0"
 # quoted-printable encoding, but missing header
 127.0.0.1 - - "GET /CR/2008/05/1123 HTTP/1.1" 200 <size> "-" "curl/7.68.0"
-### end - place new lines above this ###
