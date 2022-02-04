@@ -3,11 +3,12 @@ import os
 import re
 import tempfile
 
+import dateutil.parser
 import pytest
 
 from smontanaro import create_app
 from smontanaro.db import ensure_db
-
+from smontanaro.dates import parse_date
 
 @pytest.fixture
 def client():
@@ -27,6 +28,22 @@ def client():
 
     os.close(topic_fd)
     os.unlink(topic_path)
+
+def test_parse_date(client):
+    for (timestring, exp) in (
+            ("Date: Mon, 26 Jan 2004 21:33:19 -0800 (PST)\n",
+             dateutil.parser.parse("2004-01-26T21:33:19 -0800")),
+            ("Date: 26 Jan 2004 21:33:19 America/Los_Angeles",
+             dateutil.parser.parse("2004-01-26T21:33:19 -0800")),
+            ):
+        assert parse_date(timestring) == exp
+
+def test_fresh_db(client):
+    db_fd, db_path = tempfile.mkstemp()
+    with client.application.app_context():
+        ensure_db(db_path)
+    os.close(db_fd)
+    os.unlink(db_path)
 
 def test_get_robots(client):
     rv = client.get("/robots.txt")
