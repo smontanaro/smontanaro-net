@@ -12,6 +12,7 @@ import os
 import re
 import sys
 
+import arrow.parser
 import dateutil.parser
 import dateutil.tz
 
@@ -59,7 +60,7 @@ def insert_references(message, conn, filename, verbose):
         return 0
     try:
         stamp = parse_date(datestr)
-    except dateutil.parser.ParserError as exc:
+    except arrow.parser.ParserError as exc:
         cur.execute("select max(timestamp) from messages"
                     "  where year <= ? and month <= ?",
                     (year, month))
