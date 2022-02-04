@@ -49,6 +49,7 @@ coverage run -a --rcfile=.coveragerc scripts/generate_date_index.py -d reference
 
 # Run our official unit tests
 coverage run -a --rcfile=.coveragerc $(which pytest)
+PYT=$?
 
 if [ -r .coverage -a -r smontanaro/.coverage ] ; then
     echo combine
@@ -63,4 +64,4 @@ fi
 rm -rf htmlcov
 coverage html
 
-diff -u localhost.exp $ACT && echo "success" || echo "failure"
+diff -u localhost.exp $ACT && test $PYT -eq 0 && echo "success" || echo "failure"
