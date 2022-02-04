@@ -128,3 +128,18 @@ def test_message_strip(client):
         filt.filter_message(msg)
         filt.delete_empty_parts()
         assert "yellowpages.lycos.com" not in msg.as_string()
+
+def test_next_msg():
+    "make sure we can hop over gaps and between months"
+    from smontanaro.views import next_msg
+    # intramonth gap at (2003, 8, 31)
+    assert next_msg(2003, 8, 32, -1)["seq"] == 30
+    # normal case
+    assert next_msg(2003, 8, 382, -1)["seq"] == 381
+    assert next_msg(2003, 8, 382, +1)["seq"] == 383
+    # previous month
+    result = next_msg(2003, 8, 1, -1)
+    assert result["month"] == 7 and result["seq"] == 1216
+    # next month
+    result = next_msg(2003, 7, 1216, +1)
+    assert result["month"] == 8 and result["seq"] == 1

@@ -5,6 +5,7 @@
 from calendar import monthrange
 import csv
 import datetime
+import glob
 import os
 import re
 import sqlite3
@@ -173,6 +174,70 @@ def init_cr():
         "render email as html."
         return email_to_html(int(year), int(month), seq)
 
+
+    # global stmt is just for testing...
+    global next_msg
+    def next_msg(year, month, seq, incr):
+        "provide next or prev message in sequence (according to incr)"
+        monthdir = os.path.join(CR, f"{year:04d}-{month:02d}", "eml-files")
+        seq += incr
+        files = sorted(glob.glob(os.path.join(monthdir, "*.eml")))
+        # Fast path. This happens almost all the time.
+        msg = os.path.join(monthdir, eml_file(year, month, seq))
+        if msg in files:
+            return {
+                "year": year,
+                "month": month,
+                "seq": seq
+            }
+
+        # Intermediate path - a gap in files, but the one we want is
+        # in the list.
+        if incr == -1:
+            # We want the maximum file which is less than msg.
+            lt_files = [f for f in files if f < msg]
+            if lt_files:
+                f = lt_files[-1]
+                seq = int(f.split(".")[-2], 10)
+                return {
+                    "year": year,
+                    "month": month,
+                    "seq": seq
+                }
+        else:
+            # We want the minimum file which is greater than msg.
+            gt_files = [f for f in files if f > msg]
+            if gt_files:
+                f = gt_files[0]
+                seq = int(f.split(".")[-2], 10)
+                return {
+                    "year": year,
+                    "month": month,
+                    "seq": seq
+                }
+
+        # Slow path
+        # move forward or back one month
+        dt = datetime.date(year, month, 15) + incr * 20 * ONE_DAY
+        year = dt.year
+        month = dt.month
+        while OLDEST_MONTH <= (year, month) <= NEWEST_MONTH:
+            monthdir = os.path.join(CR, f"{year:04d}-{month:02d}", "eml-files")
+            files = sorted(glob.glob(os.path.join(monthdir, "*.eml")))
+            if files:
+                msg = files[-1] if incr == -1 else files[0]
+                seq = int(msg.split(".")[-2], 10)
+                return {
+                    "year": year,
+                    "month": month,
+                    "seq": seq
+                }
+            dt = datetime.date(year, month, 15) + incr * 20 * ONE_DAY
+            year = dt.year
+            month = dt.month
+
+        raise ValueError("No next/prev message found")
+
     global generate_nav_items
     def generate_nav_items(*, year=None, month=None, seq=None):
         "navigation header at top of email messages."
@@ -189,23 +254,32 @@ def init_cr():
                     ""
                 ))
 
-            mydir = os.path.join(CR, f"{year:04d}-{month:02d}", "eml-files")
-            if msg_exists(mydir, year, month, seq - 1):
+            try:
+                prev_seq = next_msg(year, month, seq, -1)
+            except ValueError:
+                eprint("found nothing before", (year, month, seq))
+            else:
                 nav_list.append(
                     (
                         "cr_message",
-                        dict(year=year, month=f"{month:02d}", seq=(seq - 1)),
+                        prev_seq,
                         'Prev',
                         ""
                     ))
-            if msg_exists(mydir, year, month, seq + 1):
+
+            try:
+                next_seq = next_msg(year, month, seq, +1)
+            except ValueError:
+                pass
+            else:
                 nav_list.append(
                     (
                         "cr_message",
-                        dict(year=year, month=f"{month:02d}", seq=(seq + 1)),
+                        next_seq,
                         'Next',
                         ""
                     ))
+
             nav_list.append(
                 (
                     "dates",
