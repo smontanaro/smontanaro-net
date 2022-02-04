@@ -15,7 +15,6 @@ dateit () {
     done
 }
 
-export PYTHONPATH=$PWD/smontanaro
 export PORT=5001 HOST=localhost
 (DOCOVER=true bash $(dirname $0)/run.sh 2>&1 | dateit > /tmp/$$.tmp) &
 sleep 2
@@ -66,10 +65,11 @@ sort localhost.comments /tmp/$$.tmp \
 rm localhost.comments /tmp/$$.tmp
 
 # The dates module is only used by a couple auxiliary scripts.
-PYTHONPATH=$PWD/smontanaro coverage run -a --rcfile=.coveragerc \
-         scripts/listbydate.py CR/2000-03 >/dev/null
-PYTHONPATH=$PWD/smontanaro coverage run -a --rcfile=.coveragerc \
-         scripts/generate_date_index.py -d references.db 2000 3 >/dev/null
+coverage run -a --rcfile=.coveragerc scripts/listbydate.py CR/2000-03 >/dev/null
+coverage run -a --rcfile=.coveragerc scripts/generate_date_index.py -d references.db 2000 3 >/dev/null
+
+# Run our official unit tests
+coverage run -a --rcfile=.coveragerc $(which pytest)
 
 if [ -r .coverage -a -r smontanaro/.coverage ] ; then
     echo combine
