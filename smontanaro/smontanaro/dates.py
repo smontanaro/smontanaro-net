@@ -80,9 +80,7 @@ def parse_date(timestring):
     try:
         timestamp = dateutil.parser.parse(timestring, tzinfos=TZINFOS)
     except dateutil.parser.ParserError:
-        # try arrow with its format capability
-        try:
-            timestamp = arrow.get(timestring, ARROW_FORMATS).datetime
-        except arrow.parser.ParserError as exc:
-            raise dateutil.parser.ParserError(str(exc))
+        # try arrow with its format capability - fine to let it raise
+        # an exception.
+        timestamp = arrow.get(timestring, ARROW_FORMATS).datetime
     return timestamp
