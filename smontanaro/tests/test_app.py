@@ -10,15 +10,17 @@ from smontanaro import create_app
 from smontanaro.db import ensure_db
 from smontanaro.dates import parse_date
 from smontanaro.util import read_message
+from smontanaro.views import MessageFilter
 
 @pytest.fixture
 def client():
     topic_fd, topic_path = tempfile.mkstemp()
     app = create_app(
-        {'TESTING': True,
-         'REFDB': "references.db",
-         'WTF_CSRF_ENABLED': False,
-         'TOPICFILE': topic_path,
+        {"TESTING": True,
+         "REFDB": "references.db",
+         "WTF_CSRF_ENABLED": False,
+         "TOPICFILE": topic_path,
+         "SERVER_NAME": "smontanaro.net",
          }
     )
 
@@ -117,3 +119,12 @@ def test_read_message(client):
     assert os.path.exists(pfile)
     msg2 = read_message(mfile)
     assert msg1.as_string() == msg2.as_string()
+
+def test_message_strip(client):
+    "verify the yellowpages footer disappears"
+    msg = read_message("CR/2005-10/eml-files/classicrendezvous.10510.0508.eml")
+    with client.application.app_context():
+        filt = MessageFilter(msg)
+        filt.filter_message(msg)
+        filt.delete_empty_parts()
+        assert "yellowpages.lycos.com" not in msg.as_string()
