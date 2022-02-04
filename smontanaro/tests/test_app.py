@@ -9,6 +9,7 @@ import pytest
 from smontanaro import create_app
 from smontanaro.db import ensure_db
 from smontanaro.dates import parse_date
+from smontanaro.util import read_message
 
 @pytest.fixture
 def client():
@@ -103,3 +104,16 @@ def test_suggest_topic(client):
     row = next(rdr)
     assert (row["topic"] == "Sturmey-Archer" and
             row["message-id"] == "<7e.703e8851.30481dcb@aol.com>")
+
+def test_read_message(client):
+    "read a message, then a second time to get the pickled version"
+    mfile = "CR/2008-12/eml-files/classicrendezvous.10812.0831.eml"
+    pfile = os.path.splitext(mfile)[0] + ".pck.gz"
+    try:
+        os.unlink(pfile)
+    except FileNotFoundError:
+        pass
+    msg1 = read_message(mfile)
+    assert os.path.exists(pfile)
+    msg2 = read_message(mfile)
+    assert msg1.as_string() == msg2.as_string()
