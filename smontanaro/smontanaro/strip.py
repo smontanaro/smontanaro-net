@@ -55,8 +55,8 @@ def strip_bikelist_footer(payload):
 
 def strip_yp(payload):
     "strip Yellow Pages ads"
-    header = "(?i).*get a jump"
-    footer = "(?i).*yellowpages.(lycos|aol).com"
+    header = (".*get a jump", re.I)
+    footer = (".*yellowpages.(lycos|aol).com", re.I)
     return strip_between(payload, header, footer, "yp")
 
 def strip_juno(payload):
@@ -78,22 +78,29 @@ def strip_cr_index_pwds(payload):
     return strip_between(payload, header, footer, "passwords")
 
 # pylint: disable=unused-argument
-def strip_between(payload, header, footer, tag):
-    "strip all lines at the end of the strip between header and footer"
+def strip_between(payload, start, end, tag):
+    "strip all lines at the end of the strip between start and end"
+    s_flags = e_flags = 0
+    if isinstance(start, tuple):
+        start, s_flags = start
+    if isinstance(end, tuple):
+        end, e_flags = end
     lines = re.split(r"(\n+)", payload)
     state = "start"
     new_payload = []
-    # print(tag, repr(header), repr(footer))
+    # print(tag, repr(start), repr(end))
+    spat = f"{QUOTE_PAT}{start}"
+    epat = f"{QUOTE_PAT}{end}"
     for line in lines:
         if state == "start":
-            if re.match(f"{QUOTE_PAT}{header}", line) is not None:
+            if re.match(spat, line, s_flags) is not None:
                 state = "stripping"
                 # print(">> elide", tag, state, repr(line))
                 continue
             new_payload.append(line)
         else:  # state == "stripping"
             # print(">> elide", tag, state, repr(line))
-            if re.match(f"{QUOTE_PAT}{footer}", line) is not None:
+            if re.match(epat, line, e_flags) is not None:
                 state = "start"
     new_payload = "".join(new_payload)
     # print(">> result:", tag, "unchanged" if new_payload == payload else "stripped")
