@@ -21,7 +21,7 @@ def create_app(test_config=None):
         "CR": os.path.join(crdir, "CR"),
         "SECRET_KEY": r"Aw6CNZn*GIEt8Aw6CNZn*GIEt8",
         "DEBUG": os.environ.get("FLASK_ENV") == "development",
-        "TOPICFILE": "topic.csv",
+        "TOPICFILE": os.path.join(crdir, "topic.csv"),
     })
 
     if test_config is None:
