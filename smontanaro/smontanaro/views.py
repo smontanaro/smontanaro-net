@@ -373,7 +373,7 @@ def init_topics():
         return render_template("topics.jinja", topics=topics, msgrefs=msgrefs,
                                topic=topic, nav=generate_nav_items())
 
-    @app.route('/addtopic', methods=['GET', 'POST'])
+    @app.route('/CR/addtopic', methods=['GET', 'POST'])
     def addtopic():
         "display/process form to associate topics with a message."
         topic_form = TopicForm()
