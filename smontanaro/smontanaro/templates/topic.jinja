@@ -10,7 +10,7 @@
     {% endif %}
 
     <form action="/addtopic" method="post">
-        {{ topic_form.csrf_token() }}
+        {{ topic_form.csrf_token }}
         {{ topic_form.year(value=year) }}
         {{ topic_form.month(value=month) }}
         {{ topic_form.seq(value=seq) }}
