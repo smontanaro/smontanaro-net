@@ -55,7 +55,7 @@ def strip_bikelist_footer(payload):
 
 def strip_yp(payload):
     "strip Yellow Pages ads"
-    header = (".*get a jump", re.I)
+    header = (".*(search for businesses|get a jump)", re.I)
     footer = (".*yellowpages.(lycos|aol).com", re.I)
     return strip_between(payload, header, footer, "yp")
 
