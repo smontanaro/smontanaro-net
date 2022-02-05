@@ -6,6 +6,7 @@ from calendar import monthrange
 import csv
 import datetime
 import glob
+import logging
 import os
 import re
 import sqlite3
@@ -304,7 +305,12 @@ def init_cr():
         nav = generate_nav_items(year=year, month=month, seq=seq)
         msg = eml_file(year, month, seq)
         mydir = os.path.join(CR, f"{year:04d}-{month:02d}", "eml-files")
-        message = read_message(os.path.join(mydir, msg))
+        path = os.path.join(mydir, msg)
+        try:
+            message = read_message(path)
+        except FileNotFoundError:
+            logging.root.error("File not found: %s", path)
+            abort(404)
 
         # Grab these before we sanitize any headers.
         msgid = message["Message-ID"]

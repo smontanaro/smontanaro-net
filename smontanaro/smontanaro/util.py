@@ -43,7 +43,7 @@ import sqlite3
 import sys
 import urllib.parse
 
-from flask import abort, url_for
+from flask import url_for
 
 CRLF = "\r\n"
 
@@ -376,20 +376,13 @@ def read_message(path):
         with gzip.open(pckgz, "rb") as pobj:
             return pickle.load(pobj)
 
-    try:
-        with open(path, "rb") as fobj:
-            msg = read_message_bytes(fobj.read())
-            # Cache message for future use - way faster than
-            # parsing the message from the .eml file.
-            with gzip.open(pckgz, "wb") as pobj:
-                pickle.dump(msg, pobj)
-            return msg
-    except FileNotFoundError:
-        # pylint: disable=no-member
-        logging.root.error("File not found: %s", path)
-        abort(404)
-        # keep pylint happy
-        return path
+    with open(path, "rb") as fobj:
+        msg = read_message_bytes(fobj.read())
+        # Cache message for future use - way faster than
+        # parsing the message from the .eml file.
+        with gzip.open(pckgz, "wb") as pobj:
+            pickle.dump(msg, pobj)
+        return msg
 
 def eprint(*args, file=sys.stderr, **kwds):
     print(*args, file=file, **kwds)
