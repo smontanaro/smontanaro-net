@@ -1,26 +1,9 @@
-{#
-<form action="/search" method="post">
-    {{ search_form.query.label() }} {{ search_form.engine }} for
-    {{ search_form.query(size=10) }}
-    {{ search_form.csrf_token }}
-    {{ search_form.site }}
-    <input name="search" type="submit" value="Go">
-</form>
-#}
-
 <div class="form-group">
     <form action="/search" method="post">
-        <label for="query">Search</label>
-        <select class="form-control" id="engine" name="engine">
-            <option selected value="Brave">Brave</option>
-            <option value="DuckDuckGo">DuckDuckGo</option>
-            <option value="Bing">Bing</option>
-            <option value="Google">Google</option>
-        </select>
-        <label>for</label>
-        <input class="form-control" id="query" name="query" required size="10" type="text" value="">
-        <input id="csrf_token" name="csrf_token" type="hidden" value="IjhhMTA0M2I1OWVmNTI0YmVjY2YwMjBhNjIyN2RlY2I5MWRmMjhlZjIi.Yf_2Jw.MVrO4XEOJ9c5LW73Aj5D8txeQRg">
-        <input id="site" name="site" type="hidden" value="smontanaro.net">
+        {{ search_form.query.label() }} {{ search_form.engine(class_="form-control") }} for
+        {{ search_form.query(size=10, class_="form-control") }}
+        {{ search_form.csrf_token }}
+        {{ search_form.site }}
         <input class="form-control" name="search" type="submit" value="Go">
     </form>
 </div>
