@@ -42,3 +42,5 @@ WARNING:root:Can't render images
 127.0.0.1 - - "GET /CR/2006/11/1740 HTTP/1.1" 200 <size> "-" "curl/7.68.0"
 # quoted-printable encoding, but missing header
 127.0.0.1 - - "GET /CR/2008/05/1123 HTTP/1.1" 200 <size> "-" "curl/7.68.0"
+# bad msg ref
+127.0.0.1 - - "GET /2008/05/1123 HTTP/1.1" 301 <size> "-" "curl/7.68.0"
