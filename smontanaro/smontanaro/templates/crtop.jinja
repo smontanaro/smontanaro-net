@@ -1,6 +1,7 @@
-{% extends "home.jinja" %}
+{% extends "bootstrap.jinja" %}
 
 {% block left %}
-    {% include "search.jinja" %}
-    {% include "stuff.jinja" %}
+    {% for (text, href) in [("Topics", "/CR/topics"), ("About", "/CR/about")] %}
+        <a class="list-group-item list-group-item-action list-group-item-light p-3" href="{{ href }}">{{ text }}</a>
+    {% endfor %}
 {% endblock %}
