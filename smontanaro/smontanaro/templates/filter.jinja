@@ -1,10 +1,15 @@
 <form class="d-flex" action="/CR/filter_date" method="POST">
-    {{ filter_form.in_out(class_="form-select", value=session.get("in_out", "")) }}
-    {{ filter_form.pattern(class_="form-control", value=session.get("pattern", "")) }}
+    <div>
+        {{ filter_form.in_out(class_="form-select", value=session.get("in_out", "")) }}
+        {{ filter_form.pattern(class_="form-control", value=session.get("pattern", "")) }}
+    </div>
+    <div>
+        {{ filter_form.filter_(class_="form-control") }}
+        {{ filter_form.clear(class_="form-control") }}
+    </div>
     {{ filter_form.csrf_token }}
     {{ filter_form.year(value=year) }}
     {{ filter_form.month(value=month) }}
-    {# <button class="btn btn-outline-success" type="submit">Filter</button> #}
 </form>
 
 {#
