@@ -1,6 +1,6 @@
 <div class="form-group">
     <form action="/search" method="post">
-        {{ search_form.query.label() }} {{ search_form.engine(class_="form-control") }} for
+        <b>Search</b> {{ search_form.engine(class_="form-control") }} for
         {{ search_form.query(size=10, class_="form-control") }}
         {{ search_form.csrf_token }}
         {{ search_form.site }}
