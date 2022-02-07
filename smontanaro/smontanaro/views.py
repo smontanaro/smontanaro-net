@@ -15,7 +15,7 @@ import urllib.parse
 from flask import (redirect, url_for, render_template, abort, jsonify, request,
                    current_app, session)
 from flask_wtf import FlaskForm
-from wtforms import StringField, HiddenField, SelectField
+from wtforms import StringField, HiddenField, SelectField, SubmitField
 from wtforms.validators import DataRequired
 
 from .db import ensure_db
@@ -82,7 +82,7 @@ def init_indexes():
         prev_url = month_url(year, month, -1, "dates")
         next_url = month_url(year, month, +1, "dates")
 
-        title = date.strftime("%b %Y Date Index")
+        title = f"{prev_url} {date.strftime('%b %Y Date Index')} {next_url}"
         with open(f'''{CR}/{date.strftime("%Y-%m")}/generated/dates.body''',
                   encoding="utf-8") as fobj:
             lines = list(fobj)
@@ -429,12 +429,14 @@ def init_filter():
     def filter_date():
         filter_form = FilterForm()
         if filter_form.validate_on_submit():
-            pattern = session["pattern"] = filter_form.pattern.data
-            in_out = session["in_out"] = filter_form.in_out.data
             year = int(filter_form.year.data)
             month = int(filter_form.month.data)
-            return redirect(url_for("dates", year=year, month=f"{month:02d}",
-                                    pattern=pattern, in_out=in_out))
+            if filter_form.clear.data:
+                del session["pattern"], session["in_out"]
+            else:
+                pattern = session["pattern"] = filter_form.pattern.data
+                in_out = session["in_out"] = filter_form.in_out.data
+            return redirect(url_for("dates", year=year, month=f"{month:02d}"))
         return render_template('filter.jinja', filter_form=filter_form)
 
 def init_topics():
@@ -518,6 +520,8 @@ class FilterForm(FlaskForm):
     ])
     year = HiddenField('year')
     month = HiddenField('month')
+    filter_ = SubmitField('filter')
+    clear = SubmitField('clear')
 
 class TopicForm(FlaskForm):
     "simple form used to add topics to a message"
