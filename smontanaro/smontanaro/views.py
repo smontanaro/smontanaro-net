@@ -13,7 +13,7 @@ import sqlite3
 import urllib.parse
 
 from flask import (redirect, url_for, render_template, abort, jsonify, request,
-                   current_app)
+                   current_app, session)
 from flask_wtf import FlaskForm
 from wtforms import StringField, HiddenField, SelectField
 from wtforms.validators import DataRequired
@@ -69,9 +69,11 @@ def init_indexes():
 
     @app.route("/CR/<year>/<month>")
     @app.route("/CR/<year>/<month>/dates")
-    @app.route("/CR/<year>/<month>/dates/<pattern>/<in_out>")
-    def dates(year, month, pattern=".*", in_out="keep"):
+    def dates(year, month):
         "new date index"
+
+        pattern = session.get("pattern", ".*")
+        in_out = session.get("in_out", "keep")
 
         year = int(year)
         month = int(month)
@@ -427,8 +429,8 @@ def init_filter():
     def filter_date():
         filter_form = FilterForm()
         if filter_form.validate_on_submit():
-            pattern = filter_form.pattern.data
-            in_out = filter_form.in_out.data
+            pattern = session["pattern"] = filter_form.pattern.data
+            in_out = session["in_out"] = filter_form.in_out.data
             year = int(filter_form.year.data)
             month = int(filter_form.month.data)
             return redirect(url_for("dates", year=year, month=f"{month:02d}",
@@ -509,11 +511,11 @@ def init_topics():
 
 class FilterForm(FlaskForm):
     "For filtering (out) uninteresting subjects"
-    pattern = StringField("Filter:", validators=[DataRequired()])
+    pattern = StringField("Filter:")
     in_out = SelectField("Keep or Toss:", choices=[
         ('keep', 'Keep'),
         ('toss', 'Toss'),
-    ], default='toss')
+    ])
     year = HiddenField('year')
     month = HiddenField('month')
 
