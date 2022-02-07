@@ -1,40 +1,36 @@
-{% extends "home.jinja" %}
-{% block left %}
-  {% include "search.jinja" %}
-  {% include "stuff.jinja" %}
-{% endblock %}
-{% block body %}
-<h1>Archive Topics</h1>
+{% extends "bootstrap.jinja" %}
 
-<div style="fontweight: bold">
+{% set title = "Archive Topics" %}
+
+{% block content %}
+<p style="fontweight: bold">
   Note: These topics are constructed by hand (snobs might say
   "curated"). You can help expand these topics contain by using the
   form at the top of each message page to submit your suggestions.
-</div>
+</p>
 
 {% if topic %}
 <h2>{{ topic }}</h1>
 {% endif %}
 
 {% if msgrefs %}
-  <ul class="no-bullets" style="padding-left: 0em">
+  <ul class="list-group" style="padding-left: 0em">
   {% for (year, month, seq, subject) in msgrefs %}
-    <li><a href="/CR/{{ year }}/{{ month }}/{{ seq }}">{{ subject }}</a>
+    <li class="list-group-item"><a href="/CR/{{ year }}/{{ month }}/{{ seq }}">{{ subject }}</a>
   {% endfor %}
   </ul>
 {% endif %}
 
 {% if topics %}
-  {% if msgrefs %}
-  <h2>Known Topics</h2>
-  {% endif %}
+    {% if msgrefs %}
+        <h2>Known Topics</h2>
+    {% endif %}
 
-  <ul class="no-bullets"
-      style="padding-left: 0em; column-count: auto; column-width: 200px">
-  {% for topic in topics %}
-    <li><a href="/CR/topics/{% filter urlencode %}{{topic}}{% endfilter %}">{{ topic }}</a>
-  {% endfor %}
-  </ul>
+    <ul class="list-group-flush" style="padding-left: 0em; column-count: auto; column-width: 200px">
+        {% for topic in topics %}
+            <li class="list-group-item"><a href="/CR/topics/{% filter urlencode %}{{topic}}{% endfilter %}">{{ topic }}</a></li>
+        {% endfor %}
+    </ul>
 {% endif %}
 
 {% endblock %}

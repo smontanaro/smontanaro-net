@@ -1,18 +1,5 @@
 {% extends "base.jinja" %}
 
-{#
-pulled from https://github.com/greyli/bootstrap-flask code then
-whittled down to almost nothing
-#}
-
-{% macro render_nav_item(endpoint, kwargs, text, anchor) %}
-    <li class="nav-item">
-        <a class="nav-link" href="{{ url_for(endpoint, **kwargs) }}{{ anchor }}">
-            {{ text }}
-        </a>
-    </li>
-{% endmacro %}
-
 {% block content %}
     <div class="container">
 
@@ -55,11 +42,5 @@ whittled down to almost nothing
             {% endblock %}
         </div>
 
-    </div>
-
-    <div style="font-size: 2.0rem;">
-        <a href="#top" class="float">
-            <i class="fa fa-arrow-up my-float"></i>
-        </a>
     </div>
 {% endblock %}

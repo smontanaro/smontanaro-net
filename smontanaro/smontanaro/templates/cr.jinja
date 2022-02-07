@@ -1,11 +1,7 @@
 {% extends "crtop.jinja" %}
 
-{% block topic %}
-    {% include "topic.jinja" %}
-    <hr />
-{% endblock %}
-
 {% block left %}
     {{ super() }}
+    <hr/>
     {% include "search.jinja" %}
 {% endblock %}

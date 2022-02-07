@@ -1,5 +1,7 @@
 {% extends "index.jinja" %}
 
-{% block navbar_extra %}
+{% block left %}
+    {{ super() }}
+    <hr/>
     {% include "filter.jinja" %}
 {% endblock %}
