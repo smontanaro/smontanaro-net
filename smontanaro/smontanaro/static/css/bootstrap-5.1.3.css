@@ -5250,8 +5250,9 @@ textarea.form-control-lg {
 .list-group-flush {
   border-radius: 0;
 }
+/* no border around list items -- Skip Feb 7, 2022
 .list-group-flush > .list-group-item {
-  border-width: 0 0 1px;
+    border-width: 0 0 0 0;
 }
 .list-group-flush > .list-group-item:last-child {
   border-bottom-width: 0;
