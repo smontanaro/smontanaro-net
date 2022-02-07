@@ -14,11 +14,11 @@
 {% endif %}
 
 {% if msgrefs %}
-  <ul class="list-group" style="padding-left: 0em">
-  {% for (year, month, seq, subject) in msgrefs %}
-    <li class="list-group-item"><a href="/CR/{{ year }}/{{ month }}/{{ seq }}">{{ subject }}</a>
-  {% endfor %}
-  </ul>
+    <ul class="list-group-flush" style="padding-left: 0em; column-count: auto; column-width: 200px">
+        {% for (year, month, seq, subject) in msgrefs %}
+            <li class="list-group-item"><a href="/CR/{{ year }}/{{ month }}/{{ seq }}">{{ subject }}</a>
+        {% endfor %}
+    </ul>
 {% endif %}
 
 {% if topics %}
