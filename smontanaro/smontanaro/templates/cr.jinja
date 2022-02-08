@@ -1,1 +1,9 @@
 {% extends "crtop.jinja" %}
+
+{% block left %}
+    {{ super() }}
+    <hr style="height: 4px" />
+    {% for (text, href) in nav %}
+        <a class="list-group-item list-group-item-action list-group-item-light p-3" href="{{ href }}">{{ text }}</a>
+    {% endfor %}
+{% endblock %}
