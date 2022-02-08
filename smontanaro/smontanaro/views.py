@@ -82,7 +82,7 @@ def init_indexes():
         prev_url = month_url(year, month, -1, "dates")
         next_url = month_url(year, month, +1, "dates")
 
-        title = f"{prev_url} {date.strftime('%b %Y Date Index')} {next_url}"
+        title = f"{date.strftime('%b %Y Date Index')}"
         with open(f'''{CR}/{date.strftime("%Y-%m")}/generated/dates.body''',
                   encoding="utf-8") as fobj:
             lines = list(fobj)
@@ -100,7 +100,10 @@ def init_indexes():
                 if re.search(full_pat, line, re.I) is None:
                     filter_lines.append(line)
         body = "\n".join(filter_lines)
-
+        # elide dates which the filter completely cleared out.
+        body = re.sub("<h2>.*</h2>\n+<ul .*>\n+</ul>\n+", "", body).strip()
+        if not body:
+            body = "<p>Pretty brutal filter, eh? Poke the 'Clear' button to remove it.</p>"
         if pattern == ".*":
             pattern = ""
         return render_template("dates.jinja", title=title, body=body,
@@ -122,8 +125,8 @@ def init_indexes():
         with open(f'''{CR}/{date.strftime("%Y-%m")}/generated/threads.body''',
                   encoding="utf-8") as fobj:
             body = fobj.read()
-        return render_template("index.jinja", title=title, body=body,
-                               prev=prev_url, next=next_url)
+        return render_template("threads.jinja", title=title, body=body,
+                               prev=prev_url, next=next_url, year=year, month=month)
 
     def month_url(start_year, start_month, offset, what):
         "previous month - often month +/- 1, but not always (we have gaps)"
