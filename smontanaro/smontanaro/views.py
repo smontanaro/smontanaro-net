@@ -192,7 +192,8 @@ def init_cr():
                                body=message.as_html(),
                                year=year, month=month, seq=seq,
                                topics=get_topics_for(msgid),
-                               note=note)
+                               note=note,
+                               nav=get_nav_items(year=year, month=month, seq=seq))
 
     def get_topics_for(msgid):
         "return list of topics associated with msgid"
@@ -437,6 +438,31 @@ def next_msg(year, month, seq, incr):
         month = dt.month
 
     raise ValueError("No next/prev message found")
+
+def get_nav_items(*, year, month, seq):
+    "navigation items related to the argument message."
+    items = []
+
+    items.append(("Date Index", url_for("dates",
+                                        year=year,
+                                        month=f"{month:02d}") + f"#{seq:05d}"))
+    items.append(("Thread Index", url_for("threads",
+                                          year=year,
+                                          month=f"{month:02d}") + f"#{seq:05d}"))
+    try:
+        prev_seq = next_msg(year, month, seq, -1)
+    except ValueError:
+        pass
+    else:
+        items.append(("Prev", url_for("cr_message", **prev_seq)))
+    try:
+        next_seq = next_msg(year, month, seq, +1)
+    except ValueError:
+        pass
+    else:
+        items.append(("Next", url_for("cr_message", **next_seq)))
+
+    return items
 
 class FilterForm(FlaskForm):
     "For filtering (out) uninteresting subjects"
