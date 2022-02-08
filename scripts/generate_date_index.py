@@ -5,6 +5,7 @@
 import argparse
 import html
 import itertools
+import re
 import sqlite3
 import sys
 
@@ -17,10 +18,11 @@ def date_key(record):
 def generate_link(r):
     "HTML for a single message"
     root = "" # "(T)&nbsp;" if r['is_root'] else ""
+    sub = re.sub(r"\s+", " ", r["Subject"])
     return (f'''<a name="{r['seq']:05d}">'''
             f'''{root}'''
             f'''<a href="/CR/{r['year']}/{r['month']:02d}/{r['seq']:05d}">'''
-            f'''{html.escape(r['subject'])}</a></a>'''
+            f'''{html.escape(sub)}</a></a>'''
             f''' {html.escape(r["sender"])}''')
 
 def generate_index(records):
