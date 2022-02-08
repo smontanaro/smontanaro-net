@@ -163,69 +163,6 @@ def init_cr():
         return email_to_html(int(year), int(month), seq)
 
 
-    # global stmt is just for testing...
-    global next_msg
-    def next_msg(year, month, seq, incr):
-        "provide next or prev message in sequence (according to incr)"
-        monthdir = os.path.join(CR, f"{year:04d}-{month:02d}", "eml-files")
-        seq += incr
-        files = sorted(glob.glob(os.path.join(monthdir, "*.eml")))
-        # Fast path. This happens almost all the time.
-        msg = os.path.join(monthdir, eml_file(year, month, seq))
-        if msg in files:
-            return {
-                "year": year,
-                "month": month,
-                "seq": seq
-            }
-
-        # Intermediate path - a gap in files, but the one we want is
-        # in the list.
-        if incr == -1:
-            # We want the maximum file which is less than msg.
-            lt_files = [f for f in files if f < msg]
-            if lt_files:
-                f = lt_files[-1]
-                seq = int(f.split(".")[-2], 10)
-                return {
-                    "year": year,
-                    "month": month,
-                    "seq": seq
-                }
-        else:
-            # We want the minimum file which is greater than msg.
-            gt_files = [f for f in files if f > msg]
-            if gt_files:
-                f = gt_files[0]
-                seq = int(f.split(".")[-2], 10)
-                return {
-                    "year": year,
-                    "month": month,
-                    "seq": seq
-                }
-
-        # Slow path
-        # move forward or back one month
-        dt = datetime.date(year, month, 15) + incr * 20 * ONE_DAY
-        year = dt.year
-        month = dt.month
-        while OLDEST_MONTH <= (year, month) <= NEWEST_MONTH:
-            monthdir = os.path.join(CR, f"{year:04d}-{month:02d}", "eml-files")
-            files = sorted(glob.glob(os.path.join(monthdir, "*.eml")))
-            if files:
-                msg = files[-1] if incr == -1 else files[0]
-                seq = int(msg.split(".")[-2], 10)
-                return {
-                    "year": year,
-                    "month": month,
-                    "seq": seq
-                }
-            dt = datetime.date(year, month, 15) + incr * 20 * ONE_DAY
-            year = dt.year
-            month = dt.month
-
-        raise ValueError("No next/prev message found")
-
     # pylint: disable=global-variable-not-assigned
     global email_to_html
     def email_to_html(year, month, seq, note=""):
@@ -435,6 +372,68 @@ def init_topics():
             if writeheader:
                 writer.writeheader()
             writer.writerow(record)
+
+def next_msg(year, month, seq, incr):
+    "provide next or prev message in sequence (according to incr)"
+    CR = current_app.config["CR"]
+    monthdir = os.path.join(CR, f"{year:04d}-{month:02d}", "eml-files")
+    seq += incr
+    files = sorted(glob.glob(os.path.join(monthdir, "*.eml")))
+    # Fast path. This happens almost all the time.
+    msg = os.path.join(monthdir, eml_file(year, month, seq))
+    if msg in files:
+        return {
+            "year": year,
+            "month": month,
+            "seq": seq
+        }
+
+    # Intermediate path - a gap in files, but the one we want is
+    # in the list.
+    if incr == -1:
+        # We want the maximum file which is less than msg.
+        lt_files = [f for f in files if f < msg]
+        if lt_files:
+            f = lt_files[-1]
+            seq = int(f.split(".")[-2], 10)
+            return {
+                "year": year,
+                "month": month,
+                "seq": seq
+            }
+    else:
+        # We want the minimum file which is greater than msg.
+        gt_files = [f for f in files if f > msg]
+        if gt_files:
+            f = gt_files[0]
+            seq = int(f.split(".")[-2], 10)
+            return {
+                "year": year,
+                "month": month,
+                "seq": seq
+            }
+
+    # Slow path
+    # move forward or back one month
+    dt = datetime.date(year, month, 15) + incr * 20 * ONE_DAY
+    year = dt.year
+    month = dt.month
+    while OLDEST_MONTH <= (year, month) <= NEWEST_MONTH:
+        monthdir = os.path.join(CR, f"{year:04d}-{month:02d}", "eml-files")
+        files = sorted(glob.glob(os.path.join(monthdir, "*.eml")))
+        if files:
+            msg = files[-1] if incr == -1 else files[0]
+            seq = int(msg.split(".")[-2], 10)
+            return {
+                "year": year,
+                "month": month,
+                "seq": seq
+            }
+        dt = datetime.date(year, month, 15) + incr * 20 * ONE_DAY
+        year = dt.year
+        month = dt.month
+
+    raise ValueError("No next/prev message found")
 
 class FilterForm(FlaskForm):
     "For filtering (out) uninteresting subjects"
