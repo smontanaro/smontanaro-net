@@ -61,7 +61,7 @@ def init_simple():
     @app.route("/")
     def index():
         "index"
-        return render_template("main.jinja", title="Home", nav="")
+        return render_template("main.jinja", title="Home")
 
 def init_indexes():
     app = current_app
@@ -101,16 +101,9 @@ def init_indexes():
                     filter_lines.append(line)
         body = "\n".join(filter_lines)
 
-        nav_list = (generate_nav_items() +
-                    [(
-                        "threads",
-                        dict(year=year, month=f"{month:02d}"),
-                        "By Thread",
-                        ""
-                    )])
         if pattern == ".*":
             pattern = ""
-        return render_template("dates.jinja", title=title, body=body, nav=nav_list,
+        return render_template("dates.jinja", title=title, body=body,
                                prev=prev_url, next=next_url, year=year, month=month,
                                pattern=pattern, in_out=in_out)
 
@@ -129,14 +122,7 @@ def init_indexes():
         with open(f'''{CR}/{date.strftime("%Y-%m")}/generated/threads.body''',
                   encoding="utf-8") as fobj:
             body = fobj.read()
-        nav_list = (generate_nav_items() +
-                    [(
-                        "dates",
-                        dict(year=year, month=f"{month:02d}"),
-                        "By Date",
-                        ""
-                    )])
-        return render_template("index.jinja", title=title, body=body, nav=nav_list,
+        return render_template("index.jinja", title=title, body=body,
                                prev=prev_url, next=next_url)
 
     def month_url(start_year, start_month, offset, what):
@@ -169,8 +155,7 @@ def init_cr():
 
         with open(f"{CR}/generated/index.body", encoding="utf8") as fobj:
             return render_template("crtop.jinja", body=fobj.read(),
-                                   title="Old Classic Rendezvous Archive",
-                                   nav=generate_nav_items())
+                                   title="Old Classic Rendezvous Archive")
 
     @app.route('/CR/<year>/<month>/<int:seq>')
     def cr_message(year, month, seq):
@@ -241,70 +226,10 @@ def init_cr():
 
         raise ValueError("No next/prev message found")
 
-    global generate_nav_items
-    def generate_nav_items(*, year=None, month=None, seq=None):
-        "navigation header at top of email messages."
-        nav_list = [
-            ("index", {}, 'Home', ""),
-            ("cr_index", {}, "CR", ""),
-        ]
-        if year is not None:
-            nav_list.append(
-                (
-                    "dates",
-                    dict(year=year, month=f"{month:02d}"),
-                    'Up',
-                    ""
-                ))
-
-            try:
-                prev_seq = next_msg(year, month, seq, -1)
-            except ValueError:
-                eprint("found nothing before", (year, month, seq))
-            else:
-                nav_list.append(
-                    (
-                        "cr_message",
-                        prev_seq,
-                        'Prev',
-                        ""
-                    ))
-
-            try:
-                next_seq = next_msg(year, month, seq, +1)
-            except ValueError:
-                pass
-            else:
-                nav_list.append(
-                    (
-                        "cr_message",
-                        next_seq,
-                        'Next',
-                        ""
-                    ))
-
-            nav_list.append(
-                (
-                    "dates",
-                    dict(year=year, month=f"{month:02d}"),
-                    'Date Index',
-                    f"#{seq:05d}"
-                ))
-            nav_list.append(
-                (
-                    "threads",
-                    dict(year=year, month=f"{month:02d}"),
-                    'Thread Index',
-                    f"#{seq:05d}"
-                ))
-
-        return nav_list
-
     # pylint: disable=global-variable-not-assigned
     global email_to_html
     def email_to_html(year, month, seq, note=""):
         "convert the email referenced by year, month and seq to html."
-        nav = generate_nav_items(year=year, month=month, seq=seq)
         msg = eml_file(year, month, seq)
         mydir = os.path.join(CR, f"{year:04d}-{month:02d}", "eml-files")
         path = os.path.join(mydir, msg)
@@ -324,7 +249,7 @@ def init_cr():
         filt.delete_empty_parts()
 
         return render_template("cr.jinja", title=title, page_title=clean,
-                               nav=nav, body=message.as_html(),
+                               body=message.as_html(),
                                year=year, month=month, seq=seq,
                                topics=get_topics_for(msgid),
                                note=note)
@@ -434,8 +359,8 @@ def init_filter():
             if filter_form.clear.data:
                 del session["pattern"], session["in_out"]
             else:
-                pattern = session["pattern"] = filter_form.pattern.data
-                in_out = session["in_out"] = filter_form.in_out.data
+                session["pattern"] = filter_form.pattern.data
+                session["in_out"] = filter_form.in_out.data
             return redirect(url_for("dates", year=year, month=f"{month:02d}"))
         return render_template('filter.jinja', filter_form=filter_form)
 
@@ -460,7 +385,7 @@ def init_topics():
             msgrefs=[(yr, mo, seq, trim_subject_prefix(subj))
                         for (yr, mo, seq, subj) in get_topic(topic, conn)]
         return render_template("topics.jinja", topics=topics, msgrefs=msgrefs,
-                               topic=topic, nav=generate_nav_items())
+                               topic=topic)
 
     @app.route('/CR/addtopic', methods=['GET', 'POST'])
     def addtopic():
@@ -493,8 +418,8 @@ def init_topics():
                                  month=int(topic_form.month.data, 10),
                                  seq=int(topic_form.seq.data, 10),
                                  note="Thanks for your submission.")
-        return render_template('cr.jinja', topic_form=topic_form,
-                               nav=generate_nav_items(year=year, month=month, seq=seq))
+        return render_template('cr.jinja', topic_form=topic_form)
+
 
     def save_topic_record(record):
         "write submitted topic details to CSV file."
