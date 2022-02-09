@@ -160,7 +160,7 @@ def init_cr():
             return render_template("crtop.jinja", body=fobj.read(),
                                    title="Old Classic Rendezvous Archive")
 
-    @app.route('/CR/<year>/<month>/<int:seq>')
+    @app.route('/CR/<year>/<month>/<seq>')
     def cr_message(year, month, seq):
         "render email as html."
         return email_to_html(int(year), int(month), seq)
@@ -170,6 +170,8 @@ def init_cr():
     global email_to_html
     def email_to_html(year, month, seq, note=""):
         "convert the email referenced by year, month and seq to html."
+        if not isinstance(seq, int):
+            seq = int(seq, 10)
         msg = eml_file(year, month, seq)
         mydir = os.path.join(CR, f"{year:04d}-{month:02d}", "eml-files")
         path = os.path.join(mydir, msg)
@@ -230,14 +232,14 @@ def init_redirect():
             # dead code, but this should make pylint like us again...
             return redirect("cr_index")
 
-        map_to = f"{(int(mat.groups()[0]) + 1):05d}"
+        seq = f"{(int(mat.groups()[0]) + 1):04d}"
         return redirect(url_for("cr_message", year=year, month=month,
-                                seq=map_to),
+                                seq=seq),
                         code=301)
 
-    @app.route('/<year>/<month>/<seq>')
+    @app.route('/<year>/<month>/<int:seq>')
     def bad_cr(year, month, seq):
-        return redirect(url_for("cr_message", year=year, month=month, seq=seq),
+        return redirect(url_for("cr_message", year=year, month=month, seq=f"{seq:04d}"),
                         code=301)
 
 def init_extra():
@@ -357,7 +359,7 @@ def init_topics():
             # pylint: disable=undefined-variable
             return email_to_html(year=int(topic_form.year.data, 10),
                                  month=int(topic_form.month.data, 10),
-                                 seq=int(topic_form.seq.data, 10),
+                                 seq=topic_form.seq.data,
                                  note="Thanks for your submission.")
         return render_template('cr.jinja', topic_form=topic_form)
 
@@ -389,7 +391,7 @@ def next_msg(year, month, seq, incr):
         return {
             "year": year,
             "month": month,
-            "seq": seq
+            "seq": seq,
         }
 
     # Intermediate path - a gap in files, but the one we want is
@@ -403,7 +405,7 @@ def next_msg(year, month, seq, incr):
             return {
                 "year": year,
                 "month": month,
-                "seq": seq
+                "seq": seq,
             }
     else:
         # We want the minimum file which is greater than msg.
@@ -414,7 +416,7 @@ def next_msg(year, month, seq, incr):
             return {
                 "year": year,
                 "month": month,
-                "seq": seq
+                "seq": seq,
             }
 
     # Slow path
@@ -431,7 +433,7 @@ def next_msg(year, month, seq, incr):
             return {
                 "year": year,
                 "month": month,
-                "seq": seq
+                "seq": seq,
             }
         dt = datetime.date(year, month, 15) + incr * 20 * ONE_DAY
         year = dt.year
@@ -442,13 +444,14 @@ def next_msg(year, month, seq, incr):
 def get_nav_items(*, year, month, seq):
     "navigation items related to the argument message."
     items = []
-
+    if not isinstance(seq, int):
+        seq = int(seq, 10)
     items.append(("Date Index", url_for("dates",
                                         year=year,
-                                        month=f"{month:02d}") + f"#{seq:05d}"))
+                                        month=f"{month:02d}") + f"#{seq:04d}"))
     items.append(("Thread Index", url_for("threads",
                                           year=year,
-                                          month=f"{month:02d}") + f"#{seq:05d}"))
+                                          month=f"{month:02d}") + f"#{seq:04d}"))
     try:
         prev_seq = next_msg(year, month, seq, -1)
     except ValueError:
@@ -494,15 +497,15 @@ class SearchForm(FlaskForm):
         ('Google', 'Google'),
     ], default='Brave')
 
-def eml_file(year, month, msgid):
+def eml_file(year, month, seq):
     "compute email file from sequence number"
     # MHonARC was written in Perl, so of course Y2k
     perl_yr = year - 1900
-    return f"classicrendezvous.{perl_yr:3d}{month:02d}.{(msgid):04d}.eml"
+    return f"classicrendezvous.{perl_yr:3d}{month:02d}.{seq:04d}.eml"
 
-def msg_exists(mydir, year, month, msgid):
+def msg_exists(mydir, year, month, seq):
     "test to see if there is an email message to which we should href"
-    name = eml_file(year, month, msgid)
+    name = eml_file(year, month, seq)
     full_path = os.path.join(mydir, name)
     if os.path.exists(full_path):
         return full_path

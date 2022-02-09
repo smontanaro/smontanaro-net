@@ -10,7 +10,7 @@ from smontanaro import create_app
 from smontanaro.db import ensure_db
 from smontanaro.dates import parse_date
 from smontanaro.util import read_message, trim_subject_prefix
-from smontanaro.views import MessageFilter
+from smontanaro.views import MessageFilter, eml_file
 
 @pytest.fixture
 def client():
@@ -160,3 +160,11 @@ def test_trim_subj():
     msg = read_message(mfile)
     exp = "Cinelli Myths � aluminium bars, fastback seatstay design"
     assert trim_subject_prefix(msg["Subject"]) == exp
+
+def test_eml_file():
+    for exp, args in [
+            ("classicrendezvous.10509.1592.eml", (2005, 9, 1592)),
+            ("classicrendezvous.10509.0001.eml", (2005, 9, 1)),
+            ("classicrendezvous.10509.0123.eml", (2005, 9, 123)),
+    ]:
+        assert exp == eml_file(*args)
