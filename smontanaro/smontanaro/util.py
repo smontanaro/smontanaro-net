@@ -300,11 +300,11 @@ class Message(email.message.Message):
             if hdr in ("in-reply-to", "references"):
                 tags = []
                 for tgt_msgid in re.findall(r"<[^>]+>", val):
-                    _x = re.sub(r"\s+", "", tgt_msgid)
-                    if _x != tgt_msgid:
+                    x = clean_msgid(tgt_msgid)
+                    if x != tgt_msgid:
                         logging.root.warning("Message-ID found to contain whitespace! %s",
                                              tgt_msgid)
-                        tgt_msgid = _x
+                        tgt_msgid = x
 
                     if tgt_msgid in last_refs:
                         continue
@@ -370,6 +370,10 @@ def trim_subject_prefix(subject):
     "Trim prefix detritus like [CR], Re:, etc"
     words = PFX_MATCHER.split(str(subject))
     return " ".join([word for word in words if word])
+
+def clean_msgid(msgid):
+    "Sometimes message ids contain whitespace"
+    return re.sub(r"\s+", "", msgid)
 
 def init_app(app):
     if not app.config["DEBUG"]:

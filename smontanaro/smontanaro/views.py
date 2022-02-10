@@ -21,7 +21,7 @@ from wtforms.validators import DataRequired
 from .db import ensure_db
 from .strip import strip_footers
 # pylint: disable=unused-import
-from .util import read_message, trim_subject_prefix, eprint
+from .util import read_message, trim_subject_prefix, eprint, clean_msgid
 from .exc import NoResponse
 
 SEARCH = {
@@ -185,6 +185,13 @@ def init_cr():
         msgid = message["Message-ID"]
         title = message["Subject"]
         clean = trim_subject_prefix(title)
+
+        # Occurrences of Message-ID seem to sometimes contain whitespace, but
+        # not always in the Message-ID header. See /CR/2006/10/0542
+        # for an example
+        msgid = clean_msgid(msgid)
+        if msgid != message["Message-ID"]:
+            logging.root.warning("Message-ID found to contain whitespace! %s", (year, month, seq))
 
         filt = MessageFilter(message)
         filt.filter_message(message)
