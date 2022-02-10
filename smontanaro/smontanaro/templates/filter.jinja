@@ -1,18 +1,15 @@
-<form class="d-flex" action="/CR/filter_date" method="POST">
-    <div>
-        {{ filter_form.in_out(class_="form-select", value=session.get("in_out", "")) }}
+<div class="d-flex flex-row">
+    <form action="/CR/filter_date" method="POST">
+        {# {{ filter_form.in_out(class_="form-select", value=session.get("in_out", "")) }} #}
+        <select class="form-select" id="in_out" name="in_out">
+            <option value="keep" {% if in_out == "keep" %}selected{% endif %}>Keep</option>
+            <option value="toss" {% if in_out == "toss" %}selected{% endif %}>Toss</option>
+        </select>
         {{ filter_form.pattern(class_="form-control", value=session.get("pattern", "")) }}
-    </div>
-    <div>
-        {{ filter_form.filter_(class_="form-control") }}
-        {{ filter_form.clear(class_="form-control") }}
-    </div>
-    {{ filter_form.csrf_token }}
-    {{ filter_form.year(value=year) }}
-    {{ filter_form.month(value=month) }}
-</form>
-
-{#
-<input name="pattern" class="form-control me-2" type="search" placeholder="Filter Pattern" aria-label="Search">
-</form>
-#}
+        {{ filter_form.year(value=year) }}
+        {{ filter_form.month(value=month) }}
+        {{ filter_form.csrf_token }}
+        {{ filter_form.filter_(class_="form-control", value="Filter") }}
+        {{ filter_form.clear(class_="form-control", value="Clear") }}
+    </form>
+</div>
