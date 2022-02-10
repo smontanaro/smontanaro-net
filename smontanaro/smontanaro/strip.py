@@ -2,6 +2,38 @@
 
 "bunch of small functions to strip various cruft from end of emails."
 
+# Other possible candidates for footer strippers
+#
+# Yahoo!
+#
+# http://localhost:8080/CR/2006/04/676
+# http://localhost:8080/CR/2006/02/143
+# http://localhost:8080/CR/2006/02/144
+# http://localhost:8080/CR/2006/02/153
+# http://localhost:8080/CR/2006/02/154
+# http://localhost:8080/CR/2001/5/00019
+# http://localhost:8080/CR/2006/02/156
+#
+# MSN
+#
+# http://localhost:8080/CR/2001/09/19
+#
+# AOL
+#
+# http://localhost:8080/CR/2008/06/12
+#
+# mail2web
+#
+# http://localhost:8080/CR/2006/4/659
+#
+# Virgin Media???
+#
+# https://localhost:8080/CR/2007/07/00004
+#
+# Fastmail
+#
+# http://localhost:8080/CR/2006/11/0040
+
 import re
 
 QUOTE_PAT = r'(?:(?:>\s?)*)?'
