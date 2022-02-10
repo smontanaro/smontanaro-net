@@ -327,7 +327,13 @@ class Message(email.message.Message):
                 continue
             if hdr in ("in-reply-to", "references"):
                 tags = []
-                for tgt_msgid in re.findall(r"<[^\s>]+>", val):
+                for tgt_msgid in re.findall(r"<[^>]+>", val):
+                    _x = re.sub(r"\s+", "", tgt_msgid)
+                    if _x != tgt_msgid:
+                        logging.root.warning("Message-ID found to contain whitespace! %s",
+                                             tgt_msgid)
+                        tgt_msgid = _x
+
                     if tgt_msgid in last_refs:
                         continue
                     last_refs |= set([tgt_msgid])
