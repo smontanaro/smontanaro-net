@@ -7,9 +7,9 @@ Process References: headers in email files from emaildir, adding to sqldb
 
 import argparse
 import datetime
-import email.errors
 import os
 import re
+import sqlite3
 import sys
 
 import arrow.parser
@@ -18,7 +18,7 @@ import dateutil.tz
 
 from smontanaro.dates import parse_date
 from smontanaro.db import ensure_db
-from smontanaro.util import clean_msgid
+from smontanaro.util import clean_msgid, read_message
 
 ONE_SEC = datetime.timedelta(seconds=1)
 
@@ -44,9 +44,11 @@ def insert_references(message, conn, filename, verbose):
     "extract reference bits from message and insert in db"
     nrecs = 0
     msgid = clean_msgid(message["Message-ID"])
-    datestr = message["Date"]
-    sender = message["From"]
-    subject = message["Subject"]
+    # Sometimes these aren't actually strings, but email.header.Header
+    # objects (which SQLite can't handle), so stringify them.
+    datestr = str(message["Date"])
+    sender = str(message["From"])
+    subject = str(message["Subject"])
     if not msgid:
         return nrecs
 
@@ -126,16 +128,7 @@ def insert_references(message, conn, filename, verbose):
 
 def process_one_file(filename, conn, verbose):
     "handle a single file"
-    for encoding in ("utf-8", "latin-1"):
-        with open(filename, encoding=encoding) as fobj:
-            try:
-                message = email.message_from_file(fobj)
-            except (UnicodeDecodeError, email.errors.MessageError):
-                continue
-            else:
-                break
-    else:
-        raise ValueError(f"failed to read message from {filename}")
+    message = read_message(filename)
     if message.defects:
         raise ValueError(f"message parse errors {message.defects} in {filename}")
     return insert_references(message, conn, filename, verbose)
@@ -191,9 +184,14 @@ def main():
 
     records = nfiles = 0
     for (dirpath, _dirnames, filenames) in os.walk(args.top):
+        files_read = 0
         for fname in filenames:
-            if not fname.endswith(".eml"):
+            if "eml-files" not in dirpath or not fname.endswith(".eml"):
                 continue
+            files_read += 1
+            if files_read % 100 == 0:
+                print(".", end="")
+                sys.stdout.flush()
             path = os.path.join(dirpath, fname)
             try:
                 nrecs = process_one_file(path, conn, args.verbose)
@@ -205,6 +203,8 @@ def main():
                 print("  >>", fname, nrecs)
             records += nrecs
         if args.verbose:
+            if files_read:
+                print(f" {files_read}")
             print(">>", dirpath, records, nfiles)
 
     nroots = mark_thread_roots(conn)
