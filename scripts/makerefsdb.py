@@ -18,6 +18,7 @@ import dateutil.tz
 
 from smontanaro.dates import parse_date
 from smontanaro.db import ensure_db
+from smontanaro.util import clean_msgid
 
 ONE_SEC = datetime.timedelta(seconds=1)
 
@@ -38,10 +39,6 @@ def decompose_filename(filename):
                      for x in
                      os.path.split(filename)[0].split("/")[1].split("-")]
     return (year, month, seq)
-
-def clean_msgid(msgid):
-    "Sometimes message ids contain whitespace"
-    return re.sub(r"\s+", "", msgid)
 
 def insert_references(message, conn, filename, verbose):
     "extract reference bits from message and insert in db"
@@ -147,7 +144,7 @@ def mark_thread_roots(conn):
     "identify those messages which start threads."
     cur = conn.cursor()
 
-    # messages which are parents but don't have parents are roots
+    # messages which are parents but don't themselves have parents are roots
     cur.execute("update messages"
                 "  set is_root = 1"
                 "  where messageid in"
