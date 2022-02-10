@@ -44,3 +44,7 @@ WARNING:root:Can't render images
 127.0.0.1 - - "GET /CR/2008/05/1123 HTTP/1.1" 200 <size> "-" "curl/7.68.0"
 # bad msg ref
 127.0.0.1 - - "GET /2008/05/1123 HTTP/1.1" 301 <size> "-" "curl/7.68.0"
+# Message-ID reference contains whitespace...
+WARNING:root:Message-ID found to contain whitespace! <21662.209.204.144.231.1160691923.squirrel@webmail.sonic.ne
+t>
+127.0.0.1 - - "GET /CR/2006/10/0542 HTTP/1.1" 200 <size> "-" "curl/7.68.0"

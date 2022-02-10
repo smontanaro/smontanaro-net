@@ -40,3 +40,5 @@ http://localhost:8080/CR/2006/11/1740
 http://localhost:8080/CR/2008/05/1123
 # bad msg ref
 http://localhost:8080/2008/05/1123
+# Message-ID reference contains whitespace...
+http://localhost:8080/CR/2006/10/0542

@@ -39,10 +39,14 @@ def decompose_filename(filename):
                      os.path.split(filename)[0].split("/")[1].split("-")]
     return (year, month, seq)
 
+def clean_msgid(msgid):
+    "Sometimes message ids contain whitespace"
+    return re.sub(r"\s+", "", msgid)
+
 def insert_references(message, conn, filename, verbose):
     "extract reference bits from message and insert in db"
     nrecs = 0
-    msgid = message["Message-ID"]
+    msgid = clean_msgid(message["Message-ID"])
     datestr = message["Date"]
     sender = message["From"]
     subject = message["Subject"]
@@ -91,12 +95,20 @@ def insert_references(message, conn, filename, verbose):
 
     ref_list = []
     if message["References"] is not None:
-        ref_list = [ref.strip() for ref in
-                        re.findall(r"<[^\s>]+>", message["References"])]
+        ref_list = [clean_msgid(ref) for ref in
+                        re.findall(r"<[^>]+>", message["References"])]
     if message["In-Reply-To"] is not None:
-        in_reply_to = message["In-Reply-To"].strip()
-        if in_reply_to not in ref_list:
-            ref_list.append(in_reply_to)
+        # I've discovered some bizarro In-Reply-To fields, so treat it
+        # similar to the References field. Example:
+        #    CR/2006-01/eml-files/classicrendezvous.10601.1817.eml
+        # where we find:
+        #     In-Reply-To: <s3d77aca.005@GW16.hofstra.edu> (Edward Albert's message of "Wed,
+        #          25 Jan 2006 13:18:40 -0500")
+        reply_list = [clean_msgid(ref) for ref in
+                          re.findall(r"<[^>]+>", message["In-Reply-To"])]
+        for in_reply_to in reply_list:
+            if in_reply_to not in ref_list:
+                ref_list.append(in_reply_to)
 
     for (parent, child) in zip(ref_list[:-1], ref_list[1:]):
         cur.execute("insert into msgreplies"
