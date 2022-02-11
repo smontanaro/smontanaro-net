@@ -254,11 +254,6 @@ def init_redirect():
         return redirect(url_for("cr_message", year=year, month=month, seq=f"{seq:04d}"),
                         code=301)
 
-    @app.route('/<year>/<month>/<seq>')
-    def bad_cr(year, month, seq):
-        return redirect(url_for("cr_message", year=year, month=month, seq=seq),
-                        code=301)
-
 def init_extra():
     app = current_app
 
