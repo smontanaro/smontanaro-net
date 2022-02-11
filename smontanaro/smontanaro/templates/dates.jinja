@@ -6,6 +6,9 @@
     <hr style="height: 4px" />
     {% include "search.jinja" %}
     <hr style="height: 4px" />
-    <b>Filter</b>
+    <span class="d-inline-block" tabindex="0" data-toggle="tooltip"
+          title="Enter a pattern and indicate whether to keep or toss subjects or emails with that pattern.">
+        <b>Filter</b>
+    </span>
     {% include "filter.jinja" %}
 {% endblock %}
