@@ -49,7 +49,7 @@ def init_simple():
         return render_template("about.jinja")
 
     @app.route("/CR/help")
-    def help():
+    def help_():
         "websites need these"
         return render_template("help.jinja")
 
