@@ -197,6 +197,7 @@ def main():
     conn.commit()
     os.system(f"sqlite3 {args.sqldb} < {tmpf}")
     os.close(tmpfd)
+    os.unlink(tmpf)
 
     return 0
 
