@@ -4,6 +4,8 @@ http://localhost:8080/env
 http://localhost:8080/api/help
 http://localhost:8080/
 http://localhost:8080/CR/
+http://localhost:8080/CR/about
+http://localhost:8080/CR/help
 http://localhost:8080/2001-05/html/threads.html
 http://localhost:8080/2003-09/html/maillist.html
 http://localhost:8080/2004-09/html/msg00032.html
