@@ -6,6 +6,8 @@
 127.0.0.1 - - "GET /api/help HTTP/1.1" 200 <size> "-" "curl/7.68.0"
 127.0.0.1 - - "GET / HTTP/1.1" 200 <size> "-" "curl/7.68.0"
 127.0.0.1 - - "GET /CR/ HTTP/1.1" 200 <size> "-" "curl/7.68.0"
+127.0.0.1 - - "GET /CR/about HTTP/1.1" 200 <size> "-" "curl/7.68.0"
+127.0.0.1 - - "GET /CR/help HTTP/1.1" 200 <size> "-" "curl/7.68.0"
 127.0.0.1 - - "GET /2001-05/html/threads.html HTTP/1.1" 301 <size> "-" "curl/7.68.0"
 127.0.0.1 - - "GET /2003-09/html/maillist.html HTTP/1.1" 301 <size> "-" "curl/7.68.0"
 127.0.0.1 - - "GET /2004-09/html/msg00032.html HTTP/1.1" 301 <size> "-" "curl/7.68.0"
