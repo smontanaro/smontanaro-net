@@ -95,6 +95,24 @@ def test_keep_filter(client):
         for line in rv.data.split("\n"):
             assert re.search(b"<h2|<ul|<li>.*Campagnolo", line) is not None
 
+@pytest.mark.skip(reason="flask test harness issues")
+def test_toss_everything(client):
+    "check that we keep stuff we ask to keep"
+    with client.application.test_request_context("/CR/filter_date") as ctx:
+        rv = client.post("/CR/filter_date", data={
+            "pattern": "Colnago",
+            "in_out": "keep",
+            "year": "2001",
+            "month": "10",
+            })
+        assert rv.status_code == 302
+        ctx.session["pattern"] = "Colnago"
+        ctx.session["in_out"] = "keep"
+        rv = client.get("/CR/2001/10/dates")
+        assert re.search(b"Oct 2001 Date Index", rv.data) is not None
+        for line in rv.data.split("\n"):
+            assert re.search(b"Colnago", line) is None
+
 def test_suggest_topic(client):
     "check that topics.csv is updated when a topic is suggested."
     rv = client.post("/CR/addtopic", data={
