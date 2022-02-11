@@ -16,9 +16,11 @@ def ensure_db(sqldb):
     if create:
         create_main_tables(conn)
         create_topic_tables(conn)
-        create_main_indexes(conn)
-        create_topic_indexes(conn)
     return conn
+
+def ensure_indexes(conn):
+    ensure_main_indexes(conn)
+    ensure_topic_indexes(conn)
 
 def create_main_tables(conn):
     cur = conn.cursor()
@@ -54,15 +56,15 @@ def create_main_tables(conn):
     ''')
     conn.commit()
 
-def create_main_indexes(conn):
+def ensure_main_indexes(conn):
     cur = conn.cursor()
-    cur.execute("create index msgid_index"
+    cur.execute("create index if not exists msgid_index"
                 "  on messages"
                 "  (messageid)")
-    cur.execute("create index msgrefs_index"
+    cur.execute("create index if not exists msgrefs_index"
                 "  on msgrefs"
                 "  (reference)")
-    cur.execute("create index msgreplies_index"
+    cur.execute("create index if not exists msgreplies_index"
                 "  on msgreplies"
                 "  (parent)")
     conn.commit()
@@ -78,9 +80,9 @@ def create_topic_tables(conn):
     )
     conn.commit()
 
-def create_topic_indexes(conn):
+def ensure_topic_indexes(conn):
     cur = conn.cursor()
-    cur.execute("create index topic_index"
+    cur.execute("create index if not exists topic_index"
                 "  on topics"
                 "  (topic, messageid)")
     conn.commit()

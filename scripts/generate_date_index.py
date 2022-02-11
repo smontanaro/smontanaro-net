@@ -5,6 +5,7 @@
 import argparse
 import html
 import itertools
+import re
 import sqlite3
 import sys
 
@@ -17,21 +18,20 @@ def date_key(record):
 def generate_link(r):
     "HTML for a single message"
     root = "" # "(T)&nbsp;" if r['is_root'] else ""
-    return (f'''<a name="{r['seq']:05d}">'''
+    sub = re.sub(r"\s+", " ", r["Subject"])
+    return (f'''<a name="{r['seq']:04d}">'''
             f'''{root}'''
-            f'''<a href="/CR/{r['year']}/{r['month']:02d}/{r['seq']:05d}">'''
-            f'''{html.escape(r['subject'])}</a></a>'''
+            f'''<a href="/CR/{r['year']}/{r['month']:02d}/{r['seq']:04d}">'''
+            f'''{html.escape(sub)}</a></a>'''
             f''' {html.escape(r["sender"])}''')
 
 def generate_index(records):
     "html fragment output"
     for (dt, chunk) in itertools.groupby(records, date_key):
         print(f'''<h2>{dt.strftime("%d %b %Y")}</h2>''')
-        print('''<ul style="column-count: auto; column-width: 300px;" class="no-bullets">''')
+        print('''<ul style="column-count: auto; column-width: 300px;" class="list-group-flush">''')
         for r in chunk:
-            print('''<li>''', end="")
-            print(generate_link(r), end="")
-            print('''</li>''')
+            print(f"<li>{generate_link(r)}</li>")
         print("</ul>")
 
 def main():

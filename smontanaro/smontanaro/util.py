@@ -2,34 +2,6 @@
 
 "Some functions to share between parts of the app"
 
-# Other possible candidates for footer strippers
-#
-# Yahoo!
-#
-# http://localhost:8080/CR/2006/04/676
-# http://localhost:8080/CR/2006/02/143
-# http://localhost:8080/CR/2006/02/144
-# http://localhost:8080/CR/2006/02/153
-# http://localhost:8080/CR/2006/02/154
-# http://localhost:8080/CR/2001/5/00019
-# http://localhost:8080/CR/2006/02/156
-#
-# MSN
-#
-# http://localhost:8080/CR/2001/09/19
-#
-# AOL
-#
-# http://localhost:8080/CR/2008/06/12
-#
-# mail2web
-#
-# http://localhost:8080/CR/2006/4/659
-#
-# Virgin Media???
-#
-# https://localhost:8080/CR/2007/07/00004
-
 import csv
 import datetime
 import email.message
@@ -327,7 +299,13 @@ class Message(email.message.Message):
                 continue
             if hdr in ("in-reply-to", "references"):
                 tags = []
-                for tgt_msgid in re.findall(r"<[^\s>]+>", val):
+                for tgt_msgid in re.findall(r"<[^>]+>", val):
+                    x = clean_msgid(tgt_msgid)
+                    if x != tgt_msgid:
+                        logging.root.warning("Message-ID found to contain whitespace! %s",
+                                             tgt_msgid)
+                        tgt_msgid = x
+
                     if tgt_msgid in last_refs:
                         continue
                     last_refs |= set([tgt_msgid])
@@ -392,6 +370,10 @@ def trim_subject_prefix(subject):
     "Trim prefix detritus like [CR], Re:, etc"
     words = PFX_MATCHER.split(str(subject))
     return " ".join([word for word in words if word])
+
+def clean_msgid(msgid):
+    "Sometimes message ids contain whitespace"
+    return re.sub(r"\s+", "", msgid)
 
 def init_app(app):
     if not app.config["DEBUG"]:

@@ -1,23 +1,17 @@
-{% extends "crtop.jinja" %}
+{% extends "bootstrap.jinja" %}
 
-{% set nav = [("index", {}, 'Home', ""), ("cr_index", {}, "CR", ""),] %}
+{% set title = "About the CR Archives" %}
 
-{% block title %}
-    <div class="header" style="margin: 5px;">
-        <h1 id="header">About the CR Archives</h1>
-    </div>
-{% endblock %}
-
-{% block body %}
+{% block content %}
 
     <p>
-        Before its current incarnation as a Google Group, the
-        <a href="http://classicrendezvous.com/">Classic
-        Rendezvous</a> group lived as a mailing list hosted at
+        Before its current incarnation as a <a href="https://groups.google.com/g/classic-rendezvous-lightweight-vintage-bicycles/" target="_blank">Google Group</a>, the
+        <a href="http://classicrendezvous.com/" target="_blank">Classic
+            Rendezvous</a> group lived as a mailing list hosted at
         bikelist.org (not a link here as its original purpose is no
         more). The archives of the old list were mostly intact when I
         came along. I initially converted them to HTML using an old
-        mail-to-HTML converter named <a href="https://www.mhonarc.org/">MHonArc</a>,
+        mail-to-HTML converter named <a href="https://www.mhonarc.org/" target="_blank">MHonArc</a>,
         just to make them available to current classic &amp; vintage
         bike nuts as well as the broader public. I then went on with
         my life.
@@ -28,9 +22,9 @@
         putter around with (I was a software engineer), wanted the
         site to be more dynamic, and wanted to make it slightly more
         than a static collection of emails. The current incarnation
-        was built with <a href="https://nginx.org/">NGINX</a>,
-        <a href="https://gunicorn.org/">Gunicorn</a>, and
-        <a href="https://flask.palletsprojects.com/">Flask</a>. It
+        was built with <a href="https://nginx.org/" target="_blank">NGINX</a>,
+        <a href="https://gunicorn.org/" target="_blank">Gunicorn</a>, and
+        <a href="https://flask.palletsprojects.com/" target="_blank">Flask</a>. It
         includes a bit different presentation and navigation (more?
         better?  worse? the jury is still out), as well as a couple
         functional changes to hopefully make the content more useful.
@@ -54,7 +48,7 @@
     </p>
 
     <p>
-        — <a href="mailto:skip.montanaro@gmail.com">Skip Montanaro</a>, 2022
+        — <a href="mailto:skip.montanaro@gmail.com">Skip Montanaro</a>, Feb 2022
     </p>
 
 {% endblock %}

@@ -48,7 +48,7 @@ coverage run -a --rcfile=.coveragerc scripts/listbydate.py CR/2000-03 >/dev/null
 coverage run -a --rcfile=.coveragerc scripts/generate_date_index.py -d references.db 2000 3 >/dev/null
 
 # Run our official unit tests
-coverage run -a --rcfile=.coveragerc $(which pytest)
+coverage run -a --rcfile=.coveragerc $(which pytest) --tb=native
 PYT=$?
 
 if [ -r .coverage -a -r smontanaro/.coverage ] ; then

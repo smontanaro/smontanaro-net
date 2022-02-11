@@ -1,0 +1,101 @@
+{% extends "bootstrap.jinja" %}
+
+{% set title = "Help" %}
+
+{% block content %}
+
+    <p>
+        You can do more than just browse the 180k or so messages in the archive.
+        <ul>
+            <li>When browsing by date or thread, you can search for
+                particular content on your favorite search engine.</li>
+            <li>When browsing by date you can filter on message
+                subjects or senders.</li>
+            <li>When viewing a message, you can associate one or more
+                topics with that message.</li>
+            <li>You can browse the <a href="/CR/topics">current set of topics</a>.</li>
+        </ul>
+    </p>
+
+    <a name="search"><h2>Searching</h2></a>
+
+    <p>
+        You can search the full archive using your favorite search
+        engine and its search syntax. The default search engine is
+        Brave, but Google, Bing, and DuckDuckGo are also supported. If
+        you would like to see some other search engine available, let
+        me know.
+    </p>
+
+    <a name="filter"><h2>Filtering</h2></a>
+
+    <p>
+        When browsing by date you probably won't be all that
+        interested in messages about ancient eBay listings. Simiarly,
+        you might want to only view messages about a particular brand
+        or from a particular person. The filter function on the dates
+        pages allow you to restrict your view accordingly. Select
+        "Keep" or "Toss" from the dropdown menu, and enter a pattern,
+        then click "Filter." For the nerds reading this, the pattern
+        can be any regular expression, but a word or two works just
+        fine.
+    </p>
+    <p>
+        Note that the filter capability is just a little hack. It
+        doesn't operate on full messages, just the subject and
+        sender. Each message listed has the subject and sender on a
+        single line. The filter just keeps or tosses lines matching
+        the desired pattern and displays those that make it through
+        the filter.
+    </p>
+
+    <a name="filter-examples"><h2>Filter Pattern Examples</h2></a>
+
+    <p>
+        Here are a few simple regular expression examples. Note that
+        patterns are not case-sensitive. "Colnago" and "colnago" match
+        the same messages.
+        <ul>
+            <li><tt>ebay|fs|wtb|for sale</tt> - a pattern that selects
+                many/most messages related to buying and selling</li>
+            <li><tt>Colnago|Masi</tt> - a pattern that selects messages
+                mentioning Colnago <b>or</b> Masi</li>
+            <li><tt>(Colnago.*Masi|Masi.*Colnago)</tt> - a pattern
+                that selects messages mentioning Colnago <b>and</b>
+                Masi (admittedly, a bit cumbersome)</li>
+            <li><tt>brian baylis</tt> - a pattern that selects messages
+                from (or mentioning) Brian Baylis.</li>
+        </ul>
+    </p>
+
+    <a name="topics"><h2>Browsing or Adding Topics</h2></a>
+
+    <p>
+        The archive is huge and is really not organized in a useful
+        way. While filters help cut down on the sheer number of
+        messages you need to consider when drilling down on a subject
+        of interest, a more permanent method of organization is called
+        for. The archive has a user-maintained set of topics. You can
+        view <a href="/CR/topics">existing topics</a>, or (when
+        viewing an individual message you find interesting) suggest
+        one or more topics that message might apply to. Consider this
+        message: <a href="CR/2008/9/1111">reynolds 531 SL tubing and
+        heavier riders</a>. You will see it's already associated with
+        two topics, <a href="/CR/topics/Framebuilding">Framebuilding</a>
+        and <a href="/CR/topics/Norris%20Lockley">Norris Lockley</a>. You
+        can suggest other topics to which that message might apply,
+        say, "Reynolds Tubing," by entering that in the "Add Topic(s)"
+        field and hitting RETURN or pressing the "Submit" button. If
+        you want to add the same message to multiple topics, separate
+        them with commas.
+    </p>
+    <p>
+        This is a very new feature (as of Feb 2022). At some point it
+        will probably need to undergo some further refinement.
+    </p>
+
+    <p>
+        — <a href="mailto:skip.montanaro@gmail.com">Skip Montanaro</a>, Feb 2022
+    </p>
+
+{% endblock %}

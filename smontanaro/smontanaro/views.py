@@ -13,15 +13,15 @@ import sqlite3
 import urllib.parse
 
 from flask import (redirect, url_for, render_template, abort, jsonify, request,
-                   current_app)
+                   current_app, session)
 from flask_wtf import FlaskForm
-from wtforms import StringField, HiddenField, SelectField
+from wtforms import StringField, HiddenField, SelectField, SubmitField
 from wtforms.validators import DataRequired
 
 from .db import ensure_db
 from .strip import strip_footers
 # pylint: disable=unused-import
-from .util import read_message, trim_subject_prefix, eprint
+from .util import read_message, trim_subject_prefix, eprint, clean_msgid
 from .exc import NoResponse
 
 SEARCH = {
@@ -48,6 +48,11 @@ def init_simple():
         "websites need these"
         return render_template("about.jinja")
 
+    @app.route("/CR/help")
+    def help():
+        "websites need these"
+        return render_template("help.jinja")
+
     @app.route("/favicon.ico")
     def favicon():
         "websites need these"
@@ -61,7 +66,7 @@ def init_simple():
     @app.route("/")
     def index():
         "index"
-        return render_template("main.jinja", title="Home", nav="")
+        return render_template("main.jinja", title="Home")
 
 def init_indexes():
     app = current_app
@@ -69,9 +74,11 @@ def init_indexes():
 
     @app.route("/CR/<year>/<month>")
     @app.route("/CR/<year>/<month>/dates")
-    @app.route("/CR/<year>/<month>/dates/<pattern>/<in_out>")
-    def dates(year, month, pattern=".*", in_out="keep"):
+    def dates(year, month):
         "new date index"
+
+        pattern = session.get("pattern", ".*")
+        in_out = session.get("in_out", "keep")
 
         year = int(year)
         month = int(month)
@@ -80,7 +87,7 @@ def init_indexes():
         prev_url = month_url(year, month, -1, "dates")
         next_url = month_url(year, month, +1, "dates")
 
-        title = date.strftime("%b %Y Date Index")
+        title = f"{date.strftime('%b %Y Date Index')}"
         with open(f'''{CR}/{date.strftime("%Y-%m")}/generated/dates.body''',
                   encoding="utf-8") as fobj:
             lines = list(fobj)
@@ -98,17 +105,13 @@ def init_indexes():
                 if re.search(full_pat, line, re.I) is None:
                     filter_lines.append(line)
         body = "\n".join(filter_lines)
-
-        nav_list = (generate_nav_items() +
-                    [(
-                        "threads",
-                        dict(year=year, month=f"{month:02d}"),
-                        "By Thread",
-                        ""
-                    )])
+        # elide dates which the filter completely cleared out.
+        body = re.sub("<h2>.*</h2>\n+<ul .*>\n+</ul>\n+", "", body).strip()
+        if not body:
+            body = "<p>Pretty brutal filter, eh? Poke the 'Clear' button to remove it.</p>"
         if pattern == ".*":
             pattern = ""
-        return render_template("dates.jinja", title=title, body=body, nav=nav_list,
+        return render_template("dates.jinja", title=title, body=body,
                                prev=prev_url, next=next_url, year=year, month=month,
                                pattern=pattern, in_out=in_out)
 
@@ -127,15 +130,8 @@ def init_indexes():
         with open(f'''{CR}/{date.strftime("%Y-%m")}/generated/threads.body''',
                   encoding="utf-8") as fobj:
             body = fobj.read()
-        nav_list = (generate_nav_items() +
-                    [(
-                        "dates",
-                        dict(year=year, month=f"{month:02d}"),
-                        "By Date",
-                        ""
-                    )])
-        return render_template("index.jinja", title=title, body=body, nav=nav_list,
-                               prev=prev_url, next=next_url)
+        return render_template("threads.jinja", title=title, body=body,
+                               prev=prev_url, next=next_url, year=year, month=month)
 
     def month_url(start_year, start_month, offset, what):
         "previous month - often month +/- 1, but not always (we have gaps)"
@@ -167,142 +163,20 @@ def init_cr():
 
         with open(f"{CR}/generated/index.body", encoding="utf8") as fobj:
             return render_template("crtop.jinja", body=fobj.read(),
-                                   title="Old Classic Rendezvous Archive",
-                                   nav=generate_nav_items())
+                                   title="Old Classic Rendezvous Archive")
 
-    @app.route('/CR/<year>/<month>/<int:seq>')
+    @app.route('/CR/<year>/<month>/<seq>')
     def cr_message(year, month, seq):
         "render email as html."
         return email_to_html(int(year), int(month), seq)
 
 
-    # global stmt is just for testing...
-    global next_msg
-    def next_msg(year, month, seq, incr):
-        "provide next or prev message in sequence (according to incr)"
-        monthdir = os.path.join(CR, f"{year:04d}-{month:02d}", "eml-files")
-        seq += incr
-        files = sorted(glob.glob(os.path.join(monthdir, "*.eml")))
-        # Fast path. This happens almost all the time.
-        msg = os.path.join(monthdir, eml_file(year, month, seq))
-        if msg in files:
-            return {
-                "year": year,
-                "month": month,
-                "seq": seq
-            }
-
-        # Intermediate path - a gap in files, but the one we want is
-        # in the list.
-        if incr == -1:
-            # We want the maximum file which is less than msg.
-            lt_files = [f for f in files if f < msg]
-            if lt_files:
-                f = lt_files[-1]
-                seq = int(f.split(".")[-2], 10)
-                return {
-                    "year": year,
-                    "month": month,
-                    "seq": seq
-                }
-        else:
-            # We want the minimum file which is greater than msg.
-            gt_files = [f for f in files if f > msg]
-            if gt_files:
-                f = gt_files[0]
-                seq = int(f.split(".")[-2], 10)
-                return {
-                    "year": year,
-                    "month": month,
-                    "seq": seq
-                }
-
-        # Slow path
-        # move forward or back one month
-        dt = datetime.date(year, month, 15) + incr * 20 * ONE_DAY
-        year = dt.year
-        month = dt.month
-        while OLDEST_MONTH <= (year, month) <= NEWEST_MONTH:
-            monthdir = os.path.join(CR, f"{year:04d}-{month:02d}", "eml-files")
-            files = sorted(glob.glob(os.path.join(monthdir, "*.eml")))
-            if files:
-                msg = files[-1] if incr == -1 else files[0]
-                seq = int(msg.split(".")[-2], 10)
-                return {
-                    "year": year,
-                    "month": month,
-                    "seq": seq
-                }
-            dt = datetime.date(year, month, 15) + incr * 20 * ONE_DAY
-            year = dt.year
-            month = dt.month
-
-        raise ValueError("No next/prev message found")
-
-    global generate_nav_items
-    def generate_nav_items(*, year=None, month=None, seq=None):
-        "navigation header at top of email messages."
-        nav_list = [
-            ("index", {}, 'Home', ""),
-            ("cr_index", {}, "CR", ""),
-        ]
-        if year is not None:
-            nav_list.append(
-                (
-                    "dates",
-                    dict(year=year, month=f"{month:02d}"),
-                    'Up',
-                    ""
-                ))
-
-            try:
-                prev_seq = next_msg(year, month, seq, -1)
-            except ValueError:
-                eprint("found nothing before", (year, month, seq))
-            else:
-                nav_list.append(
-                    (
-                        "cr_message",
-                        prev_seq,
-                        'Prev',
-                        ""
-                    ))
-
-            try:
-                next_seq = next_msg(year, month, seq, +1)
-            except ValueError:
-                pass
-            else:
-                nav_list.append(
-                    (
-                        "cr_message",
-                        next_seq,
-                        'Next',
-                        ""
-                    ))
-
-            nav_list.append(
-                (
-                    "dates",
-                    dict(year=year, month=f"{month:02d}"),
-                    'Date Index',
-                    f"#{seq:05d}"
-                ))
-            nav_list.append(
-                (
-                    "threads",
-                    dict(year=year, month=f"{month:02d}"),
-                    'Thread Index',
-                    f"#{seq:05d}"
-                ))
-
-        return nav_list
-
     # pylint: disable=global-variable-not-assigned
     global email_to_html
     def email_to_html(year, month, seq, note=""):
         "convert the email referenced by year, month and seq to html."
-        nav = generate_nav_items(year=year, month=month, seq=seq)
+        if not isinstance(seq, int):
+            seq = int(seq, 10)
         msg = eml_file(year, month, seq)
         mydir = os.path.join(CR, f"{year:04d}-{month:02d}", "eml-files")
         path = os.path.join(mydir, msg)
@@ -317,15 +191,23 @@ def init_cr():
         title = message["Subject"]
         clean = trim_subject_prefix(title)
 
+        # Occurrences of Message-ID seem to sometimes contain whitespace, but
+        # not always in the Message-ID header. See /CR/2006/10/0542
+        # for an example
+        msgid = clean_msgid(msgid)
+        if msgid != message["Message-ID"]:
+            logging.root.warning("Message-ID found to contain whitespace! %s", (year, month, seq))
+
         filt = MessageFilter(message)
         filt.filter_message(message)
         filt.delete_empty_parts()
 
         return render_template("cr.jinja", title=title, page_title=clean,
-                               nav=nav, body=message.as_html(),
+                               body=message.as_html(),
                                year=year, month=month, seq=seq,
                                topics=get_topics_for(msgid),
-                               note=note)
+                               note=note,
+                               nav=get_nav_items(year=year, month=month, seq=seq))
 
     def get_topics_for(msgid):
         "return list of topics associated with msgid"
@@ -362,9 +244,14 @@ def init_redirect():
             # dead code, but this should make pylint like us again...
             return redirect("cr_index")
 
-        map_to = f"{(int(mat.groups()[0]) + 1):05d}"
+        seq = f"{(int(mat.groups()[0]) + 1):04d}"
         return redirect(url_for("cr_message", year=year, month=month,
-                                seq=map_to),
+                                seq=seq),
+                        code=301)
+
+    @app.route('/<year>/<month>/<int:seq>')
+    def bad_cr(year, month, seq):
+        return redirect(url_for("cr_message", year=year, month=month, seq=f"{seq:04d}"),
                         code=301)
 
     @app.route('/<year>/<month>/<seq>')
@@ -427,12 +314,14 @@ def init_filter():
     def filter_date():
         filter_form = FilterForm()
         if filter_form.validate_on_submit():
-            pattern = filter_form.pattern.data
-            in_out = filter_form.in_out.data
             year = int(filter_form.year.data)
             month = int(filter_form.month.data)
-            return redirect(url_for("dates", year=year, month=f"{month:02d}",
-                                    pattern=pattern, in_out=in_out))
+            if filter_form.clear.data:
+                del session["pattern"], session["in_out"]
+            else:
+                session["pattern"] = filter_form.pattern.data
+                session["in_out"] = filter_form.in_out.data
+            return redirect(url_for("dates", year=year, month=f"{month:02d}"))
         return render_template('filter.jinja', filter_form=filter_form)
 
 def init_topics():
@@ -456,7 +345,7 @@ def init_topics():
             msgrefs=[(yr, mo, seq, trim_subject_prefix(subj))
                         for (yr, mo, seq, subj) in get_topic(topic, conn)]
         return render_template("topics.jinja", topics=topics, msgrefs=msgrefs,
-                               topic=topic, nav=generate_nav_items())
+                               topic=topic)
 
     @app.route('/CR/addtopic', methods=['GET', 'POST'])
     def addtopic():
@@ -487,10 +376,10 @@ def init_topics():
             # pylint: disable=undefined-variable
             return email_to_html(year=int(topic_form.year.data, 10),
                                  month=int(topic_form.month.data, 10),
-                                 seq=int(topic_form.seq.data, 10),
+                                 seq=topic_form.seq.data,
                                  note="Thanks for your submission.")
-        return render_template('cr.jinja', topic_form=topic_form,
-                               nav=generate_nav_items(year=year, month=month, seq=seq))
+        return render_template('cr.jinja', topic_form=topic_form)
+
 
     def save_topic_record(record):
         "write submitted topic details to CSV file."
@@ -507,15 +396,105 @@ def init_topics():
                 writer.writeheader()
             writer.writerow(record)
 
+def next_msg(year, month, seq, incr):
+    "provide next or prev message in sequence (according to incr)"
+    CR = current_app.config["CR"]
+    monthdir = os.path.join(CR, f"{year:04d}-{month:02d}", "eml-files")
+    seq += incr
+    files = sorted(glob.glob(os.path.join(monthdir, "*.eml")))
+    # Fast path. This happens almost all the time.
+    msg = os.path.join(monthdir, eml_file(year, month, seq))
+    if msg in files:
+        return {
+            "year": year,
+            "month": month,
+            "seq": seq,
+        }
+
+    # Intermediate path - a gap in files, but the one we want is
+    # in the list.
+    if incr == -1:
+        # We want the maximum file which is less than msg.
+        lt_files = [f for f in files if f < msg]
+        if lt_files:
+            f = lt_files[-1]
+            seq = int(f.split(".")[-2], 10)
+            return {
+                "year": year,
+                "month": month,
+                "seq": seq,
+            }
+    else:
+        # We want the minimum file which is greater than msg.
+        gt_files = [f for f in files if f > msg]
+        if gt_files:
+            f = gt_files[0]
+            seq = int(f.split(".")[-2], 10)
+            return {
+                "year": year,
+                "month": month,
+                "seq": seq,
+            }
+
+    # Slow path
+    # move forward or back one month
+    dt = datetime.date(year, month, 15) + incr * 20 * ONE_DAY
+    year = dt.year
+    month = dt.month
+    while OLDEST_MONTH <= (year, month) <= NEWEST_MONTH:
+        monthdir = os.path.join(CR, f"{year:04d}-{month:02d}", "eml-files")
+        files = sorted(glob.glob(os.path.join(monthdir, "*.eml")))
+        if files:
+            msg = files[-1] if incr == -1 else files[0]
+            seq = int(msg.split(".")[-2], 10)
+            return {
+                "year": year,
+                "month": month,
+                "seq": seq,
+            }
+        dt = datetime.date(year, month, 15) + incr * 20 * ONE_DAY
+        year = dt.year
+        month = dt.month
+
+    raise ValueError("No next/prev message found")
+
+def get_nav_items(*, year, month, seq):
+    "navigation items related to the argument message."
+    items = []
+    if not isinstance(seq, int):
+        seq = int(seq, 10)
+    items.append(("Date Index", url_for("dates",
+                                        year=year,
+                                        month=f"{month:02d}") + f"#{seq:04d}"))
+    items.append(("Thread Index", url_for("threads",
+                                          year=year,
+                                          month=f"{month:02d}") + f"#{seq:04d}"))
+    try:
+        prev_seq = next_msg(year, month, seq, -1)
+    except ValueError:
+        pass
+    else:
+        items.append(("Prev", url_for("cr_message", **prev_seq)))
+    try:
+        next_seq = next_msg(year, month, seq, +1)
+    except ValueError:
+        pass
+    else:
+        items.append(("Next", url_for("cr_message", **next_seq)))
+
+    return items
+
 class FilterForm(FlaskForm):
     "For filtering (out) uninteresting subjects"
-    pattern = StringField("Filter:", validators=[DataRequired()])
+    pattern = StringField("Filter:")
     in_out = SelectField("Keep or Toss:", choices=[
         ('keep', 'Keep'),
         ('toss', 'Toss'),
-    ], default='toss')
+    ])
     year = HiddenField('year')
     month = HiddenField('month')
+    filter_ = SubmitField('filter')
+    clear = SubmitField('clear')
 
 class TopicForm(FlaskForm):
     "simple form used to add topics to a message"
@@ -535,15 +514,15 @@ class SearchForm(FlaskForm):
         ('Google', 'Google'),
     ], default='Brave')
 
-def eml_file(year, month, msgid):
+def eml_file(year, month, seq):
     "compute email file from sequence number"
     # MHonARC was written in Perl, so of course Y2k
     perl_yr = year - 1900
-    return f"classicrendezvous.{perl_yr:3d}{month:02d}.{(msgid):04d}.eml"
+    return f"classicrendezvous.{perl_yr:3d}{month:02d}.{seq:04d}.eml"
 
-def msg_exists(mydir, year, month, msgid):
+def msg_exists(mydir, year, month, seq):
     "test to see if there is an email message to which we should href"
-    name = eml_file(year, month, msgid)
+    name = eml_file(year, month, seq)
     full_path = os.path.join(mydir, name)
     if os.path.exists(full_path):
         return full_path

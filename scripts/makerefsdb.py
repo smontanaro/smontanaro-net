@@ -7,17 +7,19 @@ Process References: headers in email files from emaildir, adding to sqldb
 
 import argparse
 import datetime
-import email.errors
 import os
 import re
+import sqlite3
 import sys
+import tempfile
 
 import arrow.parser
 import dateutil.parser
 import dateutil.tz
 
 from smontanaro.dates import parse_date
-from smontanaro.db import ensure_db
+from smontanaro.db import ensure_db, ensure_indexes
+from smontanaro.util import clean_msgid, read_message
 
 ONE_SEC = datetime.timedelta(seconds=1)
 
@@ -39,20 +41,18 @@ def decompose_filename(filename):
                      os.path.split(filename)[0].split("/")[1].split("-")]
     return (year, month, seq)
 
-def insert_references(message, conn, filename, verbose):
+def insert_references(message, conn, filename):
     "extract reference bits from message and insert in db"
     nrecs = 0
-    msgid = message["Message-ID"]
-    datestr = message["Date"]
-    sender = message["From"]
-    subject = message["Subject"]
+    msgid = clean_msgid(message["Message-ID"])
+    # Sometimes these aren't actually strings, but email.header.Header
+    # objects (which SQLite can't handle), so stringify them.
+    datestr = str(message["Date"])
+    sender = str(message["From"])
+    subject = str(message["Subject"])
     if not msgid:
         return nrecs
 
-    if verbose > 1:
-        print("  >>", msgid)
-
-    cur = conn.cursor()
     try:
         (year, month, seq) = decompose_filename(filename)
     except ValueError as exc:
@@ -61,10 +61,10 @@ def insert_references(message, conn, filename, verbose):
     try:
         stamp = parse_date(datestr)
     except arrow.parser.ParserError as exc:
-        cur.execute("select max(timestamp) from messages"
-                    "  where year <= ? and month <= ?",
-                    (year, month))
-        stamp = dateutil.parser.parse(cur.fetchone()[0]) + ONE_SEC
+        conn.execute("select max(timestamp) from messages"
+                     "  where year <= ? and month <= ?",
+                     (year, month))
+        stamp = dateutil.parser.parse(conn.fetchone()[0]) + ONE_SEC
         print(f"date parsing error for {datestr} ({exc}) - fall back to {stamp}",
               file=sys.stderr)
 
@@ -72,89 +72,70 @@ def insert_references(message, conn, filename, verbose):
         # force UTC
         stamp = stamp.replace(tzinfo=dateutil.tz.UTC)
 
-    cur.execute("delete from msgrefs"
-                "  where messageid = ?",
-                (msgid,))
-    cur.execute("delete from msgreplies"
-                "  where messageid = ?",
-                (msgid,))
-    cur.execute("delete from messages"
-                "  where messageid = ?",
-                (msgid,))
-    cur.execute("insert into messages"
-                "  values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                (msgid, filename, sender, subject, year, month, seq,
-                 0, stamp))
+    try:
+        conn.execute("insert into messages"
+                     "  values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                     (msgid, filename, sender, subject, year, month, seq,
+                      0, stamp))
+    except sqlite3.IntegrityError:
+        print(f"dup: {msgid} {filename}", file=sys.stderr)
+        return nrecs
     nrecs += 1
-    if verbose > 2:
-        print("  >>", msgid)
 
     ref_list = []
     if message["References"] is not None:
-        ref_list = [ref.strip() for ref in
-                        re.findall(r"<[^\s>]+>", message["References"])]
+        ref_list = [clean_msgid(ref) for ref in
+                        re.findall(r"<[^>]+>", message["References"])]
     if message["In-Reply-To"] is not None:
-        in_reply_to = message["In-Reply-To"].strip()
-        if in_reply_to not in ref_list:
-            ref_list.append(in_reply_to)
+        # I've discovered some bizarro In-Reply-To fields, so treat it
+        # similar to the References field. Example:
+        #    CR/2006-01/eml-files/classicrendezvous.10601.1817.eml
+        # where we find:
+        #     In-Reply-To: <s3d77aca.005@GW16.hofstra.edu> (Edward Albert's message of "Wed,
+        #          25 Jan 2006 13:18:40 -0500")
+        reply_list = [clean_msgid(ref) for ref in
+                          re.findall(r"<[^>]+>", message["In-Reply-To"])]
+        for in_reply_to in reply_list:
+            if in_reply_to not in ref_list:
+                ref_list.append(in_reply_to)
 
-    for (parent, child) in zip(ref_list[:-1], ref_list[1:]):
-        cur.execute("insert into msgreplies"
-                    " values (?, ?)",
-                    (child, parent))
+    with conn:
+        for (parent, child) in zip(ref_list[:-1], ref_list[1:]):
+            conn.execute("insert into msgreplies"
+                         " values (?, ?)",
+                         (child, parent))
 
-    for reference in ref_list:
-        cur.execute("insert into msgrefs"
-                    "  values (?, ?)",
-                    (msgid, reference))
-        nrecs += 1
-        if verbose > 3:
-            print("    :", reference)
+        for reference in ref_list:
+            conn.execute("insert into msgrefs"
+                         "  values (?, ?)",
+                         (msgid, reference))
+            nrecs += 1
 
-    cur.close()
-    conn.commit()
     return nrecs
 
-def process_one_file(filename, conn, verbose):
+def process_one_file(filename, conn):
     "handle a single file"
-    for encoding in ("utf-8", "latin-1"):
-        with open(filename, encoding=encoding) as fobj:
-            try:
-                message = email.message_from_file(fobj)
-            except (UnicodeDecodeError, email.errors.MessageError):
-                continue
-            else:
-                break
-    else:
-        raise ValueError(f"failed to read message from {filename}")
+    message = read_message(filename)
     if message.defects:
         raise ValueError(f"message parse errors {message.defects} in {filename}")
-    return insert_references(message, conn, filename, verbose)
+    return insert_references(message, conn, filename)
 
 def mark_thread_roots(conn):
     "identify those messages which start threads."
-    cur = conn.cursor()
-
-    # messages which are parents but don't have parents are roots
-    cur.execute("update messages"
-                "  set is_root = 1"
-                "  where messageid in"
-                "   (select r.parent"
-                "      from msgreplies r"
-                "      where r.parent not in"
-                "        (select messageid from msgreplies))")
-    conn.commit()
-    return cur.execute("select count(*)"
-                       "  from messages"
-                       "  where is_root = 1").fetchone()[0]
+    # messages which are parents but don't themselves have parents are roots
+    conn.execute("update messages"
+                 "  set is_root = 1"
+                 "  where messageid in"
+                 "   (select r.parent"
+                 "      from msgreplies r"
+                 "      where r.parent not in"
+                 "        (select messageid from msgreplies))")
 
 def main():
     "see __doc__"
     parser = argparse.ArgumentParser()
     parser.add_argument("-c", "--create", dest="createdb", action="store_true",
                         default=False)
-    parser.add_argument("-v", "--verbose", dest="verbose", action="count",
-                        default=0)
     parser.add_argument("-o", "--one", dest="one", help="Process a single email file",
                         default=None)
     parser.add_argument("-d", "--database", dest="sqldb",
@@ -170,11 +151,12 @@ def main():
     if args.createdb and os.path.exists(args.sqldb):
         os.remove(args.sqldb)
 
-    conn = ensure_db(args.sqldb)
+    # create db in memory, dump and write to db file at the very end
+    conn = ensure_db(":memory:")
 
     if args.one:
         try:
-            nrecs = process_one_file(args.one, conn, args.verbose)
+            nrecs = process_one_file(args.one, conn)
         except ValueError:
             print(f"failed to process message {args.one}", file=sys.stderr)
             return 1
@@ -182,29 +164,41 @@ def main():
 
     records = nfiles = 0
     for (dirpath, _dirnames, filenames) in os.walk(args.top):
+        files_read = 0
+        if "eml-files" not in dirpath:
+            continue
+        print(f"{dirpath}", end=' ')
+        start = datetime.datetime.now()
         for fname in filenames:
             if not fname.endswith(".eml"):
                 continue
+            files_read += 1
+            if files_read % 100 == 0:
+                print(".", end="")
+                sys.stdout.flush()
             path = os.path.join(dirpath, fname)
             try:
-                nrecs = process_one_file(path, conn, args.verbose)
+                nrecs = process_one_file(path, conn)
             except ValueError:
                 print(f"failed to process file {path}", file=sys.stderr)
                 continue
             nfiles += 1
-            if args.verbose > 1:
-                print("  >>", fname, nrecs)
             records += nrecs
-        if args.verbose:
-            print(">>", dirpath, records, nfiles)
+        dt = datetime.datetime.now() - start
+        if files_read:
+            print(f" {files_read} {(files_read / dt.total_seconds()):.02f}/s")
 
-    nroots = mark_thread_roots(conn)
-    print(nroots, "thread roots identified")
-    cur = conn.cursor()
-    cur.execute("select count(*) from messages")
-    print(f"{cur.fetchone()[0]} total message ids")
-    cur.execute("select count(*) from msgrefs")
-    print(f"{cur.fetchone()[0]} total references")
+    mark_thread_roots(conn)
+    ensure_indexes(conn)
+    (tmpfd, tmpf) = tempfile.mkstemp()
+    with open(tmpf, "w") as fobj:
+        for line in conn.iterdump():
+            fobj.write(f"{line}\n")
+    conn.commit()
+    os.system(f"sqlite3 {args.sqldb} < /tmp/refs.sql")
+    os.close(tmpfd)
+    os.unlink(tmpf)
+
     return 0
 
 if __name__ == "__main__":
