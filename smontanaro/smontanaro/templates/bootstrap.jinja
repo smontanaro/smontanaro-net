@@ -36,6 +36,7 @@
                 <!-- Page content -->
                 <div class="container-fluid">
                     <h1 class="mt-4">{{ prev }}{{ title }}{{ next }}</h1>
+                    {% block topic %}{% endblock %}
                     {% block content %}
                         {{ body|safe }}
                     {% endblock %}
