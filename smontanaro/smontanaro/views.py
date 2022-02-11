@@ -48,6 +48,11 @@ def init_simple():
         "websites need these"
         return render_template("about.jinja")
 
+    @app.route("/CR/help")
+    def help():
+        "websites need these"
+        return render_template("help.jinja")
+
     @app.route("/favicon.ico")
     def favicon():
         "websites need these"

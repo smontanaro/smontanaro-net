@@ -1,0 +1,60 @@
+{% extends "bootstrap.jinja" %}
+
+{% set title = "Help" %}
+
+{% block content %}
+
+    <p>
+        You can do more than just browse the 180k or so messages in the archive.
+        <ul>
+            <li>When browsing by date or thread, you can search for
+                particular content on your favorite search engine.</li>
+            <li>When browsing by date you can filter on message
+                subjects or senders.</li>
+            <li>When viewing a message, you can associate one or more
+                topics with that message.</li>
+            <li>You can browse the <a href="/CR/topics">current set of topics</a>.</li>
+        </ul>
+    </p>
+
+    <a name="search"><h2>Searching</h2></a>
+
+    <p>
+        You can search the full archive using your favorite search engine
+        and its search syntax. The default search engine is Brave, but
+        Google, Bing, and DuckDuckGo are also supported.
+    </p>
+
+    <a name="filter"><h2>Filtering</h2></a>
+
+    <p>
+        When browsing by date you probably won't be all that
+        interested in messages about ancient eBay listings. Simiarly,
+        you might want to only view messages about a particular brand
+        or from a particular person. The filter function on the dates
+        pages allow you to restrict your view accordingly. Select
+        "Keep" or "Toss" from the dropdown menu, and enter a pattern,
+        then click "Filter." For the nerds reading this, the pattern
+        can be any regular expression, but a word or two works just
+        fine.
+    </p>
+    <p>
+        Note that the filter capability is just a little hack. It
+        doesn't operate on full messages, just the subject and
+        sender. Each message listed has the subject and sender on a
+        single line. The filter just keeps or tosses lines matching
+        the desired pattern and displays those that make it through
+        the filter.
+    </p>
+
+    <a name="topics"><h2>Browsing or adding topics</h2></a>
+
+    <p>
+        TBD.
+    </p>
+
+    <p>
+        — <a href="mailto:skip.montanaro@gmail.com">Skip Montanaro</a>, Feb 2022
+    </p>
+
+{% endblock %}
