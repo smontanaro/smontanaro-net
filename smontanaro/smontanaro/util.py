@@ -365,7 +365,7 @@ def read_message(path):
 def eprint(*args, file=sys.stderr, **kwds):
     print(*args, file=file, **kwds)
 
-PFX_MATCHER = re.compile(r"\[classicrendezvous\]|\[cr\]|re:|\s+", flags=re.I)
+PFX_MATCHER = re.compile(r"\[classicrendezvous\]|\[cr\]|re[-:]|\s+", flags=re.I)
 def trim_subject_prefix(subject):
     "Trim prefix detritus like [CR], Re:, etc"
     words = PFX_MATCHER.split(str(subject))
