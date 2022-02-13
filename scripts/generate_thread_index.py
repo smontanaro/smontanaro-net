@@ -28,7 +28,8 @@ def generate_index(records, cur, level):
     "html fragment output"
     ul_ind = "  " * level
     li_ind = "  " * (level + 1)
-    print(f'''{ul_ind}<ul style="column-count: auto; column-width: 300px" class="no-bullets">''')
+    print('''\t\t\t\t\t\t<!-- -*-web-*- -->''')
+    print(f'''{ul_ind}<ul style="column-count: auto; column-width: 500px" class="no-bullets">''')
     for r in records:
         print(f'''{li_ind}<li>''')
         print(generate_link(r, li_ind + "  "))
