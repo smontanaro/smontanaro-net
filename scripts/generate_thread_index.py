@@ -28,7 +28,6 @@ def generate_index(records, cur, level):
     "html fragment output"
     ul_ind = "  " * level
     li_ind = "  " * (level + 1)
-    print('''\t\t\t\t\t\t<!-- -*-web-*- -->''')
     print(f'''{ul_ind}<ul style="column-count: auto; column-width: 500px" class="no-bullets">''')
     for r in records:
         print(f'''{li_ind}<li>''')
@@ -43,7 +42,7 @@ def generate_index(records, cur, level):
                            "order by m.ts",
                            (r["messageid"],)).fetchall()
         if refs:
-            generate_index(refs, cur, level + 1)
+            generate_index(refs, cur, level + 2)
         print(f'''{li_ind}</li>''')
     print(f"{ul_ind}</ul>")
 
@@ -70,6 +69,7 @@ def main():
                           "  order by m.ts",
                           (args.year, args.month)).fetchall()
 
+    print('''\t\t\t\t\t\t<!-- -*-web-*- -->''')
     generate_index(records, cur, 0)
 
     return 0
