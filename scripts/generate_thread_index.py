@@ -24,27 +24,44 @@ def generate_link(r, ind):
             f'''{html.escape(sub)}</a></a>'''
             f''' {html.escape(r["sender"])}''')
 
-def generate_index(records, cur, level):
-    "html fragment output"
-    ul_ind = "  " * level
-    li_ind = "  " * (level + 1)
-    print(f'''{ul_ind}<ul style="column-count: auto; column-width: 500px" class="no-bullets">''')
-    for r in records:
-        print(f'''{li_ind}<li>''')
-        print(generate_link(r, li_ind + "  "))
-        # Find any references where this message is the parent
-        refs = cur.execute("select distinct m.messageid, m.subject,"
+class IndexGenerator:
+    "generate thread index, trying to avoid duplicates"
+    def __init__(self):
+        self.seen = set()
+        print('''\t\t\t\t\t\t<!-- -*-web-*- -->''')
+
+    def generate_index(self, records, cur, level):
+        "html fragment output"
+        ul_ind = "  " * level
+        records = [r for r in records if r["messageid"] not in self.seen]
+        if records:
+            print(f'''{ul_ind}'''
+                  '''<ul style="column-count: auto; column-width: 500px"'''
+                  ''' class="no-bullets">''')
+            self.generate_list(records, cur, level)
+            print(f"{ul_ind}</ul>")
+
+    def generate_list(self, records, cur, level):
+        li_ind = "  " * (level + 1)
+        for r in records:
+            self.seen.add(r["messageid"])
+            print(f'''{li_ind}<li>''')
+            print(generate_link(r, li_ind + "  "))
+            # find any references where this message is the parent
+            refs = self.get_refs(cur, r["messageid"])
+            if refs:
+                self.generate_index(refs, cur, level + 2)
+            print(f'''{li_ind}</li>''')
+
+    def get_refs(self, cur, msgid):
+        return cur.execute("select distinct m.messageid, m.subject,"
                            " m.sender, m.year, m.month, m.seq, m.is_root"
                            "  from messages m"
                            "  join msgrefs r"
                            "  on r.messageid = m.messageid"
                            "  where r.reference = ?"
                            "order by m.ts",
-                           (r["messageid"],)).fetchall()
-        if refs:
-            generate_index(refs, cur, level + 2)
-        print(f'''{li_ind}</li>''')
-    print(f"{ul_ind}</ul>")
+                           (msgid,)).fetchall()
 
 def main():
     "see __doc__"
@@ -69,8 +86,8 @@ def main():
                           "  order by m.ts",
                           (args.year, args.month)).fetchall()
 
-    print('''\t\t\t\t\t\t<!-- -*-web-*- -->''')
-    generate_index(records, cur, 0)
+    gen = IndexGenerator()
+    gen.generate_index(records, cur, 0)
 
     return 0
 
