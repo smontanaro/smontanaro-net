@@ -41,7 +41,7 @@
 	    return 444;
         }
 
-        location ~ /(apple-touch-icon|_ignition|Autodiscover|acutator|ads.txt) {
+        location ~ /(apple-touch-icon|_ignition|Autodiscover|acutator|ads.txt|wp-includes/wlwmanifest.xml) {
 	    return 444;
         }
 
