@@ -5,7 +5,7 @@
        server_name www.smontanaro.net;
 
        return 301 https://www.smontanaro.net$request_uri;
-    }      
+    }
 
     server {
         listen 443 ssl;
@@ -38,6 +38,10 @@
         }
 
         location ~ [.](php|asp|aspx|env|git) {
+	    return 444;
+        }
+
+        location ~ /(apple-touch-icon|_ignition|Autodiscover|acutator|ads.txt) {
 	    return 444;
         }
 
