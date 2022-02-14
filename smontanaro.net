@@ -38,11 +38,11 @@
         }
 
         location ~ [.](php|asp|aspx|env|git) {
-	    return 401;
+	    return 444;
         }
 
         location ~ /(apple-touch-icon|_ignition|Autodiscover|acutator|ads.txt) {
-	    return 401;
+	    return 444;
         }
 
         rewrite ^/cr(.*) /CR$1 permanent;
