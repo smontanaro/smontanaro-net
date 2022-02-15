@@ -32,10 +32,6 @@
 	    root /home/skip/website/smontanaro/smontanaro;
 	}
 
-	location /python/ {
-	    root /home/skip/website;
-	}
-
         location / {
             include /etc/nginx/proxy_params;
             proxy_pass http://unix:/home/skip/website/smontanaro.sock;
