@@ -33,7 +33,7 @@
 	}
 
 	location /python/ {
-	    root /home/skip/website/python;
+	    root /home/skip/website;
 	}
 
         location / {
