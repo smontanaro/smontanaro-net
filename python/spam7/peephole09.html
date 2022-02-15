@@ -1,0 +1,46 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html> <head>
+<title>Benchmark Results</title>
+</head>
+
+<body bgcolor=white text=black>
+
+<h1 align=center>Benchmark Results </H1>
+
+<strong>
+<ul>
+  <li><font size="+3">Compilation/Run-time Environment</font>
+      <ul>
+	<li><font size="+2">Python compiled w/ egcs -O2 except ceval.c</font>
+	<li><font size="+2">All runs with "python -S -O"</font>
+	<li><font size="+2">PYTHONSTARTUP, PYTHONPATH disabled</font>
+      </ul>
+<br>
+  <li><font size="+3">Optimization levels</font>
+      <ul>
+	<li><font size="+2">OPT=0:  no peephole optimizations</font>
+	<li><font size="+2">OPT=2:  all peephole optimizations except *_SELF and *_LOC instructions</font>
+	<li><font size="+2">OPT=5:  all peephole optimizations</font>
+      </ul>
+<br>
+  <li><font size="+3">Two benchmark sources</font>
+      <ul>
+	<li><font size="+2">Pystone:  "old reliable"</font>
+	<li><font size="+2">Pybench:  Marc-Andre Lemburg's suite</font>
+      </ul>
+</ul>
+</strong>
+
+
+<table width="100%">
+<tr>
+<td align=left>
+<a href="peephole15.html"><img border=0 src="previous.gif"></a>
+</td>
+<td align=right>
+<a href="peephole10.html"><img border=0 src="next.gif"></a>
+</td>
+</tr>
+</table>
+
+</body> </html>

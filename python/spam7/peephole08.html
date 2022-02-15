@@ -1,0 +1,103 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html> <head>
+<title>Principal Optimizations (2)</title>
+</head>
+
+<body bgcolor=white text=black>
+<h1 align=center>Principal Optimizations </H1>
+
+
+
+<center>
+<table width="80%">
+
+<tr>
+<th colspan=3><font size="+3">StoreLoadEliminator</font></th>
+</tr>
+
+<tr>
+<td align=left>
+<strong>
+<font size="+2">
+STORE_FAST a<br>
+LOAD_FAST a
+</font>
+</strong>
+</td>
+
+<td align=middle><img src="goto.gif"></td>
+
+<td align=left>
+<strong>
+<font size="+2">
+DUP_TOP<br>
+STORE_FAST a
+</font>
+</strong>
+</td>
+</tr>
+
+<tr><td colspan=3>&nbsp;</td></tr>
+
+<tr>
+<th colspan=3><font size="+3">JumpNextEliminator</font></th>
+</tr>
+
+<tr>
+<th colspan=3><font size="+2">Deletes jumps from end of one block to next block</font></th>
+</tr>
+
+<tr><td colspan=3>&nbsp;</td></tr>
+
+<tr>
+<th colspan=3><font size="+3">JumpOptimizer</font></th>
+</tr>
+
+<tr>
+<th colspan=3><font size="+2">Reduces chains of jumps to a single jump</font></th>
+</tr>
+
+<tr><td colspan=3>&nbsp;</td></tr>
+
+<tr>
+<th colspan=3><font size="+3">ConstantExpressionEvaluator</font></th>
+</tr>
+
+<tr>
+<td align=left>
+<strong>
+<font size="+2">
+LOAD_CONST 2<br>
+LOAD_CONST 4j<br>
+BINARY_ADD
+</font>
+</strong>
+</td>
+
+<td align=middle><img src="goto.gif"></td>
+
+<td align=left>
+<strong>
+<font size="+2">
+LOAD_CONST (2+4j)
+</font>
+</strong>
+</td>
+</tr>
+
+</table>
+
+<table width="100%">
+<tr>
+<td align=left>
+<a href="peephole07.html"><img border=0 src="previous.gif"></a>
+</td>
+<td align=right>
+<a href="peephole14.html"><img border=0 src="next.gif"></a>
+</td>
+</tr>
+</table>
+</center>
+
+
+</body> </html>

@@ -1,0 +1,113 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html> <head>
+<title>Other New Opcodes</title>
+</head>
+
+<body bgcolor=white text=black>
+<h1 align=center>Other New Opcodes </H1>
+
+<center>
+<table width="90%">
+
+<tr>
+<th colspan=3><font size="+3">*_SELF Opcodes</font></th>
+</tr>
+
+<tr>
+<th colspan=3><font size="+2">Shortcut self.attr construct</font></th>
+</tr>
+
+<tr>
+<td align=left>
+<strong>
+<font size="+2">
+LOAD_FAST self<br>
+LOAD_ATTR a
+</font>
+</strong>
+</td>
+
+<td align=middle><img src="goto.gif"></td>
+
+<td align=left>
+<strong>
+<font size="+2">
+LOAD_SELF a
+</font>
+</strong>
+</td>
+</tr>
+
+<tr><td colspan=3>&nbsp;</td></tr>
+
+<tr>
+<th colspan=3><font size="+2">Less general and not much better than<br>LOAD_FAST_ATTR</font></th>
+</tr>
+
+<tr>
+<td align=left>
+<strong>
+<font size="+2">
+LOAD_FAST self<br>
+LOAD_ATTR a
+</font>
+</strong>
+</td>
+
+<td align=middle><img src="goto.gif"></td>
+
+<td align=left>
+<strong>
+<font size="+2">
+LOAD_FAST_ATTR self,a
+</font>
+</strong>
+</td>
+</tr>
+
+<tr>
+<th colspan=3><font size="+3">*_LOC Opcodes</font></th>
+</tr>
+
+<tr>
+<th colspan=3><font size="+2">Treat local vars as "registers"</font></th>
+</tr>
+
+<tr>
+<td align=left>
+<strong>
+<font size="+2">
+LOAD_FAST a<br>
+LOAD_FAST b<br>
+BINARY_ADD
+</font>
+</strong>
+</td>
+
+<td align=middle><img src="goto.gif"></td>
+
+<td align=left>
+<strong>
+<font size="+2">
+ADD_LOC a,b
+</font>
+</strong>
+</td>
+</tr>
+
+</table>
+
+<table width="100%">
+<tr>
+<td align=left>
+<a href="peephole14.html"><img border=0 src="previous.gif"></a>
+</td>
+<td align=right>
+<a href="peephole09.html"><img border=0 src="next.gif"></a>
+</td>
+</tr>
+</table>
+
+
+
+</body> </html>

@@ -1,0 +1,48 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html> <head>
+<title>Optimizer Architecture</title>
+</head>
+
+<body bgcolor=white text=black>
+<h1 align=center>Optimizer Architecture </H1>
+
+
+<strong>
+<ul>
+  <li><font size="+3">Optimizer built as pipeline </font>
+      <ul>
+	<li><font size="+2">Each step performs one optimization </font>
+	    <ul>
+	      <li><font size="+2">First step breaks code string into blocks </font>
+	      <li><font size="+2">Blocks are common data between steps </font>
+	      <li><font size="+2">Last step regenerates code string </font>
+	    </ul>
+      </ul>
+<br>
+  <li><font size="+3">OptimizeFilter base class implements:</font>
+      <ul>
+	<li><font size="+2">block()  code-to-block conversion </font>
+	<li><font size="+2">optimize() call optimize_block() for each block </font>
+	<li><font size="+2">code()  block-to-code conversion </font>
+      </ul>
+<br>  
+  <li><font size="+3">Subclasses implement:</font>
+      <ul>
+	<li><font size="+2">optimize_block()</font>
+      </ul>
+  </ul>
+</strong>
+
+
+<table width="100%">
+<tr>
+<td align=left>
+<a href="peephole05.html"><img border=0 src="previous.gif"></a>
+</td>
+<td align=right>
+<a href="peephole07.html"><img border=0 src="next.gif"></a>
+</td>
+</tr>
+</table>
+
+</body> </html>

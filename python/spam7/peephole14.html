@@ -1,0 +1,80 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html> <head>
+<title>Other Optimizations</title>
+</head>
+
+<body bgcolor=white text=black>
+<h1 align=center>Other Optimizations </H1>
+
+
+<center>
+<table width="90%">
+
+<tr>
+<th colspan=3><font size="+3">FAST_STACK</font></th>
+</tr>
+
+<tr>
+<th colspan=3><font size="+2">Minimize stack pointer movement</font></th>
+</tr>
+
+<tr>
+<td align=left>
+<strong>
+<font size="+2">
+w&nbsp;=&nbsp;POP();<br>
+v&nbsp;=&nbsp;POP();<br>
+x&nbsp;=&nbsp;PyNumberMultiply(v,w);<br>
+PUSH(x);
+</font>
+</strong>
+</td>
+
+<td align=middle><img src="goto.gif"></td>
+
+<td align=left>
+<strong>
+<font size="+2">
+w&nbsp;=&nbsp;POP();<br>
+v&nbsp;=&nbsp;TOP();<br>
+SET_TOP(PyNumberMultiply(v,w));<br>
+</font>
+</strong>
+</td>
+</tr>
+
+<tr><td colspan=3>&nbsp;</td></tr>
+
+<tr>
+<th colspan=3><font size="+3">MISC_SPEEDUP</font></th>
+</tr>
+
+<tr>
+<th colspan=3><font size="+2">Various odds-n-ends</font></th>
+</tr>
+
+<tr>
+<td colspan=3>
+<ul>
+  <li><strong><font size="+2">Macros instead of function calls where possible</font></strong>
+  <li><strong><font size="+2">Complete error test shortcuts</font></strong>
+  <li><strong><font size="+2">Treat tuples like lists for inlining</font></strong>
+  <li><strong><font size="+2">Faster comparison code</font></strong>
+</ul>
+</td>
+</tr>
+
+</table>
+
+<table width="100%">
+<tr>
+<td align=left>
+<a href="peephole08.html"><img border=0 src="previous.gif"></a>
+</td>
+<td align=right>
+<a href="peephole15.html"><img border=0 src="next.gif"></a>
+</td>
+</tr>
+</table>
+
+</body> </html>
