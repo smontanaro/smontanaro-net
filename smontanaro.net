@@ -37,11 +37,11 @@
             proxy_pass http://unix:/home/skip/website/smontanaro.sock;
         }
 
-        location ~ [.](php|asp|aspx|env|git) {
+        location ~ [.](php|asp|aspx|env|git|cgi) {
 	    return 444;
         }
 
-        location ~ /(apple-touch-icon|_ignition|Autodiscover|actuator|ads.txt|wp-includes/wlwmanifest.xml) {
+        location ~ /(apple-touch-icon|_ignition|Autodiscover|actuator|ads.txt|wp-includes/wlwmanifest.xml|cgi-bin) {
 	    return 444;
         }
 
