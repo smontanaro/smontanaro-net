@@ -21,7 +21,8 @@ from wtforms.validators import DataRequired
 from .db import ensure_db
 from .strip import strip_footers
 # pylint: disable=unused-import
-from .util import read_message, trim_subject_prefix, eprint, clean_msgid
+from .util import (read_message, trim_subject_prefix, eprint, clean_msgid,
+                   make_topic_hierarchy, get_topic)
 from .exc import NoResponse
 
 SEARCH = {
@@ -332,7 +333,9 @@ def init_topics():
           select distinct topic from topics
           order by topic
         """)
-        topics = [t[0] for t in cur.fetchall()]
+        topics = [t[0].split("/") for t in cur.fetchall()]
+
+        make_topic_hierarchy(topics, htopics:={})
 
         if not topic:
             msgrefs = []
@@ -341,7 +344,7 @@ def init_topics():
                         for (yr, mo, seq, subj, sender) in
                            get_topic(topic, conn)]
         return render_template("topics.jinja", topics=topics, msgrefs=msgrefs,
-                               topic=topic)
+                               topic=topic, htopics=htopics)
 
     @app.route('/CR/addtopic', methods=['GET', 'POST'])
     def addtopic():
@@ -563,16 +566,6 @@ class MessageFilter:
                 for todel in self.to_delete:
                     if todel in payload:
                         payload.remove(todel)
-
-def get_topic(topic, conn):
-    cur = conn.cursor()
-    return cur.execute("""
-      select m.year, m.month, m.seq, m.subject, m.sender from
-        topics t join messages m
-          on t.messageid = m.messageid
-        where t.topic = ?
-        order by m.year, m.month, m.seq
-    """, (topic,)).fetchall()
 
 def init_app(app):
     with app.app_context():
