@@ -337,8 +337,9 @@ def init_topics():
         if not topic:
             msgrefs = []
         else:
-            msgrefs=[(yr, mo, seq, trim_subject_prefix(subj))
-                        for (yr, mo, seq, subj) in get_topic(topic, conn)]
+            msgrefs=[(yr, mo, seq, trim_subject_prefix(subj), sender)
+                        for (yr, mo, seq, subj, sender) in
+                           get_topic(topic, conn)]
         return render_template("topics.jinja", topics=topics, msgrefs=msgrefs,
                                topic=topic)
 
@@ -566,7 +567,7 @@ class MessageFilter:
 def get_topic(topic, conn):
     cur = conn.cursor()
     return cur.execute("""
-      select m.year, m.month, m.seq, m.subject from
+      select m.year, m.month, m.seq, m.subject, m.sender from
         topics t join messages m
           on t.messageid = m.messageid
         where t.topic = ?
