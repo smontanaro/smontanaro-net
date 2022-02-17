@@ -3,34 +3,35 @@
 {% set title = "Archive Topics" %}
 
 {% block content %}
-<p style="fontweight: bold">
-  Note: These topics are constructed by hand (snobs might say
-  "curated"). You can help expand these topics contain by using the
-  form at the top of each message page to submit your suggestions.
-</p>
+    <p style="fontweight: bold">
+        Note: These topics are constructed by hand (snobs might say
+        "curated"). You can help expand these topics contain by using the
+        form at the top of each message page to submit your suggestions.
+    </p>
 
-{% if topic %}
-<h2>{{ topic }}</h1>
-{% endif %}
-
-{% if msgrefs %}
-    <ul class="list-group-flush" style="padding-left: 0em; column-count: auto; column-width: 400px">
-        {% for (year, month, seq, subject, sender) in msgrefs %}
-            <li class="list-group-item"><a href="/CR/{{ year }}/{{ month }}/{{ seq }}">{{ subject }}</a>
-        {% endfor %}
-    </ul>
-{% endif %}
-
-{% if topics %}
-    {% if msgrefs %}
-        <h2>All Topics</h2>
+    {% if topic %}
+        <h1>{{ topic }}</h1>
     {% endif %}
 
-    <ul class="list-group-flush" style="padding-left: 0em; column-count: auto; column-width: 200px">
-        {% for topic in topics %}
-            <li class="list-group-item"><a href="/CR/topics/{% filter urlencode %}{{topic}}{% endfilter %}">{{ topic }}</a></li>
-        {% endfor %}
-    </ul>
-{% endif %}
+    {% if msgrefs %}
+        <ul class="list-group-flush" style="padding-left: 0em; column-count: auto; column-width: 400px">
+            {% for (year, month, seq, subject, sender) in msgrefs %}
+                <li class="list-group-item"><a href="/CR/{{ year }}/{{ month }}/{{ seq }}">{{ subject }}</a>
+            {% endfor %}
+        </ul>
+    {% endif %}
 
+    {% if htopics %}
+        <h2>All Topics</h2>
+        <ul style="padding-left: 1em; column-count: auto; column-width: 400px">
+            {%- for (topic, value) in htopics.items() recursive -%}
+                <li><a href="/CR/topics/{% filter urlencode %}{{topic}}{% endfilter %}">{{ topic }}</a></li>
+                {%- if value -%}
+                    <ul style="padding-left: 2em; column-count: auto; column-width: 200px">
+                        {{ loop(value.items()) }}
+                    </ul>
+                {% endif %}
+            {% endfor %}
+        </ul>
+    {% endif %}
 {% endblock %}
