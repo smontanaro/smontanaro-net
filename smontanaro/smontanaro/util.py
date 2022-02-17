@@ -379,6 +379,24 @@ def clean_msgid(msgid):
     "Sometimes message ids contain whitespace"
     return re.sub(r"\s+", "", msgid)
 
+def get_topic(topic, conn):
+    return conn.execute("""
+      select m.year, m.month, m.seq, m.subject, m.sender from
+        topics t join messages m
+          on t.messageid = m.messageid
+        where t.topic = ?
+        order by m.year, m.month, m.seq
+    """, (topic,)).fetchall()
+
+def make_topic_hierarchy(topics, htopics):
+    for tlist in topics:
+        if not tlist:
+            return
+        topic, rest = tlist[0], tlist[1:]
+        if topic not in htopics:
+            htopics[topic] = {}
+        make_topic_hierarchy([rest], htopics[topic])
+
 def init_app(app):
     if not app.config["DEBUG"]:
         ZAP_HEADERS.add("message-id")
