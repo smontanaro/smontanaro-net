@@ -2,39 +2,9 @@
 
 "bunch of small functions to strip various cruft from end of emails."
 
-# Other possible candidates for footer strippers
-#
-# Yahoo!
-#
-# http://localhost:8080/CR/2006/04/676
-# http://localhost:8080/CR/2006/02/143
-# http://localhost:8080/CR/2006/02/144
-# http://localhost:8080/CR/2006/02/153
-# http://localhost:8080/CR/2006/02/154
-# http://localhost:8080/CR/2001/5/00019
-# http://localhost:8080/CR/2006/02/156
-#
-# MSN
-#
-# http://localhost:8080/CR/2001/09/19
-#
-# AOL
-#
-# http://localhost:8080/CR/2008/06/12
-#
-# mail2web
-#
-# http://localhost:8080/CR/2006/4/659
-#
-# Virgin Media???
-#
-# https://localhost:8080/CR/2007/07/00004
-#
-# Fastmail
-#
-# http://localhost:8080/CR/2006/11/0040
-
 import re
+
+# from .util import eprint
 
 QUOTE_PAT = r'(?:(?:>\s?)*)?'
 
@@ -47,9 +17,15 @@ def strip_footers(payload):
                      strip_mime,
                      strip_bikelist_footer,
                      strip_juno,
+                     strip_virus,
+                     strip_virgin,
+                     strip_fastmail,
                      strip_yp,
+                     strip_aol,
+                     strip_yahoo,
                      strip_msn,
                      strip_trailing_underscores):
+            # eprint(func.__name__)
             new_payload = func(new_payload)
         if new_payload == payload:
             return payload
@@ -91,11 +67,38 @@ def strip_yp(payload):
     footer = (".*yellowpages.(lycos|aol).com", re.I)
     return strip_between(payload, header, footer, "yp")
 
+def strip_aol(payload):
+    "strip Yahoo! ads"
+    header = ("_____", 0)
+    footer = (".*yahoo.(ca|com)|yahoo! mail", re.I)
+    return strip_between(payload, header, footer, "yahoo")
+
+def strip_yahoo(payload):
+    "strip Yahoo! ads"
+    header = ("_____", 0)
+    footer = (".*yahoo.(ca|com)|yahoo! mail", re.I)
+    return strip_between(payload, header, footer, "yahoo")
+
 def strip_juno(payload):
     "strip Juno ads"
     header = "_" * 60
     footer = "https?://.*juno.com"
     return strip_between(payload, header, footer, "juno")
+
+def strip_fastmail(payload):
+    "strip fastmail ads"
+    header = footer = "http://www.fastmail.fm"
+    return strip_between(payload, header, footer, "fastmail")
+
+def strip_virgin(payload):
+    "strip Virgin Media email bits"
+    header = footer = ".*virginmedia.com"
+    return strip_between(payload, header, footer, "virgin")
+
+def strip_virus(payload):
+    "strip McAfee virus checked lines"
+    header = footer = "Virus-checked using McAfee"
+    return strip_between(payload, header, footer, "virus")
 
 def strip_msn(payload):
     "a bit looser, hopefully doesn't zap actual content"
@@ -120,22 +123,23 @@ def strip_between(payload, start, end, tag):
     lines = re.split(r"(\n+)", payload)
     state = "start"
     new_payload = []
-    # print(tag, repr(start), repr(end))
     spat = f"{QUOTE_PAT}{start}"
     epat = f"{QUOTE_PAT}{end}"
+    # eprint(tag, repr(spat), repr(epat))
     for line in lines:
         if state == "start":
             if re.match(spat, line, s_flags) is not None:
                 state = "stripping"
-                # print(">> elide", tag, state, repr(line))
+                # eprint(">> elide", tag, state, repr(line))
                 continue
             new_payload.append(line)
         else:  # state == "stripping"
-            # print(">> elide", tag, state, repr(line))
+            # eprint(">> elide", tag, state, repr(line))
             if re.match(epat, line, e_flags) is not None:
                 state = "start"
     new_payload = "".join(new_payload)
-    # print(">> result:", tag, "unchanged" if new_payload == payload else "stripped")
+    # eprint(">> result:", tag,
+    #        "unchanged" if new_payload == payload else "stripped")
     return new_payload
 
 def strip_trailing_underscores(payload):
@@ -152,7 +156,7 @@ def strip_trailing_underscores(payload):
     if re.match(f"{QUOTE_PAT}{dashed_line}", lines[-1]) is not None:
         lines = lines[:-1]
     lines = "".join(lines)
-    # print(">> result:", "underscores", lines == payload)
+    # eprint(">> result:", "underscores", lines == payload)
     return lines
 
 def strip_trailing_whitespace(payload):
@@ -161,11 +165,11 @@ def strip_trailing_whitespace(payload):
         return ""
     lines = re.split(r"(\n+)", payload)
     pat = f"{QUOTE_PAT}" + r"\s*$"
-    # print(">> lines[-1]:", pat, repr(lines[-1]),
+    # eprint(">> lines[-1]:", pat, repr(lines[-1]),
     #       re.match(pat, lines[-1]))
     while lines and re.match(pat, lines[-1]) is not None:
-        # print(">> del:", repr(lines[-1]))
+        # eprint(">> del:", repr(lines[-1]))
         del lines[-1]
     lines = "".join(lines)
-    # print(">> result:", "whitespace", lines == payload)
+    # eprint(">> result:", "whitespace", lines == payload)
     return lines

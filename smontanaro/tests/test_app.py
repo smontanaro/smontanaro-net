@@ -157,6 +157,15 @@ def test_message_strip(client):
         filt.delete_empty_parts()
         assert "yellowpages.lycos.com" not in msg.as_string()
 
+def test_message_strip_same_header_footer(client):
+    "virginmedia stripper uses the same header and footer"
+    msg = read_message("CR/2007-07/eml-files/classicrendezvous.10707.0004.eml")
+    with client.application.app_context():
+        filt = MessageFilter(msg)
+        filt.filter_message(msg)
+        filt.delete_empty_parts()
+        assert "virginmedia.com" not in msg.as_string()
+
 def test_next_msg(client):
     "make sure we can hop over gaps and between months"
     with client.application.app_context():
