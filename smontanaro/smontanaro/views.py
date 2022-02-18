@@ -342,7 +342,7 @@ def init_topics():
         else:
             msgrefs=[(yr, mo, seq, trim_subject_prefix(subj), sender)
                         for (yr, mo, seq, subj, sender) in
-                           get_topic(topic, conn)]
+                           get_topic(f"{topic}%", conn)]
         return render_template("topics.jinja", topics=topics, msgrefs=msgrefs,
                                topic=topic, htopics=htopics)
 
