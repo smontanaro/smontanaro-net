@@ -333,7 +333,7 @@ def init_topics():
           select distinct topic from topics
           order by topic
         """)
-        topics = [t[0].split("/") for t in cur.fetchall()]
+        topics = [t[0].split(":") for t in cur.fetchall()]
 
         make_topic_hierarchy(topics, htopics:={})
 
