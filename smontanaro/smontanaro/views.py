@@ -335,7 +335,7 @@ def init_topics():
         """)
         topics = [t[0].split(":") for t in cur.fetchall()]
 
-        make_topic_hierarchy(topics, htopics:={})
+        make_topic_hierarchy(topics, htopics:={}, "")
 
         if not topic:
             msgrefs = []

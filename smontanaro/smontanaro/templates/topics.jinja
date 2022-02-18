@@ -25,11 +25,12 @@
         <h2>All Topics</h2>
         <ul style="padding-left: 1em; column-count: auto; column-width: 400px">
             {%- for (topic, value) in htopics.items() recursive -%}
-                {# TBD - here we need to construct a URL which includes the parent breadcrumbs #}
-                <li><a href="/CR/topics/{% filter urlencode %}{{topic}}{% endfilter %}">{{ topic }}</a></li>
-                {%- if value -%}
+                {% set path = value[0] %}
+                {% set entries = value[1] %}
+                <li><a href="/CR/topics/{% filter urlencode %}{{ path }}{% endfilter %}">{{ topic }}</a></li>
+                {%- if entries -%}
                     <ul style="padding-left: 2em; column-count: auto; column-width: 200px">
-                        {{ loop(value.items()) }}
+                        {{ loop(entries.items()) }}
                     </ul>
                 {% endif %}
             {% endfor %}

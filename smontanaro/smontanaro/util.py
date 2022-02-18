@@ -388,14 +388,32 @@ def get_topic(topic, conn):
         order by m.year, m.month, m.seq
     """, (topic,)).fetchall()
 
-def make_topic_hierarchy(topics, htopics):
+def make_topic_hierarchy(topics, htopics, prefix):
+    """construct hierarchical topic structure from list of colon-delimited topics.
+
+       for example:
+
+       ["Production Builders:LeJeune", "Production Builders:Peugeot:PX-10LE"]
+
+       would produce this category structure:
+
+           Production Builders
+               LeJeune
+               Peugeot
+                   PX-10LE
+
+       at each level, individual messages could be referenced.
+    """
+
     for tlist in topics:
         if not tlist:
             return
         topic, rest = tlist[0], tlist[1:]
-        if topic not in htopics:
-            htopics[topic] = {}
-        make_topic_hierarchy([rest], htopics[topic])
+        topic_pfx = ":".join([prefix, topic]).lstrip(":")
+        key = topic
+        if key not in htopics:
+            htopics[key] = [topic_pfx, {}]
+        make_topic_hierarchy([rest], htopics[key][1], topic_pfx)
 
 def init_app(app):
     if not app.config["DEBUG"]:
