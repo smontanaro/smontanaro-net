@@ -384,7 +384,7 @@ def get_topic(topic, conn):
       select m.year, m.month, m.seq, m.subject, m.sender from
         topics t join messages m
           on t.messageid = m.messageid
-        where t.topic = ?
+        where t.topic like ?
         order by m.year, m.month, m.seq
     """, (topic,)).fetchall()
 
