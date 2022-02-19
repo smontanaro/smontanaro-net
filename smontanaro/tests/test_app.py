@@ -195,3 +195,11 @@ def test_eml_file():
             ("classicrendezvous.10509.0123.eml", (2005, 9, 123)),
     ]:
         assert exp == eml_file(*args)
+
+def test_fmt_sig(client):
+    with client.application.app_context():
+        msg = read_message("CR/2010-07/eml-files/classicrendezvous.11007.0144.eml")
+        html = msg.as_html()
+        assert ("<br>Ted Ernst" in html and
+                "<br>Palos Verdes Estates" in html and
+                "<br>CA  USA" in html)

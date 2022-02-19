@@ -12,12 +12,11 @@ import os
 import pickle
 import re
 import sqlite3
+import statistics
 import sys
 import urllib.parse
 
 from flask import url_for
-
-CRLF = "\r\n"
 
 ZAP_HEADERS = {
     "content-disposition",
@@ -37,6 +36,10 @@ ZAP_HEADERS = {
     "sender",
     "user-agent",
     }
+
+EOL_SEP = r"\r?\n"
+PARA_SEP = fr"{EOL_SEP}\s*(?:{EOL_SEP})+"
+INDENTED_SEP = fr"({EOL_SEP}\s+)"
 
 class Message(email.message.Message):
     "subclass to add as_html() method"
@@ -104,19 +107,18 @@ class Message(email.message.Message):
         # however. We recognize two other styles of signatures:
         #
         # * a small number (2 to 4) of short lines (fewer than 50 chars)
-        # * a small number of indented lines
+        # * a small number of short lines at the end of the last paragraph
         #
         # As should be obvious, these are overlapping heuristics.  I
         # imagine that as time goes on I will encounter other styles
         # which I will try to accommodate.
 
         # special case - appended original message
-        appended = re.split("\n(--+ .* wrote:|--+ original message --+) *\n", body,
-                            flags=re.I, maxsplit=1)
-        main_msg = appended[0]
-        main_msg = self.make_urls_sensitive(html.escape(main_msg))
-
-        if len(appended) == 3:
+        appended = re.split(f"{EOL_SEP}(--+ .* wrote:|--+ original message --+) *{EOL_SEP}",
+                            body, flags=re.I, maxsplit=1)
+        if len(appended) == 1:
+            ref = ""
+        else:
             sep, ref = appended[1:]
             ref = read_message_string(ref)
 
@@ -129,35 +131,33 @@ class Message(email.message.Message):
                 if params is not None:
                     for key, val in params[1:]:
                         ref.set_param(key, val)
-            ref = f"<br>{sep}<br>{ref.as_html()}"
-        else:
-            ref = ""
-            # force quoted text start a line
-            main_msg = main_msg.replace("\n&gt;", "<br>\n&gt;")
-            # what if the last paragraph is nothing but a quoted chunk?
-            chunks = re.split(r"\n\s*\n+", main_msg)
-            is_quote = True
-            term = "\n"
-            last_chunk = chunks[-1].split(term)
-            for line in last_chunk:
-                is_quote = is_quote and line[:4] == "&gt;"
-                if not is_quote:
-                    break
-            if is_quote:
-                term = "<br>\n"
-            chunks[-1] = term.join(last_chunk)
-            main_msg = "\n\n".join(chunks)
-            main_msg = self.split_into_paras(self.handle_sig(main_msg))
+            ref = f"<br>\n{sep}<br>\n{ref.as_html()}"
+
+        main_msg = self.make_urls_sensitive(html.escape(appended[0]))
+        # force quoted text to start a line
+        main_msg = re.sub(fr"({EOL_SEP})&gt;", r"<br>\1&gt;", main_msg)
+        # what if the last paragraph is nothing but a quoted chunk?
+        chunks = re.split(PARA_SEP, main_msg)
+        is_quote = True
+        last_chunk = re.split(EOL_SEP, chunks[-1])
+        for line in last_chunk:
+            is_quote = is_quote and line[:4] == "&gt;"
+            if not is_quote:
+                break
+        if is_quote:
+            chunks[-1] = fr"<br>{EOL_SEP}".join(last_chunk)
+
+        main_msg = "\n\n".join(chunks)
+        main_msg = self.split_into_paras(self.handle_sig(main_msg))
 
         return f"{main_msg}{ref}"
 
     #pylint: disable=no-self-use
     def split_into_paras(self, body):
         "use multiple blank lines to indicate paragraphs"
-        paras = "</p>\n<p>".join(re.split(r"\n\s*\n+", body))
+        paras = "</p>\n<p>".join(re.split(PARA_SEP, body))
         return f"<p>\n{paras}\n</p>\n"
 
-    #pylint: disable=no-self-use
     def handle_sig(self, body):
         "preserve formatting (approximately) of any trailing e-sig."
 
@@ -166,21 +166,32 @@ class Message(email.message.Message):
         # * leading dashes
         # * 2-4 short lines (< 55 chars)
 
-        # Here's a message with a sig I don't handle:
+        # Here are a couple messages with a sig I don't handle:
         #
-        # http://localhost:8080/CR/2009/03/134
+        # One:
+        #
+        # http://localhost:8080/CR/2009/03/0134
         #
         # It's only got a few short lines, but it's not separated from
         # the message body by white space or a dashed line.
+        #
+        # Another:
+        #
+        # http://localhost:8080/CR/2010/07/0144
+        #
+        # It has a longer paragraph than the first and is likely
+        # easier to discriminate between the paragraph proper and the
+        # signature.
 
-        parts = re.split(r"(\n\s*\n+)", body.rstrip())
+        parts = re.split(PARA_SEP, body.rstrip())
         sig = parts[-1].split("\n")
         if (sig and
-            # starts with leadding dashes
+            # starts with leading dashes
             (sig[0].startswith("--") or
              # or only two to four short lines
-             max(len(s) for s in sig) < 55 and
+             max(len(s) for s in sig) < 40 and
              2 <= len(sig) <= 4)):
+            # eprint("entire paragraph is sig")
             parts[-1] = "<br>".join(sig)
         else:
             # what about an indented style? last couple lines might look like:
@@ -188,13 +199,46 @@ class Message(email.message.Message):
             # blah blah blah Masi blah blah blah.
             #     Homer Jones
             #     Timbuktu, Mali
-            chunks = re.split(r"(\n\s+)", parts[-1])
-            # convert whitespace to unbreakable spaces and force line break.
-            for (i, chunk) in enumerate(chunks):
-                if i % 2:
-                    chunks[i] = "<br>\n" + "&nbsp;" * (len(chunk) - 1)
-            parts[-1] = "\n".join(chunks)
+            chunks = re.split(INDENTED_SEP, parts[-1])
+            if len(chunks) > 1:
+                # eprint(chunks)
+                # convert whitespace to unbreakable spaces and force line break.
+                for (i, chunk) in enumerate(chunks):
+                    if i % 2:
+                        chunks[i] = "<br>\n" + "&nbsp;" * (len(chunk) - 1)
+                parts[-1] = "\n".join(chunks)
+                # eprint("last lines of paragraph are indented sig")
+            else:
+                # what about a non-indented style?
+                # eprint("last lines of paragraph are non-indented sig")
+                parts[-1] = self.maybe_format_sig(parts[-1])
         return "".join(parts)
+
+    #pylint: disable=no-self-use
+    def maybe_format_sig(self, para):
+        "try and format signature smashed into the end of the paragraph"
+        lines = re.split(EOL_SEP, para)
+        lengths = [len(line) for line in lines]
+        # eprint(tuple(zip(lengths, lines)))
+        for i in range(min(5, len(lines) - 1), 1, -1):
+            # sigs tend to be two to four short lines. once the mean
+            # of the last few lines drops below 10 while the mean of
+            # the remaining lines remains above 40, treat those last
+            # few lines as the sig.
+
+            # eprint(i, statistics.mean(lengths[-i:]), statistics.mean(lengths[:-i]))
+            if (statistics.mean(lengths[-i:]) < 15 and
+                statistics.mean(lengths[:-i]) > 40):
+                # eprint("found our sig!")
+                # eprint(lines[-i:])
+                break
+        else:
+            # nothing to see here folks...
+            return para
+
+
+        lines[-i:] = ["<br>" + line for line in lines[-i:]]
+        return "\n".join(lines)
 
     @classmethod
     def initialize_urlmap(cls):
