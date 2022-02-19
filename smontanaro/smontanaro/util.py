@@ -113,6 +113,20 @@ class Message(email.message.Message):
         # imagine that as time goes on I will encounter other styles
         # which I will try to accommodate.
 
+        # Some other problematic display/formatting:
+        #
+        # http://localhost:8080/CR/2008/09/0798 - inconsistent indentation of quoted block
+        #
+        # http://localhost:8080/CR/2006/06/1085 - unhandled main/quoted message separator
+        #
+        # http://localhost:8080/CR/2004/01/0415 - signature block not at end of message
+        #
+        # http://localhost:8080/CR/2008/10/1121 - larger-than-expected signature block
+        #
+        # http://localhost:8080/CR/2008/03/0505 - --- Original Message --- is indented
+        #
+        # http://localhost:8080/CR/2008/03/0238 - signature block not at end of message
+
         # special case - appended original message
         appended = re.split(f"{EOL_SEP}(--+ .* wrote:|--+ original message --+) *{EOL_SEP}",
                             body, flags=re.I, maxsplit=1)
