@@ -49,6 +49,18 @@ def init_simple():
         "websites need these"
         return render_template("about.jinja")
 
+    @app.route('/CR/<year>/<month>/mybikes')
+    @app.route('/<year>/<month>/mybikes')
+    def mybikes(year, month):
+        "currently broken link - redirect"
+        return redirect(url_for("dates", year=year, month=month))
+
+    @app.route('/CR/<year>/<month>/about')
+    @app.route('/<year>/<month>/about')
+    def _about(year, month):
+        "currently broken link - redirect"
+        return redirect(url_for("about"))
+
     @app.route("/CR/help")
     def help_():
         "websites need these"
@@ -165,11 +177,6 @@ def init_cr():
         with open(f"{CR}/generated/index.body", encoding="utf8") as fobj:
             return render_template("crtop.jinja", body=fobj.read(),
                                    title="Old Classic Rendezvous Archive")
-
-    @app.route('/CR/<year>/<month>/mybikes')
-    def mybikes(year, month):
-        "currently broken link - redirect"
-        return redirect(url_for("dates", year=year, month=month))
 
     @app.route('/CR/<year>/<month>/<seq>')
     def cr_message(year, month, seq):
