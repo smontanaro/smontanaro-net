@@ -166,6 +166,11 @@ def init_cr():
             return render_template("crtop.jinja", body=fobj.read(),
                                    title="Old Classic Rendezvous Archive")
 
+    @app.route('/CR/<year>/<month>/mybikes')
+    def mybikes(year, month):
+        "currently broken link - redirect"
+        return redirect(url_for("dates", year=year, month=month))
+
     @app.route('/CR/<year>/<month>/<seq>')
     def cr_message(year, month, seq):
         "render email as html."
