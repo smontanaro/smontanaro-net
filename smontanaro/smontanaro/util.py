@@ -147,16 +147,10 @@ class Message(email.message.Message):
         if is_quote:
             chunks[-1] = fr"<br>{EOL_SEP}".join(last_chunk)
 
-        main_msg = "\n\n".join(chunks)
-        main_msg = self.split_into_paras(self.handle_sig(main_msg))
+        main_msg = self.handle_sig("\n\n".join(chunks))
+        main_msg = "<p>\n" + "</p>\n<p>".join(re.split(PARA_SEP, main_msg)) + "\n</p>\n"
 
         return f"{main_msg}{ref}"
-
-    #pylint: disable=no-self-use
-    def split_into_paras(self, body):
-        "use multiple blank lines to indicate paragraphs"
-        paras = "</p>\n<p>".join(re.split(PARA_SEP, body))
-        return f"<p>\n{paras}\n</p>\n"
 
     def handle_sig(self, body):
         "preserve formatting (approximately) of any trailing e-sig."
@@ -184,7 +178,7 @@ class Message(email.message.Message):
         # signature.
 
         parts = re.split(PARA_SEP, body.rstrip())
-        sig = parts[-1].split("\n")
+        sig = re.split(EOL_SEP, parts[-1])
         if (sig and
             # starts with leading dashes
             (sig[0].startswith("--") or
@@ -212,7 +206,7 @@ class Message(email.message.Message):
                 # what about a non-indented style?
                 # eprint("last lines of paragraph are non-indented sig")
                 parts[-1] = self.maybe_format_sig(parts[-1])
-        return "".join(parts)
+        return "\n\n".join(parts)
 
     #pylint: disable=no-self-use
     def maybe_format_sig(self, para):
@@ -235,7 +229,6 @@ class Message(email.message.Message):
         else:
             # nothing to see here folks...
             return para
-
 
         lines[-i:] = ["<br>" + line for line in lines[-i:]]
         return "\n".join(lines)
