@@ -126,6 +126,8 @@ class Message(email.message.Message):
         # http://localhost:8080/CR/2008/03/0505 - --- Original Message --- is indented
         #
         # http://localhost:8080/CR/2008/03/0238 - signature block not at end of message
+        #
+        # http://localhost:8080/CR/2002/09/0610 - atypical message quoting
 
         # special case - appended original message
         appended = re.split(f"{EOL_SEP}(--+ .* wrote:|--+ original message --+) *{EOL_SEP}",
