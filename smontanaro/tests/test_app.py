@@ -11,6 +11,7 @@ from smontanaro.db import ensure_db
 from smontanaro.dates import parse_date
 from smontanaro.util import read_message, trim_subject_prefix
 from smontanaro.views import MessageFilter, eml_file
+from smontanaro.strip import strip_footers
 
 @pytest.fixture
 def client():
@@ -196,10 +197,28 @@ def test_eml_file():
     ]:
         assert exp == eml_file(*args)
 
-def test_fmt_sig(client):
+def test_fmt_sig1(client):
     with client.application.app_context():
         msg = read_message("CR/2010-07/eml-files/classicrendezvous.11007.0144.eml")
         html = msg.as_html()
         assert ("<br>Ted Ernst" in html and
                 "<br>Palos Verdes Estates" in html and
                 "<br>CA  USA" in html)
+
+def test_fmt_sig2(client):
+    with client.application.app_context():
+        msg = read_message("CR/2009-03/eml-files/classicrendezvous.10903.0134.eml")
+        html = msg.as_html()
+        assert ("<br>Ted Ernst" in html and
+                "<br>Palos Verdes Estates" in html and
+                "<br>CA  USA" in html)
+
+def test_para_split(client):
+    with client.application.app_context():
+        msg = read_message("CR/2009-03/eml-files/classicrendezvous.10903.0144.eml")
+        payload = msg.get_payload(decode=True)
+        payload = msg.decode(payload)
+        payload = strip_footers(payload)
+        msg.set_payload(payload)
+        html = msg.as_html()
+        assert html.count("<p>") == 10, html
