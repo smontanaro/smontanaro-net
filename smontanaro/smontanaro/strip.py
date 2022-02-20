@@ -98,7 +98,8 @@ def strip_virgin(payload):
 def strip_virus(payload):
     "strip 'virus checked' lines"
     header = "Virus-checked using McAfee|Outgoing mail is certified Virus Free"
-    footer = "Virus-checked using McAfee|Version: [0-9]+.[0-9]+.[0-9]+ / Virus Database: [0-9]+ - Release Date:"
+    footer = ("Virus-checked using McAfee|"
+              "Version: [0-9]+.[0-9]+.[0-9]+ / Virus Database: [0-9]+ - Release Date:")
     return strip_between(payload, header, footer, "virus")
 
 def strip_msn(payload):
