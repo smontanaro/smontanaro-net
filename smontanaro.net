@@ -20,10 +20,6 @@
 	    root /home/skip/website/smontanaro/smontanaro/static/txt/;
 	}
 
-	location /sitemap.xml {
-	    root /home/skip/website/smontanaro/smontanaro/static/txt/;
-	}
-
 	location /favicon.ico {
 	    root /home/skip/website/smontanaro/smontanaro/static/images/;
 	}
