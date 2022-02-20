@@ -3,14 +3,21 @@
 """Create sitemap for archives."""
 
 import contextlib
+import glob
 import os
 import sys
 
 import arrow
 
+MONTH_INDEX = """
+<sitemap>
+  <loc>https://www.smontanaro.net/CR/{year}/{month}/sitemap.xml</loc>
+</sitemap>
+""".strip()
+
 TEMPLATE = """
 <url>
-  <loc>http://www.smontanaro.net/{year}/{month}/{msg}</loc>
+  <loc>https://www.smontanaro.net/CR/{year}/{month}/{seq}</loc>
   <lastmod>{lastmod}</lastmod>
   <priority>{priority}</priority>
 </url>
@@ -28,6 +35,15 @@ HEADER = """
 
 FOOTER = """
 </urlset>
+""".strip()
+
+INDEX_HEADER = """
+<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+""".strip()
+
+INDEX_FOOTER = """
+</sitemapindex>
 """.strip()
 
 PRIORITIES = {
@@ -49,25 +65,27 @@ def swallow(exceptions):
 def main():
     "see __doc__"
 
-    with swallow((BrokenPipeError, KeyboardInterrupt)):
-        print(HEADER)
-        for line in sys.stdin:
-            emlfile = line.strip()
-            dpath, fpath = os.path.split(emlfile)
-            year, month = dpath.split("/")[1].split("-")
-            msg = int(fpath.split(".")[2], 10)
-            msg = f"{msg:04d}"
-            lastmod = arrow.get(os.path.getmtime(emlfile))
-            lastmod = lastmod.replace(microsecond=0)
-            priority = 1.0
-            print(f"""
-<url>
-  <loc>http://www.smontanaro.net/{year}/{month}/{msg}</loc>
-  <lastmod>{lastmod}</lastmod>
-  <priority>{priority}</priority>
-</url>
-""".strip())
-        print(FOOTER)
+    with open("CR/generated/sitemap.xml", "w") as index:
+        with swallow((BrokenPipeError, KeyboardInterrupt)):
+            print(INDEX_HEADER, file=index)
+            for year_month in glob.glob("CR/20??-??"):
+                year, month = os.path.split(year_month)[1].split("-")
+                print(MONTH_INDEX.format(year=year, month=month).strip(), file=index)
+                with open(os.path.join(year_month, "generated", "sitemap.xml"), "w") as sitemap:
+                    print(HEADER, file=sitemap)
+                    for emlfile in glob.glob(f"{year_month}/eml-files/class*.eml"):
+                        emlfile = emlfile.strip()
+                        dpath, fpath = os.path.split(emlfile)
+                        year, month = dpath.split("/")[1].split("-")
+                        seq = int(fpath.split(".")[2], 10)
+                        seq = f"{seq:04d}"
+                        lastmod = arrow.get(os.path.getmtime(emlfile))
+                        lastmod = lastmod.replace(microsecond=0)
+                        print(TEMPLATE.format(year=year, month=month, seq=seq,
+                                              lastmod=lastmod, priority=1.0),
+                                              file=sitemap)
+                    print(FOOTER, file=sitemap)
+            print(INDEX_FOOTER, file=index)
     return 0
 
 if __name__ == "__main__":
