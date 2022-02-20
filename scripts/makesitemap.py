@@ -79,7 +79,9 @@ def main():
                         year, month = dpath.split("/")[1].split("-")
                         seq = int(fpath.split(".")[2], 10)
                         seq = f"{seq:04d}"
-                        lastmod = arrow.get(os.path.getmtime(emlfile))
+                        pckgz = os.path.splitext(emlfile)[0] + ".pck.gz"
+                        stampfile = pckgz if os.path.exists(pckgz) else emlfile
+                        lastmod = arrow.get(os.path.getmtime(stampfile))
                         lastmod = lastmod.replace(microsecond=0)
                         print(TEMPLATE.format(year=year, month=month, seq=seq,
                                               lastmod=lastmod, priority=1.0),
