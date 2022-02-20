@@ -2,3 +2,5 @@ User-agent: *
 Disallow: /cgi-bin
 Disallow: /search
 crawl-delay: 10
+
+Sitemap: https://www.smontanaro.net/sitemap.xml
