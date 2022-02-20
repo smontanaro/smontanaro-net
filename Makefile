@@ -16,11 +16,14 @@ VIEWS = smontanaro/smontanaro/views.py
 export CRDIR = $(PWD)
 export PYTHONPATH = $(PWD)/smontanaro
 
-all : CR/generated/index.body $(DATES) $(THREADS)
+all : CR/generated/index.body CR/sitemap.xml $(DATES) $(THREADS)
 
 CR/generated/index.body : $(VIEWS) scripts/genindexbody.sh
 	mkdir -p CR/generated
 	bash scripts/genindexbody.sh  > CR/generated/index.body
+
+CR/sitemap.xml : scripts/makesitemap.py $(DATES) $(THREADS)
+	python scripts/makesitemap.py
 
 $(DATES) $(THREADS) &: $(VIEWS) scripts/gen-bodies.sh \
 	scripts/generate_date_index.py scripts/generate_thread_index.py \
