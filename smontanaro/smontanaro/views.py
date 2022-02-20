@@ -49,6 +49,20 @@ def init_simple():
         "websites need these"
         return render_template("about.jinja")
 
+    @app.route("/sitemap.xml")
+    def sitemap_index():
+        "websites need these"
+        CR = app.config["CR"]
+        with open(f'''{CR}/generated/sitemap.xml''') as fobj:
+            return fobj.read()
+
+    @app.route("/CR/<year>/<month>/sitemap.xml")
+    def sitemap_by_month(year, month):
+        "websites need these"
+        CR = app.config["CR"]
+        with open(f'''{CR}/{year}-{month}/generated/sitemap.xml''') as fobj:
+            return fobj.read()
+
     @app.route('/CR/<year>/<month>/mybikes')
     @app.route('/<year>/<month>/mybikes')
     def mybikes(year, month):
@@ -57,6 +71,7 @@ def init_simple():
 
     @app.route('/CR/<year>/<month>/about')
     @app.route('/<year>/<month>/about')
+    # pylint: disable=unused-argument
     def _about(year, month):
         "currently broken link - redirect"
         return redirect(url_for("about"))
