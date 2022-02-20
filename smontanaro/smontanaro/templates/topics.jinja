@@ -14,16 +14,18 @@
     {% endif %}
 
     {% if msgrefs %}
-        <ul class="list-group-flush" style="padding-left: 0em; column-count: auto; column-width: 400px">
+        <ul style="padding-left: 1em; column-count: 1; line-height: normal">
             {% for (year, month, seq, subject, sender) in msgrefs %}
-                <li class="list-group-item"><a href="/CR/{{ year }}/{{ month }}/{{ seq }}">{{ subject }}</a>
+                <li>
+                    <a href="/CR/{{ year }}/{{ month }}/{{ seq }}">{{ subject }}</a>&nbsp;{{ sender|e }}
+                </li>
             {% endfor %}
         </ul>
     {% endif %}
 
     {% if htopics %}
         <h2>All Topics</h2>
-        <ul style="padding-left: 1em; column-count: auto; column-width: 400px">
+        <ul style="padding-left: 1em; line-height: normal; column-count: auto; column-width: 400px">
             {%- for (topic, value) in htopics.items() recursive -%}
                 {% set path = value[0] %}
                 {% set entries = value[1] %}
