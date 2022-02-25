@@ -222,3 +222,7 @@ def test_para_split(client):
         msg.set_payload(payload)
         html = msg.as_html()
         assert html.count("<p>") == 10, html
+
+def test_subject_fix(client):
+    msg = read_message("CR/2000-11/eml-files/classicrendezvous.10011.1036.eml")
+    assert msg["Subject"] == "[CR] Danger, items for sale"

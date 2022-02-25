@@ -415,7 +415,7 @@ def read_message(path):
     if (os.path.exists(pckgz) and
         os.path.getmtime(pckgz) > os.path.getmtime(path)):
         with gzip.open(pckgz, "rb") as pobj:
-            return pickle.load(pobj)
+            msg = pickle.load(pobj)
 
     with open(path, "rb") as fobj:
         msg = read_message_bytes(fobj.read())
@@ -423,7 +423,14 @@ def read_message(path):
         # parsing the message from the .eml file.
         with gzip.open(pckgz, "wb") as pobj:
             pickle.dump(msg, pobj)
-        return msg
+
+    # This looks so horrid, I will actually fix it here:
+    #
+    #   Subject: {ClassicRend]Danger, items for sale
+    title = re.sub(r"{ClassicRend]\s*", "[CR] ", str(msg["Subject"]))
+    msg.replace_header("Subject", title)
+
+    return msg
 
 def eprint(*args, file=sys.stderr, **kwds):
     print(*args, file=file, **kwds)
