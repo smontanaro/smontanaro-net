@@ -115,19 +115,29 @@ class Message(email.message.Message):
 
         # Some other problematic display/formatting:
         #
-        # http://localhost:8080/CR/2008/09/0798 - inconsistent indentation of quoted block
+        # inconsistent indentation of quoted block
+        #   http://localhost:8080/CR/2008/09/0798
         #
-        # http://localhost:8080/CR/2006/06/1085 - unhandled main/quoted message separator
+        # unhandled main/quoted message separator
+        #   http://localhost:8080/CR/2006/06/1085
         #
-        # http://localhost:8080/CR/2004/01/0415 - signature block not at end of message
+        # signature block not at end of message
+        #   http://localhost:8080/CR/2004/01/0415
         #
-        # http://localhost:8080/CR/2008/10/1121 - larger-than-expected signature block
+        # larger-than-expected signature block
+        #   http://localhost:8080/CR/2008/10/1121
         #
-        # http://localhost:8080/CR/2008/03/0505 - --- Original Message --- is indented
+        # --- Original Message --- is indented
+        #   http://localhost:8080/CR/2008/03/0505
         #
-        # http://localhost:8080/CR/2008/03/0238 - signature block not at end of message
+        # signature block not at end of message
+        #   http://localhost:8080/CR/2008/03/0238
         #
-        # http://localhost:8080/CR/2002/09/0610 - atypical message quoting
+        # atypical message quoting
+        #   http://localhost:8080/CR/2002/09/0610
+        #
+        # unseparated quote after body
+        #   http://localhost:8080/CR/2000/11/1034
 
         # special case - appended original message
         appended = re.split(f"{EOL_SEP}(--+ .* wrote:|--+ original message --+) *{EOL_SEP}",
