@@ -4,6 +4,18 @@
 
        server_name www.smontanaro.net;
 
+        if ($http_user_agent ~ (megaindex.com|semrush.com|petalsearch.com) ) {
+        return 403;
+        }
+
+        if ($http_user_agent ~ (babbar.tech|webmeup-crawler.com|help@moz.com) ) {
+        return 403;
+        }
+
+        if ($http_user_agent ~ (mj12bot.com|yandex.com) ) {
+        return 403;
+        }
+
        return 301 https://www.smontanaro.net$request_uri;
     }
 
