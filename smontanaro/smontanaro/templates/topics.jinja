@@ -31,7 +31,7 @@
                 {% set entries = value[1] %}
                 <li><a href="/CR/topics/{% filter urlencode %}{{ path }}{% endfilter %}">{{ topic }}</a></li>
                 {%- if entries -%}
-                    <ul style="padding-left: 2em; column-count: auto; column-width: 200px">
+                    <ul style="padding-left: 2em; column-count: 1; column-width: 200px">
                         {{ loop(entries.items()) }}
                     </ul>
                 {% endif %}
