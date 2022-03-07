@@ -7,10 +7,10 @@
 
 body
 {
-font-size: 14px;
-font-family: "trebuchet ms", helvetica, sans-serif;
-color: #0C0C0C;
-line-height: 18px;
+    font-size: 14px;
+    font-family: "trebuchet ms", helvetica, sans-serif;
+    color: #0C0C0C;
+    line-height: 18px;
 }
 
 .container {
@@ -75,24 +75,43 @@ a:visited { color: #00BF48; }
 
 p
 {
-margin-bottom: 14px;
-text-align: justify;
+    margin-bottom: 14px;
+    text-align: justify;
 }
 
 html, body {
-  height: 100%;
-  margin: 0;
+    height: 100%;
+    margin: 0;
 }
 
 ul.no-bullets {
-  list-style-type: none;
-  /* margin: 0; */
-  padding-left: 2.0em;
-  margin-left: 0em;
+    list-style-type: none;
+    /* margin: 0; */
+    padding-left: 2.0em;
+    margin-left: 0em;
 }
 
 ul#engine {
-  list-style-type: none;
-  padding-left: 0em;
-  margin-left: 0em;
+    list-style-type: none;
+    padding-left: 0em;
+    margin-left: 0em;
+}
+
+ul.topic-top {
+    display: block;
+    padding-left: 1em;
+    line-height: normal;
+    column-count: auto;
+    column-width: 300px;
+}
+
+ul.topic-sub {
+    padding-left: 2em;
+    column-count: 1;
+    column-width: 200px;
+    break-before: avoid-column;
+}
+
+li.nobreak {
+    break-inside: avoid-column;
 }

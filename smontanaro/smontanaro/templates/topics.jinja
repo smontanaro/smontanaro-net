@@ -25,16 +25,18 @@
 
     {% if htopics %}
         <h2>All Topics</h2>
-        <ul style="padding-left: 1em; line-height: normal; column-count: auto; column-width: 400px">
-            {%- for (topic, value) in htopics.items() recursive -%}
+        <ul class="list-group topic-top">
+            {% for (topic, value) in htopics.items() recursive %}
                 {% set path = value[0] %}
                 {% set entries = value[1] %}
-                <li><a href="/CR/topics/{% filter urlencode %}{{ path }}{% endfilter %}">{{ topic }}</a></li>
-                {%- if entries -%}
-                    <ul style="padding-left: 2em; column-count: 1; column-width: 200px">
-                        {{ loop(entries.items()) }}
-                    </ul>
-                {% endif %}
+                <li class="nobreak">
+                    <a href="/CR/topics/{% filter urlencode %}{{ path }}{% endfilter %}">{{ topic }}</a>
+                    {% if entries %}
+                        <ul class="topic-sub">
+                            {{ loop(entries.items()) }}
+                        </ul>
+                    {% endif %}
+                </li>
             {% endfor %}
         </ul>
     {% endif %}
