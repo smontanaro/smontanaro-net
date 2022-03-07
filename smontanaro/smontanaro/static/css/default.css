@@ -91,6 +91,7 @@ ul#engine {
 }
 
 ul.topic-top {
+    font-weight: bold;
     list-style-type: none;
     display: block;
     padding-left: 1em;
@@ -100,6 +101,7 @@ ul.topic-top {
 }
 
 ul.topic-sub {
+    font-weight: normal;
     list-style-type: none;
     padding-left: 2em;
     column-count: 1;
