@@ -1,17 +1,10 @@
 /*
    started with terrafirma1.0 by nodethirtythree design
-   http://www.nodethirtythree.com, tossed most of it out.
+   http://www.nodethirtythree.com, tossed most (all?) of it out at
+   this point.
 
    grid layout started with https://grid.layoutit.com/
 */
-
-body
-{
-    font-size: 14px;
-    font-family: "trebuchet ms", helvetica, sans-serif;
-    color: #0C0C0C;
-    line-height: 18px;
-}
 
 .container {
     display: grid;
@@ -98,6 +91,7 @@ ul#engine {
 }
 
 ul.topic-top {
+    list-style-type: none;
     display: block;
     padding-left: 1em;
     line-height: normal;
@@ -106,6 +100,7 @@ ul.topic-top {
 }
 
 ul.topic-sub {
+    list-style-type: none;
     padding-left: 2em;
     column-count: 1;
     column-width: 200px;
