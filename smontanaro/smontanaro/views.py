@@ -44,6 +44,11 @@ RIGHT_ARROW = "\N{RIGHTWARDS ARROW}"
 def init_simple():
     app = current_app
 
+    @app.route("/python")
+    def python():
+        "my old python stuff"
+        return render_template("python.jinja")
+
     @app.route("/CR/about")
     def about():
         "websites need these"
