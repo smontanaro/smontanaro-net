@@ -10,6 +10,7 @@ import logging
 import os
 import re
 import sqlite3
+import tempfile
 import urllib.parse
 
 from flask import (redirect, url_for, render_template, abort, jsonify, request,
@@ -18,7 +19,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, HiddenField, SelectField, SubmitField
 from wtforms.validators import DataRequired
 
-from .db import ensure_db
+from .db import ensure_db, ensure_filter_cache
 from .strip import strip_footers
 # pylint: disable=unused-import
 from .util import (read_message, trim_subject_prefix, eprint, clean_msgid,
@@ -125,23 +126,10 @@ def init_indexes():
                   encoding="utf-8") as fobj:
             lines = list(fobj)
 
-        # note that the filtering process relies on the format of the
-        # output from generate_date_index.py. if that changes this
-        # probably will have to as well.
-        filter_lines = []
-        full_pat = f"({pattern})|</?ul.*>|<h2>" if in_out == "keep" else pattern
-        for line in lines:
-            if in_out == "keep":
-                if re.search(full_pat, line, re.I) is not None:
-                    filter_lines.append(line)
-            else:               # toss
-                if re.search(full_pat, line, re.I) is None:
-                    filter_lines.append(line)
-        body = "\n".join(filter_lines)
-        # elide dates which the filter completely cleared out.
-        body = re.sub("<h2>.*</h2>\n+<ul .*>\n+</ul>\n+", "", body).strip()
+        body = filter_month(lines, pattern, in_out, month=f"{year}-{month}")
         if not body:
-            body = "<p>Pretty brutal filter, eh? Poke the 'Clear' button to remove it.</p>"
+            body = ("<p>Pretty brutal filter, eh?"
+                    " Poke the 'Clear' button to remove it.</p>")
         if pattern == ".*":
             pattern = ""
         return render_template("dates.jinja", title=title, body=body,
@@ -188,13 +176,19 @@ def init_cr():
     CR = app.config["CR"]
 
     @app.route("/CR")
+    @app.route("/CR/<cache>")
     @app.route("/CR/")
     @app.route("/CR/index.html")
     @app.route("/CR/index")
-    def cr_index():
+    def cr_index(cache=None):
         "templated index"
 
-        with open(f"{CR}/generated/index.body", encoding="utf8") as fobj:
+        if cache is not None:
+            # Already filtered...
+            index = os.path.join(CR, "generated", "cache", cache)
+        else:
+            index = f"{CR}/generated/index.body"
+        with open(index, encoding="utf8") as fobj:
             return render_template("crtop.jinja", body=fobj.read(),
                                    title="Old Classic Rendezvous Archive")
 
@@ -342,13 +336,20 @@ def init_filter():
     def filter_date():
         filter_form = FilterForm()
         if filter_form.validate_on_submit():
-            year = int(filter_form.year.data)
-            month = int(filter_form.month.data)
+            if filter_form.year.data != "":
+                year = int(filter_form.year.data)
+                month = int(filter_form.month.data)
+            else:
+                year = month = None
             if filter_form.clear.data:
                 del session["pattern"], session["in_out"]
             else:
                 session["pattern"] = filter_form.pattern.data
                 session["in_out"] = filter_form.in_out.data
+            if year is None:
+                index_file = filter_all_months(session.get("pattern", ".*"),
+                                               session.get("in_out", "keep"))
+                return redirect(url_for("cr_index", cache=index_file))
             return redirect(url_for("dates", year=year, month=f"{month:02d}"))
         return render_template('filter.jinja', filter_form=filter_form)
 
@@ -514,6 +515,72 @@ def get_nav_items(*, year, month, seq):
         items.append(("Next", url_for("cr_message", **next_seq)))
 
     return items
+
+def filter_month(lines, pattern, in_out, month="unknown"):
+    "Filter pattern in or out of a single month, returning body"
+    # note that the filtering process relies on the format of the
+    # output from generate_date_index.py. if that changes this
+    # probably will have to as well.
+    filter_lines = []
+    full_pat = f"({pattern})|</?ul.*>|<h2>" if in_out == "keep" else pattern
+    for line in lines:
+        if in_out == "keep":
+            if re.search(full_pat, line, re.I) is not None:
+                filter_lines.append(line)
+        else:               # toss
+            if re.search(full_pat, line, re.I) is None:
+                filter_lines.append(line)
+    body = "\n".join(filter_lines)
+    # elide dates which the filter completely cleared out.
+    filtered_body = re.sub(r"<h2>.*</h2>\s*<ul .*>\s*</ul>\s*", "", body).strip()
+    return filtered_body
+
+def filter_all_months(pattern, in_out):
+    "generate filtered index, saving to cache"
+
+    CR = current_app.config["CR"]
+
+    cache_dir = f"{CR}/generated/cache"
+    cache_conn = ensure_filter_cache(os.path.join(cache_dir, "filter_cache.db"))
+    cur = cache_conn.cursor()
+    cur.execute("""
+        select filename from filter_cache
+          where pattern = ?
+            and in_out = ?
+    """, (pattern, in_out))
+    result = cur.fetchone()
+    if result:
+        return result[0]
+
+    with open(f"{CR}/generated/index.body", encoding="utf8") as fobj:
+        raw = fobj.read()
+        raw_lines = raw.split("\n")
+        out = [raw_lines[0]]
+        months = re.findall("(?:<b>)?([0-9]{4,4}-[0-9]{2,2})(?:</b>)?", raw)
+        for month, line in zip(months, raw_lines[1:-1]):
+            with open(f"{CR}/{month}/generated/dates.body", encoding="utf8") as mobj:
+                body = filter_month(mobj.readlines(), pattern, in_out, month=month)
+                if body:
+                    out.append(line)
+        out.append(raw_lines[-1])
+    filtered_body = "\n".join(out)
+    fd, cname = tempfile.mkstemp(prefix="f_", dir=cache_dir)
+    os.close(fd)
+    with open(cname, "w", encoding="utf8") as fobj:
+        fobj.write(filtered_body)
+        fobj.write("\n")
+
+    # We explicitly want the cache directory name hidden. It serves to
+    # force cache reads from an internal directory and avoids "/" in
+    # parameter name to cr_index().
+    cname = os.path.basename(cname)
+    cache_conn.execute("""
+        insert into filter_cache
+            values (?, ?, ?)
+    """, (pattern, in_out, cname))
+    cache_conn.commit()
+
+    return cname
 
 class FilterForm(FlaskForm):
     "For filtering (out) uninteresting subjects"
