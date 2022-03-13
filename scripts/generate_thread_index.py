@@ -14,7 +14,7 @@ def thread_key(record):
     "groupby key func"
     return record["messageid"]
 
-def generate_link(r, ind):
+def generate_link(r):
     "HTML for a single message"
     root = "" # "(T)&nbsp;" if r['is_root'] else ""
     sub = re.sub(r"\s+", " ", r["Subject"])
@@ -46,7 +46,7 @@ class IndexGenerator:
         for r in records:
             self.seen.add(r["messageid"])
             print(f'''{li_ind}<li>''', end="")
-            print(generate_link(r, li_ind + "  "), end="")
+            print(generate_link(r), end="")
             # find any references where this message is the parent
             refs = self.get_refs(cur, r["messageid"])
             if refs:
