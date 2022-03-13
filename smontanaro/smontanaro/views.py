@@ -126,7 +126,7 @@ def init_indexes():
                   encoding="utf-8") as fobj:
             lines = list(fobj)
 
-        body = filter_month(lines, pattern, in_out, month=f"{year}-{month}")
+        body = filter_month(lines, pattern, in_out)
         if not body:
             body = ("<p>Pretty brutal filter, eh?"
                     " Poke the 'Clear' button to remove it.</p>")
@@ -140,6 +140,9 @@ def init_indexes():
     def threads(year, month):
         "new thread index"
 
+        pattern = session.get("pattern", ".*")
+        in_out = session.get("in_out", "keep")
+
         year = int(year)
         month = int(month)
         date = datetime.date(year, month, 1)
@@ -150,9 +153,17 @@ def init_indexes():
         title = date.strftime("%b %Y Thread Index")
         with open(f'''{CR}/{date.strftime("%Y-%m")}/generated/threads.body''',
                   encoding="utf-8") as fobj:
-            body = fobj.read()
+            lines = list(fobj)
+
+        body = filter_month(lines, pattern, in_out)
+        if not body:
+            body = ("<p>Pretty brutal filter, eh?"
+                    " Poke the 'Clear' button to remove it.</p>")
+        if pattern == ".*":
+            pattern = ""
         return render_template("threads.jinja", title=title, body=body,
-                               prev=prev_url, next=next_url, year=year, month=month)
+                               prev=prev_url, next=next_url, year=year, month=month,
+                               pattern=pattern, in_out=in_out)
 
     def month_url(start_year, start_month, offset, what):
         "previous month - often month +/- 1, but not always (we have gaps)"
@@ -516,7 +527,7 @@ def get_nav_items(*, year, month, seq):
 
     return items
 
-def filter_month(lines, pattern, in_out, month="unknown"):
+def filter_month(lines, pattern, in_out):
     "Filter pattern in or out of a single month, returning body"
     # note that the filtering process relies on the format of the
     # output from generate_date_index.py. if that changes this
@@ -559,7 +570,7 @@ def filter_all_months(pattern, in_out):
         months = re.findall("(?:<b>)?([0-9]{4,4}-[0-9]{2,2})(?:</b>)?", raw)
         for month, line in zip(months, raw_lines[1:-1]):
             with open(f"{CR}/{month}/generated/dates.body", encoding="utf8") as mobj:
-                body = filter_month(mobj.readlines(), pattern, in_out, month=month)
+                body = filter_month(mobj.readlines(), pattern, in_out)
                 if body:
                     out.append(line)
         out.append(raw_lines[-1])
