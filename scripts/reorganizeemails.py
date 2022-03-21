@@ -41,7 +41,7 @@ def map_emails(src, dst):
 def scan_dir(dirname, which, message_ids):
     "scan dirname looking for message-ids and such to id duplicates."
     nfiles = 0
-    assert which in ("source", "destination")
+    assert which in ("source", "destination") # nosec
     for (dirpath, _dirnames, filenames) in os.walk(dirname):
         for filename in filenames:
             fname = os.path.join(dirpath, filename)

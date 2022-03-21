@@ -21,7 +21,7 @@ def main():
             if not fname.endswith(".eml"):
                 continue
             with open(os.path.join(dirpath, fname), mode="rb") as fobj:
-                digest = hashlib.md5(fobj.read()).hexdigest()
+                digest = hashlib.md5(fobj.read()).hexdigest() # nosec
             if digest not in pairs:
                 pairs[digest] = fname
                 continue

@@ -9,7 +9,7 @@ import gzip
 import html
 import logging
 import os
-import pickle
+import pickle                   # nosec
 import re
 import sqlite3
 import statistics
@@ -406,7 +406,7 @@ def read_message_bytes(raw):
         b"=0A" in payload and
         "Content-Transfer-Encoding" not in msg):
         msg["Content-Transfer-Encoding"] = "quoted-printable"
-        assert b"=0A" not in msg.get_payload(decode=True)
+        assert b"=0A" not in msg.get_payload(decode=True) # nosec
     return msg
 
 def read_message(path):
@@ -415,7 +415,7 @@ def read_message(path):
     if (os.path.exists(pckgz) and
         os.path.getmtime(pckgz) > os.path.getmtime(path)):
         with gzip.open(pckgz, "rb") as pobj:
-            msg = pickle.load(pobj)
+            msg = pickle.load(pobj) # nosec
 
     with open(path, "rb") as fobj:
         msg = read_message_bytes(fobj.read())

@@ -109,7 +109,7 @@ class ThreadTable:
         message_ids = []
         seen = set()
         while container is not None:
-            assert container not in seen, (container, seen)
+            assert container not in seen, (container, seen) # nosec
             seen.add(container)
             if container.message is not None:
                 msgid = container.message.msgid
@@ -121,6 +121,6 @@ class ThreadTable:
                 break
             message_ids.append(msgid)
             pprint.pprint(message_ids)
-            assert container is not container.parent
+            assert container is not container.parent # nosec
             container = container.parent
         return message_ids[::-1]

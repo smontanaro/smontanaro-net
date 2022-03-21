@@ -195,7 +195,7 @@ def main():
         for line in conn.iterdump():
             fobj.write(f"{line}\n")
     conn.commit()
-    os.system(f"sqlite3 {args.sqldb} < {tmpf}")
+    os.system(f"sqlite3 {args.sqldb} < {tmpf}") # nosec
     os.close(tmpfd)
     os.unlink(tmpf)
 

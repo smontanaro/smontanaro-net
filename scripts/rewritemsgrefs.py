@@ -59,7 +59,7 @@ def main():
 
             # if changes are temporary, diff them against the original, then discard
             if args.diff:
-                os.system(f"diff -u {fullpath} {outf}")
+                os.system(f"diff -u {fullpath} {outf}") # nosec
                 os.unlink(outf)
 
 if __name__ == "__main__":
