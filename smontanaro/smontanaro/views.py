@@ -59,14 +59,15 @@ def init_simple():
     def sitemap_index():
         "websites need these"
         CR = app.config["CR"]
-        with open(f'''{CR}/generated/sitemap.xml''') as fobj:
+        with open(f'''{CR}/generated/sitemap.xml''', encoding="utf-8") as fobj:
             return fobj.read()
 
     @app.route("/CR/<year>/<month>/sitemap.xml")
     def sitemap_by_month(year, month):
         "websites need these"
         CR = app.config["CR"]
-        with open(f'''{CR}/{year}-{month}/generated/sitemap.xml''') as fobj:
+        with open(f'''{CR}/{year}-{month}/generated/sitemap.xml''',
+                  encoding="utf-8") as fobj:
             return fobj.read()
 
     @app.route('/CR/<year>/<month>/mybikes')
@@ -209,54 +210,54 @@ def init_cr():
         return email_to_html(int(year), int(month), seq)
 
 
-    # pylint: disable=global-variable-not-assigned
-    global email_to_html
-    def email_to_html(year, month, seq, note=""):
-        "convert the email referenced by year, month and seq to html."
-        if not isinstance(seq, int):
-            seq = int(seq, 10)
-        msg = eml_file(year, month, seq)
-        mydir = os.path.join(CR, f"{year:04d}-{month:02d}", "eml-files")
-        path = os.path.join(mydir, msg)
-        try:
-            message = read_message(path)
-        except FileNotFoundError:
-            logging.root.error("File not found: %s", path)
-            abort(404)
+def get_topics_for(msgid):
+    "return list of topics associated with msgid"
+    conn = ensure_db(current_app.config["REFDB"])
+    cur = conn.cursor()
+    cur.execute("""
+    select distinct topic from topics
+      where messageid = ?
+      order by topic
+    """, (msgid,))
+    return [t[0] for t in cur.fetchall()]
 
-        # Grab these before we sanitize any headers.
-        msgid = message["Message-ID"]
-        title = message["Subject"]
-        clean = trim_subject_prefix(title)
+def email_to_html(year, month, seq, note=""):
+    "convert the email referenced by year, month and seq to html."
+    CR = current_app.config["CR"]
 
-        # Occurrences of Message-ID seem to sometimes contain whitespace, but
-        # not always in the Message-ID header. See /CR/2006/10/0542
-        # for an example
-        msgid = clean_msgid(msgid)
-        if msgid != message["Message-ID"]:
-            logging.root.warning("Message-ID found to contain whitespace! %s", (year, month, seq))
+    if not isinstance(seq, int):
+        seq = int(seq, 10)
+    msg = eml_file(year, month, seq)
+    mydir = os.path.join(CR, f"{year:04d}-{month:02d}", "eml-files")
+    path = os.path.join(mydir, msg)
+    try:
+        message = read_message(path)
+    except FileNotFoundError:
+        logging.root.error("File not found: %s", path)
+        abort(404)
 
-        filt = MessageFilter(message)
-        filt.filter_message(message)
-        filt.delete_empty_parts()
+    # Grab these before we sanitize any headers.
+    msgid = message["Message-ID"]
+    title = message["Subject"]
+    clean = trim_subject_prefix(title)
 
-        return render_template("cr.jinja", title=title, page_title=clean,
-                               body=message.as_html(),
-                               year=year, month=month, seq=seq,
-                               topics=get_topics_for(msgid),
-                               note=note,
-                               nav=get_nav_items(year=year, month=month, seq=seq))
+    # Occurrences of Message-ID seem to sometimes contain whitespace, but
+    # not always in the Message-ID header. See /CR/2006/10/0542
+    # for an example
+    msgid = clean_msgid(msgid)
+    if msgid != message["Message-ID"]:
+        logging.root.warning("Message-ID found to contain whitespace! %s", (year, month, seq))
 
-    def get_topics_for(msgid):
-        "return list of topics associated with msgid"
-        conn = ensure_db(app.config["REFDB"])
-        cur = conn.cursor()
-        cur.execute("""
-        select distinct topic from topics
-          where messageid = ?
-          order by topic
-        """, (msgid,))
-        return [t[0] for t in cur.fetchall()]
+    filt = MessageFilter(message)
+    filt.filter_message(message)
+    filt.delete_empty_parts()
+
+    return render_template("cr.jinja", title=title, page_title=clean,
+                           body=message.as_html(),
+                           year=year, month=month, seq=seq,
+                           topics=get_topics_for(msgid),
+                           note=note,
+                           nav=get_nav_items(year=year, month=month, seq=seq))
 
 def init_redirect():
     app = current_app
@@ -433,7 +434,7 @@ def init_topics():
                         "unknown")
         writeheader = (not os.path.exists(topicfile) or
                        os.path.getsize(topicfile) == 0)
-        with open(topicfile, "a") as fobj:
+        with open(topicfile, "a", encoding="utf-8") as fobj:
             writer = csv.DictWriter(fobj, fieldnames)
             if writeheader:
                 writer.writeheader()

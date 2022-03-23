@@ -191,7 +191,7 @@ def main():
     mark_thread_roots(conn)
     ensure_indexes(conn)
     (tmpfd, tmpf) = tempfile.mkstemp()
-    with open(tmpf, "w") as fobj:
+    with open(tmpf, "w", encoding="utf-8") as fobj:
         for line in conn.iterdump():
             fobj.write(f"{line}\n")
     conn.commit()

@@ -268,7 +268,7 @@ class Message(email.message.Message):
         if urlmap and stamp < cls.urlmaptime:
             return
         cls.urlmaptime = stamp
-        with open(mapfile) as fobj:
+        with open(mapfile, encoding="utf-8") as fobj:
             rdr = csv.DictReader(fobj)
             for row in rdr:
                 # eprint("urlmap:", row["old"], "->", row["new"])
