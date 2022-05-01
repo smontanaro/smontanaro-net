@@ -109,3 +109,14 @@ def ensure_filter_cache(cachedb):
         (pattern, in_out)
     """)
     return file_cache
+
+def get_topics_for(msgid, sqldb):
+    "return list of topics associated with msgid"
+    conn = ensure_db(sqldb)
+    cur = conn.cursor()
+    cur.execute("""
+    select distinct topic from topics
+      where messageid = ?
+      order by topic
+    """, (msgid,))
+    return [t[0] for t in cur.fetchall()]
