@@ -19,7 +19,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, HiddenField, SelectField, SubmitField
 from wtforms.validators import DataRequired
 
-from .db import ensure_db, ensure_filter_cache
+from .db import ensure_db, ensure_filter_cache, get_topics_for
 from .strip import strip_footers
 # pylint: disable=unused-import
 from .util import (read_message, trim_subject_prefix, eprint, clean_msgid,
@@ -210,17 +210,6 @@ def init_cr():
         return email_to_html(int(year), int(month), seq)
 
 
-def get_topics_for(msgid):
-    "return list of topics associated with msgid"
-    conn = ensure_db(current_app.config["REFDB"])
-    cur = conn.cursor()
-    cur.execute("""
-    select distinct topic from topics
-      where messageid = ?
-      order by topic
-    """, (msgid,))
-    return [t[0] for t in cur.fetchall()]
-
 def email_to_html(year, month, seq, note=""):
     "convert the email referenced by year, month and seq to html."
     CR = current_app.config["CR"]
@@ -255,7 +244,8 @@ def email_to_html(year, month, seq, note=""):
     return render_template("cr.jinja", title=title, page_title=clean,
                            body=message.as_html(),
                            year=year, month=month, seq=seq,
-                           topics=get_topics_for(msgid),
+                           topics=get_topics_for(msgid,
+                                                 current_app.config["REFDB"]),
                            note=note,
                            nav=get_nav_items(year=year, month=month, seq=seq))
 
@@ -359,6 +349,9 @@ def init_filter():
                 session["pattern"] = filter_form.pattern.data
                 session["in_out"] = filter_form.in_out.data
             if year is None:
+                pattern = session.get("pattern", "")
+                if pattern == "":
+                    return redirect(url_for("cr_index"))
                 index_file = filter_all_months(session.get("pattern", ".*"),
                                                session.get("in_out", "keep"))
                 return redirect(url_for("cr_index", cache=index_file))
