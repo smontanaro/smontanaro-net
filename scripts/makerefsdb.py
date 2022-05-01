@@ -163,7 +163,8 @@ def main():
         return 0
 
     records = nfiles = 0
-    for (dirpath, _dirnames, filenames) in os.walk(args.top):
+    for (dirpath, dirs, filenames) in os.walk(args.top):
+        dirs.sort()
         files_read = 0
         if "eml-files" not in dirpath:
             continue
