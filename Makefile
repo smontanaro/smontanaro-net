@@ -32,7 +32,7 @@ $(DATES) $(THREADS) &: $(VIEWS) scripts/gen-bodies.sh \
 	bash scripts/gen-bodies.sh
 
 $(REFDB).new : FORCE
-	python scripts/makerefsdb.py -v -d $(REFDB).new CR
+	coverage run -a --rcfile=.coveragerc scripts/makerefsdb.py -d $(REFDB).new CR
 	@echo "Replace $(REFDB) with $(REFDB).new when ready"
 
 lint : FORCE
