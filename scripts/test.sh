@@ -52,13 +52,13 @@ coverage run -a --rcfile=.coveragerc $(which pytest) --tb=native
 PYT=$?
 
 if [ -r .coverage -a -r smontanaro/.coverage ] ; then
-    echo combine
+    echo combine multiple .coverage files
     coverage combine .coverage smontanaro/.coverage
 elif [ -r smontanaro/.coverage ] ; then
-     echo rename
+     echo rename smontanaro/.coverage to the top level
      mv smontanaro/.coverage .coverage
 else
-    :
+    echo only ./.coverage found - nothing to combine or rename
 fi
 
 rm -rf htmlcov
