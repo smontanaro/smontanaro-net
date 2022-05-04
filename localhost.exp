@@ -50,3 +50,10 @@ WARNING:root:Can't render images
 WARNING:root:Message-ID found to contain whitespace! <21662.209.204.144.231.1160691923.squirrel@webmail.sonic.ne
 t>
 127.0.0.1 - - "GET /CR/2006/10/0542 HTTP/1.1" 200 <size> "-" "curl/7.68.0"
+# Miscellaneous
+127.0.0.1 - - "GET /python HTTP/1.1" 200 <size> "-" "curl/7.68.0"
+127.0.0.1 - - "GET /sitemap.xml HTTP/1.1" 200 <size> "-" "curl/7.68.0"
+127.0.0.1 - - "GET /CR/addtopic HTTP/1.1" 200 <size> "-" "curl/7.68.0"
+127.0.0.1 - - "GET /CR/2005/03/sitemap.xml HTTP/1.1" 200 <size> "-" "curl/7.68.0"
+127.0.0.1 - - "GET /2005/03/mybikes HTTP/1.1" 302 <size> "-" "curl/7.68.0"
+127.0.0.1 - - "GET /2005/03/about HTTP/1.1" 302 <size> "-" "curl/7.68.0"

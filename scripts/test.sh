@@ -43,13 +43,18 @@ sort localhost.comments /tmp/$$.tmp \
           > $ACT
 rm localhost.comments /tmp/$$.tmp
 
+# Run our official unit tests
+coverage run -a --rcfile=.coveragerc $(which pytest) --tb=native
+PYT=$?
+
 # The dates module is only used by a couple auxiliary scripts.
 coverage run -a --rcfile=.coveragerc scripts/listbydate.py CR/2000-03 >/dev/null
 coverage run -a --rcfile=.coveragerc scripts/generate_date_index.py -d references.db 2000 3 >/dev/null
 
-# Run our official unit tests
-coverage run -a --rcfile=.coveragerc $(which pytest) --tb=native
-PYT=$?
+# Small refdb run to exercise one or two functions only it uses.
+
+coverage run -a --rcfile=.coveragerc scripts/makerefsdb.py -d ref.db.test CR/2005-12
+rm -f ref.db.test
 
 if [ -r .coverage -a -r smontanaro/.coverage ] ; then
     echo combine multiple .coverage files
