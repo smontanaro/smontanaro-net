@@ -14,6 +14,7 @@ import re
 import sqlite3
 import statistics
 import sys
+import typing
 import urllib.parse
 
 from flask import url_for
@@ -45,7 +46,7 @@ class Message(email.message.Message):
     "subclass to add as_html() method"
     content_headers = ("content-type", "content-transfer-encoding")
     app = None
-    urlmap = {}
+    urlmap: typing.Dict[str, str] = {}
     urlmaptime = datetime.datetime.fromtimestamp(0)
 
     def as_html(self):
