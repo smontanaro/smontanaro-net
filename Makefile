@@ -12,6 +12,7 @@ DATES = $(foreach dir,$(GENDIRS),$(dir)/dates.body)
 THREADS = $(foreach dir,$(GENDIRS),$(dir)/threads.body)
 REFDB = references.db
 VIEWS = smontanaro/smontanaro/views.py
+PY_SRC = $(wildcard smontanaro/smontanaro/*.py) $(wildcard scripts/*.py)
 
 export CRDIR = $(PWD)
 export PYTHONPATH = $(PWD)/smontanaro
@@ -36,8 +37,10 @@ $(REFDB).new : FORCE
 	@echo "Replace $(REFDB) with $(REFDB).new when ready"
 
 lint : FORCE
-	pylint --rcfile=.pylintrc smontanaro/smontanaro/*.py scripts/*.py \
+	-pylint --rcfile=.pylintrc $(PY_SRC) \
 	| sed -e '/duplicate-code/,/^--------------------/d'
+	-MYPYPATH=typeshed mypy $(PY_SRC)
+	-bandit $(PY_SRC)
 
 test : FORCE
 	bash scripts/test.sh
