@@ -5,6 +5,7 @@ import tempfile
 
 import dateutil.parser
 import pytest
+from flask import session
 
 from smontanaro import create_app
 from smontanaro.db import ensure_db
@@ -60,59 +61,53 @@ def test_post_search(client):
         })
     assert rv.status_code == 302
 
-@pytest.mark.skip(reason="flask test harness issues")
 def test_toss_filter(client):
     "check that we eliminate stuff we don't want but keep stuff we do"
-    with client.application.test_request_context("/CR/filter_date") as ctx:
-        rv = client.post("/CR/filter_date", data={
-            "pattern": "ebay",
-            "in_out": "toss",
-            "year": "2005",
-            "month": "09",
-            })
-        assert rv.status_code == 302
-        ctx.session["pattern"] = "ebay"
-        ctx.session["in_out"] = "toss"
-        rv = client.get("/CR/2005/06/dates")
-        assert rv.status_code == 200
-        assert (re.search(b"<li>.*ebay", rv.data, re.I) is None and
-                re.search(b"01 Jun 2005", rv.data) is not None)
+    rv = client.post("/CR/filter_date", data={
+        "pattern": "ebay",
+        "in_out": "toss",
+        "year": "2005",
+        "month": "09",
+        })
+    assert rv.status_code == 302
+    session["pattern"] = "ebay"
+    session["in_out"] = "toss"
+    rv = client.get("/CR/2005/06/dates")
+    assert rv.status_code == 200
+    assert (re.search(b"<li>.*ebay", rv.data, re.I) is None and
+            re.search(b"01 Jun 2005", rv.data) is not None)
 
-@pytest.mark.skip(reason="flask test harness issues")
 def test_keep_filter(client):
     "check that we keep stuff we ask to keep"
-    with client.application.test_request_context("/CR/filter_date") as ctx:
-        rv = client.post("/CR/filter_date", data={
-            "pattern": "Campagnolo",
-            "in_out": "keep",
-            "year": "2005",
-            "month": "09",
-            })
-        assert rv.status_code == 302
-        ctx.session["pattern"] = "Campagnolo"
-        ctx.session["in_out"] = "keep"
-        rv = client.get("/CR/2005/09/dates")
-        assert re.search(b"01 Sep 2005", rv.data) is not None
-        for line in rv.data.split("\n"):
-            assert re.search(b"<h2|<ul|<li>.*Campagnolo", line) is not None
+    rv = client.post("/CR/filter_date", data={
+        "pattern": "Campagnolo",
+        "in_out": "keep",
+        "year": "2005",
+        "month": "09",
+        })
+    assert rv.status_code == 302
+    session["pattern"] = "Campagnolo"
+    session["in_out"] = "keep"
+    rv = client.get("/CR/2005/09/dates")
+    assert re.search(b"01 Sep 2005", rv.data) is not None
+    for line in rv.data.split(b"\n"):
+        if b'<li>' in line:
+            assert re.search(b"<li>.*Campagnolo", line, re.I) is not None
 
-@pytest.mark.skip(reason="flask test harness issues")
 def test_toss_everything(client):
     "check that we keep stuff we ask to keep"
-    with client.application.test_request_context("/CR/filter_date") as ctx:
-        rv = client.post("/CR/filter_date", data={
-            "pattern": "Colnago",
-            "in_out": "keep",
-            "year": "2001",
-            "month": "10",
-            })
-        assert rv.status_code == 302
-        ctx.session["pattern"] = "Colnago"
-        ctx.session["in_out"] = "keep"
-        rv = client.get("/CR/2001/10/dates")
-        assert re.search(b"Oct 2001 Date Index", rv.data) is not None
-        for line in rv.data.split("\n"):
-            assert re.search(b"Colnago", line) is None
+    rv = client.post("/CR/filter_date", data={
+        "pattern": "Colnago",
+        "in_out": "keep",
+        "year": "2001",
+        "month": "10",
+        })
+    assert rv.status_code == 302
+    session["pattern"] = "Colnago"
+    session["in_out"] = "keep"
+    rv = client.get("/CR/2001/10/dates")
+    assert re.search(b"Oct 2001 Date Index", rv.data) is not None
+    assert b"Pretty brutal filter, eh?" in rv.data
 
 def test_suggest_topic(client):
     "check that topics.csv is updated when a topic is suggested."
