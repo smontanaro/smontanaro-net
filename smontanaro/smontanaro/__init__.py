@@ -3,6 +3,7 @@
 "top level of pkg"
 
 import os
+import toml
 
 from flask import Flask
 
@@ -19,10 +20,11 @@ def create_app(test_config=None):
         "CRDIR": crdir,
         "REFDB": os.path.join(crdir, "references.db"),
         "CR": os.path.join(crdir, "CR"),
-        "SECRET_KEY": r"Aw6CNZn*GIEt8Aw6CNZn*GIEt8",
         "DEBUG": os.environ.get("FLASK_ENV") == "development",
         "TOPICFILE": os.path.join(crdir, "topic.csv"),
     })
+
+    app.config.from_file("../../env.toml", load=toml.load)
 
     if test_config is None:
         # load the instance config, if it exists, when not testing
