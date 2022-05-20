@@ -44,7 +44,7 @@ sort localhost.comments /tmp/$$.tmp \
 rm localhost.comments /tmp/$$.tmp
 
 # Run our official unit tests
-coverage run -a --rcfile=.coveragerc $(which pytest) --tb=native
+coverage run -a --rcfile=.coveragerc $(which pytest)
 PYT=$?
 
 # The dates module is only used by a couple auxiliary scripts.
