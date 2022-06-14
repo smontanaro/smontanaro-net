@@ -19,7 +19,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, HiddenField, SelectField, SubmitField
 from wtforms.validators import DataRequired
 
-from .db import ensure_db, ensure_filter_cache, get_topics_for
+from .db import ensure_db, ensure_filter_cache, get_topics_for, get_random_topic
 from .strip import strip_footers
 # pylint: disable=unused-import
 from .util import (read_message, trim_subject_prefix, eprint, clean_msgid,
@@ -241,13 +241,14 @@ def email_to_html(year, month, seq, note=""):
     filt.filter_message(message)
     filt.delete_empty_parts()
 
+    refdb = current_app.config["REFDB"]
     return render_template("cr.jinja", title=title, page_title=clean,
                            body=message.as_html(),
                            year=year, month=month, seq=seq,
-                           topics=get_topics_for(msgid,
-                                                 current_app.config["REFDB"]),
+                           topics=get_topics_for(msgid, refdb),
                            note=note,
-                           nav=get_nav_items(year=year, month=month, seq=seq))
+                           nav=get_nav_items(year=year, month=month, seq=seq),
+                           some_topic=get_random_topic(refdb))
 
 def init_redirect():
     app = current_app

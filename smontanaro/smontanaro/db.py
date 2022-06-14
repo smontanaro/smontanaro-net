@@ -3,6 +3,7 @@
 """database bits for CR archive"""
 
 import os
+import random
 import sqlite3
 
 from .dates import convert_ts_bytes
@@ -120,3 +121,19 @@ def get_topics_for(msgid, sqldb):
       order by topic
     """, (msgid,))
     return [t[0] for t in cur.fetchall()]
+
+def get_random_topic(sqldb):
+    "return list of all topics"
+    conn = ensure_db(sqldb)
+    cur = conn.cursor()
+    cur.execute("select distinct topic from topics")
+    all_topics = set(t[0] for t in cur.fetchall())
+
+    # Now run through all topics and add their parents, etc
+    new_topics = set()
+    for topic in all_topics:
+        while ":" in topic:
+            topic = ":".join(topic.split(":")[0:-1])
+            new_topics.add(topic)
+    all_topics |= new_topics
+    return random.choice(list(all_topics))
