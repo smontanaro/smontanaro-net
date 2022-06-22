@@ -329,12 +329,16 @@ class Message(email.message.Message):
 
     def make_urls_sensitive(self, text):
         """
-        <a>-ify words which look like urls (just https? or leading www).
-        Also map defunct URLs to current ones where known.
+        Make a few URL-related transformations:
+
+        * map "_URL_\s+(URL)" pattern to just "URL".
+        * <a>-ify words which look like urls (just https? or leading www).
+        * map defunct URLs to current ones where known.
         """
 
         new_text = []
         self.initialize_urlmap()
+        text = re.sub(r'_(https?:.*)_\s+[(]\1[)]', r'\1', text)
         for word in re.split(r"(\s+)", text):
             new_text.append(self.map_url(word))
         return "".join(new_text)

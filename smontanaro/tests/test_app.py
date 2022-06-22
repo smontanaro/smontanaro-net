@@ -144,6 +144,18 @@ def test_read_message(client):
     msg2 = read_message(mfile)
     assert msg1.as_string() == msg2.as_string()
 
+def test_under_paren_urlmap(client):
+    msg = read_message("CR/2005-01/eml-files/classicrendezvous.10501.1670.eml")
+    url = "http://www.moots.com/messages/1040.shtml"
+    with client.application.app_context():
+        filt = MessageFilter(msg)
+        filt.filter_message(msg)
+        filt.delete_empty_parts()
+        text = msg.as_html()
+        assert (url in text and
+                f"_{url}_" not in text and
+                f"({url})" not in text)
+
 def test_message_strip(client):
     "verify the yellowpages footer disappears"
     msg = read_message("CR/2005-10/eml-files/classicrendezvous.10510.0508.eml")
