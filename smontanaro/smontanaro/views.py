@@ -10,6 +10,7 @@ import logging
 import os
 import re
 import sqlite3
+import sys
 import tempfile
 import urllib.parse
 
@@ -305,6 +306,10 @@ def init_extra():
 
 def init_debug():
     app = current_app
+
+    @app.route("/version")
+    def print_version():
+        return jsonify(sys.version)
 
     @app.route("/env")
     def printenv():
@@ -684,4 +689,5 @@ def init_app(app):
         init_filter()
 
         if app.config["DEBUG"]:
+            print("Debug mode enabled.")
             init_debug()
