@@ -9,11 +9,15 @@ import glob
 import logging
 import os
 import re
+import signal
 import sqlite3
 import sys
 import tempfile
 import urllib.parse
 
+import mpl
+
+import arrow
 from flask import (redirect, url_for, render_template, abort, jsonify, request,
                    current_app, session)
 from flask_wtf import FlaskForm
@@ -183,6 +187,65 @@ def init_indexes():
             day = 1 if offset == -1 else monthrange(dt.year, dt.month)[1]
             dt = dt.replace(day=day) + ONE_DAY * offset
         return ""
+
+# LAST_BH_PING = arrow.get(0)
+# def init_bh():
+#     "Beach House..."
+#     app = current_app
+#     crdir = app.config["CRDIR"]
+#     mapfile = os.path.join(crdir, "bhuptime.csv")
+
+#     @app.route("/BH")
+#     @app.route("/BH/")
+#     @app.route("/BH/index.html")
+#     @app.route("/BH/index")
+#     def bh_index():
+#         "templated index"
+#         plotfile = os.path.join(crdir, "smontanaro", "smontanaro",
+#                                 "static", "images", "bhuptime.png")
+#         opts = mpl.Options()
+#         opts.title = ""
+#         opts.fields = [['timestamp', 'temperature', 'l', 'b', 'temp', '-', '']]
+#         opts.plot_file = plotfile
+#         opts.bg_spec = [["timestamp", "status", 1, "skyblue"],
+#                         ["timestamp", "status", 0, "lightgreen"]]
+#         with open(mapfile, encoding="utf-8") as mapf:
+#             mpl.plot(opts, csv.DictReader(mapf))
+#         return render_template("bhindex.jinja",
+#                                title="Beach House Power History")
+
+#     @app.route("/BH/ping/<temp>")
+#     def bh_ping(temp=0.0):
+#         "Beach House ping endpoint."
+#         # Every time this is called, it adds a line to bhuptime.csv
+#         # and resets the last ping timer.
+#         global LAST_BH_PING
+#         now = LAST_BH_PING = arrow.get()
+#         add_bh_record(now, 1, temp)
+#         signal.alarm(300)
+#         return "OK"
+
+#     def add_bh_record(now, status, temp=None):
+#         "Add a record to the Beach House CSV file."
+#         mapfile = os.path.join(crdir, "bhuptime.csv")
+#         with open(mapfile, encoding="utf-8") as mapf:
+#             fnames = csv.DictReader(mapf).fieldnames
+#         with open(mapfile, "a", encoding="utf-8") as mapf:
+#             writer = csv.DictWriter(mapf, fieldnames=fnames)
+#             writer.writerow({
+#                 "timestamp": now,
+#                 "status": status,
+#                 "temperature": None if temp is None else temp,
+#             })
+
+#     def alarm_clock(_signum, _frame):
+#         "Alarm went off. Record the problem and reset."
+#         add_bh_record(arrow.get(), 0)
+#         signal.alarm(300)
+
+#     # Start things off...
+#     signal.signal(signal.SIGALRM, alarm_clock)
+#     signal.alarm(300)
 
 def init_cr():
     app = current_app
@@ -687,6 +750,7 @@ def init_app(app):
         init_search()
         init_topics()
         init_filter()
+        # init_bh()
 
         if app.config["DEBUG"]:
             print("Debug mode enabled.")
