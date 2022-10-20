@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export CRDIR=/home/skip/src/smontanaro.net
+export CRDIR=${HOME}/src/smontanaro.net
 export FLASK_APP=smontanaro:create_app
 export FLASK_ENV=development
 PORT=${PORT:-8080}
