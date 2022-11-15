@@ -21,9 +21,6 @@
 # no content-type, quotes original message
 127.0.0.1 - - "GET /CR/2002/04/0346 HTTP/1.1" 200 <size> "-" curl/7.NN
 127.0.0.1 - - "GET /CR/2001/01/0656 HTTP/1.1" 200 <size> "-" curl/7.NN
-# file doesn't exist
-File not found: /Users/skip/src/smontanaro.net/CR/2000-09/eml-files/classicrendezvous.10009.9999.eml
-127.0.0.1 - - "GET /CR/2000/09/9999 HTTP/1.1" 404 <size> "-" curl/7.NN
 # multipart/mixed
 127.0.0.1 - - "GET /CR/2001/01/0307 HTTP/1.1" 200 <size> "-" curl/7.NN
 127.0.0.1 - - "GET /CR/2009/09/01323 HTTP/1.1" 200 <size> "-" curl/7.NN
@@ -57,3 +54,6 @@ t>
 127.0.0.1 - - "GET /CR/2005/03/sitemap.xml HTTP/1.1" 200 <size> "-" curl/7.NN
 127.0.0.1 - - "GET /2005/03/mybikes HTTP/1.1" 302 <size> "-" curl/7.NN
 127.0.0.1 - - "GET /2005/03/about HTTP/1.1" 302 <size> "-" curl/7.NN
+# file doesn't exist
+File not found: /Users/skip/src/smontanaro.net/CR/2000-09/eml-files/classicrendezvous.10009.9999.eml
+127.0.0.1 - - "GET /CR/2000/09/9999 HTTP/1.1" 404 <size> "-" curl/7.NN

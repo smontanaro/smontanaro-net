@@ -19,8 +19,6 @@ http://localhost:8080/CR/2000/06/dates
 # no content-type, quotes original message
 http://localhost:8080/CR/2002/04/0346
 http://localhost:8080/CR/2001/01/0656
-# file doesn't exist
-http://localhost:8080/CR/2000/09/9999
 # multipart/mixed
 http://localhost:8080/CR/2001/01/0307
 http://localhost:8080/CR/2009/09/01323
@@ -51,3 +49,5 @@ http://localhost:8080/CR/addtopic
 http://localhost:8080/CR/2005/03/sitemap.xml
 http://localhost:8080/2005/03/mybikes
 http://localhost:8080/2005/03/about
+# file doesn't exist
+http://localhost:8080/CR/2000/09/9999
