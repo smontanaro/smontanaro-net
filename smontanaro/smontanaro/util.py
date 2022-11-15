@@ -324,7 +324,10 @@ class Message(email.message.Message):
         target = self.map_url_prefix(word)
         mapped = "&nbsp;(mapped)" if target != word else ""
         if re.match("https?://", word):
-            word = f"""<a target="_blank" href="{target}">{word}</a>{mapped}"""
+            # provide hints for optional breaking of long URLs.
+            split = (urllib.parse.urlsplit(word))
+            split = split._replace(path=split.path.replace("/", "/<wbr>"))
+            word = f"""<a target="_blank" href="{target}">{split.geturl()}</a>{mapped}"""
         return word
 
     def make_urls_sensitive(self, text):

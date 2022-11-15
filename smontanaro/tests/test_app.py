@@ -2,6 +2,7 @@ import csv
 import os
 import re
 import tempfile
+import urllib.parse
 
 import dateutil.parser
 import pytest
@@ -152,7 +153,10 @@ def test_under_paren_urlmap(client):
         filt.filter_message(msg)
         filt.delete_empty_parts()
         text = msg.as_html()
-        assert (url in text and
+        # need to mimic the path splitting of long urls (see Message.map_url)
+        split = (urllib.parse.urlsplit(url))
+        br_url = split._replace(path=split.path.replace("/", "/<wbr>")).geturl()
+        assert (br_url in text and
                 f"_{url}_" not in text and
                 f"({url})" not in text)
 
@@ -233,3 +237,13 @@ def test_para_split(client):
 def test_subject_fix(client):
     msg = read_message("CR/2000-11/eml-files/classicrendezvous.10011.1036.eml")
     assert msg["Subject"] == "[CR] Danger, items for sale"
+
+def test_long_url_fix(client):
+    with client.application.app_context():
+        msg = read_message("CR/2010-05/eml-files/classicrendezvous.11005.1410.eml")
+        payload = msg.get_payload(decode=True)
+        payload = msg.decode(payload)
+        payload = strip_footers(payload)
+        msg.set_payload(payload)
+        html = msg.as_html()
+        assert "/<wbr>FoldingATubularTire" in html
