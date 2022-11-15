@@ -45,6 +45,7 @@ sort localhost.comments /tmp/$$.tmp \
           -e 's;.../.../....:..:..:.. -..... ;;' \
           -e 's;^.[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] [0-9][0-9]:[0-9][0-9]:[0-9][0-9] -[0-9]*. .[0-9]*. .INFO.;[INFO];' \
           -e 's:HTTP/1.1" \([2-5][0-9][0-9]\) [0-9][0-9]*:HTTP/1.1" \1 <size>:' \
+          -e 's:"curl/7[.][0-9][0-9].*:curl/7.NN:' \
     | awk -f $(dirname $0)/filter.awk \
           > $ACT
 rm localhost.comments /tmp/$$.tmp
