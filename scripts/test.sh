@@ -9,9 +9,15 @@ ACT=localhost.act
 RAW=/tmp/localhost.raw
 WARNINGS=localhost.warnings
 
+if [ "x$(which gdate | egrep -v 'not found')" = "x" ] ; then
+    DATE=date
+else
+    DATE=gdate
+fi
+
 dateit () {
     while read line ; do
-        echo "$(date +%T.%N) ${line}"
+        echo "$($DATE +%T.%N) ${line}"
     done
 }
 
