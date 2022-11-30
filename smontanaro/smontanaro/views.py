@@ -108,6 +108,11 @@ def init_simple():
         "index"
         return render_template("main.jinja", title="Home")
 
+    @app.route("/vintage-trek")
+    def vintage_trek():
+        "index"
+        return redirect(url_for("static", filename="bikes/vintage-trek/index.htm"))
+
 def init_indexes():
     app = current_app
     CR = app.config["CR"]
