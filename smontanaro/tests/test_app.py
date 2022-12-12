@@ -247,3 +247,8 @@ def test_long_url_fix(client):
         msg.set_payload(payload)
         html = msg.as_html()
         assert "/<wbr>FoldingATubularTire" in html
+
+def test_vintage_trek(client):
+    with client.application.app_context():
+        rv = client.get("/vintage-trek/Trekpromoa.htm")
+        assert rv.status_code == 200
