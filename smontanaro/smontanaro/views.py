@@ -19,7 +19,7 @@ import urllib.parse
 
 # import arrow
 from flask import (redirect, url_for, render_template, abort, jsonify, request,
-                   current_app, session)
+                   current_app, session, send_from_directory)
 from flask_wtf import FlaskForm
 from wtforms import StringField, HiddenField, SelectField, SubmitField
 from wtforms.validators import DataRequired
@@ -109,9 +109,14 @@ def init_simple():
         return render_template("main.jinja", title="Home")
 
     @app.route("/vintage-trek")
-    def vintage_trek():
-        "index"
-        return redirect(url_for("static", filename="bikes/vintage-trek/index.htm"))
+    @app.route("/vintage-trek/")
+    @app.route("/vintage-trek/<path:path>")
+    def vintage_trek(path="index.htm"):
+        "vintage-trek.com replica"
+        top = os.environ.get("CRDIR")
+        vtdir = f"{top}/smontanaro/smontanaro/static/bikes/vintage-trek"
+        print(f">>> {vtdir}/{path}", file=sys.stderr)
+        return send_from_directory(vtdir, path)
 
 def init_indexes():
     app = current_app
