@@ -6,4 +6,4 @@ extension-pkg-whitelist=pyodbc,math
 
 msg-template={path}:{line}: [{msg_id}({symbol}), {obj}] {msg}
 
-disable=bad-continuation,no-self-use,missing-function-docstring,too-many-locals,invalid-name
+disable=missing-function-docstring,too-many-locals,invalid-name
