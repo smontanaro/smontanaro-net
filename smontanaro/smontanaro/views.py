@@ -417,7 +417,7 @@ def init_filter():
     def filter_date():
         filter_form = FilterForm()
         if filter_form.validate_on_submit():
-            if filter_form.year.data != "":
+            if filter_form.year.data:
                 year = int(filter_form.year.data)
                 month = int(filter_form.month.data)
             else:
