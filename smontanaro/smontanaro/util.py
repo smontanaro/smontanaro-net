@@ -420,17 +420,23 @@ def read_message_bytes(raw):
 def read_message(path):
     "read an email message from path, trying encodings"
     pckgz = os.path.splitext(path)[0] + ".pck.gz"
+    msg = None
     if (os.path.exists(pckgz) and
         os.path.getmtime(pckgz) > os.path.getmtime(path)):
         with gzip.open(pckgz, "rb") as pobj:
-            msg = pickle.load(pobj) # nosec
+            try:
+                msg = pickle.load(pobj) # nosec
+            except EOFError:
+                # corrupt pickle file I guess
+                pass
 
-    with open(path, "rb") as fobj:
-        msg = read_message_bytes(fobj.read())
-        # Cache message for future use - way faster than
-        # parsing the message from the .eml file.
-        with gzip.open(pckgz, "wb") as pobj:
-            pickle.dump(msg, pobj)
+    if msg is None:
+        with open(path, "rb") as fobj:
+            msg = read_message_bytes(fobj.read())
+            # Cache message for future use - way faster than
+            # parsing the message from the .eml file.
+            with gzip.open(pckgz, "wb") as pobj:
+                pickle.dump(msg, pobj)
 
     # This looks so horrid, I will actually fix it here:
     #
