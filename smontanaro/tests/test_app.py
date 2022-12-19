@@ -1,6 +1,7 @@
 import csv
 import os
 import re
+import shutil
 import tempfile
 import urllib.parse
 
@@ -131,6 +132,30 @@ def test_suggest_topic(client):
     row = next(rdr)
     assert (row["topic"] == "Sturmey-Archer" and
             row["message-id"] == "<7e.703e8851.30481dcb@aol.com>")
+
+def test_filter_nodate(client):
+    "check that we keep stuff we ask to keep"
+    cache_dir = "CR/generated/cache"
+    # First time, guarantee cache is missing
+    shutil.rmtree(cache_dir, ignore_errors=True)
+    rv = client.post("/CR/filter_date", data={
+        "pattern": "Colnago",
+        "in_out": "keep",
+        })
+    assert rv.status_code == 302
+    session["pattern"] = "Colnago"
+    session["in_out"] = "keep"
+    # Second time, cache_dir should be there
+    rv = client.post("/CR/filter_date", data={
+        "pattern": "Colnago",
+        "in_out": "keep",
+        })
+    assert rv.status_code == 302
+    session["pattern"] = "Colnago"
+    session["in_out"] = "keep"
+    rv = client.get("/CR/2001/10/dates")
+    assert re.search(b"Oct 2001 Date Index", rv.data) is not None
+    assert b"Pretty brutal filter, eh?" in rv.data
 
 def test_read_message(client):
     "read a message, then a second time to get the pickled version"
