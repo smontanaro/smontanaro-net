@@ -11,3 +11,4 @@ server.log*
 .coverage
 htmlcov
 localhost.act
+.DS_Store
