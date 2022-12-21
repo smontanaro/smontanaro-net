@@ -2,12 +2,13 @@
 
 "Return to Flask..."
 
-from calendar import monthrange
+from calendar import monthrange, month_name
 import csv
 import datetime
 import glob
 import logging
 import os
+import pickle
 import re
 # import signal
 import sqlite3
@@ -28,7 +29,7 @@ from .db import ensure_db, ensure_filter_cache, get_topics_for, get_random_topic
 from .strip import strip_footers
 # pylint: disable=unused-import
 from .util import (read_message, trim_subject_prefix, eprint, clean_msgid,
-                   make_topic_hierarchy, get_topic)
+                   make_topic_hierarchy, get_topic, generate_link)
 from .exc import NoResponse
 
 SEARCH = {
@@ -324,6 +325,38 @@ def email_to_html(year, month, seq, note=""):
                            nav=get_nav_items(year=year, month=month, seq=seq),
                            some_topic=get_random_topic(refdb))
 
+
+QUERY_INDEX = None
+QUERY_FILE = os.path.join(os.environ.get("CRDIR"), "word-map.pck")
+def query_index(query):
+    "use query string to search for matching pages"
+    # TBD - a bit of AND and OR connectors
+    # TBD - paginate results
+
+    global QUERY_INDEX
+    if QUERY_INDEX is None:
+        with open(QUERY_FILE, "rb") as qi:
+            QUERY_INDEX = pickle.load(qi)
+
+    pages = []
+    for page in sorted(QUERY_INDEX.get(query, set())):
+        match = re.match("CR/([0-9]+)-([0-9]+)/eml-files/"
+                         "classicrendezvous.[0-9]+.([0-9]+).eml", page)
+        if match is None:
+            continue
+        yr, mo, seq = [int(x) for x in match.groups()]
+        msg = read_message(page)
+        record = {
+            "year": yr,
+            "month": mo,
+            "seq": seq,
+            "Subject": trim_subject_prefix(msg["Subject"]),
+            "sender": msg["from"],
+        }
+        pages.append((f"{month_name[mo]} {yr}", generate_link(record)))
+    return pages
+
+
 def init_redirect():
     app = current_app
 
@@ -375,6 +408,7 @@ def init_extra():
             "search_form": SearchForm(),
             "topic_form": TopicForm(),
             "filter_form": FilterForm(),
+            "query_form": QueryForm(),
         }
 
 def init_debug():
@@ -409,6 +443,31 @@ def init_search():
             engine = SEARCH.get(search_form.engine.data, SEARCH["Brave"])
             return redirect(f"{engine}?q={query}")
         return render_template('cr.jinja', search_form=search_form)
+
+    @app.route('/CR/query', methods=['GET', 'POST'])
+    def query():
+        query_form = QueryForm()
+        page = 1
+        size = 100
+        if request.method == "GET":
+            print("+++", request.args, file=sys.stderr)
+            query = request.args.get("query", default=None)
+            print(repr(query), file=sys.stderr)
+            if query is None:
+                return render_template('cr.jinja', form=query_form)
+            page = request.args.get("page", default=1, type=int)
+            size = request.args.get("pagesize", default=100, type=int)
+            matches = query_index(query)
+
+        elif request.method == "GET" and query_form.validate_on_submit():
+            query = urllib.parse.quote_plus(f"{query_form.query.data}")
+            matches = query_index(query)
+        else:
+            raise ValueError(f"Unrecognized request method {request.method}")
+
+        return render_template('page.jinja', matches=matches,
+                               query=urllib.parse.unquote_plus(query),
+                               page=page, size=size)
 
 def init_filter():
     app = current_app
@@ -695,6 +754,10 @@ class SearchForm(FlaskForm):
         ('Bing', 'Bing'),
         ('Google', 'Google'),
     ], default='Brave')
+
+class QueryForm(FlaskForm):
+    "simple query form used to search for indexed phrases"
+    query = StringField('Search:', validators=[DataRequired()])
 
 def eml_file(year, month, seq):
     "compute email file from sequence number"
