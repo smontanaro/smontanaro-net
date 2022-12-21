@@ -12,9 +12,10 @@ from flask import session
 from smontanaro import create_app
 from smontanaro.db import ensure_db
 from smontanaro.dates import parse_date
-from smontanaro.util import read_message, trim_subject_prefix
+from smontanaro.util import (read_message, read_message_string,
+                             trim_subject_prefix)
 from smontanaro.views import MessageFilter, eml_file
-from smontanaro.strip import strip_footers
+from smontanaro.strip import strip_footers, strip_leading_quotes
 
 @pytest.fixture
 def client():
@@ -254,10 +255,94 @@ def test_para_split(client):
         msg = read_message("CR/2009-03/eml-files/classicrendezvous.10903.0144.eml")
         payload = msg.get_payload(decode=True)
         payload = msg.decode(payload)
-        payload = strip_footers(payload)
+        payload = strip_leading_quotes(strip_footers(payload))
         msg.set_payload(payload)
         html = msg.as_html()
         assert html.count("<p>") == 10, html
+
+EMPTY_MAIL = """\
+x-sender: classicrendezvous-bounces@bikelist.org
+x-receiver: classicrendezvous-index@archive.nt.phred.org
+Received: from phred.org ([172.16.1.2]) by monkeyfood.nt.phred.org with Microsoft SMTPSVC(6.0.3790.3959);
+	 Wed, 4 Mar 2009 16:11:55 -0800
+Return-Path: <passionateyouththing@yahoo.com>
+Delivered-To: classicrendezvous@bikelist.org
+Received: from monkeyfood.nt.phred.org (unknown [172.16.1.15])
+	by phred.org (Postfix) with ESMTP id 51A5A5E58
+	for <classicrendezvous@bikelist.org>;
+	Wed,  4 Mar 2009 16:12:02 -0800 (PST)
+Received: from exchange12.nt.phred.org ([172.16.1.12]) by
+	monkeyfood.nt.phred.org with Microsoft SMTPSVC(6.0.3790.3959);
+	Wed, 4 Mar 2009 16:11:53 -0800
+Received: from web53307.mail.re2.yahoo.com (206.190.49.97) by
+	exchange12.nt.phred.org (172.16.1.12) with Microsoft SMTP Server id
+	8.1.340.0; Wed, 4 Mar 2009 16:11:53 -0800
+Received: (qmail 35315 invoked by uid 60001); 5 Mar 2009 00:12:01 -0000
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=yahoo.com; s=s1024;
+	t=1236211921; bh=hP0oGBClEX04Rfe+6lljF+q4iyvtpU8SEWEnG7POrDg=;
+	h=Message-ID:X-YMail-OSG:Received:X-Mailer:Date:From:Reply-To:Subject:To:MIME-Version:Content-Type;
+	b=M21EUndi0GGrNM73SMGE7gD93ff9FbrK39uaCZizJHVS34w/QknNJUm0ai0jkLtroXrjXw3gfb7bkrNt72oyUTf1aN+k5wvBTCPFnzgZD9DquUuwyNG8sldC+JdB/ac7u8ehufTlkEYsvIDaDmP7uI2lM/Sve+ETBAwQHz+Oqz8=
+DomainKey-Signature: a=rsa-sha1; q=dns; c=nofws; s=s1024; d=yahoo.com;
+	h=Message-ID:X-YMail-OSG:Received:X-Mailer:Date:From:Reply-To:Subject:To:MIME-Version:Content-Type;
+	b=Ws3x1HtnY4I1zWqDwCLah+2/ivDaaUJ5XFQVLVRHm07CiDWMebEcp4ozE/XnBgGzZs/mo+cU27yoKOV4yowzIp6OoY0YmgykrfCYBFFyrzBnfmzye/Eqe8JUxELsaLTwzpP14BHGbT54phyXWvp91HV+zhGl6y7DN6q1R2xwMrg=;
+Message-ID: <488976.31337.qm@web53307.mail.re2.yahoo.com>
+X-YMail-OSG: jA_slkMVM1nmPFTijVNzuU8v3H8ResFKerC2mlYmbP7Hnp68pG3nydRic6Xxb3KqELsnOfilNE469vpu76r7wweXHzXDlRzAObxVT1Lt.N7MhrqLF6bcKIOtDkylFVuKgBM2gPlLB4BiXon03kgAqXk6gw--
+Received: from [129.7.156.181] by web53307.mail.re2.yahoo.com via HTTP; Wed,
+	04 Mar 2009 16:12:01 PST
+X-Mailer: YahooMailWebService/0.7.289.1
+Date: Wed, 4 Mar 2009 16:12:01 -0800
+From: Kirke Campbell <passionateyouththing@yahoo.com>
+To: <classicrendezvous@bikelist.org>
+MIME-Version: 1.0
+Received-SPF: None (exchange12.nt.phred.org: passionateyouththing@yahoo.com
+	does not designate permitted sender hosts)
+X-OriginalArrivalTime: 05 Mar 2009 00:11:53.0906 (UTC)
+	FILETIME=[FD32E920:01C99D26]
+X-StripMime: Non-text section removed by stripmime
+Subject: [CR] FS: 3TTT stems, Maillard hubs, BB's...
+X-BeenThere: classicrendezvous@bikelist.org
+X-Mailman-Version: 2.1.11
+Precedence: list
+Reply-To: passionateyouththing@yahoo.com
+List-Id: A sharing of vintage lightweight bicycle information and lore
+	<classicrendezvous.bikelist.org>
+List-Unsubscribe: <http://www.bikelist.org/mailman/options/classicrendezvous>,
+	<mailto:classicrendezvous-request@bikelist.org?subject=unsubscribe>
+List-Archive: <http://www.bikelist.org/pipermail/classicrendezvous>
+List-Post: <mailto:classicrendezvous@bikelist.org>
+List-Help: <mailto:classicrendezvous-request@bikelist.org?subject=help>
+List-Subscribe: <http://www.bikelist.org/mailman/listinfo/classicrendezvous>,
+	<mailto:classicrendezvous-request@bikelist.org?subject=subscribe>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Sender: classicrendezvous-bounces@bikelist.org
+Errors-To: classicrendezvous-bounces@bikelist.org
+
+
+
+
+
+
+--- StripMime Report -- processed MIME parts ---
+multipart/alternative
+  text/plain (text body -- kept)
+  text/html
+---
+_______________________________________________
+Classicrendezvous mailing list
+Classicrendezvous@bikelist.org
+http://www.bikelist.org/mailman/listinfo/classicrendezvous
+"""
+
+
+def test_empty_payload(client):
+    with client.application.app_context():
+        msg = read_message_string(EMPTY_MAIL)
+        payload = msg.get_payload(decode=True)
+        payload = msg.decode(payload)
+        payload = strip_footers(payload)
+        assert not payload, payload
+
 
 def test_subject_fix(client):
     msg = read_message("CR/2000-11/eml-files/classicrendezvous.10011.1036.eml")
