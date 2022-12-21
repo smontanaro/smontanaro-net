@@ -453,9 +453,11 @@ PFX_MATCHER = re.compile(r"\[classicrendezvous\]"
                          r"|\[cr\]"
                          r"|re\[[0-9]\]:"
                          r"|re[-:]"
+                         r"|fs:"
+                         r"|aw:"
                          r"|\s+", flags=re.I)
 def trim_subject_prefix(subject):
-    "Trim prefix detritus like [CR], Re:, etc"
+    "Trim prefix detritus like [CR], Re:, FS:, etc"
     words = PFX_MATCHER.split(str(subject))
     return " ".join([word for word in words if word])
 
