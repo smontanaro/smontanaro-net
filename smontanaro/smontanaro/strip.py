@@ -7,6 +7,7 @@ import re
 # from .util import eprint
 
 QUOTE_PAT = r'(?:(?:>\s?)*)?'
+CRLF = "\r\n"
 
 def strip_footers(payload):
     "strip non-content footers"
@@ -30,6 +31,15 @@ def strip_footers(payload):
         if new_payload == payload:
             return payload
         payload = new_payload
+
+
+def strip_leading_quotes(payload):
+    """strip any leading '>' characters"""
+    lines = payload.split(CRLF)
+    for (i, line) in enumerate(lines):
+        lines[i] = re.sub("^(>\s*)*", "", line)
+    return CRLF.join(lines)
+
 
 def strip_mime(payload):
     "strip the StripMime Report block."
