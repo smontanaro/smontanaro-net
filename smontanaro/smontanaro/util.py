@@ -499,6 +499,18 @@ def make_topic_hierarchy(topics, htopics, prefix):
             htopics[key] = [topic_pfx, {}]
         make_topic_hierarchy([rest], htopics[key][1], topic_pfx)
 
+
+def generate_link(r):
+    "HTML for a single message"
+    root = "" # "(T)&nbsp;" if r['is_root'] else ""
+    sub = re.sub(r"\s+", " ", r["Subject"])
+    return (f'''<a name="{r['seq']:04d}">'''
+            f'''{root}'''
+            f'''<a href="/CR/{r['year']}/{r['month']:02d}/{r['seq']:04d}">'''
+            f'''{html.escape(sub)}</a></a>'''
+            f''' {html.escape(r["sender"])}''')
+
+
 def init_app(app):
     if not app.config["DEBUG"]:
         ZAP_HEADERS.add("message-id")

@@ -9,20 +9,13 @@ import sqlite3
 import sys
 
 from smontanaro import dates
+from smontanaro.util import generate_link
+
 
 def thread_key(record):
     "groupby key func"
     return record["messageid"]
 
-def generate_link(r):
-    "HTML for a single message"
-    root = "" # "(T)&nbsp;" if r['is_root'] else ""
-    sub = re.sub(r"\s+", " ", r["Subject"])
-    return (f'''<a name="{r['seq']:04d}">'''
-            f'''{root}'''
-            f'''<a href="/CR/{r['year']}/{r['month']:02d}/{r['seq']:04d}">'''
-            f'''{html.escape(sub)}</a></a>'''
-            f''' {html.escape(r["sender"])}''')
 
 class IndexGenerator:
     "generate thread index, trying to avoid duplicates"
