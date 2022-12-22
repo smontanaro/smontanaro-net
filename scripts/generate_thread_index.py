@@ -3,8 +3,6 @@
 "generate thread index similar to what MhonARC would do"
 
 import argparse
-import html
-import re
 import sqlite3
 import sys
 
