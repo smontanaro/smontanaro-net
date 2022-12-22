@@ -18,6 +18,7 @@ pylint
 python-dateutil
 requests
 six
+textblob
 toml
 urllib3
 Werkzeug
