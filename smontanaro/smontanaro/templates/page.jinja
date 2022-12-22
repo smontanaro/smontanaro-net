@@ -1,0 +1,28 @@
+{% extends "crtop.jinja" %}
+
+{% block left %}
+    {{ super() }}
+    <hr style="height: 4px" />
+    {% for (text, href) in nav %}
+        <a class="list-group-item list-group-item-action list-group-item-light p-3" href="{{ href }}">{{ text }}</a>
+    {% endfor %}
+{% endblock %}
+
+{% block content %}
+    <h1>Search: {{ query }}</h1>
+    {% set lastmonth = { 'm': "January 1970" } %}
+    {% if matches[page*size:] %}
+        <a href="/CR/query?query={{ query | safe }}&page={{ page+1 }}&size={{ size }}">Next</a><br/>
+    {% endif %}
+    {% for (month, match) in matches[(page-1)*size:page*size] %}
+        {% if month != lastmonth['m'] %}
+            <br/>
+            <h2>{{ month }}</h2>
+            {% set _dummy = lastmonth.update({'m': month}) %}
+        {% endif %}
+        {{ match }}<br/>
+    {% endfor %}
+    {% if matches[page*size:] %}
+        <a href="/CR/query?{{ query | safe }}&page={{ page+1 }}&size={{ size }}">Next</a>
+    {% endif %}
+{% endblock %}
