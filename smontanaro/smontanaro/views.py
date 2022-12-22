@@ -29,7 +29,7 @@ from .db import ensure_db, ensure_filter_cache, get_topics_for, get_random_topic
 from .strip import strip_footers
 # pylint: disable=unused-import
 from .util import (read_message, trim_subject_prefix, eprint, clean_msgid,
-                   make_topic_hierarchy, get_topic, generate_link)
+                   make_topic_hierarchy, get_topic, generate_link, open_)
 from .exc import NoResponse
 
 SEARCH = {
@@ -327,7 +327,6 @@ def email_to_html(year, month, seq, note=""):
 
 
 QUERY_INDEX = None
-QUERY_FILE = os.path.join(os.environ.get("CRDIR"), "word-map.pck")
 def query_index(query):
     "use query string to search for matching pages"
     # TBD - a bit of AND and OR connectors
@@ -335,7 +334,8 @@ def query_index(query):
 
     global QUERY_INDEX
     if QUERY_INDEX is None:
-        with open(QUERY_FILE, "rb") as qi:
+        query_file = os.path.join(os.environ.get("CRDIR"), "word-map.pck.gz")
+        with open_(query_file, "rb") as qi:
             QUERY_INDEX = pickle.load(qi)
 
     pages = []
@@ -450,18 +450,19 @@ def init_search():
         page = 1
         size = 100
         if request.method == "GET":
-            print("+++", request.args, file=sys.stderr)
             query = request.args.get("query", default=None)
-            print(repr(query), file=sys.stderr)
             if query is None:
                 return render_template('cr.jinja', form=query_form)
             page = request.args.get("page", default=1, type=int)
             size = request.args.get("pagesize", default=100, type=int)
             matches = query_index(query)
 
-        elif request.method == "GET" and query_form.validate_on_submit():
-            query = urllib.parse.quote_plus(f"{query_form.query.data}")
-            matches = query_index(query)
+        elif request.method == "POST":
+            if query_form.validate_on_submit():
+                query = urllib.parse.quote_plus(f"{query_form.query.data}")
+                matches = query_index(query)
+            else:
+                return render_template('cr.jinja', form=query_form)
         else:
             raise ValueError(f"Unrecognized request method {request.method}")
 
