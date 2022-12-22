@@ -13,7 +13,7 @@ from smontanaro import create_app
 from smontanaro.db import ensure_db
 from smontanaro.dates import parse_date
 from smontanaro.util import (read_message, read_message_string,
-                             trim_subject_prefix)
+                             trim_subject_prefix, eprint, open_)
 from smontanaro.views import MessageFilter, eml_file
 from smontanaro.strip import strip_footers, strip_leading_quotes
 
@@ -313,7 +313,7 @@ List-Post: <mailto:classicrendezvous@bikelist.org>
 List-Help: <mailto:classicrendezvous-request@bikelist.org?subject=help>
 List-Subscribe: <http://www.bikelist.org/mailman/listinfo/classicrendezvous>,
 	<mailto:classicrendezvous-request@bikelist.org?subject=subscribe>
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: x-unknown/plain
 Content-Transfer-Encoding: 7bit
 Sender: classicrendezvous-bounces@bikelist.org
 Errors-To: classicrendezvous-bounces@bikelist.org
@@ -362,3 +362,34 @@ def test_vintage_trek(client):
     with client.application.app_context():
         rv = client.get("/vintage-trek/Trekpromoa.htm")
         assert rv.status_code == 200
+
+
+def test_query_get(client):
+    with client.application.app_context():
+        rv = client.get("/CR/query?page=3&query='faliero+masi'&size=20")
+        assert rv.status_code == 200
+
+
+def test_query_post(client):
+    with client.application.app_context():
+        rv = client.post("/CR/query", data={
+            "query": "colnago",
+        })
+        assert rv.status_code == 200
+    with client.application.app_context():
+        rv = client.post("/CR/query", data={})
+        assert rv.status_code == 200
+
+
+def test_unknown_content_type(client):
+    msg = read_message_string(EMPTY_MAIL)
+    maintype = msg.get_content_maintype()
+    assert maintype not in ("image", "text", "multipart"), msg.get_content_type()
+    try:
+        x = msg.as_html()
+    except ValueError:
+        pass
+
+
+def test_eprint(client):
+    eprint("Hello World!", file=open_(os.devnull, "w"))
