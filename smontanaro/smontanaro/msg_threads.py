@@ -103,7 +103,6 @@ class ThreadTable:
             self.contain_message(tmsg)
         print(n)
 
-    # pylint: disable=no-self-use
     def container_chain(self, container):
         "return list of constructed parent message ids"
         message_ids = []
