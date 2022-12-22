@@ -235,7 +235,6 @@ class Message(email.message.Message):
                 parts[-1] = self.maybe_format_sig(parts[-1])
         return "\n\n".join(parts)
 
-    #pylint: disable=no-self-use
     def maybe_format_sig(self, para):
         "try and format signature smashed into the end of the paragraph"
         lines = re.split(EOL_SEP, para)
@@ -331,10 +330,10 @@ class Message(email.message.Message):
         return word
 
     def make_urls_sensitive(self, text):
-        """
+        r"""
         Make a few URL-related transformations:
 
-        * map "_URL_\s+(URL)" pattern to just "URL".
+        * map r"_URL_\s+(URL)" pattern to just "URL".
         * <a>-ify words which look like urls (just https? or leading www).
         * map defunct URLs to current ones where known.
         """
@@ -451,6 +450,7 @@ def eprint(*args, file=sys.stderr, **kwds):
 
 PFX_MATCHER = re.compile(r"\[classicrendezvous\]"
                          r"|\[cr\]"
+                         r"|cr:"
                          r"|re\[[0-9]\]:"
                          r"|re[-:]"
                          r"|fs:"
@@ -511,6 +511,13 @@ def generate_link(r):
             f'''<a href="/CR/{r['year']}/{r['month']:02d}/{r['seq']:04d}">'''
             f'''{html.escape(sub)}</a></a>'''
             f''' {html.escape(r["sender"])}''')
+
+
+def open_(f, mode):
+    "use ext to decide if we should compress"
+    if f.endswith(".gz"):
+        return gzip.open(f, mode)
+    return open(f, mode)
 
 
 def init_app(app):
