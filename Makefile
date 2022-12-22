@@ -37,10 +37,10 @@ $(REFDB).new : FORCE
 	@echo "Replace $(REFDB) with $(REFDB).new when ready"
 
 lint : FORCE
-	-pylint --rcfile=.pylintrc $(PY_SRC) \
-	| sed -e '/duplicate-code/,/^--------------------/d'
 	-MYPYPATH=typeshed mypy $(PY_SRC)
 	-bandit $(PY_SRC)
+	-pylint --rcfile=.pylintrc $(PY_SRC) \
+	| sed -e '/duplicate-code/,/^--------------------/d'
 
 test : FORCE
 	bash scripts/test.sh
