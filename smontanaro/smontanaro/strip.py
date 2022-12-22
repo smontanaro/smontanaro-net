@@ -37,7 +37,7 @@ def strip_leading_quotes(payload):
     """strip any leading '>' characters"""
     lines = payload.split(CRLF)
     for (i, line) in enumerate(lines):
-        lines[i] = re.sub("^(>\s*)*", "", line)
+        lines[i] = re.sub(r"^(>\s*)*", "", line)
     return CRLF.join(lines)
 
 
