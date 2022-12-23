@@ -2,7 +2,7 @@
 
 export CRDIR=${HOME}/src/smontanaro.net
 export FLASK_APP=smontanaro:create_app
-export FLASK_ENV=development
+export FLASK_DEBUG=True
 PORT=${PORT:-8080}
 HOST=${HOST:-localhost}
 

@@ -20,7 +20,7 @@ def create_app(test_config=None):
         "CRDIR": crdir,
         "REFDB": os.path.join(crdir, "references.db"),
         "CR": os.path.join(crdir, "CR"),
-        "DEBUG": os.environ.get("FLASK_ENV") == "development",
+        "DEBUG": os.environ.get("FLASK_DEBUG") == "True",
         "TOPICFILE": os.path.join(crdir, "topic.csv"),
     })
 
