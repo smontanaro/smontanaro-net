@@ -1,6 +1,10 @@
 User-agent: *
 Disallow: /cgi-bin
 Disallow: /search
+Disallow: /CR/query
+Disallow: /CR/addtopic
+Disallow: /CR/filter_date
+
 crawl-delay: 10
 
 Sitemap: https://www.smontanaro.net/sitemap.xml
