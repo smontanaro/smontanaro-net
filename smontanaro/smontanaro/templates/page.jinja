@@ -11,9 +11,8 @@
 {% block content %}
     <h1>Search: {{ query }}</h1>
     {% set lastmonth = { 'm': "January 1970" } %}
-    {% if matches[page*size:] %}
-        <a href="/CR/query?query={{ query | safe }}&page={{ page+1 }}&size={{ size }}">Next</a><br/>
-    {% endif %}
+    {{ prev_next }}
+    <br/>
     {% for (month, match) in matches[(page-1)*size:page*size] %}
         {% if month != lastmonth['m'] %}
             <br/>
@@ -22,7 +21,6 @@
         {% endif %}
         {{ match }}<br/>
     {% endfor %}
-    {% if matches[page*size:] %}
-        <a href="/CR/query?{{ query | safe }}&page={{ page+1 }}&size={{ size }}">Next</a>
-    {% endif %}
+    <br/>
+    {{ prev_next }}
 {% endblock %}
