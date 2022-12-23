@@ -2,7 +2,7 @@
 
 "bunch of small functions to strip various cruft from end of emails."
 
-import re
+import regex as re
 
 # from .util import eprint
 
@@ -135,24 +135,19 @@ def strip_between(payload, start, end, tag):
     lines = re.split(r"(\n+)", payload)
     state = "start"
     new_payload = []
-    spat = f"{QUOTE_PAT}{start}"
-    epat = f"{QUOTE_PAT}{end}"
-    # eprint(tag, repr(spat), repr(epat))
+    pappend = new_payload.append
+    smatch = re.compile(f"{QUOTE_PAT}{start}").match
+    ematch = re.compile(f"{QUOTE_PAT}{end}").match
     for line in lines:
         if state == "start":
-            if re.match(spat, line, s_flags) is not None:
+            if smatch(line, s_flags):
                 state = "stripping"
-                # eprint(">> elide", tag, state, repr(line))
                 continue
-            new_payload.append(line)
+            pappend(line)
         else:  # state == "stripping"
-            # eprint(">> elide", tag, state, repr(line))
-            if re.match(epat, line, e_flags) is not None:
+            if ematch(line, e_flags):
                 state = "start"
-    new_payload = "".join(new_payload)
-    # eprint(">> result:", tag,
-    #        "unchanged" if new_payload == payload else "stripped")
-    return new_payload
+    return "".join(new_payload)
 
 def strip_trailing_underscores(payload):
     "strip trailing underscores at the bottom of the message"
