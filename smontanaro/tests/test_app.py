@@ -10,7 +10,7 @@ import pytest
 from flask import session
 
 from smontanaro import create_app
-from smontanaro.db import ensure_db
+from smontanaro.refdb import ensure_db
 from smontanaro.dates import parse_date
 from smontanaro.util import (read_message, read_message_string,
                              trim_subject_prefix, eprint, open_)

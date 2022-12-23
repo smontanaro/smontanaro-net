@@ -26,7 +26,7 @@ import regex as re
 from wtforms import StringField, HiddenField, SelectField, SubmitField
 from wtforms.validators import DataRequired
 
-from .db import ensure_db, ensure_filter_cache, get_topics_for, get_random_topic
+from .refdb import ensure_db, ensure_filter_cache, get_topics_for, get_random_topic
 from .strip import strip_footers
 # pylint: disable=unused-import
 from .util import (read_message, trim_subject_prefix, eprint, clean_msgid,
