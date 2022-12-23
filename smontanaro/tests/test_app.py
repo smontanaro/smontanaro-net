@@ -370,12 +370,14 @@ def test_query_get(client):
         assert rv.status_code == 200
 
 
-def test_query_post(client):
+def test_query_post_arg(client):
     with client.application.app_context():
         rv = client.post("/CR/query", data={
             "query": "colnago",
         })
         assert rv.status_code == 200
+
+def test_query_post_empty(client):
     with client.application.app_context():
         rv = client.post("/CR/query", data={})
         assert rv.status_code == 200
