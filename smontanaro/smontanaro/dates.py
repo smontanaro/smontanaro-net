@@ -3,11 +3,12 @@
 "date handling bits"
 
 import datetime
-import re
 
 import arrow
 import dateutil.parser
 import dateutil.tz
+import regex as re
+
 
 def convert_ts_bytes(stamp):
     "SQLite3 converter for tz-aware datetime objects"
