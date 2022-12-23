@@ -6,10 +6,10 @@ from calendar import monthrange, month_name
 import csv
 import datetime
 import glob
+import html
 import logging
 import os
 import pickle
-import re
 # import signal
 import sqlite3
 import sys
@@ -22,6 +22,7 @@ import urllib.parse
 from flask import (redirect, url_for, render_template, abort, jsonify, request,
                    current_app, session, send_from_directory)
 from flask_wtf import FlaskForm
+import regex as re
 from wtforms import StringField, HiddenField, SelectField, SubmitField
 from wtforms.validators import DataRequired
 
@@ -37,6 +38,7 @@ SEARCH = {
     "Bing": "https://bing.com/search",
     "Google": "https://google.com/search",
     "Brave": "https://search.brave.com/search",
+    "Neeva": "https://neeva.com/search",
 }
 
 ONE_DAY = datetime.timedelta(days=1)
@@ -339,13 +341,20 @@ def query_index(query):
             QUERY_INDEX = pickle.load(qi)
 
     pages = []
-    for page in sorted(QUERY_INDEX.get(query, set())):
+    query_result = sorted(QUERY_INDEX.get(query.lower(), set()))
+    # eprint("+++", repr(query), len(query_result))
+    for page in query_result:
         match = re.match("CR/([0-9]+)-([0-9]+)/eml-files/"
                          "classicrendezvous.[0-9]+.([0-9]+).eml", page)
         if match is None:
             continue
         yr, mo, seq = [int(x) for x in match.groups()]
         msg = read_message(page)
+        payload = msg.get_payload(decode=True)
+        try:
+            decoded = msg.decode(payload)
+        except (LookupError, UnicodeDecodeError):
+            decoded = ""
         record = {
             "year": yr,
             "month": mo,
@@ -353,7 +362,15 @@ def query_index(query):
             "Subject": trim_subject_prefix(msg["Subject"]),
             "sender": msg["from"],
         }
-        pages.append((f"{month_name[mo]} {yr}", generate_link(record)))
+        link = generate_link(record)
+        pad = ".{2,50}"
+        mat = re.search(f"({pad})({query})({pad})", decoded, re.I)
+        if mat is not None:
+            pad1, snippet, pad2 = [html.escape(s) for s in mat.groups()]
+            snippet = f"{pad1}<b>{snippet}</b>{pad2}".strip()
+            # eprint("+++", repr(snippet))
+            link += f"<br>&nbsp;&nbsp;&nbsp;&nbsp;... {snippet} ..."
+        pages.append((f"{month_name[mo]} {yr}", link))
     return pages
 
 
@@ -451,24 +468,52 @@ def init_search():
         size = 100
         if request.method == "GET":
             query = request.args.get("query", default=None)
+            query = urllib.parse.unquote_plus(query)
             if query is None:
                 return render_template('cr.jinja', form=query_form)
             page = request.args.get("page", default=1, type=int)
             size = request.args.get("pagesize", default=100, type=int)
             matches = query_index(query)
-
+            # eprint("+++", query, len(matches), "GET")
         elif request.method == "POST":
             if query_form.validate_on_submit():
-                query = urllib.parse.quote_plus(f"{query_form.query.data}")
+                query = urllib.parse.unquote_plus(f"{query_form.query.data}")
                 matches = query_index(query)
+                eprint("+++", query, len(matches), "POST")
             else:
+                # eprint("+++ empty form")
                 return render_template('cr.jinja', form=query_form)
         else:
             raise ValueError(f"Unrecognized request method {request.method}")
 
+        prev_next = build_prev_next(query, matches, page, size)
+
         return render_template('page.jinja', matches=matches,
-                               query=urllib.parse.unquote_plus(query),
-                               page=page, size=size)
+                               query=query, page=page, size=size,
+                               prev_next=prev_next)
+
+
+def build_prev_next(query, matches, page, size):
+    "construct html fragment - eventually do this in jinja"
+    qurl = urllib.parse.quote_plus(query)
+    qsafe = html.escape(query)
+    nxt = prv = ""
+    cr_query = f"/CR/query?query={qurl}"
+    if matches[page*size:]:
+        nxt = f'<a href="{cr_query}&page={page+1}&size={size}">Next</a>'
+    if matches[:(page-1)*size]:
+        prv = f'<a href="{cr_query}&page={page}&size={size}">Prev</a>'
+
+    if nxt and prv:
+        prev_next = f"{prv} | {nxt}"
+    elif nxt:
+        prev_next = f"{nxt}"
+    elif prv:
+        prev_next = f"{prv}"
+    else:
+        prev_next = ""
+
+    return prev_next
 
 def init_filter():
     app = current_app
@@ -754,6 +799,7 @@ class SearchForm(FlaskForm):
         ('DuckDuckGo', 'DuckDuckGo'),
         ('Bing', 'Bing'),
         ('Google', 'Google'),
+        ('Neeva', 'Neeva'),
     ], default='Brave')
 
 class QueryForm(FlaskForm):
