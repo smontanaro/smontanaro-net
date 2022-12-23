@@ -10,7 +10,6 @@ import html
 import logging
 import os
 import pickle                   # nosec
-import re
 import sqlite3
 import statistics
 import sys
@@ -18,6 +17,7 @@ import typing
 import urllib.parse
 
 from flask import url_for
+import regex as re
 
 ZAP_HEADERS = {
     "content-disposition",
@@ -347,7 +347,7 @@ class Message(email.message.Message):
 
     def decode(self, payload):
         "decode payload, trying a couple different fallback encodings..."
-        for charset in (self.get_content_charset("us-ascii"), "utf-8", "latin-1"):
+        for charset in (self.get_content_charset("ascii"),  "latin-1", "utf-8"):
             try:
                 return payload.decode(charset)
             except (LookupError, UnicodeDecodeError) as exc:
