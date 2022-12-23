@@ -7,11 +7,12 @@ https://www.jwz.org/doc/threading.html
 
 import glob
 import pprint
-import re
 import sys
 
-from smontanaro.util import (Message, read_message, clean_msgid, trim_subject_prefix,
-                             eprint)
+import regex as re
+
+from smontanaro.util import (Message, read_message, clean_msgid,
+                             trim_subject_prefix, eprint)
 
 class TMessage:
     "JWZ's Message object"
