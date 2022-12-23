@@ -18,7 +18,7 @@ import dateutil.parser
 import dateutil.tz
 
 from smontanaro.dates import parse_date
-from smontanaro.db import ensure_db, ensure_indexes
+from smontanaro.refdb import ensure_db, ensure_indexes
 from smontanaro.util import clean_msgid, read_message
 
 ONE_SEC = datetime.timedelta(seconds=1)
