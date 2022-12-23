@@ -6,21 +6,22 @@ import csv
 import getopt
 import os
 import pickle                             # nosec
-import re
 import string
 import sys
 
-from smontanaro.util import read_message, trim_subject_prefix, open_
-from smontanaro.strip import strip_footers, strip_leading_quotes, CRLF
-
+import regex as re
 from textblob import TextBlob
+
+from smontanaro.util import (read_message, trim_subject_prefix, open_,
+                             eprint)
+from smontanaro.strip import strip_footers, strip_leading_quotes, CRLF
 
 
 def main():
     opts, args = getopt.getopt(sys.argv[1:], "h")
     for opt, _arg in opts:
         if opt == "-h":
-            print("sorry, no help yet", file=sys.stderr)
+            eprint("sorry, no help yet")
             return 0
 
     word_map = {}
@@ -28,7 +29,7 @@ def main():
     for f in sys.stdin:
         parts = f.split("/")
         if parts[1] != last:
-            print(">>>", parts[1], file=sys.stderr)
+            eprint(">>>", parts[1])
             last = parts[1]
         process_file(f.strip(), word_map)
 
@@ -38,7 +39,7 @@ def main():
         outfile = args[0]
         print(f"save {len(word_map)} phrases to {outfile}")
         with open_(outfile, "wb") as pobj:
-            pickle.dump(word_map, pobj)
+            pickle.dump(word_map, pobj, protocol=5)
 
     return 0
 
@@ -51,21 +52,10 @@ def process_file(f, word_map):
     payload = msg.get_payload(decode=True)
     if payload is None:
         return
-    charset = msg.get_content_charset() or "utf-8"
-    ## print(">>>", f, charset)
-    # Try declared charset (or ascii, if missing), then latin-1 and utf-8 if
-    # necessary.
-    exc = None                            # keep pylint happy
-    for cs in [charset or "ascii"] + ["iso-8859-1", "utf-8"]:
-        try:
-            payload = payload.decode(cs)
-        # pylint: disable=unused-variable
-        except (LookupError, UnicodeDecodeError) as exc:
-            continue
-        else:
-            break
-    else:
-        print(f, exc, file=sys.stderr)
+    try:
+        payload = msg.decode(payload)
+    except(LookupError, UnicodeDecodeError) as exc:
+        eprint(f, exc)
         return
 
     quoted = re.compile(r'''\s*"(.*)"\s*$''')
@@ -142,6 +132,7 @@ def preprocess(phrase):
     return phrase if len(phrase) >= 5 else ""
 
 
+# pylint: disable=unused-argument
 def merge_plurals(k, word_map):
     "map simple plurals to singular"
     # we only want to consider words/phrases if the last word is in the
@@ -152,12 +143,13 @@ def merge_plurals(k, word_map):
     old = new = k
     for end in ("s", "es"):
         n = len(end)
+        # eprint(k, end, last,
+        #        last[:-n] in ALL_WORDS, last[-n:] == end,
+        #        k[:-n] in word_map)
         # require truncated last word to be in large dictionary and
-        # last n characters of the last word to be the plural and
-        # truncated word/phrase is also in the word map
+        # last n characters of the last word to be the plural
         if (last[:-n] in ALL_WORDS and
-            last[-n:] == end and
-            k[:-n] in word_map):
+            last[-n:] == end):
             new = k[:-n]
             break
     return (old, new, "plural")
@@ -194,6 +186,7 @@ def merge_wrong(k, word_map):
     return old, new, "wrong"
 
 
+# pylint: disable=unused-argument
 def merge_exceptions(k, word_map):
     "hand-crafted merge"
     # a CSV file contains 'from' and 'to' columns. The 'from' column can match
@@ -206,13 +199,12 @@ def merge_exceptions(k, word_map):
         new = EXCEPTIONS[k]
     elif last in EXCEPTIONS:
         new = (" ".join(k.split()[:-1] + [EXCEPTIONS[last]])).strip()
-    if new is not None:
-        if new not in word_map:
-            word_map[new] = set()
+    if new != k:
         why = "exc"
     return old, new, why
 
 
+# pylint: disable=unused-argument
 def merge_whitespace(k, word_map):
     "strip trailing whitespace and merge if possible"
     old = new = k
@@ -221,11 +213,10 @@ def merge_whitespace(k, word_map):
     if old != ks:
         new = ks
         why = "white"
-        if new not in word_map:
-            word_map[new] = set()
     return old, new, why
 
 
+# pylint: disable=unused-argument
 def strip_nonprint(k, word_map):
     "strip non-printable characters"
     old = new = k
@@ -234,23 +225,23 @@ def strip_nonprint(k, word_map):
     if old != ks:
         new = ks
         why = "non-print"
-        if new not in word_map:
-            word_map[new] = set()
     return old, new, why
 
 
+PUNCT = string.punctuation.replace("-", "")
+
+# pylint: disable=unused-argument
 def strip_punct(k, word_map):
     "strip leading or trailing punctuation or whitespace"
     old = new = k
     why = "noop"
-    punct = string.punctuation.replace("-", "")
-    ks = re.sub(f"[ {punct}-]+$", "", old)
-    ks = re.sub(f"^[ {punct}-]+", "", ks).strip()
+    ks = re.sub(f"[ {PUNCT}-]+$", "", old)
+    ks = re.sub(f"^[ {PUNCT}-]+", "", ks).strip()
+    if ks and ks[0] == "'":
+        ks = ""
     if old != ks:
         new = ks
         why = "punct"
-        if new not in word_map:
-            word_map[new] = set()
     return old, new, why
 
 
@@ -269,10 +260,16 @@ def postprocess_map(word_map):
                       merge_wrong, strip_nonprint, strip_punct):
             # pylint: disable=unused-variable
             old, new, why = merge(old, word_map)
+            if not new:
+                to_delete.add(old)
+                break
             if new != old:
-                print(f"pp: {new} |= {old} ({why})", file=sys.stderr)
+                eprint(f"pp: {new} |= {old} ({why})")
+                if new not in word_map:
+                    word_map[new] = set()
                 word_map[new] |= word_map[old]
                 to_delete.add(old)
+                old = new
 
     if "" in word_map:
         to_delete.add("")
