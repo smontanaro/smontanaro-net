@@ -4,14 +4,26 @@
 trivial little script to check buildindex.py-generated keys
 """
 
-import pickle
+import sqlite3
 import sys
 
-from smontanaro.util import open_
-
 if __name__ == "__main__":
-    with open_(sys.argv[1], "rb") as fobj:
-        word_map = pickle.load(fobj)
+    conn = sqlite3.connect(sys.argv[1])
+    cur = conn.cursor()
+    ones = twos = total = 0
+    for (term, count) in cur.execute("select st.term, count(fs.fragment)"
+                                     " from search_terms st, file_search fs"
+                                     "  where fs.reference = st.rowid"
+                                     "  group by fs.reference"
+                                     "  order by st.term"):
+        total += 1
+        if count == 1:
+            ones += 1
+        elif count == 2:
+            twos += 1
+        else:
+            print(f"{term}: {count}")
 
-    for key in sorted(word_map):
-        print(f"{key}: {len(word_map[key])}")
+    print(f"{ones} terms with just one ref.")
+    print(f"{twos} terms with just two refs.")
+    print(f"{total} total terms.")
