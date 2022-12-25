@@ -4,17 +4,19 @@
 
 import csv
 import getopt
+import html
 import os
-import pickle                             # nosec
+import re
 import string
 import sys
 
 import regex as re
 from textblob import TextBlob
 
-from smontanaro.util import (read_message, trim_subject_prefix, open_,
-                             eprint)
+from smontanaro.util import (read_message, trim_subject_prefix, eprint)
 from smontanaro.strip import strip_footers, strip_leading_quotes, CRLF
+
+from smontanaro.srchdb import ensure_search_db
 
 
 def main():
@@ -24,27 +26,24 @@ def main():
             eprint("sorry, no help yet")
             return 0
 
-    word_map = {}
+    conn = ensure_search_db(args[0])
     last = ""
     for f in sys.stdin:
         parts = f.split("/")
         if parts[1] != last:
             eprint(">>>", parts[1])
             last = parts[1]
-        process_file(f.strip(), word_map)
+        process_file(f.strip(), conn)
+        conn.commit()
 
-    postprocess_map(word_map)
-
-    if args:
-        outfile = args[0]
-        print(f"save {len(word_map)} phrases to {outfile}")
-        with open_(outfile, "wb") as pobj:
-            pickle.dump(word_map, pobj, protocol=5)
+    postprocess_db(conn)
+    conn.commit()
 
     return 0
 
 
-def process_file(f, word_map):
+QUOTED = re.compile(r'''\s*"(.*)"\s*$''')
+def process_file(f, conn):
     "extract bits from one file"
     f = f.strip()
     msg = read_message(f)
@@ -58,20 +57,39 @@ def process_file(f, word_map):
         eprint(f, exc)
         return
 
-    quoted = re.compile(r'''\s*"(.*)"\s*$''')
     subject = trim_subject_prefix(msg["subject"])
-    mat = quoted.match(subject)
+    mat = QUOTED.match(subject)
     if mat is not None:
         # print(f"  {subject} -> {mat.group(1)}")
         subject = mat.group(1)
     if subject:
         payload = f"{subject}{CRLF}{CRLF}{payload}"
-    for word in get_terms(strip_leading_quotes(strip_footers(payload))):
-        if word not in word_map:
-            word_map[word] = set()
-            if len(word_map) % 1000 == 0:
-                print("...", len(word_map))
-        word_map[word].add(f)
+    cur = conn.cursor()
+    cur.execute("begin")
+    for term in get_terms(strip_leading_quotes(strip_footers(payload))):
+        rowid = add_term(term, cur)
+        cur.execute("insert into file_search"
+                    " (filename, fragment, reference) values (?, ?, ?)",
+                    (f, create_fragment(payload, term), rowid))
+        if cur.lastrowid % 1000 == 0:
+            print("...", cur.lastrowid)
+    cur.execute("commit")
+
+
+def create_fragment(payload, term):
+    "get a fragment of text from the message matching the term"
+    pad = ".{2,50}"
+    try:
+        mat = re.search(fr"({pad})({re.escape(term).replace(' ', 's*')})({pad})", payload, re.I)
+    except re.error:
+        eprint(pad, term, type(payload))
+        raise
+
+    fragment = ""
+    if mat is not None:
+        pfx, fragment, sfx = [html.escape(s) for s in mat.groups()]
+        fragment = f"{pfx}<b>{fragment}</b>{sfx}".strip()
+    return fragment
 
 
 def read_words(word_file):
@@ -133,7 +151,7 @@ def preprocess(phrase):
 
 
 # pylint: disable=unused-argument
-def merge_plurals(k, word_map):
+def merge_plurals(k, conn):
     "map simple plurals to singular"
     # we only want to consider words/phrases if the last word is in the
     # large dictionary - for example, we shouldn't mess with
@@ -143,9 +161,6 @@ def merge_plurals(k, word_map):
     old = new = k
     for end in ("s", "es"):
         n = len(end)
-        # eprint(k, end, last,
-        #        last[:-n] in ALL_WORDS, last[-n:] == end,
-        #        k[:-n] in word_map)
         # require truncated last word to be in large dictionary and
         # last n characters of the last word to be the plural
         if (last[:-n] in ALL_WORDS and
@@ -155,7 +170,26 @@ def merge_plurals(k, word_map):
     return (old, new, "plural")
 
 
-def merge_ing(k, word_map):
+def have_term(term, cur):
+    "return rowid if we already have term in the database, else zero"
+    count = cur.execute("select count(*) from search_terms"
+                        "  where term = ?", (term,)).fetchone()[0]
+    if not count:
+        return 0
+    rowid = cur.execute("select rowid from search_terms"
+                        "  where term = ?", (term,)).fetchone()[0]
+    return rowid
+
+
+def add_term(term, cur):
+    "make sure term is in database, return its rowid"
+    if rowid := have_term(term, cur):
+        return rowid
+    cur.execute("insert into search_terms values (?)", (term,))
+    return cur.lastrowid
+
+
+def merge_ing(k, conn):
     "map 'ing' endings to base word"
     last = k.split()[-1]
 
@@ -166,28 +200,28 @@ def merge_ing(k, word_map):
         # to "bicycl"
         for suffix in ("e", ""):
             if (last[:-3].strip() + suffix in ALL_WORDS and
-                old[:-3].strip() + suffix in word_map):
+                have_term(old[:-3].strip() + suffix, conn)):
                 new = old[:-3].strip() + suffix
                 why = "-ing"
                 break
     return (old, new, why)
 
 
-def merge_wrong(k, word_map):
+def merge_wrong(k, conn):
     "merge simple truncations"
     last = k.split()[-1]
 
     old = new = k
     if last not in ALL_WORDS:
         for suffix in ("e", "es", "s"):
-            if last + suffix in ALL_WORDS and k + suffix in word_map:
+            if last + suffix in ALL_WORDS and have_term(k+suffix, conn):
                 new = k + suffix
                 break
     return old, new, "wrong"
 
 
 # pylint: disable=unused-argument
-def merge_exceptions(k, word_map):
+def merge_exceptions(k, conn):
     "hand-crafted merge"
     # a CSV file contains 'from' and 'to' columns. The 'from' column can match
     # in two ways, either an exact match for `k` or as an exact match for the
@@ -205,7 +239,7 @@ def merge_exceptions(k, word_map):
 
 
 # pylint: disable=unused-argument
-def merge_whitespace(k, word_map):
+def merge_whitespace(k, conn):
     "strip trailing whitespace and merge if possible"
     old = new = k
     why = "noop"
@@ -217,7 +251,7 @@ def merge_whitespace(k, word_map):
 
 
 # pylint: disable=unused-argument
-def strip_nonprint(k, word_map):
+def strip_nonprint(k, conn):
     "strip non-printable characters"
     old = new = k
     why = "noop"
@@ -229,10 +263,11 @@ def strip_nonprint(k, word_map):
 
 
 PUNCT = string.punctuation.replace("-", "")
+PUNCTSET = set(re.sub("[-_]", "", string.punctuation))
 
 # pylint: disable=unused-argument
-def strip_punct(k, word_map):
-    "strip leading or trailing punctuation or whitespace"
+def zap_punct(k, conn):
+    "strip leading or trailing punctuation or whitespace and zap terms with punct & no ' '"
     old = new = k
     why = "noop"
     ks = re.sub(f"[ {PUNCT}-]+$", "", old)
@@ -242,45 +277,110 @@ def strip_punct(k, word_map):
     if old != ks:
         new = ks
         why = "punct"
+    # If term is a single word and contains punctuation other than '-' or '_',
+    # get rid of it.
+    if set(new) & PUNCTSET and " " not in new:
+        new = ""
     return old, new, why
 
 
-def postprocess_map(word_map):
+# pylint: disable=unused-argument
+def zap_long_phrases(k, conn):
+    "mark long phrases for deletion"
+    old = new = k
+    why = "noop"
+    words = k.split()
+    punct = set(PUNCT)
+    for (i, word) in reversed(list(enumerate(words))):
+        ws = set(word)
+        # delete words which are just punctuation
+        if ws & punct == ws:
+            del words[i]
+    if len(words) > 5 or len(words) == 1 and len(k) > 25:
+        new = ""
+        why = "long"
+    else:
+        new = " ".join(words)
+    return old, new, why
+
+
+def postprocess_db(conn):
     "final messing around"
     to_delete = set()
 
-    for k in sorted(word_map):
-        if len(k) < 4 or len(k) > 32 or len(word_map[k]) <= 1:
-            to_delete.add(k)
+    refs = []
+    cur = conn.cursor()
+    cur.execute("begin")
+    for (term, count) in cur.execute("select st.term, count(fs.fragment)"
+                                     " from search_terms st, file_search fs"
+                                     "  where fs.reference = st.rowid"
+                                     "  group by fs.reference"
+                                     "  order by st.term"):
+        if len(term) < 4 or count <= 1:
+            eprint(">>>", term, count)
+            to_delete.add(term)
             continue
 
-        old = new = k
+        old = new = term
         why = "noop"
         for merge in (merge_exceptions, merge_plurals, merge_ing,
-                      merge_wrong, strip_nonprint, strip_punct):
+                      merge_wrong, strip_nonprint, zap_punct,
+                      zap_long_phrases):
             # pylint: disable=unused-variable
-            old, new, why = merge(old, word_map)
+            old, new, why = merge(old, conn)
             if not new:
+                eprint("d:", old)
                 to_delete.add(old)
                 break
             if new != old:
                 eprint(f"pp: {new} |= {old} ({why})")
-                if new not in word_map:
-                    word_map[new] = set()
-                word_map[new] |= word_map[old]
+                add_term(new, cur)
+                refs.append((
+                    cur.execute("select rowid from search_terms"
+                                "  where term = ?", (new,)).fetchone()[0],
+                    cur.execute("select rowid from search_terms"
+                                "  where term = ?", (old,)).fetchone()[0]
+                    ))
                 to_delete.add(old)
                 old = new
 
-    if "" in word_map:
-        to_delete.add("")
+    for (newid, oldid) in refs:
+        cur.execute("update file_search"
+                    "  set reference = ?"
+                    "  where reference = ?", (newid, oldid))
+    cur.execute("commit")
 
-    for k in word_map:
-        if "bikelist.org" in k:
-            to_delete.add(k)
+    # belt and suspenders
+    to_delete.add("")
 
-    for k in to_delete:
-        del word_map[k]
+    for term in cur.execute("select term from search_terms"
+                            "  where term like '%bikelist%'"):
+        to_delete.add(term[0])
 
+    delete_exceptions(to_delete, conn)
+
+
+def delete_exceptions(to_delete, conn):
+    "delete terms we determined aren't worth it."
+    eprint(f"deleting {len(to_delete)} sketchy terms")
+    cur = conn.cursor()
+
+    to_delete = list(to_delete)
+    while to_delete:
+        terms, to_delete = tuple(to_delete[:100]), to_delete[100:]
+        eprint(".", end="") ; sys.stderr.flush()
+        qmarks = ", ".join(["?"] * len(terms))
+        cur.execute("select distinct rowid from search_terms"
+                    f"  where term in ({qmarks})", terms)
+        rowids = tuple(x[0] for x in cur.fetchall())
+        if not rowids:
+            continue
+        qmarks = ", ".join(["?"] * len(rowids))
+        cur.execute("delete from file_search"
+                    f"  where reference in ({qmarks})", rowids)
+        cur.execute("delete from search_terms"
+                    f"  where rowid in ({qmarks})", rowids)
+    eprint()
 
 COMMON_WORDS = common_words()
 ALL_WORDS = all_words()
@@ -292,8 +392,9 @@ def get_terms(text):
     "yield a series of words matching desired pattern"
     pat = re.compile(r"[A-Za-z][-/a-z0-9]{2,}"
                      r"(?:\s+[A-Za-z][-'/a-z0-9]+)*")
-    blob = TextBlob(text)
-    for phrase in sorted(set(blob.noun_phrases)):
+    for phrase in set(TextBlob(text).noun_phrases):
+        if "bikelist.org" in phrase.lower():
+            continue
         if pat.match(phrase) is None:
             # print("   nm:", repr(phrase))
             continue
