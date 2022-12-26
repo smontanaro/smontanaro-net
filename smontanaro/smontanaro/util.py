@@ -445,9 +445,9 @@ def read_message(path):
 
     return msg
 
-def eprint(*args, file=sys.stderr, dt=True, **kwds):
+def eprint(*args, file=sys.stderr, dt="%T", **kwds):
     if dt:
-        print(datetime.datetime.now(), end=" ", file=file)
+        print(datetime.datetime.now().strftime(dt), end=" ", file=file)
     print(*args, file=file, **kwds)
 
 PFX_MATCHER = re.compile(r"\[classicrendezvous\]"
