@@ -34,10 +34,25 @@ def main():
             eprint(">>>", parts[1])
             last = parts[1]
         process_file(f.strip(), conn)
-        conn.commit()
 
     postprocess_db(conn)
-    conn.commit()
+
+    total = ones = twos = 0
+    cur = conn.cursor()
+    for (term, count) in cur.execute("select st.term, count(fs.fragment)"
+                                     " from search_terms st, file_search fs"
+                                     "  where fs.reference = st.rowid"
+                                     "  group by fs.reference"
+                                     "  order by st.term"):
+        total += 1
+        if count == 1:
+            ones += 1
+        elif count == 2:
+            twos += 1
+
+    eprint(f"{ones} terms with just one ref.")
+    eprint(f"{twos} terms with just two refs.")
+    eprint(f"{total} total terms.")
 
     return 0
 
@@ -60,7 +75,7 @@ def process_file(f, conn):
     subject = trim_subject_prefix(msg["subject"])
     mat = QUOTED.match(subject)
     if mat is not None:
-        # print(f"  {subject} -> {mat.group(1)}")
+        # eprint(f"  {subject} -> {mat.group(1)}")
         subject = mat.group(1)
     if subject:
         payload = f"{subject}{CRLF}{CRLF}{payload}"
@@ -68,17 +83,19 @@ def process_file(f, conn):
     cur.execute("begin")
     for term in get_terms(strip_leading_quotes(strip_footers(payload))):
         rowid = add_term(term, cur)
-        cur.execute("insert into file_search"
-                    " (filename, fragment, reference) values (?, ?, ?)",
-                    (f, create_fragment(payload, term), rowid))
-        if cur.lastrowid % 1000 == 0:
-            print("...", cur.lastrowid)
+        fragment = create_fragment(payload, term)
+        if fragment:
+            cur.execute("insert into file_search"
+                        " (filename, fragment, reference) values (?, ?, ?)",
+                        (f, fragment, rowid))
+            if cur.lastrowid % 10000 == 0:
+                eprint(cur.lastrowid)
     cur.execute("commit")
 
 
 def create_fragment(payload, term):
     "get a fragment of text from the message matching the term"
-    pad = ".{2,50}"
+    pad = ".{2,25}"
     try:
         mat = re.search(fr"({pad})({re.escape(term).replace(' ', 's*')})({pad})", payload, re.I)
     except re.error:
@@ -89,7 +106,7 @@ def create_fragment(payload, term):
     if mat is not None:
         pfx, fragment, sfx = [html.escape(s) for s in mat.groups()]
         fragment = f"{pfx}<b>{fragment}</b>{sfx}".strip()
-    return fragment
+    return re.sub(r"\s+", " ", fragment)
 
 
 def read_words(word_file):
@@ -287,21 +304,15 @@ def zap_punct(k, conn):
 # pylint: disable=unused-argument
 def zap_long_phrases(k, conn):
     "mark long phrases for deletion"
-    old = new = k
+    old = k
     why = "noop"
     words = k.split()
-    punct = set(PUNCT)
     for (i, word) in reversed(list(enumerate(words))):
         ws = set(word)
         # delete words which are just punctuation
-        if ws & punct == ws:
+        if ws & PUNCTSET == ws:
             del words[i]
-    if len(words) > 5 or len(words) == 1 and len(k) > 25:
-        new = ""
-        why = "long"
-    else:
-        new = " ".join(words)
-    return old, new, why
+    return old, " ".join(words), why
 
 
 def postprocess_db(conn):
@@ -316,11 +327,6 @@ def postprocess_db(conn):
                                      "  where fs.reference = st.rowid"
                                      "  group by fs.reference"
                                      "  order by st.term"):
-        if len(term) < 4 or count <= 1:
-            eprint(">>>", term, count)
-            to_delete.add(term)
-            continue
-
         old = new = term
         why = "noop"
         for merge in (merge_exceptions, merge_plurals, merge_ing,
@@ -350,12 +356,18 @@ def postprocess_db(conn):
                     "  where reference = ?", (newid, oldid))
     cur.execute("commit")
 
+    for (term, count) in cur.execute("select st.term, count(fs.fragment)"
+                                     " from search_terms st, file_search fs"
+                                     "  where fs.reference = st.rowid"
+                                     "  group by fs.reference"
+                                     "  order by st.term"):
+        if (len(term) < 4 or
+            count <= 1 or
+            " " not in term and len(term) > 20):
+            to_delete.add(term)
+
     # belt and suspenders
     to_delete.add("")
-
-    for term in cur.execute("select term from search_terms"
-                            "  where term like '%bikelist%'"):
-        to_delete.add(term[0])
 
     delete_exceptions(to_delete, conn)
 
@@ -366,9 +378,12 @@ def delete_exceptions(to_delete, conn):
     cur = conn.cursor()
 
     to_delete = list(to_delete)
+    n = 0
+    chunksize = 10000
     while to_delete:
-        terms, to_delete = tuple(to_delete[:100]), to_delete[100:]
-        eprint(".", end="") ; sys.stderr.flush()
+        cur.execute("begin")
+        terms, to_delete = tuple(to_delete[:chunksize]), to_delete[chunksize:]
+        n += chunksize
         qmarks = ", ".join(["?"] * len(terms))
         cur.execute("select distinct rowid from search_terms"
                     f"  where term in ({qmarks})", terms)
@@ -380,7 +395,9 @@ def delete_exceptions(to_delete, conn):
                     f"  where reference in ({qmarks})", rowids)
         cur.execute("delete from search_terms"
                     f"  where rowid in ({qmarks})", rowids)
-    eprint()
+        eprint(n)
+        cur.execute("commit")
+
 
 COMMON_WORDS = common_words()
 ALL_WORDS = all_words()
@@ -392,20 +409,33 @@ def get_terms(text):
     "yield a series of words matching desired pattern"
     pat = re.compile(r"[A-Za-z][-/a-z0-9]{2,}"
                      r"(?:\s+[A-Za-z][-'/a-z0-9]+)*")
+    seen = set()
     for phrase in set(TextBlob(text).noun_phrases):
-        if "bikelist.org" in phrase.lower():
+        lphrase = phrase.lower()
+        # common bits embedded in cc'd and forwarded messages.
+        if "bikelist" in lphrase or lphrase.startswith("subject"):
+            continue
+        # not sure where these come from, but there are plenty. delete for now.
+        if lphrase[0:3] == "'s " or len(lphrase) == 1:
             continue
         if pat.match(phrase) is None:
             # print("   nm:", repr(phrase))
             continue
         phrase = preprocess(phrase.lower())
         if (not phrase or
-            " " not in phrase and len(phrase) < 4 or
-            len(phrase) < 7):
+            # extraordinarily long multi-word phrases
+            phrase.count(" ") > 5 or
+            # too short or long one-word phrases
+            " " not in phrase and (len(phrase) < 4 or len(phrase) > 20) or
+            # too short multi-word phrases
+            " " in phrase and len(phrase) < 7):
             continue
         words = phrase.split()
         while words:
-            yield " ".join(words)
+            subphrase = " ".join(words)
+            if subphrase not in seen:
+                seen.add(subphrase)
+                yield subphrase
             del words[-1]
 
 
