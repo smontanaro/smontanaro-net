@@ -19,6 +19,7 @@ def create_app(test_config=None):
     app.config.from_mapping({
         "CRDIR": crdir,
         "REFDB": os.path.join(crdir, "references.db"),
+        "SRCHDB": os.path.join(crdir, "searchindex.db"),
         "CR": os.path.join(crdir, "CR"),
         "DEBUG": os.environ.get("FLASK_DEBUG") == "True",
         "TOPICFILE": os.path.join(crdir, "topic.csv"),
