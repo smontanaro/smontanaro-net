@@ -6,10 +6,8 @@ from calendar import monthrange, month_name
 import csv
 import datetime
 import glob
-import html
 import logging
 import os
-import pickle
 # import signal
 import sqlite3
 import sys
@@ -328,33 +326,31 @@ def email_to_html(year, month, seq, note=""):
                            some_topic=get_random_topic(refdb))
 
 
-QUERY_INDEX = None
-def query_index(query):
+def get_page_fragments(conn, term):
+    cur = conn.cursor()
+    for (page, fragment) in cur.execute("""
+        select fs.filename, fs.fragment
+          from search_terms st, file_search fs
+          where st.term = ?
+            and fs.reference = st.rowid
+        """, (term,)):
+        yield (page, fragment)
+
+
+def query_index(query_db, query):
     "use query string to search for matching pages"
     # TBD - a bit of AND and OR connectors
     # TBD - paginate results
 
-    global QUERY_INDEX
-    if QUERY_INDEX is None:
-        query_file = os.path.join(os.environ.get("CRDIR"), "word-map.pck.gz")
-        with open_(query_file, "rb") as qi:
-            QUERY_INDEX = pickle.load(qi)
-
     pages = []
-    query_result = sorted(QUERY_INDEX.get(query.lower(), set()))
     # eprint("+++", repr(query), len(query_result))
-    for page in query_result:
+    for (page, fragment) in get_page_fragments(query_db, query.lower()):
         match = re.match("CR/([0-9]+)-([0-9]+)/eml-files/"
                          "classicrendezvous.[0-9]+.([0-9]+).eml", page)
         if match is None:
             continue
         yr, mo, seq = [int(x) for x in match.groups()]
         msg = read_message(page)
-        payload = msg.get_payload(decode=True)
-        try:
-            decoded = msg.decode(payload)
-        except (LookupError, UnicodeDecodeError):
-            decoded = ""
         record = {
             "year": yr,
             "month": mo,
@@ -363,13 +359,8 @@ def query_index(query):
             "sender": msg["from"],
         }
         link = generate_link(record)
-        pad = ".{2,50}"
-        mat = re.search(f"({pad})({query})({pad})", decoded, re.I)
-        if mat is not None:
-            pad1, snippet, pad2 = [html.escape(s) for s in mat.groups()]
-            snippet = f"{pad1}<b>{snippet}</b>{pad2}".strip()
-            # eprint("+++", repr(snippet))
-            link += f"<br>&nbsp;&nbsp;&nbsp;&nbsp;... {snippet} ..."
+        if fragment:
+            link += f"<br>&nbsp;&nbsp;&nbsp;&nbsp;... {fragment} ..."
         pages.append((f"{month_name[mo]} {yr}", link))
     return pages
 
@@ -451,6 +442,8 @@ def init_debug():
 def init_search():
     app = current_app
 
+    query_db = sqlite3.connect(app.config["SRCHDB"])
+
     @app.route('/search', methods=['GET', 'POST'])
     def search():
         search_form = SearchForm()
@@ -473,12 +466,12 @@ def init_search():
                 return render_template('cr.jinja', form=query_form)
             page = request.args.get("page", default=1, type=int)
             size = request.args.get("pagesize", default=100, type=int)
-            matches = query_index(query)
+            matches = query_index(query_db, query)
             # eprint("+++", query, len(matches), "GET")
         elif request.method == "POST":
             if query_form.validate_on_submit():
                 query = urllib.parse.unquote_plus(f"{query_form.query.data}")
-                matches = query_index(query)
+                matches = query_index(query_db, query)
                 eprint("+++", query, len(matches), "POST")
             else:
                 # eprint("+++ empty form")
