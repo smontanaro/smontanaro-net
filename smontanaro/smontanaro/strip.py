@@ -57,7 +57,7 @@ def strip_mime(payload):
 
     header = "--- StripMime Report --"
     footer = "---"
-    return strip_between(payload, header, footer, "mime")
+    return _strip_helper(payload, header, "s", footer, "mime")
 
 def strip_bikelist_footer(payload):
     "strip the CR mailing list footer"
@@ -69,83 +69,92 @@ def strip_bikelist_footer(payload):
 
     header = "Classicrendezvous mailing list"
     footer = "http://www.bikelist.org/mailman/listinfo/classicrendezvous"
-    return strip_between(payload, header, footer, "bikelist")
+    return _strip_helper(payload, header, "s", footer, "bikelist")
 
 def strip_yp(payload):
     "strip Yellow Pages ads"
     header = (".*(search for businesses|get a jump)", re.I)
     footer = (".*yellowpages.(lycos|aol).com", re.I)
-    return strip_between(payload, header, footer, "yp")
+    return _strip_helper(payload, header, "re", footer, "yp")
 
 def strip_aol(payload):
     "strip Yahoo! ads"
-    header = ("_____", 0)
+    header = "_____"
     footer = (".*yahoo.(ca|com)|yahoo! mail", re.I)
-    return strip_between(payload, header, footer, "yahoo")
+    return _strip_helper(payload, header, "s", footer, "yahoo")
 
 def strip_yahoo(payload):
     "strip Yahoo! ads"
-    header = ("_____", 0)
+    header = "_____"
     footer = (".*yahoo.(ca|com)|yahoo! mail", re.I)
-    return strip_between(payload, header, footer, "yahoo")
+    return _strip_helper(payload, header, "s", footer, "yahoo")
 
 def strip_juno(payload):
     "strip Juno ads"
     header = "_" * 60
     footer = "https?://.*juno.com"
-    return strip_between(payload, header, footer, "juno")
+    return _strip_helper(payload, header, "s", footer, "juno")
 
 def strip_fastmail(payload):
     "strip fastmail ads"
     header = footer = "http://www.fastmail.fm"
-    return strip_between(payload, header, footer, "fastmail")
+    return _strip_helper(payload, header, "s", footer, "fastmail")
 
 def strip_virgin(payload):
     "strip Virgin Media email bits"
     header = footer = ".*virginmedia.com"
-    return strip_between(payload, header, footer, "virgin")
+    return _strip_helper(payload, header, "re", footer, "virgin")
 
 def strip_virus(payload):
     "strip 'virus checked' lines"
     header = "Virus-checked using McAfee|Outgoing mail is certified Virus Free"
     footer = ("Virus-checked using McAfee|"
               "Version: [0-9]+.[0-9]+.[0-9]+ / Virus Database: [0-9]+ - Release Date:")
-    return strip_between(payload, header, footer, "virus")
+    return _strip_helper(payload, header, "re", footer, "virus")
 
 def strip_msn(payload):
     "a bit looser, hopefully doesn't zap actual content"
     header = ".* MSN"
     footer = ".*https?:.*msn.com"
-    return strip_between(payload, header, footer, "msn")
+    return _strip_helper(payload, header, "re", footer, "msn")
 
 def strip_cr_index_pwds(payload):
     "this occurs on occasion. Strip to remove passwords."
     header = "Passwords for classicrendezvous-index@catfood.phred.org"
     footer = ".*index%40catfood.phred.org"
-    return strip_between(payload, header, footer, "passwords")
+    return _strip_helper(payload, header, "s", footer, "passwords")
 
 # pylint: disable=unused-argument
-def strip_between(payload, start, end, tag):
-    "strip all lines at the end of the strip between start and end"
+def _strip_helper(payload, start, style, end, tag):
+    """strip all lines at the end of the strip between start and end.
+
+    as a quick check, if style == 's' and start doesn't appear in the payload,
+    return early.
+    """
+
+    if style == "s" and start not in payload:
+        return payload
+
     s_flags = e_flags = 0
     if isinstance(start, tuple):
         start, s_flags = start
     if isinstance(end, tuple):
         end, e_flags = end
+
     lines = re.split(r"(\n+)", payload)
     state = "start"
     new_payload = []
     pappend = new_payload.append
-    smatch = re.compile(f"{QUOTE_PAT}{start}").match
-    ematch = re.compile(f"{QUOTE_PAT}{end}").match
+    smatch = re.compile(f"{QUOTE_PAT}{start}", flags=s_flags).match
+    ematch = re.compile(f"{QUOTE_PAT}{end}", flags=e_flags).match
     for line in lines:
         if state == "start":
-            if smatch(line, s_flags):
+            if smatch(line):
                 state = "stripping"
                 continue
             pappend(line)
         else:  # state == "stripping"
-            if ematch(line, e_flags):
+            if ematch(line):
                 state = "start"
     return "".join(new_payload)
 
