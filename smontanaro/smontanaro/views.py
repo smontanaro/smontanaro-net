@@ -496,7 +496,6 @@ def init_search():
 def build_prev_next(query, matches, page, size):
     "construct html fragment - eventually do this in jinja"
     qurl = urllib.parse.quote_plus(query)
-    qsafe = html.escape(query)
     nxt = prv = ""
     cr_query = f"/CR/query?query={qurl}"
     if matches[page*size:]:
