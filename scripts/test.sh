@@ -64,6 +64,11 @@ coverage run -a --rcfile=.coveragerc scripts/generate_date_index.py -d reference
 coverage run -a --rcfile=.coveragerc scripts/makerefsdb.py -d ref.db.test CR/2005-12
 rm -f ref.db.test
 
+# Exercise the code used to build the sqlite search database
+find CR/2002-12/eml-files -name 'class*eml' \
+    | CRDIR=$(pwd) PYTHONPATH=smontanaro coverage run -a scripts/buildindex.py srch.db.test
+rm -f srch.db.test
+
 if [ -r .coverage -a -r smontanaro/.coverage ] ; then
     echo combine multiple .coverage files
     coverage combine .coverage smontanaro/.coverage
