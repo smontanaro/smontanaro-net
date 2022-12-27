@@ -382,6 +382,17 @@ def test_low_level_query(client):
             raise ValueError("no search results")
 
 
+def test_from_query(client):
+    with client.application.app_context():
+        conn = ensure_search_db(client.application.config["SRCHDB"])
+        for (filename, fragment) in get_page_fragments(conn, "from:mark petry"):
+            assert filename
+            assert not fragment
+            break
+        else:
+            raise ValueError("no search results")
+
+
 def test_query_post_arg(client):
     with client.application.app_context():
         rv = client.post("/CR/query", data={
