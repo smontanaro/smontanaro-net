@@ -16,6 +16,7 @@ from smontanaro.util import (read_message, read_message_string,
                              trim_subject_prefix, eprint, open_)
 from smontanaro.views import MessageFilter, eml_file
 from smontanaro.strip import strip_footers, strip_leading_quotes
+from smontanaro.srchdb import ensure_search_db, get_page_fragments
 
 @pytest.fixture
 def client():
@@ -368,6 +369,17 @@ def test_query_get(client):
     with client.application.app_context():
         rv = client.get("/CR/query?page=3&query='faliero+masi'&size=20")
         assert rv.status_code == 200
+
+
+def test_low_level_query(client):
+    with client.application.app_context():
+        conn = ensure_search_db(client.application.config["SRCHDB"])
+        for (filename, fragment) in get_page_fragments(conn, "faliero masi"):
+            assert filename
+            assert fragment
+            break
+        else:
+            raise ValueError("no search results")
 
 
 def test_query_post_arg(client):
