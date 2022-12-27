@@ -30,6 +30,7 @@ from .strip import strip_footers
 from .util import (read_message, trim_subject_prefix, eprint, clean_msgid,
                    make_topic_hierarchy, get_topic, generate_link, open_)
 from .exc import NoResponse
+from .srchdb import ensure_search_db, get_page_fragments
 
 SEARCH = {
     "DuckDuckGo": "https://duckduckgo.com/",
@@ -326,17 +327,6 @@ def email_to_html(year, month, seq, note=""):
                            some_topic=get_random_topic(refdb))
 
 
-def get_page_fragments(conn, term):
-    cur = conn.cursor()
-    for (page, fragment) in cur.execute("""
-        select fs.filename, fs.fragment
-          from search_terms st, file_search fs
-          where st.term = ?
-            and fs.reference = st.rowid
-        """, (term,)):
-        yield (page, fragment)
-
-
 def query_index(query_db, query):
     "use query string to search for matching pages"
     # TBD - a bit of AND and OR connectors
@@ -442,7 +432,7 @@ def init_debug():
 def init_search():
     app = current_app
 
-    query_db = sqlite3.connect(app.config["SRCHDB"])
+    query_db = ensure_search_db(app.config["SRCHDB"])
 
     @app.route('/search', methods=['GET', 'POST'])
     def search():
