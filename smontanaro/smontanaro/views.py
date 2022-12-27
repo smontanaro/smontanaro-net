@@ -352,6 +352,8 @@ def query_index(query_db, query):
         if fragment:
             link += f"<br>&nbsp;&nbsp;&nbsp;&nbsp;... {fragment} ..."
         pages.append((f"{month_name[mo]} {yr}", link))
+    if not pages:
+        logging.root.info("Empty search: %r", query)
     return pages
 
 
