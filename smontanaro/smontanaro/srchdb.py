@@ -5,8 +5,6 @@
 import os
 import sqlite3
 
-from flask import current_app
-
 from .dates import convert_ts_bytes
 
 def ensure_search_db(sqldb):
@@ -17,6 +15,7 @@ def ensure_search_db(sqldb):
                                                 | sqlite3.PARSE_COLNAMES))
     if create:
         create_tables(conn)
+        ensure_indexes(conn)
     return conn
 
 def create_tables(conn):
@@ -48,13 +47,11 @@ def ensure_indexes(conn):
                 "  (term)")
     conn.commit()
 
-def get_matches(term):
+def get_page_fragments(conn, term):
     "return list (filename, fragment) tuples matching term"
-    app = current_app()
-    conn = ensure_search_db(app.config["SRCHDB"])
     cur = conn.cursor()
-    cur.execute("select filename, fragment from file_search, search_terms"
-                "  where term = ?"
-                "    and search_terms.term = file_search.reference",
-                (term,))
-    return cur.fetchall()
+    for (filename, fragment) in cur.execute(
+        "select filename, fragment from file_search fs, search_terms st"
+        "  where st.term = ?"
+        "    and st.rowid = fs.reference", (term,)):
+        yield (filename, fragment)
