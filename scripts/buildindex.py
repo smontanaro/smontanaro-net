@@ -39,11 +39,11 @@ def main():
 
     total = ones = twos = 0
     cur = conn.cursor()
-    for (term, count) in cur.execute("select st.term, count(fs.fragment)"
-                                     " from search_terms st, file_search fs"
-                                     "  where fs.reference = st.rowid"
-                                     "  group by fs.reference"
-                                     "  order by st.term"):
+    for count in cur.execute("select count(fs.fragment)"
+                             " from search_terms st, file_search fs"
+                             "  where fs.reference = st.rowid"
+                             "  group by fs.reference"
+                             "  order by st.term"):
         total += 1
         if count == 1:
             ones += 1
@@ -58,6 +58,7 @@ def main():
 
 
 QUOTED = re.compile(r'''\s*"(.*)"\s*$''')
+SENDER_PAT = re.compile(r'''"([^"]*)"\s*<([^>]*>)\s*$''')
 def process_file(f, conn):
     "extract bits from one file"
     f = f.strip()
@@ -90,6 +91,18 @@ def process_file(f, conn):
                         (f, fragment, rowid))
             if cur.lastrowid % 10000 == 0:
                 eprint(cur.lastrowid)
+
+    sender = msg["from"].lower()
+    mat = SENDER_PAT.match(sender)
+    if mat is not None:
+        sender = f"from:{mat.group(1)}"
+        rowid = add_term(sender, cur)
+        fragment = ""
+        cur.execute("insert into file_search"
+                    " (filename, fragment, reference) values (?, ?, ?)",
+                    (f, fragment, rowid))
+        if cur.lastrowid % 10000 == 0:
+            eprint(cur.lastrowid)
     cur.execute("commit")
 
 
