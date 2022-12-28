@@ -5,6 +5,8 @@
 import os
 import sqlite3
 
+from flask import current_app
+
 from .dates import convert_ts_bytes
 
 def ensure_search_db(sqldb):
@@ -55,3 +57,27 @@ def get_page_fragments(conn, term):
         "  where st.term = ?"
         "    and st.rowid = fs.reference", (term,)):
         yield (filename, fragment)
+
+
+def have_term(term, cur=None):
+    "return rowid if we already have term in the database, else zero"
+    if cur is None:
+        conn = ensure_search_db(current_app.config["SRCHDB"])
+        cur = conn.cursor()
+    count = cur.execute("select count(*) from search_terms"
+                        "  where term = ?", (term,)).fetchone()[0]
+    if not count:
+        return 0
+    rowid = cur.execute("select rowid from search_terms"
+                        "  where term = ?", (term,)).fetchone()[0]
+    return rowid
+
+def add_term(term, cur=None):
+    "make sure term is in database, return its rowid"
+    if cur is None:
+        conn = ensure_search_db(current_app.config["SRCHDB"])
+        cur = conn.cursor()
+    if rowid := have_term(term, cur):
+        return rowid
+    cur.execute("insert into search_terms values (?)", (term,))
+    return cur.lastrowid
