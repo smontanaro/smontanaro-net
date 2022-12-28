@@ -408,12 +408,12 @@ class Message(email.message.Message):
                 # TBD: allow similar search by email.
                 mat = SENDER_PAT.match(val)
                 if mat is not None:
-                    from_ = mat.group(1).lower()
+                    from_ = mat.group(1).strip().lower()
                     if have_term(f"from:{from_}"):
                         # rewrite header to include a query link
                         name = urllib.parse.quote_plus(mat.group(1))
-                        grp1 = html.escape(mat.group(1))
-                        grp2 = html.escape(mat.group(2))
+                        grp1 = html.escape(mat.group(1).strip())
+                        grp2 = html.escape(mat.group(2).strip())
                         val = f'"<a href="/CR/query?query=from:{name}">{grp1}</a>"&lt;{grp2}&gt;'
                         self.replace_header(hdr, val)
                     else:
