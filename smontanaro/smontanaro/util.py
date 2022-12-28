@@ -19,6 +19,9 @@ import urllib.parse
 from flask import url_for
 import regex as re
 
+from .refdb import ensure_db
+from .srchdb import have_term
+
 ZAP_HEADERS = {
     "content-disposition",
     "content-language",
@@ -41,6 +44,9 @@ ZAP_HEADERS = {
 EOL_SEP = r"\r?\n"
 PARA_SEP = fr"{EOL_SEP}\s*(?:{EOL_SEP})+"
 INDENTED_SEP = fr"({EOL_SEP}\s+)"
+
+# Match sender of an email (crude)
+SENDER_PAT = re.compile(r'''"?([^"]*)"?(?:\s*<([^>]*>)\s*)$''')
 
 class Message(email.message.Message):
     "subclass to add as_html() method"
@@ -356,7 +362,7 @@ class Message(email.message.Message):
 
     def filter_headers(self):
         "generate self header block"
-        conn = sqlite3.connect(self.app.config["REFDB"])
+        conn = ensure_db(self.app.config["REFDB"])
         cur = conn.cursor()
         last_refs = set()
         for (hdr, val) in self.items():
@@ -397,6 +403,23 @@ class Message(email.message.Message):
                     self.replace_header(hdr, f"{' '.join(tags)}")
             elif hdr == "content-type":
                 pass                # preserve as-is for later calcuations
+            elif hdr == "from":
+                # Create a link for searching other posts by the same user.
+                # TBD: allow similar search by email.
+                mat = SENDER_PAT.match(val)
+                if mat is not None:
+                    from_ = mat.group(1).lower()
+                    if have_term(f"from:{from_}"):
+                        # rewrite header to include a query link
+                        name = urllib.parse.quote_plus(mat.group(1))
+                        grp1 = html.escape(mat.group(1))
+                        grp2 = html.escape(mat.group(2))
+                        val = f'"<a href="/CR/query?query=from:{name}">{grp1}</a>"&lt;{grp2}&gt;'
+                        self.replace_header(hdr, val)
+                    else:
+                        self.replace_header(hdr, html.escape(str(val)))
+                else:
+                    self.replace_header(hdr, html.escape(str(val)))
             else:
                 self.replace_header(hdr, html.escape(str(val)))
 
