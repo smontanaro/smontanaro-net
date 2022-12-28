@@ -1,7 +1,0 @@
-<div class="d-flex flex-row">
-    <form action="/CR/query" method="POST">
-        {{ query_form.query(class_="form-control", value=session.get("qdata", "")) }}
-        {{ query_form.csrf_token }}
-        <input class="form-control" name="search" type="submit" value="Go">
-    </form>
-</div>

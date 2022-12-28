@@ -4,12 +4,10 @@
     {{ super() }}
     {% for (text, href) in [("Home", "/"), ("Topics", "/CR/topics"),
         ("About", "/CR/about"), ("Help", "/CR/help"),] %}
-        <a class="list-group-item list-group-item-action list-group-item-light p-3" href="{{ href }}">{{ text }}</a>
+        <a class="list-group-item list-group-item-action list-group-item-light" href="{{ href }}">{{ text }}</a>
     {% endfor %}
     <hr style="height: 4px" />
-    <span class="d-inline-block" tabindex="0" data-toggle="tooltip"
-          title="Enter a word or phrase to search the archive.">
-        <b>Internal Search</b>
-        {% include "filter.jinja" %}
-    </span>
+    {% include "internal.jinja" %}
+    <hr style="height: 4px" />
+    {% include "search.jinja" %}
 {% endblock %}

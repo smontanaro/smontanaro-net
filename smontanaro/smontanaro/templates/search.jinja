@@ -1,10 +1,11 @@
 <div class="form-group">
-    <form action="/search" method="post">
-        <span class="d-inline-block" tabindex="0" data-toggle="tooltip"
-              title="Select your preferred search engine and enter a search term.">
-            <b>Web Search</b>
-        </span>
-        {{ search_form.engine(class_="form-control") }} for
+    <span class="d-inline-block" tabindex="0" data-toggle="tooltip"
+          title="Select your preferred search engine and enter a search term.">
+        <b>Web Search</b>
+    </span>
+    <form action="/search" method="POST">
+        {{ search_form.engine(class_="form-control") }}
+        <b>for</b>
         {{ search_form.query(size=10, class_="form-control") }}
         {{ search_form.csrf_token }}
         {{ search_form.site }}
