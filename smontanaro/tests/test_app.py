@@ -14,7 +14,7 @@ from smontanaro.refdb import ensure_db
 from smontanaro.dates import parse_date
 from smontanaro.util import (read_message, read_message_string,
                              trim_subject_prefix, eprint, open_)
-from smontanaro.views import MessageFilter, eml_file
+from smontanaro.views import MessageFilter, eml_file, query_index
 from smontanaro.strip import strip_footers, strip_leading_quotes
 from smontanaro.srchdb import ensure_search_db, get_page_fragments
 
@@ -391,6 +391,14 @@ def test_from_query(client):
             break
         else:
             raise ValueError("no search results")
+
+
+def test_trailing_space_from(client):
+    with client.application.app_context():
+        conn = ensure_search_db(client.application.config["SRCHDB"])
+        no_space = list(query_index(conn, "from:dale brown"))
+        tr_space = list(query_index(conn, "from:dale brown "))
+        assert tr_space and no_space and len(no_space) == len(tr_space)
 
 
 def test_query_post_arg(client):
