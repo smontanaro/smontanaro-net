@@ -1,0 +1,11 @@
+<div class="form-group">
+    <span class="d-inline-block" tabindex="0" data-toggle="tooltip"
+          title="Enter a word or phrase to search the archive.">
+        <b>Internal Search</b>
+    </span>
+    <form action="/CR/query" method="POST">
+        {{ query_form.query(class_="form-control") }}
+        {{ query_form.csrf_token }}
+        <input class="form-control" name="search" type="submit" value="Go">
+    </form>
+</div>
