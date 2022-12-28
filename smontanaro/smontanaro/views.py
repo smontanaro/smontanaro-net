@@ -327,14 +327,14 @@ def email_to_html(year, month, seq, note=""):
                            some_topic=get_random_topic(refdb))
 
 
-def query_index(query_db, query):
+def query_index(conn, query):
     "use query string to search for matching pages"
     # TBD - a bit of AND and OR connectors
     # TBD - paginate results
 
     pages = []
     # eprint("+++", repr(query), len(query_result))
-    for (page, fragment) in get_page_fragments(query_db, query.lower()):
+    for (page, fragment) in get_page_fragments(conn, query.strip().lower()):
         match = re.match("CR/([0-9]+)-([0-9]+)/eml-files/"
                          "classicrendezvous.[0-9]+.([0-9]+).eml", page)
         if match is None:
@@ -353,7 +353,7 @@ def query_index(query_db, query):
             link += f"<br>&nbsp;&nbsp;&nbsp;&nbsp;... {fragment} ..."
         pages.append((f"{month_name[mo]} {yr}", link))
     if not pages:
-        logging.root.info("Empty search: %r", query)
+        logging.root.info("Empty search result: %r", query)
     return pages
 
 
