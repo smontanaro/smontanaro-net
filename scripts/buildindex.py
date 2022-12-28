@@ -13,10 +13,10 @@ import sys
 import regex as re
 from textblob import TextBlob
 
-from smontanaro.util import (read_message, trim_subject_prefix, eprint)
+from smontanaro.util import (read_message, trim_subject_prefix, eprint, SENDER_PAT)
 from smontanaro.strip import strip_footers, strip_leading_quotes, CRLF
 
-from smontanaro.srchdb import ensure_search_db
+from smontanaro.srchdb import ensure_search_db, have_term, add_term
 
 
 def main():
@@ -58,7 +58,6 @@ def main():
 
 
 QUOTED = re.compile(r'''\s*"(.*)"\s*$''')
-SENDER_PAT = re.compile(r'''"([^"]*)"\s*<([^>]*>)\s*$''')
 def process_file(f, conn):
     "extract bits from one file"
     f = f.strip()
@@ -198,25 +197,6 @@ def merge_plurals(k, conn):
             new = k[:-n]
             break
     return (old, new, "plural")
-
-
-def have_term(term, cur):
-    "return rowid if we already have term in the database, else zero"
-    count = cur.execute("select count(*) from search_terms"
-                        "  where term = ?", (term,)).fetchone()[0]
-    if not count:
-        return 0
-    rowid = cur.execute("select rowid from search_terms"
-                        "  where term = ?", (term,)).fetchone()[0]
-    return rowid
-
-
-def add_term(term, cur):
-    "make sure term is in database, return its rowid"
-    if rowid := have_term(term, cur):
-        return rowid
-    cur.execute("insert into search_terms values (?)", (term,))
-    return cur.lastrowid
 
 
 def merge_ing(k, conn):
