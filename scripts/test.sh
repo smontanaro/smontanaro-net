@@ -65,10 +65,15 @@ coverage run -a --rcfile=.coveragerc scripts/makerefsdb.py -d ref.db.test CR/200
 rm -f ref.db.test
 
 # Exercise the code used to build the sqlite search database
-find CR/2001-09/eml-files -name 'class*eml' \
-    | head -100 \
+find CR/2007-11/eml-files -name 'class*eml' \
+    | head -1100 \
     | CRDIR=$(pwd) PYTHONPATH=smontanaro coverage run -a scripts/buildindex.py srch.db.test
+n=$(echo "select * from search_terms where term = 'from:dale brown'" | sqlite3 srch.db.test | wc -l)
+m=$(echo "select * from search_terms where term like 'from:% '" | sqlite3 srch.db.test | wc -l)
 rm -f srch.db.test
+if [ $n -eq 0 -o $m -gt 0 ] ; then
+    echo "$(tput bold)Error generating from: terms$(tput sgr0)" 1>&2
+fi
 
 if [ -r .coverage -a -r smontanaro/.coverage ] ; then
     echo combine multiple .coverage files
