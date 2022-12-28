@@ -16,6 +16,7 @@ mccabe
 platformdirs
 pylint
 python-dateutil
+regex
 requests
 six
 textblob
