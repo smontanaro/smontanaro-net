@@ -65,7 +65,8 @@ coverage run -a --rcfile=.coveragerc scripts/makerefsdb.py -d ref.db.test CR/200
 rm -f ref.db.test
 
 # Exercise the code used to build the sqlite search database
-find CR/2002-12/eml-files -name 'class*eml' \
+find CR/2001-09/eml-files -name 'class*eml' \
+    | head -100 \
     | CRDIR=$(pwd) PYTHONPATH=smontanaro coverage run -a scripts/buildindex.py srch.db.test
 rm -f srch.db.test
 
