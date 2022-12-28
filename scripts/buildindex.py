@@ -94,7 +94,7 @@ def process_file(f, conn):
     sender = msg["from"].lower()
     mat = SENDER_PAT.match(sender)
     if mat is not None:
-        sender = f"from:{mat.group(1)}"
+        sender = f"from:{mat.group(1).strip()}"
         rowid = add_term(sender, cur)
         fragment = ""
         cur.execute("insert into file_search"
