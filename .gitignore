@@ -5,7 +5,7 @@ bin
 lib*
 pyvenv.cfg
 references.db
-terrafirma
+searchindex.db
 server.log*
 *,cover
 .coverage
