@@ -13,7 +13,8 @@ import sys
 import regex as re
 from textblob import TextBlob
 
-from smontanaro.util import (read_message, trim_subject_prefix, eprint, SENDER_PAT)
+from smontanaro.util import (read_message, trim_subject_prefix,
+                             eprint, parse_from)
 from smontanaro.strip import strip_footers, strip_leading_quotes, CRLF
 
 from smontanaro.srchdb import ensure_search_db, have_term, add_term
@@ -91,15 +92,17 @@ def process_file(f, conn):
             if cur.lastrowid % 10000 == 0:
                 eprint(cur.lastrowid)
 
-    sender = msg["from"].lower()
-    mat = SENDER_PAT.match(sender)
-    if mat is not None:
-        sender = f"from:{mat.group(1).strip()}"
-        rowid = add_term(sender, cur)
-        fragment = ""
+    (sender, addr) = parse_from(msg["from"])
+
+    # from:name & from:someone@somewhere
+    for term in (f"from:{sender.strip().lower()}",
+                 f"from:{addr.strip().lower()}"):
+        if term == "from:":
+            continue
+        rowid = add_term(term, cur)
         cur.execute("insert into file_search"
                     " (filename, fragment, reference) values (?, ?, ?)",
-                    (f, fragment, rowid))
+                    (f, "", rowid))
         if cur.lastrowid % 10000 == 0:
             eprint(cur.lastrowid)
     cur.execute("commit")
@@ -352,6 +355,8 @@ def postprocess_db(conn):
     for (term, count) in cur.execute("select st.term, count(fs.fragment)"
                                      " from search_terms st, file_search fs"
                                      "  where fs.reference = st.rowid"
+                                     # always keep synthetic terms...
+                                     '    and st.term not like "from:%"'
                                      "  group by fs.reference"
                                      "  order by st.term"):
         if (len(term) < 4 or

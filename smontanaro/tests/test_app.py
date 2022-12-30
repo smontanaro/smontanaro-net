@@ -12,7 +12,7 @@ from flask import session
 from smontanaro import create_app
 from smontanaro.refdb import ensure_db
 from smontanaro.dates import parse_date
-from smontanaro.util import (read_message, read_message_string,
+from smontanaro.util import (read_message, read_message_string, parse_from,
                              trim_subject_prefix, eprint, open_)
 from smontanaro.views import MessageFilter, eml_file, query_index
 from smontanaro.strip import strip_footers, strip_leading_quotes
@@ -221,11 +221,51 @@ def test_next_msg(client):
         result = next_msg(2003, 7, 1216, +1)
         assert result["month"] == 8 and result["seq"] == 1
 
+def test_encoded_from(client):
+    "check decode of quopri-encoding From:"
+    with client.application.app_context():
+        mfile = "CR/2002-12/eml-files/classicrendezvous.10212.1259.eml"
+        msg = read_message(mfile)
+        msg.filter_headers()
+        assert msg["x-html-from"] is not None
+        assert msg["from"] == 'Michael Butler <pariscycles@yahoo.co.uk>'
+        header = str(msg["x-html-from"])
+        assert header.count("<a href=") == 2
+
 def test_trim_subj():
     mfile = "CR/2001-01/eml-files/classicrendezvous.10101.0091.eml"
     msg = read_message(mfile)
     exp = "Cinelli Myths � aluminium bars, fastback seatstay design"
     assert trim_subject_prefix(msg["Subject"]) == exp
+
+def test_sender_pat():
+    for (from_, sender, addr) in (
+        # bare email address
+        ("Bikerdaver@aol.com",
+         "", "Bikerdaver@aol.com"),
+        # quoted name, bracketed email address
+        ('"Mark Poore" <rauler47@hotmail.com>',
+         "Mark Poore", "rauler47@hotmail.com"),
+        # name only, no email address
+        ("Mark Bulgier",
+         "Mark Bulgier", ""),
+        # bare name, bracketed email address
+        ("Chuck Schmidt <chuckschmidt@earthlink.net>",
+         "Chuck Schmidt", "chuckschmidt@earthlink.net"),
+        # quoted, complex name, bracketed email address
+        ('"Beyer Jr., Chris (C.C.)" <cbeyer2@volvocars.com>',
+         "Beyer Jr., Chris (C.C.)", "cbeyer2@volvocars.com"),
+        # bare email address, parenthesized name
+        ('kurtsperry@netscape.net (Kurt Sperry)',
+         'Kurt Sperry', 'kurtsperry@netscape.net'),
+        # bare name, square bracket enclosing mailto:
+        ("Chuck Schmidt [mailto:chuckschmidt@earthlink.net]",
+         "Chuck Schmidt", "chuckschmidt@earthlink.net"),
+        ('Michael Butler <pariscycles@yahoo.co.uk>',
+         'Michael Butler', 'pariscycles@yahoo.co.uk'),
+    ):
+        (name, email) = parse_from(from_)
+        assert name == sender and email == addr
 
 def test_eml_file():
     for exp, args in [

@@ -5,12 +5,12 @@
 import csv
 import datetime
 import email.message
+import email.policy
 import gzip
 import html
 import logging
 import os
 import pickle                   # nosec
-import sqlite3
 import statistics
 import sys
 import typing
@@ -46,9 +46,39 @@ PARA_SEP = fr"{EOL_SEP}\s*(?:{EOL_SEP})+"
 INDENTED_SEP = fr"({EOL_SEP}\s+)"
 
 # Match sender of an email (crude)
-SENDER_PAT = re.compile(r'''"?([^"]*)"?(?:\s*<([^>]*>)\s*)$''')
+ADDR_PAT = re.compile(r'''(?:\s*<?([^ >]+@[^ >]*)>?)''')          # email only
+NAME_PAT = re.compile(r'''([^@]+)$''')                            # name only
+NAME_ANGLED_PAT = re.compile(r'''"?([^"@<[]*)"?'''                # name <email>
+                             r'''(?:\s*[[<]?(?:mailto:)?([^] >]+@[^] >]*)[]>]?)''')
+EMAIL_PAREN_PAT = re.compile(r'''(?:\s*<?([^ >]+@[^ >]*)>?)'''    # email (name)
+                             r'''\s*\(([^"@<)]*)\)''')
+WHITESPACE_PAT = re.compile(r'\s')
 
-class Message(email.message.Message):
+def parse_from(from_):
+    "Parse content of the from_ header into name and email"
+    if (mat := EMAIL_PAREN_PAT.match(from_)) is not None:
+        name = mat.group(2).strip()
+        addr = mat.group(1).strip()
+    elif (mat := EMAIL_PAREN_PAT.match(from_)) is not None:
+        name = mat.group(2).strip()
+        addr = mat.group(1).strip()
+    elif (WHITESPACE_PAT.match(from_) is None and
+          (mat := ADDR_PAT.match(from_)) is not None):
+        name = ""
+        addr = mat.group(1).strip()
+    elif mat := NAME_PAT.match(from_):
+        name = mat.group(1).strip()
+        addr = ""
+    else:
+        mat = NAME_ANGLED_PAT.match(from_)
+        if mat is None:
+            name = addr = ""
+        else:
+            name = mat.group(1).strip()
+            addr = mat.group(2).strip()
+    return (name, addr)
+
+class Message(email.message.EmailMessage):
     "subclass to add as_html() method"
     content_headers = ("content-type", "content-transfer-encoding")
     app = None
@@ -59,8 +89,16 @@ class Message(email.message.Message):
         "return string in HTML form"
 
         if self.get_content_type() == "text/plain":
-            headers = "<br>\n".join(f"{key}: {val}"
-                                      for (key, val) in self.items())
+            headers = []
+            for (key, val) in self.items():
+                if key[0:2].lower() == "x-":
+                    continue
+                if self[f"x-html-{key}"] is not None:
+                    newval = self[f"x-html-{key}"]
+                    headers.append(f"{key}: {newval}")
+                else:
+                    headers.append(f"{key}: {val}")
+            headers = "<br>\n".join(headers)
             # zap "content-type and content-transfer-encoding" if we
             # aren't debugging
             if not self.app.config["DEBUG"]:
@@ -405,32 +443,31 @@ class Message(email.message.Message):
                 pass                # preserve as-is for later calcuations
             elif hdr == "from":
                 # Create a link for searching other posts by the same user.
-                # TBD: allow similar search by email.
-                mat = SENDER_PAT.match(val)
-                if mat is not None:
-                    from_ = mat.group(1).strip().lower()
-                    if have_term(f"from:{from_}"):
-                        # rewrite header to include a query link
-                        name = urllib.parse.quote_plus(mat.group(1))
-                        grp1 = html.escape(mat.group(1).strip())
-                        grp2 = html.escape(mat.group(2).strip())
-                        val = f'"<a href="/CR/query?query=from:{name}">{grp1}</a>"&lt;{grp2}&gt;'
-                        self.replace_header(hdr, val)
-                    else:
-                        self.replace_header(hdr, html.escape(str(val)))
+                (sender, addr) = parse_from(val)
+                have_sender = have_term(f"from:{sender.lower()}")
+                have_addr = have_term(f"from:{addr.lower()}")
+                if have_sender:
+                    name = urllib.parse.quote_plus(sender)
+                    sender = f'"<a href="/CR/query?query=from:{name}">{sender}</a>"'
+                if have_addr:
+                    mail = urllib.parse.quote_plus(addr)
+                    addr = f'&lt;<a href="/CR/query?query=from:{mail}">{addr}</a>&gt;'
                 else:
-                    self.replace_header(hdr, html.escape(str(val)))
+                    addr = html.escape(addr)
+                self["x-html-from"] = f"{sender}&nbsp;{addr}"
             else:
                 self.replace_header(hdr, html.escape(str(val)))
 
 
 def read_message_string(raw):
     "construct Message from string."
-    return email.message_from_string(raw, _class=Message)
+    return email.message_from_string(raw, _class=Message,
+                                     policy=email.policy.default)
 
 def read_message_bytes(raw):
     "construct Message from byte string."
-    msg = email.message_from_bytes(raw, _class=Message)
+    msg = email.message_from_bytes(raw, _class=Message,
+                                   policy=email.policy.default)
     payload = msg.get_payload(decode=True)
     if (isinstance(payload, bytes) and
         b"=0A" in payload and
