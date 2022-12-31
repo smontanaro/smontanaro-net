@@ -238,8 +238,8 @@ class Message(email.message.EmailMessage):
             # starts with leading dashes
             (sig[0].startswith("--") or
              # or only a few short lines (other than URL links)
-             max(len(s) for s in sig if "<a target=" not in s) < 45 and
-             2 <= len(sig) <= 10)):
+             2 <= len(sig) <= 10 and
+             max([0] + [len(s) for s in sig if "<a target=" not in s]) < 45)):
             # eprint("entire paragraph is sig")
             parts[-1] = "<br>".join(sig)
         else:
