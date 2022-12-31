@@ -419,15 +419,17 @@ def get_terms(text):
         if pat.match(phrase) is None:
             # print("   nm:", repr(phrase))
             continue
+
         phrase = preprocess(phrase.lower())
-        if (not phrase or
+        if not phrase or phrase.count(" ") > 5:
             # extraordinarily long multi-word phrases
-            phrase.count(" ") > 5 or
-            # too short or long one-word phrases
-            " " not in phrase and (len(phrase) < 4 or len(phrase) > 20) or
-            # too short multi-word phrases
-            " " in phrase and len(phrase) < 7):
             continue
+
+        if (" " not in phrase and (len(phrase) < 4 or len(phrase) > 20) or
+            " " in phrase and len(phrase) < 7):
+            # too short or long one-word phrases
+            continue
+
         words = phrase.split()
         while words:
             subphrase = " ".join(words)
