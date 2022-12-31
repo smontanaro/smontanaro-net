@@ -6,9 +6,8 @@ import argparse
 import sqlite3
 import sys
 
-from smontanaro import dates
+from smontanaro import dates, create_app
 from smontanaro.util import generate_link
-
 
 def thread_key(record):
     "groupby key func"
@@ -66,6 +65,14 @@ def main():
     parser.add_argument("month", type=int)
     args = parser.parse_args()
 
+    app = create_app(
+        {"TESTING": False,
+         "REFDB": "references.db",
+         "SRCHDB": "searchindex.db",
+         "WTF_CSRF_ENABLED": False,
+         "SERVER_NAME": "smontanaro.net",
+         })
+
     sqlite3.register_converter("TIMESTAMP", dates.convert_ts_bytes)
     conn = sqlite3.connect(args.sqldb, detect_types=(sqlite3.PARSE_DECLTYPES
                                                      | sqlite3.PARSE_COLNAMES))
@@ -78,8 +85,9 @@ def main():
                           "  order by m.ts",
                           (args.year, args.month)).fetchall()
 
-    gen = IndexGenerator()
-    gen.generate_index(records, cur, 0)
+    with app.app_context():
+        gen = IndexGenerator()
+        gen.generate_index(records, cur, 0)
 
     return 0
 
