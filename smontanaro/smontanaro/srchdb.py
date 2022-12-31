@@ -64,20 +64,32 @@ def have_term(term, cur=None):
     if cur is None:
         conn = ensure_search_db(current_app.config["SRCHDB"])
         cur = conn.cursor()
-    count = cur.execute("select count(*) from search_terms"
-                        "  where term = ?", (term,)).fetchone()[0]
-    if not count:
-        return 0
-    rowid = cur.execute("select rowid from search_terms"
-                        "  where term = ?", (term,)).fetchone()[0]
-    return rowid
+    else:
+        conn = None
+    try:
+        count = cur.execute("select count(*) from search_terms"
+                            "  where term = ?", (term,)).fetchone()[0]
+        if not count:
+            return 0
+        rowid = cur.execute("select rowid from search_terms"
+                            "  where term = ?", (term,)).fetchone()[0]
+        return rowid
+    finally:
+        if conn is not None:
+            conn.close()
 
 def add_term(term, cur=None):
     "make sure term is in database, return its rowid"
     if cur is None:
         conn = ensure_search_db(current_app.config["SRCHDB"])
         cur = conn.cursor()
-    if rowid := have_term(term, cur):
-        return rowid
-    cur.execute("insert into search_terms values (?)", (term,))
-    return cur.lastrowid
+    else:
+        conn = None
+    try:
+        if rowid := have_term(term, cur):
+            return rowid
+        cur.execute("insert into search_terms values (?)", (term,))
+        return cur.lastrowid
+    finally:
+        if conn is not None:
+            conn.close()
