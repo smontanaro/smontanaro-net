@@ -569,11 +569,11 @@ def generate_link(r):
             f''' {sender}''')
 
 
-def open_(f, mode):
+def open_(f, mode, encoding="utf-8"):
     "use ext to decide if we should compress"
     if f.endswith(".gz"):
         return gzip.open(f, mode)
-    return open(f, mode)
+    return open(f, mode, encoding=None if "b" in mode else encoding)
 
 
 def init_app(app):
