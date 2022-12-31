@@ -229,33 +229,17 @@ class Message(email.message.EmailMessage):
         # last para might be a signature. Clues:
         #
         # * leading dashes
-        # * 2-4 short lines (< 55 chars)
-
-        # Here are a couple messages with a sig I don't handle:
-        #
-        # One:
-        #
-        # http://localhost:8080/CR/2009/03/0134
-        #
-        # It's only got a few short lines, but it's not separated from
-        # the message body by white space or a dashed line.
-        #
-        # Another:
-        #
-        # http://localhost:8080/CR/2010/07/0144
-        #
-        # It has a longer paragraph than the first and is likely
-        # easier to discriminate between the paragraph proper and the
-        # signature.
+        # * a few short lines (< 45 chars, unless it looks like an
+        #   HTMLified web page reference)
 
         parts = re.split(PARA_SEP, body.rstrip())
         sig = re.split(EOL_SEP, parts[-1])
         if (sig and
             # starts with leading dashes
             (sig[0].startswith("--") or
-             # or only two to four short lines
-             max(len(s) for s in sig) < 40 and
-             2 <= len(sig) <= 4)):
+             # or only a few short lines (other than URL links)
+             max(len(s) for s in sig if "<a target=" not in s) < 45 and
+             2 <= len(sig) <= 10)):
             # eprint("entire paragraph is sig")
             parts[-1] = "<br>".join(sig)
         else:
@@ -455,15 +439,17 @@ def generate_from_html(sender, addr):
     have_addr = have_term(f"from:{addr.lower()}")
     if have_sender:
         name = urllib.parse.quote_plus(sender)
+        sender = html.escape(sender)
         sender = f'"<a href="/CR/query?query=from:{name}">{sender}</a>"'
     else:
         sender = html.escape(sender)
     if have_addr:
         mail = urllib.parse.quote_plus(addr)
+        addr = html.escape(addr)
         addr = f'&lt;<a href="/CR/query?query=from:{mail}">{addr}</a>&gt;'
     else:
         addr = html.escape(addr)
-    return f"{sender}&nbsp;{addr}"
+    return f"{sender} {addr}"
 
 def read_message_string(raw):
     "construct Message from string."
@@ -580,7 +566,7 @@ def generate_link(r):
             f'''{root}'''
             f'''<a href="/CR/{r['year']}/{r['month']:02d}/{r['seq']:04d}">'''
             f'''{html.escape(sub)}</a></a>'''
-            f'''<br/>{sender}''')
+            f''' {sender}''')
 
 
 def open_(f, mode):
