@@ -23,6 +23,7 @@ def strip_footers(payload):
                      strip_fastmail,
                      strip_yp,
                      strip_aol,
+                     strip_advcorps,
                      strip_yahoo,
                      strip_msn,
                      strip_trailing_underscores):
@@ -79,6 +80,12 @@ def strip_yp(payload):
 
 def strip_aol(payload):
     "strip Yahoo! ads"
+    header = ("adventurecorps", re.I)
+    footer = ("newsletter.*adventurecorps", re.I)
+    return _strip_helper(payload, header, "re", footer, "yahoo")
+
+def strip_advcorps(payload):
+    "strip AdventureCORPS ads"
     header = "_____"
     footer = (".*yahoo.(ca|com)|yahoo! mail", re.I)
     return _strip_helper(payload, header, "s", footer, "yahoo")
