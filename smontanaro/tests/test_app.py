@@ -16,7 +16,8 @@ from smontanaro.util import (read_message, read_message_string, parse_from,
                              trim_subject_prefix, eprint, open_)
 from smontanaro.views import MessageFilter, eml_file, query_index
 from smontanaro.strip import strip_footers, strip_leading_quotes
-from smontanaro.srchdb import ensure_search_db, get_page_fragments
+from smontanaro.srchdb import (ensure_search_db, get_page_fragments,
+                               add_term, have_term)
 
 @pytest.fixture
 def client():
@@ -464,5 +465,26 @@ def test_unknown_content_type(client):
         pass
 
 
-def test_eprint(client):
+def test_open_(client):
     eprint("Hello World!", file=open_(os.devnull, "w"))
+    fd, name = tempfile.mkstemp()
+    os.close(fd)
+    with open_(f"{name}.gz", "wb") as fobj:
+        fobj.write(b"Hello World!")
+    os.unlink(f"{name}.gz")
+
+
+def test_add_term(client):
+    with client.application.app_context():
+        rowid = 0
+        try:
+            key = "skip m"
+            rowid = have_term(key)
+            assert rowid == 0
+            rowid = add_term(key)
+            assert rowid > 0
+        finally:
+            conn = ensure_search_db(client.application.config["SRCHDB"])
+            cur = conn.cursor()
+            cur.execute("delete from search_terms where rowid = ?",
+                        (rowid,))
