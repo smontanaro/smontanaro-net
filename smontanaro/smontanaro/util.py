@@ -444,20 +444,26 @@ class Message(email.message.EmailMessage):
             elif hdr == "from":
                 # Create a link for searching other posts by the same user.
                 (sender, addr) = parse_from(val)
-                have_sender = have_term(f"from:{sender.lower()}")
-                have_addr = have_term(f"from:{addr.lower()}")
-                if have_sender:
-                    name = urllib.parse.quote_plus(sender)
-                    sender = f'"<a href="/CR/query?query=from:{name}">{sender}</a>"'
-                if have_addr:
-                    mail = urllib.parse.quote_plus(addr)
-                    addr = f'&lt;<a href="/CR/query?query=from:{mail}">{addr}</a>&gt;'
-                else:
-                    addr = html.escape(addr)
-                self["x-html-from"] = f"{sender}&nbsp;{addr}"
+                self["x-html-from"] = generate_from_html(sender, addr)
             else:
                 self.replace_header(hdr, html.escape(str(val)))
 
+
+def generate_from_html(sender, addr):
+    "Create links for sender name and email address"
+    have_sender = have_term(f"from:{sender.lower()}")
+    have_addr = have_term(f"from:{addr.lower()}")
+    if have_sender:
+        name = urllib.parse.quote_plus(sender)
+        sender = f'"<a href="/CR/query?query=from:{name}">{sender}</a>"'
+    else:
+        sender = html.escape(sender)
+    if have_addr:
+        mail = urllib.parse.quote_plus(addr)
+        addr = f'&lt;<a href="/CR/query?query=from:{mail}">{addr}</a>&gt;'
+    else:
+        addr = html.escape(addr)
+    return f"{sender}&nbsp;{addr}"
 
 def read_message_string(raw):
     "construct Message from string."
@@ -568,11 +574,13 @@ def generate_link(r):
     "HTML for a single message"
     root = "" # "(T)&nbsp;" if r['is_root'] else ""
     sub = re.sub(r"\s+", " ", r["Subject"])
+    sender = generate_from_html(*parse_from(r["sender"]))
+
     return (f'''<a name="{r['seq']:04d}">'''
             f'''{root}'''
             f'''<a href="/CR/{r['year']}/{r['month']:02d}/{r['seq']:04d}">'''
             f'''{html.escape(sub)}</a></a>'''
-            f''' {html.escape(r["sender"])}''')
+            f'''<br/>{sender}''')
 
 
 def open_(f, mode):
