@@ -19,7 +19,7 @@ import dateutil.tz
 
 from smontanaro.dates import parse_date
 from smontanaro.refdb import ensure_db, ensure_indexes
-from smontanaro.util import clean_msgid, read_message
+from smontanaro.util import clean_msgid, read_message, eprint
 
 ONE_SEC = datetime.timedelta(seconds=1)
 
@@ -34,7 +34,7 @@ def decompose_filename(filename):
     try:
         seq = int(os.path.split(filename)[1].split(".")[-2], 10)
     except (ValueError, IndexError):
-        print(f"Error decomposing {filename}", file=sys.stderr)
+        eprint(f"Error decomposing {filename}")
         raise
     (year, month) = [int(x)
                      for x in
@@ -56,7 +56,7 @@ def insert_references(message, conn, filename):
     try:
         (year, month, seq) = decompose_filename(filename)
     except ValueError as exc:
-        print(exc, file=sys.stderr)
+        eprint(exc)
         return 0
     try:
         stamp = parse_date(datestr)
@@ -65,8 +65,7 @@ def insert_references(message, conn, filename):
                      "  where year <= ? and month <= ?",
                      (year, month))
         stamp = dateutil.parser.parse(conn.fetchone()[0]) + ONE_SEC
-        print(f"date parsing error for {datestr} ({exc}) - fall back to {stamp}",
-              file=sys.stderr)
+        eprint(f"date parsing error for {datestr} ({exc}) - fall back to {stamp}")
 
     if stamp.tzinfo is None:
         # force UTC
@@ -78,7 +77,7 @@ def insert_references(message, conn, filename):
                      (msgid, filename, sender, subject, year, month, seq,
                       0, stamp))
     except sqlite3.IntegrityError:
-        print(f"dup: {msgid} {filename}", file=sys.stderr)
+        eprint(f"dup: {msgid} {filename}")
         return nrecs
     nrecs += 1
 
@@ -131,8 +130,8 @@ def mark_thread_roots(conn):
                  "      where r.parent not in"
                  "        (select messageid from msgreplies))")
 
-def main():
-    "see __doc__"
+def parse_args():
+    "command line argument eating"
     parser = argparse.ArgumentParser()
     parser.add_argument("-c", "--create", dest="createdb", action="store_true",
                         default=False)
@@ -142,28 +141,13 @@ def main():
                         help="SQLite3 database file", required=True)
     parser.add_argument("top", help="directory containing email files to process",
                         default=None, nargs="?")
-    args = parser.parse_args()
-    if args.one and args.top:
-        print("Only one of top level directory and single filename may be given",
-              file=sys.stderr)
-        return 1
+    return parser.parse_args()
 
-    if args.createdb and os.path.exists(args.sqldb):
-        os.remove(args.sqldb)
 
-    # create db in memory, dump and write to db file at the very end
-    conn = ensure_db(":memory:")
-
-    if args.one:
-        try:
-            nrecs = process_one_file(args.one, conn)
-        except ValueError:
-            print(f"failed to process message {args.one}", file=sys.stderr)
-            return 1
-        return 0
-
+def process_files(top, conn):
+    "find and process files, starting at top"
     records = nfiles = 0
-    for (dirpath, dirs, filenames) in os.walk(args.top):
+    for (dirpath, dirs, filenames) in os.walk(top):
         dirs.sort()
         files_read = 0
         if "eml-files" not in dirpath:
@@ -181,13 +165,37 @@ def main():
             try:
                 nrecs = process_one_file(path, conn)
             except ValueError:
-                print(f"failed to process file {path}", file=sys.stderr)
+                eprint(f"failed to process file {path}")
                 continue
             nfiles += 1
             records += nrecs
         dt = datetime.datetime.now() - start
         if files_read:
             print(f" {files_read} {(files_read / dt.total_seconds()):.02f}/s")
+
+def main():
+    "see __doc__"
+    args = parse_args()
+
+    if args.one and args.top:
+        eprint("Only a top level directory or a single filename may be given")
+        return 1
+
+    if args.createdb and os.path.exists(args.sqldb):
+        os.remove(args.sqldb)
+
+    # create db in memory, dump and write to db file at the very end
+    conn = ensure_db(":memory:")
+
+    if args.one:
+        try:
+            process_one_file(args.one, conn)
+        except ValueError:
+            eprint(f"failed to process message {args.one}")
+            return 1
+        return 0
+
+    process_files(args.top, conn)
 
     mark_thread_roots(conn)
     ensure_indexes(conn)
