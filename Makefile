@@ -39,8 +39,7 @@ $(REFDB).new : FORCE
 lint : FORCE
 	-MYPYPATH=typeshed mypy $(PY_SRC)
 	-bandit $(PY_SRC)
-	-pylint --rcfile=.pylintrc $(PY_SRC) \
-	| sed -e '/duplicate-code/,/^--------------------/d'
+	-pylint --rcfile=.pylintrc $(PY_SRC)
 
 test : FORCE
 	bash scripts/test.sh
