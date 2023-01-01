@@ -11,20 +11,19 @@ import os
 # import signal
 import sqlite3
 import sys
-import tempfile
 import urllib.parse
 
 # import mpl
 
 # import arrow
 from flask import (redirect, url_for, render_template, abort, jsonify, request,
-                   current_app, session, send_from_directory)
+                   current_app, send_from_directory)
 from flask_wtf import FlaskForm
 import regex as re
-from wtforms import StringField, HiddenField, SelectField, SubmitField
+from wtforms import StringField, HiddenField, SelectField
 from wtforms.validators import DataRequired
 
-from .refdb import ensure_db, ensure_filter_cache, get_topics_for, get_random_topic
+from .refdb import ensure_db, get_topics_for, get_random_topic
 from .strip import strip_footers
 # pylint: disable=unused-import
 from .util import (read_message, trim_subject_prefix, eprint, clean_msgid,
@@ -129,9 +128,6 @@ def init_indexes():
     def dates(year, month):
         "new date index"
 
-        pattern = session.get("pattern", ".*")
-        in_out = session.get("in_out", "keep")
-
         year = int(year)
         month = int(month)
         date = datetime.date(year, month, 1)
@@ -142,24 +138,15 @@ def init_indexes():
         title = f"{date.strftime('%b %Y Date Index')}"
         with open(f'''{CR}/{date.strftime("%Y-%m")}/generated/dates.body''',
                   encoding="utf-8") as fobj:
-            lines = list(fobj)
+            body = fobj.read()
 
-        body = filter_month(lines, pattern, in_out)
-        if not body:
-            body = ("<p>Pretty brutal filter, eh?"
-                    " Poke the 'Clear' button to remove it.</p>")
-        if pattern == ".*":
-            pattern = ""
         return render_template("dates.jinja", title=title, body=body,
-                               prev=prev_url, next=next_url, year=year, month=month,
-                               pattern=pattern, in_out=in_out)
+                               prev=prev_url, next=next_url, year=year,
+                               month=month)
 
     @app.route("/CR/<year>/<month>/threads")
     def threads(year, month):
         "new thread index"
-
-        pattern = session.get("pattern", ".*")
-        in_out = session.get("in_out", "keep")
 
         year = int(year)
         month = int(month)
@@ -171,17 +158,11 @@ def init_indexes():
         title = date.strftime("%b %Y Thread Index")
         with open(f'''{CR}/{date.strftime("%Y-%m")}/generated/threads.body''',
                   encoding="utf-8") as fobj:
-            lines = list(fobj)
+            body = fobj.read()
 
-        body = filter_month(lines, pattern, in_out)
-        if not body:
-            body = ("<p>Pretty brutal filter, eh?"
-                    " Poke the 'Clear' button to remove it.</p>")
-        if pattern == ".*":
-            pattern = ""
         return render_template("threads.jinja", title=title, body=body,
-                               prev=prev_url, next=next_url, year=year, month=month,
-                               pattern=pattern, in_out=in_out)
+                               prev=prev_url, next=next_url, year=year,
+                               month=month)
 
     def month_url(start_year, start_month, offset, what):
         "previous month - often month +/- 1, but not always (we have gaps)"
@@ -407,7 +388,6 @@ def init_extra():
             "today": datetime.date.today(),
             "search_form": SearchForm(),
             "topic_form": TopicForm(),
-            "filter_form": FilterForm(),
             "query_form": QueryForm(),
         }
 
@@ -498,33 +478,6 @@ def build_prev_next(query, matches, page, size):
         prev_next = ""
 
     return prev_next
-
-def init_filter():
-    app = current_app
-
-    @app.route('/CR/filter_date', methods=['GET', 'POST'])
-    def filter_date():
-        filter_form = FilterForm()
-        if filter_form.validate_on_submit():
-            if filter_form.year.data:
-                year = int(filter_form.year.data)
-                month = int(filter_form.month.data)
-            else:
-                year = month = None
-            if filter_form.clear.data:
-                del session["pattern"], session["in_out"]
-            else:
-                session["pattern"] = filter_form.pattern.data
-                session["in_out"] = filter_form.in_out.data
-            if year is None:
-                pattern = session.get("pattern", "")
-                if pattern == "":
-                    return redirect(url_for("cr_index"))
-                index_file = filter_all_months(session.get("pattern", ".*"),
-                                               session.get("in_out", "keep"))
-                return redirect(url_for("cr_index", cache=index_file))
-            return redirect(url_for("dates", year=year, month=f"{month:02d}"))
-        return render_template('filter.jinja', filter_form=filter_form)
 
 def init_topics():
     app = current_app
@@ -708,65 +661,6 @@ def filter_month(lines, pattern, in_out):
     filtered_body = re.sub(r"<h2>.*</h2>\s*<ul .*>\s*</ul>\s*", "", body).strip()
     return filtered_body
 
-def filter_all_months(pattern, in_out):
-    "generate filtered index, saving to cache"
-
-    CR = current_app.config["CR"]
-
-    cache_dir = f"{CR}/generated/cache"
-    cache_conn = ensure_filter_cache(os.path.join(cache_dir, "filter_cache.db"))
-    cur = cache_conn.cursor()
-    cur.execute("""
-        select filename from filter_cache
-          where pattern = ?
-            and in_out = ?
-    """, (pattern, in_out))
-    result = cur.fetchone()
-    if result:
-        return result[0]
-
-    with open(f"{CR}/generated/index.body", encoding="utf8") as fobj:
-        raw = fobj.read()
-        raw_lines = raw.split("\n")
-        out = [raw_lines[0]]
-        months = re.findall("(?:<b>)?([0-9]{4,4}-[0-9]{2,2})(?:</b>)?", raw)
-        for month, line in zip(months, raw_lines[1:-1]):
-            with open(f"{CR}/{month}/generated/dates.body", encoding="utf8") as mobj:
-                body = filter_month(mobj.readlines(), pattern, in_out)
-                if body:
-                    out.append(line)
-        out.append(raw_lines[-1])
-    filtered_body = "\n".join(out)
-    fd, cname = tempfile.mkstemp(prefix="f_", dir=cache_dir)
-    os.close(fd)
-    with open(cname, "w", encoding="utf8") as fobj:
-        fobj.write(filtered_body)
-        fobj.write("\n")
-
-    # We explicitly want the cache directory name hidden. It serves to
-    # force cache reads from an internal directory and avoids "/" in
-    # parameter name to cr_index().
-    cname = os.path.basename(cname)
-    cache_conn.execute("""
-        insert into filter_cache
-            values (?, ?, ?)
-    """, (pattern, in_out, cname))
-    cache_conn.commit()
-
-    return cname
-
-class FilterForm(FlaskForm):
-    "For filtering (out) uninteresting subjects"
-    pattern = StringField("Filter:")
-    in_out = SelectField("Keep or Toss:", choices=[
-        ('keep', 'Keep'),
-        ('toss', 'Toss'),
-    ])
-    year = HiddenField('year')
-    month = HiddenField('month')
-    filter_ = SubmitField('filter')
-    clear = SubmitField('clear')
-
 class TopicForm(FlaskForm):
     "simple form used to add topics to a message"
     topic = StringField('Add Topic(s):', validators=[DataRequired()])
@@ -845,7 +739,6 @@ def init_app(app):
         init_extra()
         init_search()
         init_topics()
-        init_filter()
         # init_bh()
 
         if app.config["DEBUG"]:

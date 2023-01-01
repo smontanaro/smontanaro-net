@@ -88,29 +88,6 @@ def ensure_topic_indexes(conn):
                 "  (topic, messageid)")
     conn.commit()
 
-def ensure_filter_cache(cachedb):
-    if os.path.exists(cachedb):
-        return sqlite3.connect(cachedb)
-
-    cache_dir = os.path.dirname(cachedb)
-    if not os.path.exists(cache_dir):
-        os.mkdir(cache_dir)
-    file_cache = sqlite3.connect(cachedb)
-    file_cache.execute("""
-    create table filter_cache
-      (
-        pattern TEXT,
-        in_out TEXT,
-        filename TEXT
-      )
-    """)
-    file_cache.execute("""
-      create index if not exists filter_index
-        on filter_cache
-        (pattern, in_out)
-    """)
-    return file_cache
-
 def get_topics_for(msgid, sqldb):
     "return list of topics associated with msgid"
     conn = ensure_db(sqldb)
