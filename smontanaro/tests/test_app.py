@@ -1,8 +1,11 @@
+"unit tests"
+
 import csv
 import os
 import re
 import shutil
 import tempfile
+import time
 import urllib.parse
 
 import dateutil.parser
@@ -14,7 +17,7 @@ from smontanaro.refdb import ensure_db
 from smontanaro.dates import parse_date
 from smontanaro.util import (read_message, read_message_string, parse_from,
                              trim_subject_prefix, eprint, open_)
-from smontanaro.views import MessageFilter, eml_file, query_index
+from smontanaro.views import MessageFilter, eml_file, query_index, next_msg
 from smontanaro.strip import strip_footers, strip_leading_quotes
 from smontanaro.srchdb import (ensure_search_db, get_page_fragments,
                                add_term, have_term)
@@ -23,7 +26,8 @@ from smontanaro.srchdb import (ensure_search_db, get_page_fragments,
 def client():
     topic_fd, topic_path = tempfile.mkstemp()
     app = create_app(
-        {"TESTING": True,
+        {"DEBUG": True,
+         "TESTING": True,
          "REFDB": "references.db",
          "WTF_CSRF_ENABLED": False,
          "TOPICFILE": topic_path,
@@ -39,7 +43,7 @@ def client():
     os.close(topic_fd)
     os.unlink(topic_path)
 
-def test_parse_date(client):
+def test_parse_date():
     for (timestring, exp) in (
             ("Date: Mon, 26 Jan 2004 21:33:19 -0800 (PST)\n",
              dateutil.parser.parse("2004-01-26T21:33:19 -0800")),
@@ -60,6 +64,10 @@ def test_fresh_db(client):
 def test_get_robots(client):
     rv = client.get("/robots.txt")
     assert rv.status_code == 302
+
+def test_get_version(client):
+    rv = client.get("/version")
+    assert rv.status_code == 200
 
 def test_post_search(client):
     rv = client.post("/search", data={
@@ -133,10 +141,11 @@ def test_suggest_topic(client):
         "seq": "0001",
         })
     assert rv.status_code == 200
-    rdr = csv.DictReader(open(client.application.config["TOPICFILE"]))
-    row = next(rdr)
-    assert (row["topic"] == "Sturmey-Archer" and
-            row["message-id"] == "<7e.703e8851.30481dcb@aol.com>")
+    with open(client.application.config["TOPICFILE"], encoding="utf-8") as fobj:
+        rdr = csv.DictReader(fobj)
+        row = next(rdr)
+        assert (row["topic"] == "Sturmey-Archer" and
+                row["message-id"] == "<7e.703e8851.30481dcb@aol.com>")
 
 def test_filter_nodate(client):
     "check that we keep stuff we ask to keep"
@@ -162,9 +171,9 @@ def test_filter_nodate(client):
     assert re.search(b"Oct 2001 Date Index", rv.data) is not None
     assert b"Pretty brutal filter, eh?" in rv.data
 
-def test_read_message(client):
+def test_read_message():
     "read a message, then a second time to get the pickled version"
-    mfile = "CR/2008-12/eml-files/classicrendezvous.10812.0831.eml"
+    mfile = "CR/2002-10/eml-files/classicrendezvous.10210.0759.eml"
     pfile = os.path.splitext(mfile)[0] + ".pck.gz"
     try:
         os.unlink(pfile)
@@ -174,6 +183,40 @@ def test_read_message(client):
     assert os.path.exists(pfile)
     msg2 = read_message(mfile)
     assert msg1.as_string() == msg2.as_string()
+
+def _test_read_busted_helper(tmpdir):
+    emlfile = os.path.join(tmpdir, "msg.eml")
+    pckgzfile = os.path.join(tmpdir, "msg.pck.gz")
+    with open_(emlfile, "w", encoding="utf-8") as fobj:
+        fobj.write(EMPTY_MAIL)
+    msg1 = read_message(emlfile)
+    assert os.path.exists(pckgzfile)
+
+    # read and write most of the bytes in the pckgz file
+    with open_(pckgzfile, "rb") as fobj:
+        bits = fobj.read()[:-100]
+    with open_(pckgzfile, "wb") as fobj:
+        fobj.write(bits)
+
+    pcktime1 = os.path.getmtime(pckgzfile)
+    time.sleep(1.1)
+
+    # re-read, pckgz file should get EOFError, then get rewritten after the eml
+    # file is read.
+    msg2 = read_message(emlfile)
+    assert os.path.exists(pckgzfile)
+    pcktime2 = os.path.getmtime(pckgzfile)
+
+    assert pcktime2 > pcktime1
+    assert msg1.as_string() == msg2.as_string()
+
+def test_read_busted_pickle():
+    "save a message, read it, then corrupt the pckgz file and read again"
+    tmpdir = tempfile.mkdtemp()
+    try:
+        _test_read_busted_helper(tmpdir)
+    finally:
+        shutil.rmtree(tmpdir, ignore_errors=True)
 
 def test_under_paren_urlmap(client):
     msg = read_message("CR/2005-01/eml-files/classicrendezvous.10501.1670.eml")
@@ -189,6 +232,13 @@ def test_under_paren_urlmap(client):
         assert (br_url in text and
                 f"_{url}_" not in text and
                 f"({url})" not in text)
+
+def test_map_url():
+    # any old message will do (I think)
+    msg = read_message("CR/2005-01/eml-files/classicrendezvous.10501.1670.eml")
+    domain = "www.wooljersey.com"
+    word = f"&lt;{domain}&gt;"
+    assert f'"http://{domain}"' in msg.map_url(word)
 
 def test_message_strip(client):
     "verify the yellowpages footer disappears"
@@ -211,7 +261,6 @@ def test_message_strip_same_header_footer(client):
 def test_next_msg(client):
     "make sure we can hop over gaps and between months"
     with client.application.app_context():
-        from smontanaro.views import next_msg
         # intramonth gap at (2003, 8, 31)
         assert next_msg(2003, 8, 32, -1)["seq"] == 30
         # normal case
@@ -387,8 +436,7 @@ def test_empty_payload(client):
         payload = strip_footers(payload)
         assert not payload, payload
 
-
-def test_subject_fix(client):
+def test_subject_fix():
     msg = read_message("CR/2000-11/eml-files/classicrendezvous.10011.1036.eml")
     assert msg["Subject"] == "[CR] Danger, items for sale"
 
@@ -457,17 +505,17 @@ def test_query_post_empty(client):
         assert rv.status_code == 200
 
 
-def test_unknown_content_type(client):
+def test_unknown_content_type():
     msg = read_message_string(EMPTY_MAIL)
     maintype = msg.get_content_maintype()
-    assert maintype not in ("image", "text", "multipart"), msg.get_content_type()
+    assert maintype not in ("image", "text", "multipart")
     try:
-        x = msg.as_html()
+        _x = msg.as_html()
     except ValueError:
         pass
 
 
-def test_open_(client):
+def test_open_():
     eprint("Hello World!", file=open_(os.devnull, "w"))
     fd, name = tempfile.mkstemp()
     os.close(fd)
