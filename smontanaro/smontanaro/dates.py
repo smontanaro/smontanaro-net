@@ -44,6 +44,7 @@ ARROW_FORMATS = [
     "ddd, D MMM YYYY HH:mm:ss Z",
     "DD MMM YYYY HH:mm:ss ZZZ",
     "D MMM YYYY HH:mm:ss ZZZ",
+    "YYYY-MM-DD, H:mmA ZZZ",
 ]
 
 TZINFOS = {
