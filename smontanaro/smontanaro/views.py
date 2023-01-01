@@ -796,14 +796,6 @@ def eml_file(year, month, seq):
     perl_yr = year - 1900
     return f"classicrendezvous.{perl_yr:3d}{month:02d}.{seq:04d}.eml"
 
-def msg_exists(mydir, year, month, seq):
-    "test to see if there is an email message to which we should href"
-    name = eml_file(year, month, seq)
-    full_path = os.path.join(mydir, name)
-    if os.path.exists(full_path):
-        return full_path
-    return ""
-
 class MessageFilter:
     "filter various uninteresting bits from messages"
     def __init__(self, message):
