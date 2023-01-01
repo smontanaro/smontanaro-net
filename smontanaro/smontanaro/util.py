@@ -59,9 +59,6 @@ def parse_from(from_):
     if (mat := EMAIL_PAREN_PAT.match(from_)) is not None:
         name = mat.group(2).strip()
         addr = mat.group(1).strip()
-    elif (mat := EMAIL_PAREN_PAT.match(from_)) is not None:
-        name = mat.group(2).strip()
-        addr = mat.group(1).strip()
     elif (WHITESPACE_PAT.match(from_) is None and
           (mat := ADDR_PAT.match(from_)) is not None):
         name = ""
@@ -477,7 +474,7 @@ def read_message(path):
         with gzip.open(pckgz, "rb") as pobj:
             try:
                 msg = pickle.load(pobj) # nosec
-            except EOFError:
+            except (EOFError, pickle.UnpicklingError):
                 # corrupt pickle file I guess
                 pass
 
