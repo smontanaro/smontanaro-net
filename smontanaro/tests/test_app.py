@@ -45,6 +45,8 @@ def test_parse_date(client):
              dateutil.parser.parse("2004-01-26T21:33:19 -0800")),
             ("Date: 26 Jan 2004 21:33:19 America/Los_Angeles",
              dateutil.parser.parse("2004-01-26T21:33:19 -0800")),
+            ("Date: 2010-06-27, 6:06PM CDT",
+             dateutil.parser.parse("2010-06-27T18:06:00 -0500")),
             ):
         assert parse_date(timestring) == exp
 
