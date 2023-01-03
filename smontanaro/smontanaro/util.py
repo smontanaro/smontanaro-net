@@ -525,6 +525,14 @@ def get_topic(topic, conn):
         order by m.year, m.month, m.seq
     """, (topic,)).fetchall()
 
+def get_message_bits(messageid, conn):
+    return conn.execute("""
+      select distinct year, month, seq
+        from messages
+        where messageid = ?
+        order by year, month, seq
+    """, (messageid,)).fetchall()
+
 def make_topic_hierarchy(topics, htopics, prefix):
     """construct hierarchical topic structure from list of colon-delimited topics.
 
