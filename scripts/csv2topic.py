@@ -20,20 +20,20 @@ def main():
     rdr = csv.DictReader(sys.stdin)
     yms = "yr mo seq".split()
     for row in rdr:
-        for topic in row["topic"].split(","):
-            existing = set([(yr, mo, seq) for (yr, mo, seq, *rest) in get_topic(row["topic"], conn)])
-            if existing:
-                print("--", existing)
-            bits = get_message_bits(row["message-id"], conn)
-            for part in bits:
-                row.update(dict(zip(yms, part)))
-                print("--", URL.format(**row), end=" ")
-                if part in existing:
-                    print("(KNOWN)", end="")
-                print()
-            if not bits:
-                print("--", end=" ")
-            print(TEMPLATE.format(**row))
+        existing = set((yr, mo, seq)
+            for (yr, mo, seq, *rest) in get_topic(row["topic"], conn))
+        if existing:
+            print("--", existing)
+        bits = get_message_bits(row["message-id"], conn)
+        for part in bits:
+            row.update(dict(zip(yms, part)))
+            print("--", URL.format(**row), end=" ")
+            if part in existing:
+                print("(KNOWN)", end="")
+            print()
+        if not bits:
+            print("--", end=" ")
+        print(TEMPLATE.format(**row))
 
 if __name__ == "__main__":
     sys.exit(main())
