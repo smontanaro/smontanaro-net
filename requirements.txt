@@ -6,6 +6,7 @@ click
 Flask
 Flask-WTF
 gunicorn
+html2text
 idna
 isort
 itsdangerous
