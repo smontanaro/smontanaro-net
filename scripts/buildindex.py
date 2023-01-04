@@ -5,11 +5,13 @@
 import csv
 import getopt
 import html
+import logging
 import os
 import re
 import string
 import sys
 
+import html2text
 import regex as re
 from textblob import TextBlob
 
@@ -58,19 +60,38 @@ def main():
     return 0
 
 
+def extract_text(msg):
+    "recursively extract text bits of message payload"
+    body_parts = []
+    content_type = msg.get_content_type()
+    if content_type == "text/plain":
+        body_parts.append(msg.decode(msg.get_payload(decode=True)))
+    elif content_type == "text/html":
+        # This will return Markdown, not quite what we want
+        text_maker = html2text.HTML2Text()
+        text_maker.ignore_links = True
+        body_parts.append(text_maker.handle(msg.decode(msg.get_payload(decode=True))))
+    elif msg.get_content_maintype() == "multipart":
+        for part in msg.walk():
+            if part == msg:
+                continue
+            body_parts.append(extract_text(part))
+    elif msg.get_content_maintype() == "image":
+        pass
+    else:
+        logging.warning("Unrecognized content type: %s", content_type)
+    return "\n\n".join(body_parts)
+
+
 QUOTED = re.compile(r'''\s*"(.*)"\s*$''')
 def process_file(f, conn):
     "extract bits from one file"
     f = f.strip()
     msg = read_message(f)
-    # Takes care of the content-transfer-encoding but returns bytes
-    payload = msg.get_payload(decode=True)
-    if payload is None:
-        return
-    try:
-        payload = msg.decode(payload)
-    except(LookupError, UnicodeDecodeError) as exc:
-        eprint(f, exc)
+
+    payload = extract_text(msg)
+
+    if not payload:
         return
 
     subject = trim_subject_prefix(msg["subject"])
@@ -126,12 +147,11 @@ def create_fragment(payload, term):
 
 def read_words(word_file):
     words = set()
-    punct = set(string.punctuation)
     with open(word_file, "r", encoding="utf-8") as wf:
         for word in wf:
             if (len(word) < 4 or
                 word[0] in string.ascii_uppercase or
-                set(word) & punct):
+                set(word) & PUNCTSET):
                 continue
             words.add(word.lower().strip())
     return words
@@ -176,10 +196,19 @@ def preprocess(phrase):
         del words[0]
     while words and words[-1] in COMMON_WORDS:
         del words[-1]
+    # Don't care about eBay URLs at this late date.
+    words = [word for word in words if re.search("http.*ebay", word) is None]
+    # Or excessively long "words".
+    words = [word for word in words if len(word) < 40]
+    # Or "words" made up entirely of punctuation.
+    words = [word for word in words if set(word) - PUNCTSET]
+    # Or "words" that look like urls.
+    words = [word for word in words if word.lower()[0:4] != "www."]
     # Somehow we get stuff like "mother 's" out of the noun phrases. Deal with
     # that... ¯\_(ツ)_/¯
     phrase = re.sub(" 's( |$)", r"'s\1", " ".join(words))
-    return phrase if len(phrase) >= 5 else ""
+    # Finally, exceedingly long or short phrases are uninteresting.
+    return "" if len(phrase) < 5 or len(phrase) > 30 else phrase
 
 
 # pylint: disable=unused-argument
@@ -368,6 +397,34 @@ def postprocess_db(conn):
     to_delete.add("")
 
     delete_exceptions(to_delete, conn)
+
+    delete_unreferenced_terms(conn)
+
+
+def delete_unreferenced_terms(conn):
+    eprint("deleting unreferenced terms")
+    cur = conn.cursor()
+    cur.execute("select rowid from file_search")
+    rowids = [x for (x,) in cur.fetchall()]
+
+    to_delete = set()
+    for rowid in rowids:
+        cur.execute("select count(*) from file_search where reference = ?",
+                    (rowid,))
+        if cur.fetchone()[0] == 0:
+            to_delete.add(rowid)
+
+    n = 0
+    to_delete = list(to_delete)
+    chunksize = 10000
+    while to_delete:
+        cur.execute("begin")
+        ids, to_delete = tuple(to_delete[:chunksize]), to_delete[chunksize:]
+        n += chunksize
+        qmarks = ", ".join(["?"] * len(ids))
+        cur.execute(f"delete from search_terms where rowid in ({qmarks})", ids)
+        eprint(n)
+        cur.execute("commit")
 
 
 def delete_exceptions(to_delete, conn):
