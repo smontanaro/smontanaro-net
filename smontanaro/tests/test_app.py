@@ -378,6 +378,14 @@ def test_long_url_fix(client):
         html = msg.as_html()
         assert "/<wbr>FoldingATubularTire" in html
 
+def test_extract_text(client):
+    with client.application.app_context():
+        # main type is multipart/alternative with one part being text/html
+        msg = read_message("CR/2011-02/eml-files/classicrendezvous.11102.1586.eml")
+        assert msg["content-type"].split(";")[0] == "multipart/alternative"
+        payload = msg.extract_text()
+        assert payload.count("Let's do that again with my signature.") == 2
+
 def test_vintage_trek(client):
     with client.application.app_context():
         rv = client.get("/vintage-trek/Trekpromoa.htm")
