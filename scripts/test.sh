@@ -64,6 +64,9 @@ coverage run -a --rcfile=.coveragerc scripts/generate_date_index.py -d reference
 coverage run -a --rcfile=.coveragerc scripts/makerefsdb.py -d ref.db.test CR/2005-12
 rm -f ref.db.test
 
+# Exercise some bits only csv2topic uses
+coverage run -a --rcfile=.coveragerc scripts/csv2topic.py references.db < topic.csv > /dev/null
+
 # Exercise the code used to build the sqlite search database
 find CR/2007-11/eml-files -name 'class*eml' \
     | head -1100 \
