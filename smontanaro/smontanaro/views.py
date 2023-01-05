@@ -642,25 +642,6 @@ def get_nav_items(*, year, month, seq):
 
     return items
 
-def filter_month(lines, pattern, in_out):
-    "Filter pattern in or out of a single month, returning body"
-    # note that the filtering process relies on the format of the
-    # output from generate_date_index.py. if that changes this
-    # probably will have to as well.
-    filter_lines = []
-    full_pat = f"({pattern})|</?ul.*>|<h2>" if in_out == "keep" else pattern
-    for line in lines:
-        if in_out == "keep":
-            if re.search(full_pat, line, re.I) is not None:
-                filter_lines.append(line)
-        else:               # toss
-            if re.search(full_pat, line, re.I) is None:
-                filter_lines.append(line)
-    body = "\n".join(filter_lines)
-    # elide dates which the filter completely cleared out.
-    filtered_body = re.sub(r"<h2>.*</h2>\s*<ul .*>\s*</ul>\s*", "", body).strip()
-    return filtered_body
-
 class TopicForm(FlaskForm):
     "simple form used to add topics to a message"
     topic = StringField('Add Topic(s):', validators=[DataRequired()])
