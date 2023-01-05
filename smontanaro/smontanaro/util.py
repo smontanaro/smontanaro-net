@@ -17,10 +17,12 @@ import typing
 import urllib.parse
 
 from flask import url_for
+import html2text
 import regex as re
 
 from .refdb import ensure_db
 from .srchdb import have_term
+from .strip import strip_footers
 
 ZAP_HEADERS = {
     "content-disposition",
@@ -283,6 +285,34 @@ class Message(email.message.EmailMessage):
 
         lines[-i:] = ["<br>" + line for line in lines[-i:]]
         return "\n".join(lines)
+
+    def extract_text(self):
+        "recursively extract text bits of message payload"
+        body_parts = []
+        content_type = self.get_content_type()
+        if content_type == "text/plain":
+            payload = self.decode(self.get_payload(decode=True))
+            payload = strip_footers(payload)
+            body_parts.append(payload)
+        elif content_type == "text/html":
+            # This will return Markdown, not quite what we want
+            text_maker = html2text.HTML2Text()
+            text_maker.ignore_links = True
+            payload = self.decode(self.get_payload(decode=True))
+            payload = text_maker.handle(payload)
+            payload = strip_footers(payload)
+            body_parts.append(payload)
+        elif self.get_content_maintype() == "multipart":
+            for part in self.walk():
+                if part == self:
+                    continue
+                body_parts.append(part.extract_text())
+        elif self.get_content_maintype() == "image":
+            pass
+        else:
+            logging.warning("Unrecognized content type: %s", content_type)
+        return "\n\n".join(body_parts)
+
 
     @classmethod
     def initialize_urlmap(cls):
