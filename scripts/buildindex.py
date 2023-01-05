@@ -11,7 +11,6 @@ import re
 import string
 import sys
 
-import html2text
 import regex as re
 from textblob import TextBlob
 
