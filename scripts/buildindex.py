@@ -60,36 +60,13 @@ def main():
     return 0
 
 
-def extract_text(msg):
-    "recursively extract text bits of message payload"
-    body_parts = []
-    content_type = msg.get_content_type()
-    if content_type == "text/plain":
-        body_parts.append(msg.decode(msg.get_payload(decode=True)))
-    elif content_type == "text/html":
-        # This will return Markdown, not quite what we want
-        text_maker = html2text.HTML2Text()
-        text_maker.ignore_links = True
-        body_parts.append(text_maker.handle(msg.decode(msg.get_payload(decode=True))))
-    elif msg.get_content_maintype() == "multipart":
-        for part in msg.walk():
-            if part == msg:
-                continue
-            body_parts.append(extract_text(part))
-    elif msg.get_content_maintype() == "image":
-        pass
-    else:
-        logging.warning("Unrecognized content type: %s", content_type)
-    return "\n\n".join(body_parts)
-
-
 QUOTED = re.compile(r'''\s*"(.*)"\s*$''')
 def process_file(f, conn):
     "extract bits from one file"
     f = f.strip()
     msg = read_message(f)
 
-    payload = extract_text(msg)
+    payload = msg.extract_text()
 
     if not payload:
         return
