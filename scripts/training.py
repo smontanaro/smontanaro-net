@@ -53,13 +53,13 @@ def view_subset(pattern, n):
     random.shuffle(files)
 
     for f in files[:n]:
-        os.system("clear")
+        os.system("clear")                # nosec
         print(f)
         print()
 
         process_one(f, cl)
 
-        match (response := input("continue [y]/q/r(etrain)? ").lower()):
+        match (response := input("continue [y]/q/r(etrain)? ").lower()): # nosec
             case "q" | "quit":
                 return 0
             case "r" | "retrain":
