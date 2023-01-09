@@ -16,7 +16,7 @@ from smontanaro import create_app
 from smontanaro.refdb import ensure_db
 from smontanaro.dates import parse_date
 from smontanaro.util import (read_message, read_message_string, parse_from,
-                             trim_subject_prefix, eprint, open_, ALL_WORDS,
+                             trim_subject_prefix, eprint, open_, all_words,
                              EXCEPTIONS)
 from smontanaro.views import MessageFilter, eml_file, query_index, next_msg
 from smontanaro.strip import strip_footers, strip_leading_quotes
@@ -683,4 +683,4 @@ def test_patch_word_breaks():
 
 def test_words_exceptions():
     exc = list(EXCEPTIONS)[0]
-    assert exc not in ALL_WORDS
+    assert exc not in all_words(keep_odd=True)
