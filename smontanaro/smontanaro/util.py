@@ -64,7 +64,16 @@ CRLF = "\r\n"
 # words which appear in one or more dictionaries which really aren't words.
 EXCEPTIONS = {
     "throu",
+    "iwa",
+    "iwaiwa",
 }
+# /usr/share/dict/words (at least) has all single letters as "words". While
+# this might be useful in some contexts, it's clearly not helpful when trying
+# to smash separated words back together.  Toss all of them except "a" and "i".
+_one_letter = set(string.ascii_uppercase) | set(string.ascii_lowercase)
+for _ai in "aAiI":
+    _one_letter.discard(_ai)
+EXCEPTIONS |= _one_letter
 
 def all_words(keep_odd=False):
     dictionaries = [
@@ -116,7 +125,6 @@ def parse_from(from_):
     return (name, addr)
 
 
-ALL_WORDS = all_words()
 class Message(email.message.EmailMessage):
     "subclass to add as_html() method"
     content_headers = ("content-type", "content-transfer-encoding")
@@ -561,13 +569,14 @@ def patch_word_breaks(text):
     # Maybe it's an archaic British spelling of "through." So, perhaps that
     # isn't the best test case. :-/
 
+    dict_words = all_words(keep_odd=True)
     punctset = set(re.sub("[-_]", "", string.punctuation))
     # We are willing to skip over multiple spaces, but it seems the CRLF breaks
     # between words are only single line breaks.
     splits = re.split(f"( +|{CRLF})", text)
     indexes = list(range(len(splits)))
     del_crlf = []
-    for (off1, off2, off3) in zip(indexes[0::3], indexes[1::3], indexes[2::3]):
+    for (off1, off2, off3) in zip(indexes[0:], indexes[1:], indexes[2:]):
         frag1 = splits[off1]
         frag2 = splits[off2]
         frag3 = splits[off3]
@@ -576,9 +585,13 @@ def patch_word_breaks(text):
         if frag3[-1] in punctset:
             # period or comma most likely
             frag3 = frag3[:-1]
-        if (frag1 and frag3 and
-            frag1.lower() not in ALL_WORDS and
-            (frag1+frag3).lower() in ALL_WORDS):
+        if not frag1 or not frag3:
+            continue
+        if frag1.lower() in dict_words:
+            continue
+        word = (frag1+frag3).lower()
+        if word in dict_words or word[-1] == "s" and word[:-1] in dict_words:
+            # eprint((off1, frag1, frag2, frag3, frag1+frag3))
             del_crlf.append(off2)
     for offset in reversed(del_crlf):
         del splits[offset]
