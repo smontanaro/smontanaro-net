@@ -433,9 +433,9 @@ def init_search():
         size = 100
         if request.method == "GET":
             query = request.args.get("query", default=None)
-            query = urllib.parse.unquote_plus(query)
             if query is None:
                 return render_template('cr.jinja', form=query_form)
+            query = urllib.parse.unquote_plus(query)
             page = request.args.get("page", default=1, type=int)
             size = request.args.get("pagesize", default=100, type=int)
             matches = query_index(query_db, query)
