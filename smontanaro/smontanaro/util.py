@@ -3,6 +3,7 @@
 "Some functions to share between parts of the app"
 
 import csv
+from dataclasses import dataclass, field as dataclass_field
 import datetime
 import email.message
 import email.policy
@@ -12,6 +13,7 @@ import logging
 import os
 import pickle                   # nosec
 import statistics
+import string
 import sys
 import typing
 import urllib.parse
@@ -56,6 +58,42 @@ EMAIL_PAREN_PAT = re.compile(r'''(?:\s*<?([^ >]+@[^ >]*)>?)'''    # email (name)
                              r'''\s*\(([^"@<)]*)\)''')
 WHITESPACE_PAT = re.compile(r'\s')
 
+CRLF = "\r\n"
+
+
+# words which appear in one or more dictionaries which really aren't words.
+EXCEPTIONS = {
+    "throu",
+}
+
+def all_words(keep_odd=False):
+    dictionaries = [
+        "/usr/share/dict/american-english-large",
+        "/usr/share/dict/american-english",
+        "/usr/share/dict/words",
+    ]
+    for word_file in dictionaries:
+        if os.path.exists(word_file):
+            words = read_words(word_file, keep_odd)
+            words -= EXCEPTIONS
+            return words
+
+    raise ValueError("no dictionary found")
+
+
+def read_words(word_file, keep_odd=False):
+    punctset = set(re.sub("[-_]", "", string.punctuation))
+    words = set()
+    with open(word_file, "r", encoding="utf-8") as wf:
+        for word in wf:
+            if not keep_odd and (len(word) < 4 or
+                                 word[0] in string.ascii_uppercase or
+                                 set(word) & punctset):
+                continue
+            words.add(word.lower().strip())
+    return words
+
+
 def parse_from(from_):
     "Parse content of the from_ header into name and email"
     if (mat := EMAIL_PAREN_PAT.match(from_)) is not None:
@@ -77,6 +115,8 @@ def parse_from(from_):
             addr = mat.group(2).strip()
     return (name, addr)
 
+
+ALL_WORDS = all_words()
 class Message(email.message.EmailMessage):
     "subclass to add as_html() method"
     content_headers = ("content-type", "content-transfer-encoding")
@@ -289,11 +329,27 @@ class Message(email.message.EmailMessage):
     def extract_text(self):
         "recursively extract text bits of message payload"
         body_parts = []
-        content_type = self.get_content_type()
+        hier = self.get_hierarchy()
+        content_type = hier.content_type
         if content_type == "text/plain":
             payload = self.decode(self.get_payload(decode=True))
             payload = strip_footers(payload)
-            body_parts.append(payload)
+            body_parts.append(patch_word_breaks(payload))
+        elif content_type in ("multipart/mixed", "multipart/related"):
+            for kid_hier in hier.children:
+                body_parts.append(kid_hier.me.extract_text())
+        elif content_type == "multipart/alternative":
+            types = hier.child_types()
+            if "text/plain" in types:
+                desired = "text/plain"
+            elif "text/html" in types:
+                desired = "text/html"
+            else:
+                desired = None
+            for kid_hier in hier.children:
+                if kid_hier.content_type == desired:
+                    body_parts.append(kid_hier.me.extract_text())
+                    break
         elif content_type == "text/html":
             # This will return Markdown, not quite what we want
             text_maker = html2text.HTML2Text()
@@ -302,11 +358,6 @@ class Message(email.message.EmailMessage):
             payload = text_maker.handle(payload)
             payload = strip_footers(payload)
             body_parts.append(payload)
-        elif self.get_content_maintype() == "multipart":
-            for part in self.walk():
-                if part == self:
-                    continue
-                body_parts.append(part.extract_text())
         elif self.get_content_maintype() == "image":
             pass
         else:
@@ -400,6 +451,26 @@ class Message(email.message.EmailMessage):
             new_text.append(self.map_url(word))
         return "".join(new_text)
 
+    def get_hierarchy(self, indent=0, seen=None):
+        "return nested hierarchy of (self, content-type, children) pairs."
+        # children is a (possibly empty) list.
+        if seen is None:
+            seen = set()
+        seen.add(self)
+
+        content_type = f"{self.get_content_maintype()}/{self.get_content_subtype()}"
+        me = MessageHierarchy(self, content_type)
+        # eprint("  "*indent, hex(id(self)), me.content_type)
+        if self.get_content_maintype() == "multipart":
+            for part in self.walk():
+                if part not in seen:
+                    me.children.append(part.get_hierarchy(indent+1,
+                                                          seen))
+        # kid_types = me.child_types()
+        # if kid_types:
+        #     eprint("  "*indent, hex(id(self)), kid_types)
+        return me
+
     def decode(self, payload):
         "decode payload, trying a couple different fallback encodings..."
         for charset in (self.get_content_charset("ascii"),  "latin-1", "utf-8"):
@@ -458,6 +529,60 @@ class Message(email.message.EmailMessage):
                 self["x-html-from"] = generate_from_html(sender, addr)
             else:
                 self.replace_header(hdr, html.escape(str(val)))
+
+
+@dataclass
+class MessageHierarchy:
+    "represent a message and its children"
+    me: Message
+    content_type: str
+    children: list = dataclass_field(default_factory=list)
+
+    def child_types(self):
+        return [kid.content_type for kid in self.children]
+
+def patch_word_breaks(text):
+    "reconstruct words which cross CRLF boundaries"
+    # see CR/2005-07/eml-files/classicrendezvous.10507.0921.eml, where we
+    # find this:
+    #   ...snapped throuCRLFgh the middle...
+
+    # The symptom is that we have a non-word (or uncommon word, more blow),
+    # CRLF, then possibly another non-word. If we smush them together then wind
+    # up with an actual word, perhaps we should delete the CRLF.
+
+    # I'm not entirely sure why this happened, but it's in the raw email
+    # messages.  In the above example, it's in poorly formatted quoted
+    # material.
+
+    # Despite my best intentions, /usr/share/dict/words on my Mac thinks
+    # "throu" is a word. I can't find an online definition for it, however, and
+    # on my web server, /usr/share/dict/american-english-large doesn't have it.
+    # Maybe it's an archaic British spelling of "through." So, perhaps that
+    # isn't the best test case. :-/
+
+    punctset = set(re.sub("[-_]", "", string.punctuation))
+    # We are willing to skip over multiple spaces, but it seems the CRLF breaks
+    # between words are only single line breaks.
+    splits = re.split(f"( +|{CRLF})", text)
+    indexes = list(range(len(splits)))
+    del_crlf = []
+    for (off1, off2, off3) in zip(indexes[0::3], indexes[1::3], indexes[2::3]):
+        frag1 = splits[off1]
+        frag2 = splits[off2]
+        frag3 = splits[off3]
+        if not frag3 or frag2 != CRLF:
+            continue
+        if frag3[-1] in punctset:
+            # period or comma most likely
+            frag3 = frag3[:-1]
+        if (frag1 and frag3 and
+            frag1.lower() not in ALL_WORDS and
+            (frag1+frag3).lower() in ALL_WORDS):
+            del_crlf.append(off2)
+    for offset in reversed(del_crlf):
+        del splits[offset]
+    return "".join(splits)
 
 
 def generate_from_html(sender, addr):
