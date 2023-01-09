@@ -16,7 +16,8 @@ from smontanaro import create_app
 from smontanaro.refdb import ensure_db
 from smontanaro.dates import parse_date
 from smontanaro.util import (read_message, read_message_string, parse_from,
-                             trim_subject_prefix, eprint, open_)
+                             trim_subject_prefix, eprint, open_, ALL_WORDS,
+                             EXCEPTIONS)
 from smontanaro.views import MessageFilter, eml_file, query_index, next_msg
 from smontanaro.strip import strip_footers, strip_leading_quotes
 from smontanaro.srchdb import (ensure_search_db, get_page_fragments,
@@ -356,6 +357,184 @@ http://www.bikelist.org/mailman/listinfo/classicrendezvous
 """
 
 
+MULTIPART_NO_TEXT_EMAIL = """\
+x-sender: classic-rendezvous-lightweight-vintage-bicycles+bncCLO0uJroCxDt2YrrBBoEnaFj1w@googlegroups.com
+x-receiver: classicrendezvous-index@archive.nt.phred.org
+Received: from phred.org ([172.16.1.2]) by monkeyfood.nt.phred.org with Microsoft SMTPSVC(6.0.3790.4675);
+	 Mon, 21 Feb 2011 15:01:52 -0800
+Received: from mail-qw0-f62.google.com (mail-qw0-f62.google.com [209.85.216.62])
+	by phred.org (Postfix) with ESMTP id 78C475E3F
+	for <classicrendezvous-index@catfood.phred.org>; Mon, 21 Feb 2011 15:02:03 -0800 (PST)
+Received: by qwe4 with SMTP id 4sf3919202qwe.7
+        for <classicrendezvous-index@catfood.phred.org>; Mon, 21 Feb 2011 15:02:05 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=googlegroups.com; s=beta;
+        h=domainkey-signature:x-beenthere:received-spf:to:subject:date
+         :x-mb-message-source:x-aol-ip:x-mb-message-type:mime-version:from
+         :x-mailer:message-id:x-spam-flag:x-aol-sender:x-original-sender
+         :x-original-authentication-results:reply-to:precedence:mailing-list
+         :list-id:list-post:list-help:list-archive:sender:list-unsubscribe
+         :content-type;
+        bh=NaraORkC96232Zj0p8dbn57aHFVYPhOZjyaMawAt/vk=;
+        b=xbSgR0Y5PcEwAVJa/yrXosZi4XX/gbT/S+oAz7ANw/6aneiUUec0gez50LMWkYAgvb
+         GkBt9J8yQM+dBc5Z5cTPY5QQ5XilI4NnzoyRFA0BZ3ql4pyyYaFnIP5fJmvFf9oBmOPx
+         p+ff5gXK1blHEyJvWo0uNACeATiwZ+u8QLuOE=
+DomainKey-Signature: a=rsa-sha1; c=nofws;
+        d=googlegroups.com; s=beta;
+        h=x-beenthere:received-spf:to:subject:date:x-mb-message-source
+         :x-aol-ip:x-mb-message-type:mime-version:from:x-mailer:message-id
+         :x-spam-flag:x-aol-sender:x-original-sender
+         :x-original-authentication-results:reply-to:precedence:mailing-list
+         :list-id:list-post:list-help:list-archive:sender:list-unsubscribe
+         :content-type;
+        b=55E8UBZhFEitk66NLdpRkXnSwDfoiuxHIYZLvWpWDk7DdtpD8Rh/5UCaHMeI5dSPFx
+         O0BdJJdB3MPomSLegaicu6am+0HYmQsu02bf8zdeeeX6MDpxRZes1sm5kv+96TDy5k7X
+         0J9V7N78TPXiI9/DVqk4zyvimqLxmGFOxTtLw=
+Received: by 10.229.67.133 with SMTP id r5mr189362qci.34.1298312429370;
+        Mon, 21 Feb 2011 10:20:29 -0800 (PST)
+X-BeenThere: classic-rendezvous-lightweight-vintage-bicycles@googlegroups.com
+Received: by 10.224.3.230 with SMTP id 38ls661292qao.0.p; Mon, 21 Feb 2011
+ 10:20:29 -0800 (PST)
+Received: by 10.224.89.14 with SMTP id c14mr154995qam.8.1298312429166;
+        Mon, 21 Feb 2011 10:20:29 -0800 (PST)
+Received: by 10.229.185.135 with SMTP id co7mr150289qcb.14.1298312377419;
+        Mon, 21 Feb 2011 10:19:37 -0800 (PST)
+Received: by 10.229.185.135 with SMTP id co7mr150288qcb.14.1298312377302;
+        Mon, 21 Feb 2011 10:19:37 -0800 (PST)
+Received: from imr-ma03.mx.aol.com (imr-ma03.mx.aol.com [64.12.206.41])
+        by gmr-mx.google.com with ESMTP id k7si1167466qcu.6.2011.02.21.10.19.37;
+        Mon, 21 Feb 2011 10:19:37 -0800 (PST)
+Received-SPF: pass (google.com: domain of OROBOYZ@aol.com designates 64.12.206.41 as permitted sender) client-ip=64.12.206.41;
+Received: from imo-da04.mx.aol.com (imo-da04.mx.aol.com [205.188.169.202])
+	by imr-ma03.mx.aol.com (8.14.1/8.14.1) with ESMTP id p1LIJPHU015567
+	for <classic-rendezvous-lightweight-vintage-bicycles@googlegroups.com>; Mon, 21 Feb 2011 13:19:25 -0500
+Received: from OROBOYZ@aol.com
+	by imo-da04.mx.aol.com  (mail_out_v42.9.) id r.fdc.c4e5a34 (43815)
+	 for <classic-rendezvous-lightweight-vintage-bicycles@googlegroups.com>; Mon, 21 Feb 2011 13:19:22 -0500 (EST)
+Received: from smtprly-dd03.mx.aol.com (smtprly-dd03.mx.aol.com [205.188.84.131]) by cia-dc01.mx.aol.com (v129.9) with ESMTP id MAILCIADC014-d4054d62aca6cf; Mon, 21 Feb 2011 13:19:21 -0500
+Received: from Webmail-d107 (webmail-d107.sim.aol.com [205.188.171.201]) by smtprly-dd03.mx.aol.com (v129.9) with ESMTP id MAILSMTPRLYDD031-d4054d62aca6cf; Mon, 21 Feb 2011 13:19:18 -0500
+To: classic-rendezvous-lightweight-vintage-bicycles@googlegroups.com
+Subject: {Classic Rendezvous} Moving the CR list to Google groups
+Date: Mon, 21 Feb 2011 13:19:18 -0500
+X-MB-Message-Source: WebUI
+X-AOL-IP: 174.98.97.4
+X-MB-Message-Type: User
+MIME-Version: 1.0
+From: oroboyz@aol.com
+X-Mailer: AOL Webmail 33222-STANDARD
+Received: from 174.98.97.4 by Webmail-d107.sysops.aol.com (205.188.171.201) with HTTP (WebMailUI); Mon, 21 Feb 2011 13:19:18 -0500
+Message-Id: <8CDA00AFD472A37-D34-102C@Webmail-d107.sysops.aol.com>
+X-Spam-Flag: NO
+X-AOL-SENDER: OROBOYZ@aol.com
+X-Original-Sender: oroboyz@aol.com
+X-Original-Authentication-Results: gmr-mx.google.com; spf=pass (google.com:
+ domain of OROBOYZ@aol.com designates 64.12.206.41 as permitted sender) smtp.mail=OROBOYZ@aol.com
+Reply-To: classic-rendezvous-lightweight-vintage-bicycles@googlegroups.com
+Precedence: list
+Mailing-list: list classic-rendezvous-lightweight-vintage-bicycles@googlegroups.com;
+ contact classic-rendezvous-lightweight-vintage-bicycles+owners@googlegroups.com
+List-ID: <classic-rendezvous-lightweight-vintage-bicycles.googlegroups.com>
+List-Post: <http://groups.google.com/group/classic-rendezvous-lightweight-vintage-bicycles/post?hl=en_US>,
+ <mailto:classic-rendezvous-lightweight-vintage-bicycles@googlegroups.com>
+List-Help: <http://groups.google.com/support/?hl=en_US>, <mailto:classic-rendezvous-lightweight-vintage-bicycles+help@googlegroups.com>
+List-Archive: <http://groups.google.com/group/classic-rendezvous-lightweight-vintage-bicycles?hl=en_US>
+Sender: classic-rendezvous-lightweight-vintage-bicycles@googlegroups.com
+List-Unsubscribe: <http://groups.google.com/group/classic-rendezvous-lightweight-vintage-bicycles/subscribe?hl=en_US>,
+ <mailto:classic-rendezvous-lightweight-vintage-bicycles+unsubscribe@googlegroups.com>
+Content-Type: multipart/alternative;
+ boundary="--------MB_8CDA00AFD4BECFB_D34_23E9_Webmail-d107.sysops.aol.com"
+Return-Path: classic-rendezvous-lightweight-vintage-bicycles+bncCLO0uJroCxDt2YrrBBoEnaFj1w@googlegroups.com
+X-OriginalArrivalTime: 21 Feb 2011 23:01:53.0092 (UTC) FILETIME=[5453D040:01CBD21B]
+
+----------MB_8CDA00AFD4BECFB_D34_23E9_Webmail-d107.sysops.aol.com
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/html; charset=ISO-8859-1
+
+<font color=3D'rgb(25, 25, 112)' size=3D'2' face=3D'Verdana, Arial, Helveti=
+ca, sans-serif'><font class=3D"Apple-style-span" color=3D"#191970" face=3D"=
+Verdana, Arial, Helvetica, sans-serif" size=3D"2">Hi folks:</font>
+<div style=3D"color: rgb(25, 25, 112); font-family: Verdana, Arial, Helveti=
+ca, sans-serif; font-size: 10pt; "><br>
+</div>
+
+<div style=3D"color: rgb(25, 25, 112); font-family: Verdana, Arial, Helveti=
+ca, sans-serif; font-size: 10pt; ">The process has begun. &nbsp;It looks li=
+ke there will be definite advantages... I just successfully attached a pict=
+ure to a message there, so that will be a huge step up!&nbsp;</div>
+
+<div style=3D"color: rgb(25, 25, 112); font-family: Verdana, Arial, Helveti=
+ca, sans-serif; font-size: 10pt; "><br>
+</div>
+
+<div><font class=3D"Apple-style-span" color=3D"#191970" face=3D"Verdana, Ar=
+ial, Helvetica, sans-serif" size=3D"2">Request: Please put your first and l=
+ast name in the Google group "Nick name" box when signing up. This has been=
+ a&nbsp;</font><font class=3D"Apple-style-span" color=3D"#191970" face=3D"V=
+erdana, Arial, Helvetica, sans-serif">requirement</font><font class=3D"Appl=
+e-style-span" color=3D"#191970" face=3D"Verdana, Arial, Helvetica, sans-ser=
+if" size=3D"2">&nbsp;all along so this will carry over to this new format.<=
+/font></div>
+
+<div><font class=3D"Apple-style-span" color=3D"#191970" face=3D"Verdana, Ar=
+ial, Helvetica, sans-serif" size=3D"2"><br>
+</font></div>
+
+<div><font class=3D"Apple-style-span" color=3D"#191970" face=3D"Verdana, Ar=
+ial, Helvetica, sans-serif" size=3D"2">Here is the new email list home page=
+:</font></div>
+
+<div><font class=3D"Apple-style-span" color=3D"#191970" face=3D"Verdana, Ar=
+ial, Helvetica, sans-serif" size=3D"2"><br>
+</font></div>
+
+<div><font class=3D"Apple-style-span" color=3D"#191970" face=3D"Verdana, Ar=
+ial, Helvetica, sans-serif" size=3D"2"><a href=3D"http://groups.google.com/=
+group/classic-rendezvous-lightweight-vintage-bicycles?hl=3Den_US">http://gr=
+oups.google.com/group/classic-rendezvous-lightweight-vintage-bicycles?hl=3D=
+en_US</a></font></div>
+
+<div style=3D"color: rgb(25, 25, 112); font-family: Verdana, Arial, Helveti=
+ca, sans-serif; font-size: 10pt; "><br>
+</div>
+
+<div style=3D"color: rgb(25, 25, 112); font-family: Verdana, Arial, Helveti=
+ca, sans-serif; font-size: 10pt; ">Thanks</div>
+
+<div style=3D"color: rgb(25, 25, 112); font-family: Verdana, Arial, Helveti=
+ca, sans-serif; font-size: 10pt; ">Dale<br>
+<br>
+
+<div style=3D"clear:both"><font color=3D"black" face=3D"arial" size=3D"2"><=
+font size=3D"2"><font face=3D"Arial, Helvetica, sans-serif">Dale Brown<br>
+cycles de ORO, Inc.<br>
+Greensboro, North Carolina &nbsp;USA<br>
+www.classicrendezvous.com<br>
+</font></font></font><br>
+<font color=3D"black" face=3D"arial" size=3D"2"><font size=3D"2"><font face=
+=3D"Arial, Helvetica, sans-serif"><br>
+</font></font></font></div>
+</div>
+</font>
+
+<p></p>
+
+-- <br />
+You received this message because you are subscribed to the Google Groups "=
+Classic Rendezvous lightweight vintage bicycles" group.<br />
+To post to this group, send email to classic-rendezvous-lightweight-vintage=
+-bicycles@googlegroups.com.<br />
+To unsubscribe from this group, send email to classic-rendezvous-lightweigh=
+t-vintage-bicycles+unsubscribe@googlegroups.com.<br />
+
+For more options, visit this group at http://groups.google.com/group/classi=
+c-rendezvous-lightweight-vintage-bicycles?hl=3Den.<br />
+
+
+
+----------MB_8CDA00AFD4BECFB_D34_23E9_Webmail-d107.sysops.aol.com--
+"""
+
+
 def test_empty_payload(client):
     with client.application.app_context():
         msg = read_message_string(EMPTY_MAIL)
@@ -378,13 +557,30 @@ def test_long_url_fix(client):
         html = msg.as_html()
         assert "/<wbr>FoldingATubularTire" in html
 
-def test_extract_text(client):
+def test_extract_text_mixed(client):
     with client.application.app_context():
-        # main type is multipart/alternative with one part being text/html
-        msg = read_message("CR/2011-02/eml-files/classicrendezvous.11102.1586.eml")
+        # main type is multipart/mixed with one part being text/html and
+        # another image/jpeg
+        msg = read_message("CR/2011-02/eml-files/classicrendezvous.11102.1425.eml")
+        assert msg["content-type"].split(";")[0] == "multipart/mixed"
+        payload = msg.extract_text()
+        assert payload.count("I am in need of a Mafac") == 1
+
+def test_extract_related(client):
+    with client.application.app_context():
+        msg = read_message("CR/2011-02/eml-files/classicrendezvous.11102.1408.eml")
+        assert msg["content-type"].split(";")[0] == "multipart/related"
+        payload = msg.extract_text()
+        assert payload.count("Any a youse ever seen this before?") == 1
+
+def test_extract_htmltext(client):
+    with client.application.app_context():
+        # main type is multipart/alternative, but I've removed the text/plain
+        # section, leaving the text/html section.
+        msg = read_message_string(MULTIPART_NO_TEXT_EMAIL)
         assert msg["content-type"].split(";")[0] == "multipart/alternative"
         payload = msg.extract_text()
-        assert payload.count("Let's do that again with my signature.") == 2
+        assert payload.count("The process has begun.") == 1
 
 def test_vintage_trek(client):
     with client.application.app_context():
@@ -474,3 +670,17 @@ def test_add_term(client):
             cur = conn.cursor()
             cur.execute("delete from search_terms where rowid = ?",
                         (rowid,))
+
+
+def test_patch_word_breaks():
+    msg = read_message("CR/2005-07/eml-files/classicrendezvous.10507.0921.eml")
+    raw_body = msg.decode(msg.get_payload(decode=True))
+    patched_body = msg.extract_text()
+    assert " approa\r\nch " in raw_body
+    assert (" approa\r\nch " not in patched_body and
+            " approach " in patched_body)
+
+
+def test_words_exceptions():
+    exc = list(EXCEPTIONS)[0]
+    assert exc not in ALL_WORDS
