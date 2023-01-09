@@ -17,6 +17,7 @@ def strip_footers(payload):
                      strip_cr_index_pwds,
                      strip_mime,
                      strip_bikelist_footer,
+                     strip_google_groups_footer,
                      strip_juno,
                      strip_virus,
                      strip_virgin,
@@ -60,8 +61,23 @@ def strip_mime(payload):
     footer = "---"
     return _strip_helper(payload, header, "s", footer, "mime")
 
+def strip_google_groups_footer(payload):
+    "strip the later CR mailing list footer"
+    # The footer looks like this:
+    #
+    # Classicrendezvous mailing list
+    # Classicrendezvous@bikelist.org
+    #  http://www.bikelist.org/mailman/listinfo/classicrendezvous
+
+    header = "You received this message because you are subscribed to the Google Groups"
+    footer = "For more options, visit this group at http://groups.google.com/group"
+    payload = _strip_helper(payload, header, "s", footer, "Google Groups")
+    if payload.endswith("\n--"):
+        payload = payload[:-2].rstrip()
+    return payload
+
 def strip_bikelist_footer(payload):
-    "strip the CR mailing list footer"
+    "strip the earlier CR mailing list footer"
     # The footer looks like this:
     #
     # Classicrendezvous mailing list
