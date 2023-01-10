@@ -506,8 +506,6 @@ class Message(email.message.EmailMessage):
                 for tgt_msgid in re.findall(r"<[^>]+>", val):
                     x = clean_msgid(tgt_msgid)
                     if x != tgt_msgid:
-                        logging.root.warning("Message-ID found to contain whitespace! %s",
-                                             tgt_msgid)
                         tgt_msgid = x
 
                     if tgt_msgid in last_refs:
@@ -549,6 +547,7 @@ class MessageHierarchy:
     def child_types(self):
         return [kid.content_type for kid in self.children]
 
+DICT_WORDS = all_words(keep_odd=True)
 def patch_word_breaks(text):
     "reconstruct words which cross CRLF boundaries"
     # see CR/2005-07/eml-files/classicrendezvous.10507.0921.eml, where we
@@ -569,7 +568,6 @@ def patch_word_breaks(text):
     # Maybe it's an archaic British spelling of "through." So, perhaps that
     # isn't the best test case. :-/
 
-    dict_words = all_words(keep_odd=True)
     punctset = set(re.sub("[-_]", "", string.punctuation))
     # We are willing to skip over multiple spaces, but it seems the CRLF breaks
     # between words are only single line breaks.
@@ -587,10 +585,10 @@ def patch_word_breaks(text):
             frag3 = frag3[:-1]
         if not frag1 or not frag3:
             continue
-        if frag1.lower() in dict_words:
+        if frag1.lower() in DICT_WORDS:
             continue
         word = (frag1+frag3).lower()
-        if word in dict_words or word[-1] == "s" and word[:-1] in dict_words:
+        if word in DICT_WORDS or word[-1] == "s" and word[:-1] in DICT_WORDS:
             # eprint((off1, frag1, frag2, frag3, frag1+frag3))
             del_crlf.append(off2)
     for offset in reversed(del_crlf):
