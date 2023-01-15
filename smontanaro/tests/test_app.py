@@ -19,7 +19,8 @@ from smontanaro.util import (read_message, read_message_string, parse_from,
                              trim_subject_prefix, eprint, open_, all_words,
                              EXCEPTIONS)
 from smontanaro.views import MessageFilter, eml_file, query_index, next_msg
-from smontanaro.strip import strip_footers, strip_leading_quotes
+from smontanaro.strip import (strip_footers, strip_leading_quotes,
+                              rewrite_ebay_urls)
 from smontanaro.srchdb import (ensure_search_db, get_page_fragments,
                                add_term, have_term)
 
@@ -153,7 +154,6 @@ def test_under_paren_urlmap(client):
     with client.application.app_context():
         filt = MessageFilter(msg)
         filt.filter_message(msg)
-        filt.delete_empty_parts()
         text = msg.as_html()
         # need to mimic the path splitting of long urls (see Message.map_url)
         split = (urllib.parse.urlsplit(url))
@@ -175,7 +175,6 @@ def test_message_strip(client):
     with client.application.app_context():
         filt = MessageFilter(msg)
         filt.filter_message(msg)
-        filt.delete_empty_parts()
         assert "yellowpages.lycos.com" not in msg.as_string()
 
 def test_message_strip_same_header_footer(client):
@@ -184,7 +183,6 @@ def test_message_strip_same_header_footer(client):
     with client.application.app_context():
         filt = MessageFilter(msg)
         filt.filter_message(msg)
-        filt.delete_empty_parts()
         assert "virginmedia.com" not in msg.as_string()
 
 def test_next_msg(client):
@@ -684,3 +682,11 @@ def test_patch_word_breaks():
 def test_words_exceptions():
     exc = list(EXCEPTIONS)[0]
     assert exc not in all_words(keep_odd=True)
+
+
+def test_rewrite_ebay_urls():
+    for url in (
+        "http://cgi.ebay.com/1974-Masi-Prestige-Cronometro-Campagnolo_W0QQitemZ120316303908QQcmdZViewItem?hash=item120316303908&_trkparms=72%3A1423%7C39%3A1%7C66%3A2%7C65%3A12%7C240%3A1318&_trksid=p3286.c0.m14",
+        ):
+        line = f"pfx{url}sfx\r\npfx"
+        assert rewrite_ebay_urls(line) == "pfxhttp://ebay.com/<blah>\r\npfx"
