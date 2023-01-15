@@ -296,7 +296,6 @@ def email_to_html(year, month, seq, note=""):
 
     filt = MessageFilter(message)
     filt.filter_message(message)
-    filt.delete_empty_parts()
 
     refdb = current_app.config["REFDB"]
     return render_template("cr.jinja", title=title, page_title=clean,
@@ -675,7 +674,6 @@ class MessageFilter:
     "filter various uninteresting bits from messages"
     def __init__(self, message):
         self.message = message
-        self.to_delete = []
         self.seen_parts = set()
 
     def filter_message(self, message):
@@ -697,19 +695,7 @@ class MessageFilter:
             payload = message.decode(payload)
             payload = strip_footers(payload)
             part.set_payload(payload)
-            if not payload and part is not self.message:
-                self.to_delete.append(part)
 
-    def delete_empty_parts(self):
-        "if we emptied out parts, remove them altogether"
-        if not self.to_delete:
-            return
-        for part in self.message.walk():
-            if part.is_multipart():
-                payload = part.get_payload()
-                for todel in self.to_delete:
-                    if todel in payload:
-                        payload.remove(todel)
 
 def init_app(app):
     with app.app_context():
