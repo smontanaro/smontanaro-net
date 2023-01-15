@@ -31,8 +31,25 @@ def strip_footers(payload):
             # eprint(func.__name__)
             new_payload = func(new_payload)
         if new_payload == payload:
-            return payload
+            return rewrite_ebay_urls(payload)
         payload = new_payload
+
+
+EBAY_PAT = re.compile("(https?://.*ebay[.]com[^/]*"
+                      "(?:/*[^?\r\n]*)?"                # path
+                      "(?:[?][^&\r\n]*"                 # first param
+                      "(?:&[^&\r\n]*)*)?"               # successive params
+                      ")")
+def rewrite_ebay_urls(payload):
+    "all ebay urls will be defunct, so shorten the heck out of them."
+    # example:
+    #   http://cgi.ebay.com/1974-Masi...hash=item120316303908...
+    # which we want to rewrite to:
+    #   https://www.ebay.com/itm/120316303908
+
+    # Unfortunately, there are plenty of variations, so I think I'll just
+    # convert anything to "http://www.ebay.com/<blah>".
+    return EBAY_PAT.sub("http://ebay.com/<blah>", payload)
 
 
 def strip_leading_quotes(payload):
