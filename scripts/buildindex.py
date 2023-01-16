@@ -5,62 +5,70 @@
 import csv
 import getopt
 import html
-import logging
 import os
-import re
 import string
 import sys
 
 import regex as re
 from textblob import TextBlob
+from textblob.classifiers import NaiveBayesClassifier
 
 from smontanaro.util import (read_message, trim_subject_prefix,
-                             eprint, parse_from)
+                             eprint, parse_from, read_words, all_words)
 from smontanaro.strip import strip_footers, strip_leading_quotes, CRLF
 
 from smontanaro.srchdb import ensure_search_db, have_term, add_term
 
 
 def main():
-    opts, args = getopt.getopt(sys.argv[1:], "h")
-    for opt, _arg in opts:
+    opts, args = getopt.getopt(sys.argv[1:], "ht:")
+    classifier = None
+    for opt, arg in opts:
+        if opt == "t":
+            with open(arg, "r", encoding="utf-8") as fp:
+                classifier = NaiveBayesClassifier(fp, format="csv")
         if opt == "-h":
             eprint("sorry, no help yet")
             return 0
 
     conn = ensure_search_db(args[0])
     last = ""
+    n = 0
+    cur = conn.cursor()
+    cur.execute("begin")
     for f in sys.stdin:
         parts = f.split("/")
         if parts[1] != last:
             eprint(">>>", parts[1])
             last = parts[1]
-        process_file(f.strip(), conn)
+        process_file(f, cur, classifier)
+        n += 1
+        if n % 50 == 0:
+            conn.commit()
+            cur.execute("begin")
+    conn.commit()
 
+    cur.execute("begin")
     postprocess_db(conn)
-
-    total = ones = twos = 0
-    cur = conn.cursor()
-    for count in cur.execute("select count(fs.fragment)"
-                             " from search_terms st, file_search fs"
-                             "  where fs.reference = st.rowid"
-                             "  group by fs.reference"
-                             "  order by st.term"):
-        total += 1
-        if count == 1:
-            ones += 1
-        elif count == 2:
-            twos += 1
-
-    eprint(f"{ones} terms with just one ref.")
-    eprint(f"{twos} terms with just two refs.")
-    eprint(f"{total} total terms.")
+    conn.commit()
 
     return 0
 
 
+def filter_positive(cl, text):
+    "Only use sentences which score positive with the NaiveBayesClassifier"
+    positive = []
+    blob = TextBlob(text)
+    upper = 0.65
+    for sent in blob.sentences:
+        prob_dist = cl.prob_classify(sent)
+        if prob_dist.prob("pos") >= upper:
+            positive.append(sent)
+    return "\r\n\r\n".join(positive)
+
+
 QUOTED = re.compile(r'''\s*"(.*)"\s*$''')
-def process_file(f, conn):
+def process_file(f, cur, classifier):
     "extract bits from one file"
     f = f.strip()
     msg = read_message(f)
@@ -70,6 +78,9 @@ def process_file(f, conn):
     if not payload:
         return
 
+    if classifier is not None:
+        payload = filter_positive(classifier, payload)
+
     subject = trim_subject_prefix(msg["subject"])
     mat = QUOTED.match(subject)
     if mat is not None:
@@ -77,8 +88,6 @@ def process_file(f, conn):
         subject = mat.group(1)
     if subject:
         payload = f"{subject}{CRLF}{CRLF}{payload}"
-    cur = conn.cursor()
-    cur.execute("begin")
     for term in get_terms(strip_leading_quotes(strip_footers(payload))):
         rowid = add_term(term, cur)
         fragment = create_fragment(payload, term)
@@ -86,8 +95,9 @@ def process_file(f, conn):
             cur.execute("insert into file_search"
                         " (filename, fragment, reference) values (?, ?, ?)",
                         (f, fragment, rowid))
-            if cur.lastrowid % 10000 == 0:
-                eprint(cur.lastrowid)
+            lastrowid = cur.lastrowid
+            if lastrowid % 10000 == 0:
+                eprint(lastrowid)
 
     (sender, addr) = parse_from(msg["from"])
 
@@ -102,7 +112,6 @@ def process_file(f, conn):
                     (f, "", rowid))
         if cur.lastrowid % 10000 == 0:
             eprint(cur.lastrowid)
-    cur.execute("commit")
 
 
 def create_fragment(payload, term):
@@ -121,18 +130,6 @@ def create_fragment(payload, term):
     return re.sub(r"\s+", " ", fragment)
 
 
-def read_words(word_file):
-    words = set()
-    with open(word_file, "r", encoding="utf-8") as wf:
-        for word in wf:
-            if (len(word) < 4 or
-                word[0] in string.ascii_uppercase or
-                set(word) & PUNCTSET):
-                continue
-            words.add(word.lower().strip())
-    return words
-
-
 def read_csv(csv_file):
     "read a CSV file but return as single dict, not list of dicts"
     records = {}
@@ -146,19 +143,6 @@ def read_csv(csv_file):
 def common_words():
     word_file = os.path.join(os.path.dirname(__file__), "common-words.txt")
     return read_words(word_file)
-
-
-def all_words():
-    dictionaries = [
-        "/usr/share/dict/american-english-large",
-        "/usr/share/dict/american-english",
-        "/usr/share/dict/words",
-    ]
-    for word_file in dictionaries:
-        if os.path.exists(word_file):
-            return read_words(word_file)
-
-    raise ValueError("no dictionary found")
 
 
 def preprocess(phrase):
@@ -322,7 +306,6 @@ def postprocess_db(conn):
 
     refs = []
     cur = conn.cursor()
-    cur.execute("begin")
     for (term, count) in cur.execute("select st.term, count(fs.fragment)"
                                      " from search_terms st, file_search fs"
                                      "  where fs.reference = st.rowid"
@@ -355,7 +338,6 @@ def postprocess_db(conn):
         cur.execute("update file_search"
                     "  set reference = ?"
                     "  where reference = ?", (newid, oldid))
-    cur.execute("commit")
 
     for (term, count) in cur.execute("select st.term, count(fs.fragment)"
                                      " from search_terms st, file_search fs"
@@ -369,12 +351,56 @@ def postprocess_db(conn):
             " " not in term and len(term) > 20):
             to_delete.add(term)
 
+    # zap terms...
+    #   containing characters outside the printable ascii range
+    nonprint = set(chr(i) for i in range(128, 256))
+    nonprint |= set(chr(i) for i in range(0, ord(' ')))
+    #   or anything beginning with punctuation
+    punct = set(string.punctuation)
+    #   or ending with punctuation other than periods
+    punct_nodot = punct - set(".")
+    #   or anything that looks like a (US) phone number
+    phonepat = re.compile(r"[0-9]{3,3}[-.][0-9]{3,3}[-.][0-9]{4,4}")
+
+    # those items ending in period will just have the period zapped.
+    end_in_dot = set()
+
+    for (term,) in cur.execute("select term from search_terms"
+                            "  where term not like 'from:%'"):
+        if (set(term) & nonprint or
+            term[0] in punct or
+            term[-1] in punct_nodot or
+            phonepat.search(term) is not None):
+            to_delete.add(term)
+        elif term[-1] == ".":
+            end_in_dot.add((term, term[:-1]))
+
     # belt and suspenders
     to_delete.add("")
 
+    move_terms(end_in_dot, conn)
     delete_exceptions(to_delete, conn)
-
     delete_unreferenced_terms(conn)
+
+def move_terms(from_to, conn):
+    "move terms from undesirable value to more desirable real estate."
+    eprint("moving some terms")
+    # We don't really move them, just change the
+    # reference. delete_referenced_items will then take care of eliminating the
+    # now orphaned terms.
+    cur = conn.cursor()
+    for (old, new) in from_to:
+        try:
+            (old_rowid,) = cur.execute("select rowid from search_terms"
+                                       "  where term = ?", (old,)).fetchone()
+        except TypeError:
+            eprint("can't find term:", old)
+            continue
+        new_rowid = add_term(new, cur)
+        if old.startswith("camp"):
+            eprint(f"{old} ({old_rowid}) -> {new} ({new_rowid})")
+        cur.execute("update file_search set reference = ?"
+                    "  where reference = ?", (new_rowid, old_rowid))
 
 
 def delete_unreferenced_terms(conn):
@@ -394,13 +420,11 @@ def delete_unreferenced_terms(conn):
     to_delete = list(to_delete)
     chunksize = 10000
     while to_delete:
-        cur.execute("begin")
         ids, to_delete = tuple(to_delete[:chunksize]), to_delete[chunksize:]
         n += chunksize
         qmarks = ", ".join(["?"] * len(ids))
         cur.execute(f"delete from search_terms where rowid in ({qmarks})", ids)
         eprint(n)
-        cur.execute("commit")
 
 
 def delete_exceptions(to_delete, conn):
@@ -412,7 +436,6 @@ def delete_exceptions(to_delete, conn):
     n = 0
     chunksize = 10000
     while to_delete:
-        cur.execute("begin")
         terms, to_delete = tuple(to_delete[:chunksize]), to_delete[chunksize:]
         n += chunksize
         qmarks = ", ".join(["?"] * len(terms))
@@ -427,7 +450,6 @@ def delete_exceptions(to_delete, conn):
         cur.execute("delete from search_terms"
                     f"  where rowid in ({qmarks})", rowids)
         eprint(n)
-        cur.execute("commit")
 
 
 COMMON_WORDS = common_words()
