@@ -21,6 +21,10 @@ dateit () {
     done
 }
 
+if [ -d search_cache ] ; then
+    rm -r search_cache
+fi
+
 export PORT=5001 HOST=localhost
 (DOCOVER=true bash $(dirname $0)/run.sh 2>&1 | dateit > /tmp/$$.tmp) &
 sleep 2
