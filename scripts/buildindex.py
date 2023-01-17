@@ -458,11 +458,14 @@ EXCEPTIONS = read_csv(os.path.join(os.path.dirname(__file__),
                                    "buildindex.exc"))
 
 
+TERM_PAT = re.compile(r"[A-Za-z][-/a-z0-9]{2,}"
+                      r"(?:\s+[A-Za-z][-'/a-z0-9]+)*")
+DIMENSION_PAT = re.compile(r"[0-9]+[a-z]+$")
 def get_terms(text):
     "yield a series of words matching desired pattern"
-    pat = re.compile(r"[A-Za-z][-/a-z0-9]{2,}"
-                     r"(?:\s+[A-Za-z][-'/a-z0-9]+)*")
     seen = set()
+    tpat = TERM_PAT
+    dpat = DIMENSION_PAT
     for phrase in set(TextBlob(text).noun_phrases):
         lphrase = phrase.lower()
         # common bits embedded in cc'd and forwarded messages.
@@ -471,7 +474,7 @@ def get_terms(text):
         # not sure where these come from, but there are plenty. delete for now.
         if lphrase[0:3] == "'s " or len(lphrase) == 1:
             continue
-        if pat.match(phrase) is None:
+        if tpat.match(phrase) is None:
             # print("   nm:", repr(phrase))
             continue
 
@@ -480,18 +483,31 @@ def get_terms(text):
             # extraordinarily long multi-word phrases
             continue
 
-        if (" " not in phrase and (len(phrase) < 4 or len(phrase) > 20) or
-            " " in phrase and len(phrase) < 7):
+        phrase_len = len(phrase)
+        if (" " not in phrase and (phrase_len < 4 or phrase_len > 20) or
+            " " in phrase and phrase_len < 7):
             # too short or long one-word phrases
             continue
 
         words = phrase.split()
-        while words:
+        # Always keep the full phrase
+        if phrase not in seen:
+            seen.add(phrase)
+            yield phrase
+
+        # and the first word, if it matches DIMENSION_PAT (useful stuff like
+        # 126mm, 130bcd, etc).
+        if words[0] not in seen and dpat.match(words[0]) is not None:
+            seen.add(words[0])
+            yield words[0]
+
+        # and any leading subphrases of at least two words.
+        while len(words) > 2:
+            del words[-1]
             subphrase = " ".join(words)
             if subphrase not in seen:
                 seen.add(subphrase)
                 yield subphrase
-            del words[-1]
 
 
 if __name__ == "__main__":
