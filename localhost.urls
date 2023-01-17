@@ -29,6 +29,8 @@ http://localhost:8080/request/junk
 http://localhost:8080/request/HTTP_USER_AGENT
 # search
 http://localhost:8080/search?query=Baylis
+# second time to exercise query cache
+http://localhost:8080/search?query=Baylis
 http://localhost:8080/CR/query
 # topics
 http://localhost:8080/CR/topics/BVVW

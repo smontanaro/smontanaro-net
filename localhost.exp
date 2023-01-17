@@ -32,6 +32,9 @@ WARNING:root:Can't render images
 127.0.0.1 - - "GET /request/HTTP_USER_AGENT HTTP/1.1" 200 <size> "-" curl/7.NN
 # search
 127.0.0.1 - - "GET /search?query=Baylis HTTP/1.1" 200 <size> "-" curl/7.NN
+# second time to exercise query cache
+127.0.0.1 - - "GET /search?query=Baylis HTTP/1.1" 200 <size> "-" curl/7.NN
+127.0.0.1 - - "GET /CR/query HTTP/1.1" 200 <size> "-" curl/7.NN
 # topics
 127.0.0.1 - - "GET /CR/topics/BVVW HTTP/1.1" 200 <size> "-" curl/7.NN
 127.0.0.1 - - "GET /CR/topics HTTP/1.1" 200 <size> "-" curl/7.NN
