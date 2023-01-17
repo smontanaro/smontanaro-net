@@ -588,7 +588,7 @@ def test_vintage_trek(client):
 
 def test_query_get(client):
     with client.application.app_context():
-        rv = client.get("/CR/query?page=3&query='faliero+masi'&size=20")
+        rv = client.get("/CR/query?page=3&query=faliero+masi&size=20")
         assert rv.status_code == 200
 
 
