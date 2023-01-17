@@ -651,10 +651,13 @@ def test_open_():
     os.close(fd)
     with open_(f"{name}.gz", "wb") as fobj:
         fobj.write(b"Hello World!")
+    with open_(f"{name}.gz", "rb") as fobj:
+        assert fobj.read() == b"Hello World!"
     os.unlink(f"{name}.gz")
 
 
 def test_add_term(client):
+    eprint("Hello World!", file=open_(os.devnull, "w"), dt="")
     with client.application.app_context():
         rowid = 0
         try:
