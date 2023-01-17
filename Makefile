@@ -38,7 +38,7 @@ $(REFDB).new : FORCE
 
 lint : FORCE
 	-MYPYPATH=typeshed mypy $(PY_SRC)
-	-bandit $(PY_SRC)
+	-TERM=dumb bandit $(PY_SRC)
 	-pylint --rcfile=.pylintrc $(PY_SRC)
 
 test : FORCE
