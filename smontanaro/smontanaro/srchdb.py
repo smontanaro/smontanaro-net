@@ -52,11 +52,17 @@ def ensure_indexes(conn):
 def get_page_fragments(conn, term):
     "return list (filename, fragment) tuples matching term"
     cur = conn.cursor()
+    filenames = set()
     for (filename, fragment) in cur.execute(
-        "select filename, fragment from file_search fs, search_terms st"
-        "  where st.term = ?"
-        "    and st.rowid = fs.reference", (term,)):
-        yield (filename, fragment)
+        "select distinct filename, fragment"
+        "  from file_search fs, search_terms st"
+        "  where (st.term like ? or st.term like ? or st.term = ?)"
+        "    and st.rowid = fs.reference", (f"% {term}", f"{term} %", term,)):
+        # with the more generous term matching we can get multiple fragments
+        # per filename. Just return one, which isn't terribly important.
+        if filename not in filenames:
+            filenames.add(filename)
+            yield (filename, fragment)
 
 
 def have_term(term, cur=None):
