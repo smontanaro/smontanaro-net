@@ -11,7 +11,7 @@ import sys
 
 import regex as re
 
-from smontanaro.log imoprt eprint
+from smontanaro.log import eprint
 from smontanaro.util import (Message, read_message, clean_msgid,
                              trim_subject_prefix)
 
