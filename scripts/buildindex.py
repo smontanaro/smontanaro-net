@@ -13,11 +13,12 @@ import regex as re
 from textblob import TextBlob
 from textblob.classifiers import NaiveBayesClassifier
 
-from smontanaro.util import (read_message, trim_subject_prefix,
-                             eprint, parse_from, read_words, all_words)
+from smontanaro.log import eprint
+from smontanaro.srchdb import ensure_search_db, have_term, add_term
 from smontanaro.strip import strip_footers, strip_leading_quotes, CRLF
 
-from smontanaro.srchdb import ensure_search_db, have_term, add_term
+from smontanaro.util import (read_message, trim_subject_prefix,
+                             parse_from, read_words, all_words)
 
 
 def main():
@@ -118,7 +119,10 @@ def create_fragment(payload, term):
     "get a fragment of text from the message matching the term"
     pad = ".{2,25}"
     try:
-        mat = re.search(fr"({pad})({re.escape(term).replace(' ', 's*')})({pad})", payload, re.I)
+        mat = re.search(fr"({pad})"
+                        fr"({re.escape(term).replace(' ', 's*')})"
+                        fr"({pad})",
+                        payload, re.I)
     except re.error:
         eprint(pad, term, type(payload))
         raise
@@ -362,8 +366,8 @@ def postprocess_db(conn):
     #   or anything that looks like a (US) phone number
     phonepat = re.compile(r"[0-9]{3,3}[-.][0-9]{3,3}[-.][0-9]{4,4}")
 
-    # those items ending in period will just have the period zapped.
-    end_in_dot = set()
+    wordspat = re.compile(r"([a-z]+) .$")
+    move_these = set()
 
     for (term,) in cur.execute("select term from search_terms"
                             "  where term not like 'from:%'"):
@@ -373,12 +377,16 @@ def postprocess_db(conn):
             phonepat.search(term) is not None):
             to_delete.add(term)
         elif term[-1] == ".":
-            end_in_dot.add((term, term[:-1]))
+            # trim trailing periods
+            move_these.add((term, term[:-1]))
+        elif (mat := wordspat.match(term)) is not None:
+            # toss last "word" if it's a single character
+            move_these.add((term, mat.group(1)))
 
     # belt and suspenders
     to_delete.add("")
 
-    move_terms(end_in_dot, conn)
+    move_terms(move_these, conn)
     delete_exceptions(to_delete, conn)
     delete_unreferenced_terms(conn)
 
@@ -423,7 +431,7 @@ def delete_unreferenced_terms(conn):
         ids, to_delete = tuple(to_delete[:chunksize]), to_delete[chunksize:]
         n += chunksize
         qmarks = ", ".join(["?"] * len(ids))
-        cur.execute(f"delete from search_terms where rowid in ({qmarks})", ids)
+        cur.execute(f"delete from search_terms where rowid in ({qmarks})", ids) # nosec
         eprint(n)
 
 
@@ -439,15 +447,15 @@ def delete_exceptions(to_delete, conn):
         terms, to_delete = tuple(to_delete[:chunksize]), to_delete[chunksize:]
         n += chunksize
         qmarks = ", ".join(["?"] * len(terms))
-        cur.execute("select distinct rowid from search_terms"
+        cur.execute("select distinct rowid from search_terms"   # nosec
                     f"  where term in ({qmarks})", terms)
         rowids = tuple(x[0] for x in cur.fetchall())
         if not rowids:
             continue
         qmarks = ", ".join(["?"] * len(rowids))
-        cur.execute("delete from file_search"
+        cur.execute("delete from file_search"   # nosec
                     f"  where reference in ({qmarks})", rowids)
-        cur.execute("delete from search_terms"
+        cur.execute("delete from search_terms"                    # nosec
                     f"  where rowid in ({qmarks})", rowids)
         eprint(n)
 
