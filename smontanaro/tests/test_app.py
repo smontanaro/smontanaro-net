@@ -13,16 +13,17 @@ import pytest
 from flask import session
 
 from smontanaro import create_app
-from smontanaro.refdb import ensure_db
 from smontanaro.dates import parse_date
-from smontanaro.util import (read_message, read_message_string, parse_from,
-                             trim_subject_prefix, eprint, open_, all_words,
-                             EXCEPTIONS)
-from smontanaro.views import MessageFilter, eml_file, query_index, next_msg
-from smontanaro.strip import (strip_footers, strip_leading_quotes,
-                              rewrite_ebay_urls)
+from smontanaro.log import eprint
+from smontanaro.refdb import ensure_db
 from smontanaro.srchdb import (ensure_search_db, get_page_fragments,
                                add_term, have_term)
+from smontanaro.strip import (strip_footers, strip_leading_quotes,
+                              rewrite_ebay_urls)
+from smontanaro.util import (read_message, read_message_string, parse_from,
+                             trim_subject_prefix, open_, all_words,
+                             EXCEPTIONS)
+from smontanaro.views import MessageFilter, eml_file, query_index, next_msg
 
 @pytest.fixture
 def client():

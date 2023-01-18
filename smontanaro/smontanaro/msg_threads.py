@@ -11,8 +11,9 @@ import sys
 
 import regex as re
 
+from smontanaro.log imoprt eprint
 from smontanaro.util import (Message, read_message, clean_msgid,
-                             trim_subject_prefix, eprint)
+                             trim_subject_prefix)
 
 class TMessage:
     "JWZ's Message object"
