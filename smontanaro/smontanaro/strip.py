@@ -4,7 +4,7 @@
 
 import regex as re
 
-# from .util import eprint
+# from .log import eprint
 
 QUOTE_PAT = r'(?:(?:>\s?)*)?'
 CRLF = "\r\n"
@@ -189,12 +189,12 @@ def _strip_helper(payload, start, style, end, tag):
     ematch = re.compile(f"{QUOTE_PAT}{end}", flags=e_flags).match
     for line in lines:
         if state == "start":
-            if smatch(line):
+            if style == "s" and start in line or smatch(line):
                 state = "stripping"
                 continue
             pappend(line)
         else:  # state == "stripping"
-            if ematch(line):
+            if style == "s" and end in line or ematch(line):
                 state = "start"
     return "".join(new_payload)
 
