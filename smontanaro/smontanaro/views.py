@@ -23,13 +23,13 @@ import regex as re
 from wtforms import StringField, HiddenField, SelectField
 from wtforms.validators import DataRequired
 
-from .refdb import ensure_db, get_topics_for, get_random_topic
-from .strip import strip_footers
-# pylint: disable=unused-import
-from .util import (read_message, trim_subject_prefix, eprint, clean_msgid,
-                   make_topic_hierarchy, get_topic, generate_link, open_)
 from .exc import NoResponse
+from .log import eprint
+from .refdb import ensure_db, get_topics_for, get_random_topic
 from .srchdb import ensure_search_db, get_page_fragments
+from .strip import strip_footers
+from .util import (read_message, trim_subject_prefix, clean_msgid,
+                   make_topic_hierarchy, get_topic, generate_link, open_)
 
 SEARCH = {
     "DuckDuckGo": "https://duckduckgo.com/",
@@ -65,15 +65,15 @@ def init_simple():
     def sitemap_index():
         "websites need these"
         CR = app.config["CR"]
-        with open(f'''{CR}/generated/sitemap.xml''', encoding="utf-8") as fobj:
+        with open_(f'{CR}/generated/sitemap.xml', encoding="utf-8") as fobj:
             return fobj.read()
 
     @app.route("/CR/<year>/<month>/sitemap.xml")
     def sitemap_by_month(year, month):
         "websites need these"
         CR = app.config["CR"]
-        with open(f'''{CR}/{year}-{month}/generated/sitemap.xml''',
-                  encoding="utf-8") as fobj:
+        with open_(f'{CR}/{year}-{month}/generated/sitemap.xml',
+                   encoding="utf-8") as fobj:
             return fobj.read()
 
     @app.route('/CR/<year>/<month>/mybikes')
@@ -136,8 +136,8 @@ def init_indexes():
         next_url = month_url(year, month, +1, "dates")
 
         title = f"{date.strftime('%b %Y Date Index')}"
-        with open(f'''{CR}/{date.strftime("%Y-%m")}/generated/dates.body''',
-                  encoding="utf-8") as fobj:
+        with open_(f'{CR}/{date.strftime("%Y-%m")}/generated/dates.body',
+                   encoding="utf-8") as fobj:
             body = fobj.read()
 
         return render_template("dates.jinja", title=title, body=body,
@@ -156,8 +156,8 @@ def init_indexes():
         next_url = month_url(year, month, +1, "threads")
 
         title = date.strftime("%b %Y Thread Index")
-        with open(f'''{CR}/{date.strftime("%Y-%m")}/generated/threads.body''',
-                  encoding="utf-8") as fobj:
+        with open_(f'{CR}/{date.strftime("%Y-%m")}/generated/threads.body',
+                   encoding="utf-8") as fobj:
             body = fobj.read()
 
         return render_template("threads.jinja", title=title, body=body,
@@ -202,7 +202,7 @@ def init_indexes():
 #         opts.plot_file = plotfile
 #         opts.bg_spec = [["timestamp", "status", 1, "skyblue"],
 #                         ["timestamp", "status", 0, "lightgreen"]]
-#         with open(mapfile, encoding="utf-8") as mapf:
+#         with open_(mapfile, encoding="utf-8") as mapf:
 #             mpl.plot(opts, csv.DictReader(mapf))
 #         return render_template("bhindex.jinja",
 #                                title="Beach House Power History")
@@ -221,9 +221,9 @@ def init_indexes():
 #     def add_bh_record(now, status, temp=None):
 #         "Add a record to the Beach House CSV file."
 #         mapfile = os.path.join(crdir, "bhuptime.csv")
-#         with open(mapfile, encoding="utf-8") as mapf:
+#         with open_(mapfile, encoding="utf-8") as mapf:
 #             fnames = csv.DictReader(mapf).fieldnames
-#         with open(mapfile, "a", encoding="utf-8") as mapf:
+#         with open_(mapfile, "a", encoding="utf-8") as mapf:
 #             writer = csv.DictWriter(mapf, fieldnames=fnames)
 #             writer.writerow({
 #                 "timestamp": now,
@@ -257,7 +257,7 @@ def init_cr():
             index = os.path.join(CR, "generated", "cache", cache)
         else:
             index = f"{CR}/generated/index.body"
-        with open(index, encoding="utf8") as fobj:
+        with open_(index, encoding="utf8") as fobj:
             return render_template("crtop.jinja", body=fobj.read(),
                                    title="Old Classic Rendezvous Archive")
 
@@ -547,7 +547,7 @@ def init_topics():
                         "unknown")
         writeheader = (not os.path.exists(topicfile) or
                        os.path.getsize(topicfile) == 0)
-        with open(topicfile, "a", encoding="utf-8") as fobj:
+        with open_(topicfile, "a", encoding="utf-8") as fobj:
             writer = csv.DictWriter(fobj, fieldnames)
             if writeheader:
                 writer.writeheader()
