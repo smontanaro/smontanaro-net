@@ -3,11 +3,18 @@
 """search index database bits for CR archive"""
 
 import os
+import pickle                             # nosec
 import sqlite3
+import tempfile
 
 from flask import current_app
 
 from .dates import convert_ts_bytes
+from .log import eprint
+
+## TODO: This really cries out to be a class. It would allow persistent
+## TODO: connections, measurement of (cached and non-cached) query performance,
+## TODO: and simpler API (not always passing connections or cursors around).
 
 def ensure_search_db(sqldb):
     "make sure the database and its schema exist"
@@ -51,18 +58,69 @@ def ensure_indexes(conn):
 
 def get_page_fragments(conn, term):
     "return list (filename, fragment) tuples matching term"
-    cur = conn.cursor()
-    filenames = set()
-    for (filename, fragment) in cur.execute(
-        "select distinct filename, fragment"
-        "  from file_search fs, search_terms st"
-        "  where (st.term like ? or st.term like ? or st.term = ?)"
-        "    and st.rowid = fs.reference", (f"% {term}", f"{term} %", term,)):
-        # with the more generous term matching we can get multiple fragments
-        # per filename. Just return one, which isn't terribly important.
-        if filename not in filenames:
-            filenames.add(filename)
-            yield (filename, fragment)
+    cached = read_from_cache(term)
+    if not cached:
+        cur = conn.cursor()
+        filenames = set()
+        for (filename, fragment) in cur.execute(
+            "select distinct filename, fragment"
+            "  from file_search fs, search_terms st"
+            "  where (st.term like ? or st.term like ? or st.term = ?)"
+            "    and st.rowid = fs.reference",
+            (f"% {term}", f"{term} %", term,)):
+            # with the more generous term matching we can get multiple
+            # fragments per filename. Just return one, which isn't terribly
+            # important.
+            if filename not in filenames:
+                filenames.add(filename)
+                cached.append((filename, fragment))
+        save_to_cache(term, cached)
+    for (filename, fragment) in cached:
+        yield (filename, fragment)
+
+
+CACHE_DIR = os.path.join(os.environ.get("CRDIR", os.getcwd()),
+                         "search_cache")
+CACHE_INDEX = os.path.join(CACHE_DIR, "index.pkl")
+
+def read_from_cache(term):
+    "look up term in cache and return whatever is there"
+    if not os.path.exists(CACHE_INDEX):
+        eprint(f"cache miss (no index): {term!r}")
+        return []
+    with open(CACHE_INDEX, "rb") as fobj:
+        index = pickle.load(fobj)         # nosec
+    if term in index:
+        try:
+            with open(index[term], "rb") as fobj:
+                eprint(f"cache hit: {term!r}")
+                return pickle.load(fobj)   # nosec
+        except OSError:
+            # remove the offending term
+            del index[term]
+            with open(CACHE_INDEX, "wb") as fobj:
+                pickle.dump(index, fobj)
+    eprint(f"cache miss (missing term): {term!r}")
+    return []
+
+def save_to_cache(term, result):
+    "save search result to cache"
+    if not os.path.exists(CACHE_DIR):
+        os.mkdir(CACHE_DIR)
+    if not os.path.exists(CACHE_INDEX):
+        index = {}
+    else:
+        with open(CACHE_INDEX, "rb") as fobj:
+            index = pickle.load(fobj)     # nosec
+    cache_file = index.get(term)
+    if cache_file is None:
+        (fd, cache_file) = tempfile.mkstemp(dir=CACHE_DIR)
+        os.close(fd)
+        index[term] = cache_file
+    with open(cache_file, "wb") as fobj:
+        pickle.dump(result, fobj)
+    with open(CACHE_INDEX, "wb") as fobj:
+        pickle.dump(index, fobj)
 
 
 def have_term(term, cur=None):
