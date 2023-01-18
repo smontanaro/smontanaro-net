@@ -14,16 +14,16 @@ import os
 import pickle                   # nosec
 import statistics
 import string
-import sys
 import typing
 import urllib.parse
 
-from flask import url_for
+from flask import url_for, current_app
 import html2text
 import regex as re
 
+# from .log import eprint
 from .refdb import ensure_db
-from .srchdb import have_term
+from .srchdb import ensure_search_db, have_term
 from .strip import strip_footers
 
 ZAP_HEADERS = {
@@ -598,8 +598,10 @@ def patch_word_breaks(text):
 
 def generate_from_html(sender, addr):
     "Create links for sender name and email address"
-    have_sender = have_term(f"from:{sender.lower()}")
-    have_addr = have_term(f"from:{addr.lower()}")
+    conn = ensure_search_db(current_app.config["SRCHDB"])
+    cur = conn.cursor()
+    have_sender = have_term(f"from:{sender.lower()}", cur)
+    have_addr = have_term(f"from:{addr.lower()}", cur)
     if have_sender:
         name = urllib.parse.quote_plus(sender)
         sender = html.escape(sender)
@@ -650,7 +652,7 @@ def read_message(path):
             # Cache message for future use - way faster than
             # parsing the message from the .eml file.
             with gzip.open(pckgz, "wb") as pobj:
-                pickle.dump(msg, pobj)
+                pickle.dump(msg, pobj, protocol=pickle.HIGHEST_PROTOCOL)
 
     # This looks so horrid, I will actually fix it here:
     #
@@ -659,11 +661,6 @@ def read_message(path):
     msg.replace_header("Subject", title)
 
     return msg
-
-def eprint(*args, file=sys.stderr, dt="%T", **kwds):
-    if dt:
-        print(datetime.datetime.now().strftime(dt), end=" ", file=file)
-    print(*args, file=file, **kwds)
 
 PFX_MATCHER = re.compile(r"\[classicrendezvous\]"
                          r"|\[cr\]"
@@ -740,8 +737,9 @@ def generate_link(r):
             f''' {sender}''')
 
 
-def open_(f, mode, encoding="utf-8"):
+def open_(f, mode="r", encoding="utf-8"):
     "use ext to decide if we should compress"
+    # TODO: Catch use of binary mode with non-empty encoding.
     if f.endswith(".gz"):
         return gzip.open(f, mode)
     return open(f, mode, encoding=None if "b" in mode else encoding)
