@@ -604,6 +604,37 @@ def test_low_level_query(client):
             raise ValueError("no search results")
 
 
+def test_query_cache(client):
+    # hopefully none of these will already be cached.
+    queries = [
+        "from:aldoross4@siscom.net",
+        "from:brianbaylis@juno.com",
+        "126mm",
+        "80s bikes",
+        "ambrosio stem",
+        "ebay problems",
+        "kof rivendell",
+        "madonna del ghisallo",
+        "mid-range components",
+        "nervex masi",
+        "fausto coppi",
+        ]
+
+    result1 = [0.0, {}]
+    result2 = [0.0, {}]
+    with client.application.app_context():
+        conn = ensure_search_db(client.application.config["SRCHDB"])
+        for result in (result1, result2):
+            start = time.time()
+            for query in queries:
+                result[1][query] = list(get_page_fragments(conn, query))
+            result[0] = time.time() - start
+    # Caching should return the same results ...
+    assert result1[1] == result2[1]
+    # ... but more quickly
+    assert result1[0] > result2[0]
+
+
 def test_from_query(client):
     with client.application.app_context():
         conn = ensure_search_db(client.application.config["SRCHDB"])
