@@ -17,13 +17,13 @@ import string
 import typing
 import urllib.parse
 
-from flask import url_for, current_app
+from flask import url_for
 import html2text
 import regex as re
 
 # from .log import eprint
 from .refdb import ensure_db
-from .srchdb import ensure_search_db, have_term
+from .srchdb import SRCHDB
 from .strip import strip_footers
 
 ZAP_HEADERS = {
@@ -598,10 +598,8 @@ def patch_word_breaks(text):
 
 def generate_from_html(sender, addr):
     "Create links for sender name and email address"
-    conn = ensure_search_db(current_app.config["SRCHDB"])
-    cur = conn.cursor()
-    have_sender = have_term(f"from:{sender.lower()}", cur)
-    have_addr = have_term(f"from:{addr.lower()}", cur)
+    have_sender = SRCHDB.have_term(f"from:{sender.lower()}")
+    have_addr = SRCHDB.have_term(f"from:{addr.lower()}")
     if have_sender:
         name = urllib.parse.quote_plus(sender)
         sender = html.escape(sender)

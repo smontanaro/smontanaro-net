@@ -26,7 +26,7 @@ from wtforms.validators import DataRequired
 from .exc import NoResponse
 from .log import eprint
 from .refdb import ensure_db, get_topics_for, get_random_topic
-from .srchdb import ensure_search_db, get_page_fragments
+from .srchdb import SRCHDB
 from .strip import strip_footers
 from .util import (read_message, trim_subject_prefix, clean_msgid,
                    make_topic_hierarchy, get_topic, generate_link, open_)
@@ -307,14 +307,14 @@ def email_to_html(year, month, seq, note=""):
                            some_topic=get_random_topic(refdb))
 
 
-def query_index(conn, query):
+def query_index(query):
     "use query string to search for matching pages"
     # TBD - a bit of AND and OR connectors
     # TBD - paginate results
 
     pages = []
     # eprint("+++", repr(query), len(query_result))
-    for (page, fragment) in get_page_fragments(conn, query.strip().lower()):
+    for (page, fragment) in SRCHDB.get_page_fragments(query.strip().lower()):
         match = re.match("CR/([0-9]+)-([0-9]+)/eml-files/"
                          "classicrendezvous.[0-9]+.([0-9]+).eml", page)
         if match is None:
@@ -413,7 +413,7 @@ def init_debug():
 def init_search():
     app = current_app
 
-    query_db = ensure_search_db(app.config["SRCHDB"])
+    SRCHDB.set_database(app.config["SRCHDB"])
 
     @app.route('/search', methods=['GET', 'POST'])
     def search():
@@ -437,12 +437,12 @@ def init_search():
             query = urllib.parse.unquote_plus(query)
             page = request.args.get("page", default=1, type=int)
             size = request.args.get("pagesize", default=100, type=int)
-            matches = query_index(query_db, query)
+            matches = query_index(query)
             # eprint("+++", query, len(matches), "GET")
         elif request.method == "POST":
             if query_form.validate_on_submit():
                 query = urllib.parse.unquote_plus(f"{query_form.query.data}")
-                matches = query_index(query_db, query)
+                matches = query_index(query)
                 eprint("+++", query, len(matches), "POST")
             else:
                 # eprint("+++ empty form")

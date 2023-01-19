@@ -16,8 +16,7 @@ from smontanaro import create_app
 from smontanaro.dates import parse_date
 from smontanaro.log import eprint
 from smontanaro.refdb import ensure_db
-from smontanaro.srchdb import (ensure_search_db, get_page_fragments,
-                               add_term, have_term)
+from smontanaro.srchdb import SRCHDB
 from smontanaro.strip import (strip_footers, strip_leading_quotes,
                               rewrite_ebay_urls)
 from smontanaro.util import (read_message, read_message_string, parse_from,
@@ -592,11 +591,9 @@ def test_query_get(client):
         rv = client.get("/CR/query?page=3&query=faliero+masi&size=20")
         assert rv.status_code == 200
 
-
 def test_low_level_query(client):
     with client.application.app_context():
-        conn = ensure_search_db(client.application.config["SRCHDB"])
-        for (filename, fragment) in get_page_fragments(conn, "faliero masi"):
+        for (filename, fragment) in SRCHDB.get_page_fragments("faliero masi"):
             assert filename
             assert fragment
             break
@@ -623,11 +620,10 @@ def test_query_cache(client):
     result1 = [0.0, {}]
     result2 = [0.0, {}]
     with client.application.app_context():
-        conn = ensure_search_db(client.application.config["SRCHDB"])
         for result in (result1, result2):
             start = time.time()
             for query in queries:
-                result[1][query] = list(get_page_fragments(conn, query))
+                result[1][query] = list(SRCHDB.get_page_fragments(query))
             result[0] = time.time() - start
     # Caching should return the same results ...
     assert result1[1] == result2[1]
@@ -637,8 +633,7 @@ def test_query_cache(client):
 
 def test_from_query(client):
     with client.application.app_context():
-        conn = ensure_search_db(client.application.config["SRCHDB"])
-        for (filename, fragment) in get_page_fragments(conn, "from:mark petry"):
+        for (filename, fragment) in SRCHDB.get_page_fragments("from:mark petry"):
             assert filename
             assert not fragment
             break
@@ -648,9 +643,8 @@ def test_from_query(client):
 
 def test_trailing_space_from(client):
     with client.application.app_context():
-        conn = ensure_search_db(client.application.config["SRCHDB"])
-        no_space = list(query_index(conn, "from:dale brown"))
-        tr_space = list(query_index(conn, "from:dale brown "))
+        no_space = list(query_index("from:dale brown"))
+        tr_space = list(query_index("from:dale brown "))
         assert tr_space and no_space and len(no_space) == len(tr_space)
 
 
@@ -694,13 +688,12 @@ def test_add_term(client):
         rowid = 0
         try:
             key = "skip m"
-            rowid = have_term(key)
+            rowid = SRCHDB.have_term(key)
             assert rowid == 0
-            rowid = add_term(key)
+            rowid = SRCHDB.add_term(key)
             assert rowid > 0
         finally:
-            conn = ensure_search_db(client.application.config["SRCHDB"])
-            cur = conn.cursor()
+            cur = SRCHDB.cursor()
             cur.execute("delete from search_terms where rowid = ?",
                         (rowid,))
 

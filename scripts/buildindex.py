@@ -14,12 +14,13 @@ from textblob import TextBlob
 from textblob.classifiers import NaiveBayesClassifier
 
 from smontanaro.log import eprint
-from smontanaro.srchdb import ensure_search_db, have_term, add_term
+from smontanaro.srchdb import SRCHDB
 from smontanaro.strip import strip_footers, strip_leading_quotes, CRLF
 
 from smontanaro.util import (read_message, trim_subject_prefix,
                              parse_from, read_words, all_words)
 
+DB = None
 
 def main():
     opts, args = getopt.getopt(sys.argv[1:], "ht:")
@@ -32,10 +33,10 @@ def main():
             eprint("sorry, no help yet")
             return 0
 
-    conn = ensure_search_db(args[0])
+    SRCHDB.set_database(args[0])
     last = ""
     n = 0
-    cur = conn.cursor()
+    cur = SRCHDB.cursor()
     cur.execute("begin")
     for f in sys.stdin:
         parts = f.split("/")
@@ -45,13 +46,13 @@ def main():
         process_file(f, cur, classifier)
         n += 1
         if n % 50 == 0:
-            conn.commit()
+            SRCHDB.commit()
             cur.execute("begin")
-    conn.commit()
+    SRCHDB.commit()
 
     cur.execute("begin")
-    postprocess_db(conn)
-    conn.commit()
+    postprocess_db()
+    SRCHDB.commit()
 
     return 0
 
@@ -90,7 +91,7 @@ def process_file(f, cur, classifier):
     if subject:
         payload = f"{subject}{CRLF}{CRLF}{payload}"
     for term in get_terms(strip_leading_quotes(strip_footers(payload))):
-        rowid = add_term(term, cur)
+        rowid = SRCHDB.add_term(term)
         fragment = create_fragment(payload, term)
         if fragment:
             cur.execute("insert into file_search"
@@ -107,7 +108,7 @@ def process_file(f, cur, classifier):
                  f"from:{addr.strip().lower()}"):
         if term == "from:":
             continue
-        rowid = add_term(term, cur)
+        rowid = SRCHDB.add_term(term)
         cur.execute("insert into file_search"
                     " (filename, fragment, reference) values (?, ?, ?)",
                     (f, "", rowid))
@@ -175,8 +176,7 @@ def preprocess(phrase):
     return "" if len(phrase) < 5 or len(phrase) > 30 else phrase
 
 
-# pylint: disable=unused-argument
-def merge_plurals(k, conn):
+def merge_plurals(k):
     "map simple plurals to singular"
     # we only want to consider words/phrases if the last word is in the
     # large dictionary - for example, we shouldn't mess with
@@ -195,7 +195,7 @@ def merge_plurals(k, conn):
     return (old, new, "plural")
 
 
-def merge_ing(k, conn):
+def merge_ing(k):
     "map 'ing' endings to base word"
     last = k.split()[-1]
 
@@ -206,28 +206,27 @@ def merge_ing(k, conn):
         # to "bicycl"
         for suffix in ("e", ""):
             if (last[:-3].strip() + suffix in ALL_WORDS and
-                have_term(old[:-3].strip() + suffix, conn)):
+                SRCHDB.have_term(old[:-3].strip() + suffix)):
                 new = old[:-3].strip() + suffix
                 why = "-ing"
                 break
     return (old, new, why)
 
 
-def merge_wrong(k, conn):
+def merge_wrong(k):
     "merge simple truncations"
     last = k.split()[-1]
 
     old = new = k
     if last not in ALL_WORDS:
         for suffix in ("e", "es", "s"):
-            if last + suffix in ALL_WORDS and have_term(k+suffix, conn):
+            if last + suffix in ALL_WORDS and SRCHDB.have_term(k+suffix):
                 new = k + suffix
                 break
     return old, new, "wrong"
 
 
-# pylint: disable=unused-argument
-def merge_exceptions(k, conn):
+def merge_exceptions(k):
     "hand-crafted merge"
     # a CSV file contains 'from' and 'to' columns. The 'from' column can match
     # in two ways, either an exact match for `k` or as an exact match for the
@@ -244,8 +243,7 @@ def merge_exceptions(k, conn):
     return old, new, why
 
 
-# pylint: disable=unused-argument
-def merge_whitespace(k, conn):
+def merge_whitespace(k):
     "strip trailing whitespace and merge if possible"
     old = new = k
     why = "noop"
@@ -257,7 +255,7 @@ def merge_whitespace(k, conn):
 
 
 # pylint: disable=unused-argument
-def strip_nonprint(k, conn):
+def strip_nonprint(k):
     "strip non-printable characters"
     old = new = k
     why = "noop"
@@ -271,8 +269,7 @@ def strip_nonprint(k, conn):
 PUNCT = string.punctuation.replace("-", "")
 PUNCTSET = set(re.sub("[-_]", "", string.punctuation))
 
-# pylint: disable=unused-argument
-def zap_punct(k, conn):
+def zap_punct(k):
     "strip leading or trailing punctuation or whitespace and zap terms with punct & no ' '"
     old = new = k
     why = "noop"
@@ -290,8 +287,7 @@ def zap_punct(k, conn):
     return old, new, why
 
 
-# pylint: disable=unused-argument
-def zap_long_phrases(k, conn):
+def zap_long_phrases(k):
     "mark long phrases for deletion"
     old = k
     why = "noop"
@@ -304,12 +300,12 @@ def zap_long_phrases(k, conn):
     return old, " ".join(words), why
 
 
-def postprocess_db(conn):
+def postprocess_db():
     "final messing around"
     to_delete = set()
 
     refs = []
-    cur = conn.cursor()
+    cur = SRCHDB.cursor()
     for (term, count) in cur.execute("select st.term, count(fs.fragment)"
                                      " from search_terms st, file_search fs"
                                      "  where fs.reference = st.rowid"
@@ -321,14 +317,14 @@ def postprocess_db(conn):
                       merge_wrong, strip_nonprint, zap_punct,
                       zap_long_phrases):
             # pylint: disable=unused-variable
-            old, new, why = merge(old, conn)
+            old, new, why = merge(old)
             if not new:
                 eprint("d:", old)
                 to_delete.add(old)
                 break
             if new != old:
                 eprint(f"pp: {new} |= {old} ({why})")
-                add_term(new, cur)
+                SRCHDB.add_term(new)
                 refs.append((
                     cur.execute("select rowid from search_terms"
                                 "  where term = ?", (new,)).fetchone()[0],
@@ -386,17 +382,17 @@ def postprocess_db(conn):
     # belt and suspenders
     to_delete.add("")
 
-    move_terms(move_these, conn)
-    delete_exceptions(to_delete, conn)
-    delete_unreferenced_terms(conn)
+    move_terms(move_these)
+    delete_exceptions(to_delete)
+    delete_unreferenced_terms()
 
-def move_terms(from_to, conn):
+def move_terms(from_to):
     "move terms from undesirable value to more desirable real estate."
     eprint("moving some terms")
     # We don't really move them, just change the
     # reference. delete_referenced_items will then take care of eliminating the
     # now orphaned terms.
-    cur = conn.cursor()
+    cur = SRCHDB.cursor()
     for (old, new) in from_to:
         try:
             (old_rowid,) = cur.execute("select rowid from search_terms"
@@ -404,16 +400,16 @@ def move_terms(from_to, conn):
         except TypeError:
             eprint("can't find term:", old)
             continue
-        new_rowid = add_term(new, cur)
+        new_rowid = SRCHDB.add_term(new)
         if old.startswith("camp"):
             eprint(f"{old} ({old_rowid}) -> {new} ({new_rowid})")
         cur.execute("update file_search set reference = ?"
                     "  where reference = ?", (new_rowid, old_rowid))
 
 
-def delete_unreferenced_terms(conn):
+def delete_unreferenced_terms():
     eprint("deleting unreferenced terms")
-    cur = conn.cursor()
+    cur = SRCHDB.cursor()
     cur.execute("select rowid from file_search")
     rowids = [x for (x,) in cur.fetchall()]
 
@@ -435,10 +431,10 @@ def delete_unreferenced_terms(conn):
         eprint(n)
 
 
-def delete_exceptions(to_delete, conn):
+def delete_exceptions(to_delete):
     "delete terms we determined aren't worth it."
     eprint(f"deleting {len(to_delete)} sketchy terms")
-    cur = conn.cursor()
+    cur = SRCHDB.cursor()
 
     to_delete = list(to_delete)
     n = 0
