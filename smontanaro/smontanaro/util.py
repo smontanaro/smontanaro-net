@@ -739,7 +739,7 @@ def open_(f, mode="r", encoding=None):
     "use ext to decide if we should compress"
     if "b" in mode and encoding is not None:
         raise ValueError("binary mode doesn't take an encoding argument")
-    elif "b" not in mode and encoding is None:
+    if "b" not in mode and encoding is None:
         encoding = "utf-8"
     if f.endswith(".gz"):
         return gzip.open(f, mode)
