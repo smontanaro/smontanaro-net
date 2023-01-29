@@ -46,4 +46,4 @@ test : FORCE
 
 FORCE :
 
-.PHONY : FORCE all debug
+.PHONY : FORCE all
