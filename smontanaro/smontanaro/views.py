@@ -670,6 +670,7 @@ def eml_file(year, month, seq):
     perl_yr = year - 1900
     return f"classicrendezvous.{perl_yr:3d}{month:02d}.{seq:04d}.eml"
 
+# pylint: disable=too-few-public-methods
 class MessageFilter:
     "filter various uninteresting bits from messages"
     def __init__(self, message):
