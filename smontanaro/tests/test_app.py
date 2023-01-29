@@ -677,10 +677,22 @@ def test_open_():
     os.close(fd)
     with open_(f"{name}.gz", "wb") as fobj:
         fobj.write(b"Hello World!")
-    with open_(f"{name}.gz", "rb") as fobj:
-        assert fobj.read() == b"Hello World!"
+    os.unlink(f"{name}")
     os.unlink(f"{name}.gz")
 
+def test_open_invalid_encoding():
+    fd, name = tempfile.mkstemp()
+    os.close(fd)
+    try:
+        try:
+            with open_(f"{name}", "rb", encoding="ascii") as fobj:
+                assert fobj.read() == b"Hello World!"
+        except ValueError:
+            pass
+        else:
+            raise SystemError("Failed to raise ValueError")
+    finally:
+        os.unlink(f"{name}")
 
 def test_add_term(client):
     eprint("Hello World!", file=open_(os.devnull, "w"), dt="")

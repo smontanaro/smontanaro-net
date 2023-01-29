@@ -735,12 +735,15 @@ def generate_link(r):
             f''' {sender}''')
 
 
-def open_(f, mode="r", encoding="utf-8"):
+def open_(f, mode="r", encoding=None):
     "use ext to decide if we should compress"
-    # TODO: Catch use of binary mode with non-empty encoding.
+    if "b" in mode and encoding is not None:
+        raise ValueError("binary mode doesn't take an encoding argument")
+    elif "b" not in mode and encoding is None:
+        encoding = "utf-8"
     if f.endswith(".gz"):
         return gzip.open(f, mode)
-    return open(f, mode, encoding=None if "b" in mode else encoding)
+    return open(f, mode, encoding=encoding)
 
 
 def init_app(app):
