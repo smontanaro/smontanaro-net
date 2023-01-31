@@ -14,7 +14,7 @@ for yr_mo in 20??-?? ; do
         echo -n "${yr}-${mo}:"
     fi
     for f in threads dates ; do
-        echo -n " <a href='${yr}/${mo}/${f}'>${f}</a>"
+        echo -n " <a href='/CR/${yr}/${mo}/${f}'>${f}</a>"
     done
     echo -n "  </li>"
     echo
