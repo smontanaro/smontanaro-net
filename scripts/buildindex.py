@@ -103,18 +103,28 @@ def process_file(f, cur, classifier):
 
     (sender, addr) = parse_from(msg["from"])
 
-    # from:name & from:someone@somewhere
-    for term in (f"from:{sender.strip().lower()}",
-                 f"from:{addr.strip().lower()}"):
-        if term == "from:":
-            continue
-        rowid = SRCHDB.add_term(term)
-        cur.execute("insert into file_search"
-                    " (filename, fragment, reference) values (?, ?, ?)",
-                    (f, "", rowid))
-        if cur.lastrowid % 10000 == 0:
-            eprint(cur.lastrowid)
+    sub_frags = set([subject])
 
+    # add from:name, from:someone@somewhere, subject:...
+    for term in (f"from:{sender.strip().lower()}",
+                 f"from:{addr.strip().lower()}",
+                 f"subject:{subject.strip().lower()}",):
+        if term in ("from:", "subject:"):
+            continue
+        add_term(term, f, cur)
+
+    for phrase in get_terms(subject):
+        if phrase in sub_frags:
+            continue
+        add_term(f"subject:{phrase}", f, cur)
+
+def add_term(term, f, cur):
+    rowid = SRCHDB.add_term(term)
+    cur.execute("insert into file_search"
+                " (filename, fragment, reference) values (?, ?, ?)",
+                (f, "", rowid))
+    if cur.lastrowid % 10000 == 0:
+        eprint(cur.lastrowid)
 
 def create_fragment(payload, term):
     "get a fragment of text from the message matching the term"
