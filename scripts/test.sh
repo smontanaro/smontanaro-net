@@ -44,6 +44,8 @@ sleep 1
 
 pkill -f gunicorn
 
+PYTHONPATH=smontanaro flask routes | egrep --color=never 'GET|POST' | sort > $ACT
+
 sort localhost.comments /tmp/$$.tmp \
     | sed -e 's/^[0-9][0-9]:[0-9][0-9]:[0-9][0-9][.0-9]* //' \
           -e 's;.../.../....:..:..:.. -..... ;;' \
@@ -52,7 +54,7 @@ sort localhost.comments /tmp/$$.tmp \
           -e 's:"curl/7[.][0-9][0-9].*:curl/7.NN:' \
           -e 's:/[^/]*/skip:~:' \
     | awk -f $(dirname $0)/filter.awk \
-          > $ACT
+          >> $ACT
 rm localhost.comments /tmp/$$.tmp
 
 # Run our official unit tests

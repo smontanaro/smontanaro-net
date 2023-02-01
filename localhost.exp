@@ -1,3 +1,36 @@
+_about            GET        /<year>/<month>/about
+_about            GET        /CR/<year>/<month>/about
+about             GET        /CR/about
+addtopic          GET, POST  /CR/addtopic
+bad_cr            GET        /<year>/<month>/<int:seq>
+cr_index          GET        /CR
+cr_index          GET        /CR/
+cr_index          GET        /CR/<cache>
+cr_index          GET        /CR/index
+cr_index          GET        /CR/index.html
+cr_message        GET        /CR/<year>/<month>/<seq>
+dates             GET        /CR/<year>/<month>
+dates             GET        /CR/<year>/<month>/dates
+favicon           GET        /favicon.ico
+help_             GET        /CR/help
+index             GET        /
+mybikes           GET        /<year>/<month>/mybikes
+mybikes           GET        /CR/<year>/<month>/mybikes
+old_cr            GET        /<year>-<month>/html/<filename>
+python            GET        /python
+query             GET, POST  /CR/query
+req               GET        /request/<header>
+robots            GET        /robots.txt
+search            GET, POST  /search
+show_topics       GET        /CR/topics
+show_topics       GET        /CR/topics/<topic>
+sitemap_by_month  GET        /CR/<year>/<month>/sitemap.xml
+sitemap_index     GET        /sitemap.xml
+static            GET        /static/<path:filename>
+threads           GET        /CR/<year>/<month>/threads
+vintage_trek      GET        /vintage-trek
+vintage_trek      GET        /vintage-trek/
+vintage_trek      GET        /vintage-trek/<path:path>
 [INFO] Starting gunicorn 20.1.0
 [INFO] Using worker: sync
 127.0.0.1 - - "GET /favicon.ico HTTP/1.1" 302 <size> "-" curl/7.NN
@@ -11,6 +44,8 @@
 127.0.0.1 - - "GET /2001-05/html/threads.html HTTP/1.1" 301 <size> "-" curl/7.NN
 127.0.0.1 - - "GET /2003-09/html/maillist.html HTTP/1.1" 301 <size> "-" curl/7.NN
 127.0.0.1 - - "GET /2004-09/html/msg00032.html HTTP/1.1" 301 <size> "-" curl/7.NN
+127.0.0.1 - - "GET /CR/2001/05/threads HTTP/1.1" 200 <size> "-" curl/7.NN
+127.0.0.1 - - "GET /CR/2001/05/ HTTP/1.1" 404 <size> "-" curl/7.NN
 # invalid old-style message url
 127.0.0.1 - - "GET /2004-09/html/msg.html HTTP/1.1" 404 <size> "-" curl/7.NN
 # bogus charset
@@ -47,8 +82,6 @@ WARNING:root:Can't render images
 # bad msg ref
 127.0.0.1 - - "GET /2008/05/1123 HTTP/1.1" 301 <size> "-" curl/7.NN
 # Message-ID reference contains whitespace...
-WARNING:root:Message-ID found to contain whitespace! <21662.209.204.144.231.1160691923.squirrel@webmail.sonic.ne
-t>
 127.0.0.1 - - "GET /CR/2006/10/0542 HTTP/1.1" 200 <size> "-" curl/7.NN
 # Miscellaneous
 127.0.0.1 - - "GET /python HTTP/1.1" 200 <size> "-" curl/7.NN
@@ -60,3 +93,5 @@ t>
 # file doesn't exist
 ERROR:root:File not found: ~/src/smontanaro.net/CR/2000-09/eml-files/classicrendezvous.10009.9999.eml
 127.0.0.1 - - "GET /CR/2000/09/9999 HTTP/1.1" 404 <size> "-" curl/7.NN
+Debug mode enabled.
+[INFO] Shutting down: Master
