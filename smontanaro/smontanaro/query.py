@@ -36,7 +36,7 @@ def reduce_binop(op, p):
 _RULES = [
     [
         'atom',
-        ('STRING', lambda p: ["search", p[0]]),
+        ('STRING', lambda p: ["search", p[0].lower()]),
         ('LPAREN expr RPAREN', lambda p: p[1]),
     ],
     [

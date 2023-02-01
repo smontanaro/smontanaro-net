@@ -314,7 +314,7 @@ def query_index(query):
     # TBD - paginate results
 
     pages = []
-    for (page, fragment) in execute_query(query.strip().lower()):
+    for (page, fragment) in execute_query(query.strip()):
         match = re.match("CR/([0-9]+)-([0-9]+)/eml-files/"
                          "classicrendezvous.[0-9]+.([0-9]+).eml", page)
         if match is None:
