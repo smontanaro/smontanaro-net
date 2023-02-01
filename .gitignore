@@ -3,6 +3,7 @@ __pycache__
 *~
 bin
 lib*
+dist
 pyvenv.cfg
 references.db
 searchindex.db
