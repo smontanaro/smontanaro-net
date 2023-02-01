@@ -86,4 +86,4 @@ def execute_structured_query(query):
                         results.append((page, res1.get(page) or res2.get(page)))
         case _:
             raise ValueError(f"Unrecognized query structure: {query}")
-    return results
+    return sorted(results)
