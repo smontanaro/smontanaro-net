@@ -27,7 +27,7 @@ from .exc import NoResponse
 from .log import eprint
 from .refdb import ensure_db, get_topics_for, get_random_topic
 from .srchdb import SRCHDB
-from .query_parser import parse_query
+from .query import execute_query
 from .strip import strip_footers
 from .util import (read_message, trim_subject_prefix, clean_msgid,
                    make_topic_hierarchy, get_topic, generate_link, open_)
@@ -314,8 +314,7 @@ def query_index(query):
     # TBD - paginate results
 
     pages = []
-    # eprint("+++", repr(query), len(query_result))
-    for (page, fragment) in SRCHDB.get_page_fragments(query.strip().lower()):
+    for (page, fragment) in execute_query(query.strip().lower()):
         match = re.match("CR/([0-9]+)-([0-9]+)/eml-files/"
                          "classicrendezvous.[0-9]+.([0-9]+).eml", page)
         if match is None:
