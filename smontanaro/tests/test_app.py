@@ -581,6 +581,13 @@ def test_query_post_arg(client):
         })
         assert rv.status_code == 200
 
+def test_complex_query(client):
+    with client.application.app_context():
+        rv = client.post("/CR/query", data={
+            "query": "bartali OR coppi",
+        })
+        assert rv.status_code == 200
+
 def test_query_post_empty(client):
     with client.application.app_context():
         rv = client.post("/CR/query", data={})

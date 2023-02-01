@@ -19,6 +19,33 @@ def test_low_level_query(client):
             raise ValueError("no search results")
 
 
+def test_complex_query1(client):
+    with client.application.app_context():
+        # CR/2000/10/0885 (bartali and coppi)
+        # CR/2000/10/0169 (coppi only)
+        # CR/2001/12/0582 (bartali only)
+        filenames = set(res[0] for res in execute_query("bartali OR coppi"))
+        assert "CR/2000-10/eml-files/classicrendezvous.10010.0885.eml" in filenames
+        assert "CR/2000-10/eml-files/classicrendezvous.10010.0169.eml" in filenames
+        assert "CR/2001-12/eml-files/classicrendezvous.10112.0582.eml" in filenames
+        q1 = set(fname for (fname, frag) in execute_query("bartali OR coppi"))
+        q2 = set(fname for (fname, frag) in execute_query("coppi OR bartali"))
+        assert q1 == q2
+
+def test_complex_query2(client):
+    with client.application.app_context():
+        # CR/2000/10/0885 (bartali and coppi)
+        # CR/2000/10/0169 (coppi only)
+        # CR/2001/12/0582 (bartali only)
+        filenames = set(res[0] for res in execute_query("bartali AND coppi"))
+        assert "CR/2000-10/eml-files/classicrendezvous.10010.0885.eml" in filenames
+        assert "CR/2000-10/eml-files/classicrendezvous.10010.0169.eml" not in filenames
+        assert "CR/2001-12/eml-files/classicrendezvous.10112.0582.eml" not in filenames
+        q1 = set(fname for (fname, frag) in execute_query("bartali AND coppi"))
+        q2 = set(fname for (fname, frag) in execute_query("coppi AND bartali"))
+        assert q1 == q2
+
+
 def test_query_cache(client):
     # hopefully none of these will already be cached.
     queries = [
@@ -70,27 +97,27 @@ def test_parse_simple_query():
 
 def test_parse_and_query():
     assert parse_query("Valetti AND Bartali") == \
-        ["intersect", ["search", "Valetti"], ["search", "Bartali"]]
+        ["intersect", ["search", "valetti"], ["search", "bartali"]]
 
 def test_parse_or_query():
     assert parse_query("Valetti OR Bartali") == \
-        ["union", ["search", "Valetti"], ["search", "Bartali"]]
+        ["union", ["search", "valetti"], ["search", "bartali"]]
 
 def test_parse_and_or_query():
     assert parse_query("Valetti OR Bartali AND Coppi") == \
         ["union",
-         ["search", "Valetti"],
+         ["search", "valetti"],
          ["intersect",
-          ["search", "Bartali"],
-          ["search", "Coppi"],
+          ["search", "bartali"],
+          ["search", "coppi"],
          ]]
 
 def test_parse_parens_query():
     assert parse_query("(Valetti OR Bartali) AND Coppi") == \
         ["intersect",
          ["union",
-          ["search", "Valetti"],
-          ["search", "Bartali"],
+          ["search", "valetti"],
+          ["search", "bartali"],
          ],
-         ["search", "Coppi"],
+         ["search", "coppi"],
         ]
