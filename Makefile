@@ -12,7 +12,9 @@ DATES = $(foreach dir,$(GENDIRS),$(dir)/dates.body)
 THREADS = $(foreach dir,$(GENDIRS),$(dir)/threads.body)
 REFDB = references.db
 VIEWS = smontanaro/smontanaro/views.py
-PY_SRC = $(wildcard smontanaro/smontanaro/*.py) $(wildcard scripts/*.py)
+APP_SRC = $(wildcard smontanaro/smontanaro/*.py) $(wildcard scripts/*.py)
+TST_SRC = $(wildcard smontanaro/tests/*.py)
+PY_SRC = $(APP_SRC) $(TST_SRC)
 
 export CRDIR = $(PWD)
 export PYTHONPATH = $(PWD)/smontanaro
@@ -38,7 +40,7 @@ $(REFDB).new : FORCE
 
 lint : FORCE
 	-MYPYPATH=typeshed mypy $(PY_SRC)
-	-TERM=dumb bandit $(PY_SRC)
+	-TERM=dumb bandit $(APP_SRC)
 	-pylint --rcfile=.pylintrc $(PY_SRC)
 
 test : FORCE
