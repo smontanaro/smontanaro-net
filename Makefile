@@ -14,7 +14,6 @@ REFDB = references.db
 VIEWS = smontanaro/smontanaro/views.py
 APP_SRC = $(wildcard smontanaro/smontanaro/*.py) $(wildcard scripts/*.py)
 TST_SRC = $(wildcard smontanaro/tests/*.py)
-PY_SRC = $(APP_SRC) $(TST_SRC)
 
 export CRDIR = $(PWD)
 export PYTHONPATH = $(PWD)/smontanaro
@@ -39,9 +38,9 @@ $(REFDB).new : FORCE
 	@echo "Replace $(REFDB) with $(REFDB).new when ready"
 
 lint : FORCE
-	-MYPYPATH=typeshed mypy $(PY_SRC)
+	-MYPYPATH=typeshed mypy --install-types $(APP_SRC)
 	-TERM=dumb bandit $(APP_SRC)
-	-pylint --rcfile=.pylintrc $(PY_SRC)
+	-pylint --rcfile=.pylintrc $(APP_SRC)
 
 test : FORCE
 	bash scripts/test.sh
