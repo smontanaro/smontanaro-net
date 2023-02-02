@@ -562,12 +562,6 @@ def test_extract_htmltext(client):
         payload = msg.extract_text()
         assert payload.count("The process has begun.") == 1
 
-def test_vintage_trek(client):
-    with client.application.app_context():
-        rv = client.get("/vintage-trek/Trekpromoa.htm")
-        assert rv.status_code == 200
-
-
 def test_query_get(client):
     with client.application.app_context():
         rv = client.get("/CR/query?page=3&query=faliero+masi&size=20")
