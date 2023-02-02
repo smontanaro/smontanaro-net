@@ -8,7 +8,7 @@ import sqlite3
 import tempfile
 
 from .dates import convert_ts_bytes
-from .log import eprint
+# from .log import eprint
 
 CACHE_DIR = os.path.join(os.environ.get("CRDIR", os.getcwd()),
                          "search_cache")
@@ -120,21 +120,21 @@ class SearchDB:
     def _read_from_cache(self, term):
         "look up term in cache and return whatever is there"
         if not os.path.exists(self.cache_index):
-            eprint(f"cache miss (no index): {term!r}")
+            # eprint(f"cache miss (no index): {term!r}")
             return []
         with open(self.cache_index, "rb") as fobj:
             index = pickle.load(fobj)         # nosec
         if term in index:
             try:
                 with open(index[term], "rb") as fobj:
-                    eprint(f"cache hit: {term!r}")
+                    # eprint(f"cache hit: {term!r}")
                     return pickle.load(fobj)   # nosec
             except OSError:
                 # remove the offending term
                 del index[term]
                 with open(self.cache_index, "wb") as fobj:
                     pickle.dump(index, fobj)
-        eprint(f"cache miss (missing term): {term!r}")
+        # eprint(f"cache miss (missing term): {term!r}")
         return []
 
     def _save_to_cache(self, term, result):
