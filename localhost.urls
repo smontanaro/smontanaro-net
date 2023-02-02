@@ -54,5 +54,6 @@ http://localhost:8080/CR/addtopic
 http://localhost:8080/CR/2005/03/sitemap.xml
 http://localhost:8080/2005/03/mybikes
 http://localhost:8080/2005/03/about
+http://localhost:8080/vintage-trek/Trekpromoa.htm
 # file doesn't exist
 http://localhost:8080/CR/2000/09/9999
