@@ -9,12 +9,16 @@
 #
 #    from:Brian Baylis AND (subject:Masi OR subject:Confente)
 
+from dataclasses import dataclass, field as datafield
+
 import regex as re
 from sprdpl import lex, parse
 
 from .srchdb import SRCHDB
 
+
 _TABLE = {
+    'NOT':        r'~',
     'AND':        r'&&',
     'OR':         r'[|][|]',
     'LPAREN':     r'[(]',
@@ -38,6 +42,7 @@ _RULES = [
         'atom',
         ('STRING', lambda p: ["search", p[0].lower()]),
         ('LPAREN expr RPAREN', lambda p: p[1]),
+        ('NOT atom', lambda p: ["not", p[1]]),
     ],
     [
         'term',
@@ -52,12 +57,39 @@ _RULES = [
 _PARSER = parse.Parser(_RULES, 'expr')
 
 def parse_query(query):
-    query = re.sub(r"\bOR\b", "||", re.sub(r"\bAND\b", "&&", query))
+    query = re.sub(r"\bOR\b", "||", query)
+    query = re.sub(r"\bAND\b", "&&", query)
+    query = re.sub(r"\bNOT\b", "~", query)
     return _PARSER.parse(_LEXER.input(query))
 
 def execute_query(query):
     "parse and execute parts of a possibly compound query"
-    return execute_structured_query(parse_query(query))
+    parsed_query = parse_query(query)
+    return execute_structured_query(parsed_query)
+
+@dataclass
+class SearchResult:
+    "result of a search (compound or simple)"
+    data: dict = datafield(default_factory=dict)
+    negate: bool = False
+
+    def pages(self):
+        return set(self.data.keys())
+
+    def get(self, key):
+        return self.data.get(key)
+
+    def __getitem__(self, key):
+        return self.data[key]
+
+    def __contains__(self, fname):
+        return fname in self.data
+
+    def __eq__(self, other):
+        return self.data == other.data and self.negate == other.negate
+
+    def __len__(self):
+        return len(self.data)
 
 def execute_structured_query(query):
     "execute a structured query"
@@ -68,22 +100,40 @@ def execute_structured_query(query):
     # 'union' - perform searches for the second and third elements (lists),
     #     then combine them
 
-    results = []
     match query:
         case ["search", search]:
-            results.extend(SRCHDB.get_page_fragments(search))
+            result = SearchResult(dict(SRCHDB.get_page_fragments(search)))
+        case ["not", search]:
+            result = execute_structured_query(search)
+            result.negate = True
         case [action, query1, query2]:
-            res1 = dict(execute_structured_query(query1))
-            res2 = dict(execute_structured_query(query2))
+            res1 = execute_structured_query(query1)
+            res2 = execute_structured_query(query2)
             match action:
                 case "intersect":
                     # intersect the filenames - page fragments are secondary here
-                    for page in set(res1) & set(res2):
-                        results.append((page, res1.get(page) or res2.get(page)))
+                    if res1.negate and res2.negate:
+                        raise ValueError("NOT may only be used with one of the AND queries")
+                    if res1.negate:
+                        pages = res2.pages() - res1.pages()
+                    elif res2.negate:
+                        pages = res1.pages() - res2.pages()
+                    else:
+                        pages = res1.pages() & res2.pages()
+                    data = {}
+                    for page in pages:
+                        data[page] = res1.get(page) or res2.get(page)
+                    result = SearchResult(data)
                 case "union":
-                    # intersect the filenames - page fragments are secondary here
-                    for page in set(res1) | set(res2):
-                        results.append((page, res1.get(page) or res2.get(page)))
+                    if res1.negate or res2.negate:
+                        raise ValueError("NOT may only be used with AND queries")
+                    data = {}
+                    for page in res1.pages() | res2.pages():
+                        data[page] = res1.get(page) or res2.get(page)
+                    result = SearchResult(data)
+                case _:
+                    raise ValueError(f"Unrecognized query structure: {query}")
         case _:
-            raise ValueError(f"Unrecognized query structure: {query}")
-    return sorted(results)
+            raise ValueError(f"Unrecognized simple query verb: {query}")
+
+    return result
