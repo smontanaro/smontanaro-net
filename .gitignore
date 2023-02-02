@@ -6,10 +6,12 @@ lib*
 dist
 pyvenv.cfg
 references.db
-searchindex.db
+searchindex.db*
 server.log*
 *,cover
 .coverage
 htmlcov
 localhost.act
 .DS_Store
+*.egg-info
+search_cache
