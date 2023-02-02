@@ -30,12 +30,10 @@ _TABLE = {
 _LEXER = lex.Lexer(_TABLE)
 
 def reduce_binop(op, p):
-    # print(f">>> {op} {p[:]} {len(p[:])}")
-    if not p[1]:
-        # print(":::", p[0])
-        return p[0]
-    # print(f"::: {op}", [p[0], p[1][0][1]])
-    return [op, p[0], p[1][0][1]]
+    result = p[0]
+    for element in p[1]:
+        result = [op, element[1], result]
+    return result
 
 _RULES = [
     [
