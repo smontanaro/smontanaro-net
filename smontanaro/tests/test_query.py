@@ -120,36 +120,38 @@ def test_parse_simple_query():
 
 def test_parse_and_query():
     assert parse_query("Valetti AND Bartali") == \
-        ["intersect", ["search", "valetti"], ["search", "bartali"]]
+        ["intersect", ["search", "bartali"], ["search", "valetti"]]
 
 def test_parse_or_query():
     assert parse_query("Valetti OR Bartali") == \
-        ["union", ["search", "valetti"], ["search", "bartali"]]
+        ["union", ["search", "bartali"], ["search", "valetti"]]
 
 def test_parse_and_or_query():
     assert parse_query("Valetti OR Bartali AND NOT Coppi") == \
         ["union",
-         ["search", "valetti"],
          ["intersect",
-          ["search", "bartali"],
           ["not", ["search", "coppi"]],
-         ]]
+          ["search", "bartali"],
+         ],
+         ["search", "valetti"],
+         ]
 
 def test_parse_parens_query():
     assert parse_query("(Valetti OR Bartali) AND Coppi") == \
         ["intersect",
-         ["union",
-          ["search", "valetti"],
-          ["search", "bartali"],
-         ],
          ["search", "coppi"],
+         ["union",
+          ["search", "bartali"],
+          ["search", "valetti"],
+         ],
         ]
 
 def test_parse_not_and_not_query():
     assert parse_query("(NOT coppi) AND (NOT bartali)") == \
         ["intersect",
+         ["not", ["search", "bartali"]],
          ["not", ["search", "coppi"]],
-         ["not", ["search", "bartali"]]]
+         ]
 
 def test_invalid_parse1():
     parsed_query = parse_query("bartali")
@@ -170,3 +172,14 @@ def test_invalid_parse():
         pass
     else:
         raise ValueError("Failed to reject bad parse")
+
+def test_deeply_nested_parse():
+    q = parse_query("subject:For Sale OR subject:wtt OR subject:wtb OR subject:fs")
+    assert q == \
+        ['union',
+         ['search', 'subject:fs'],
+         ['union',
+          ['search', 'subject:wtb'],
+          ['union',
+           ['search', 'subject:wtt'],
+           ['search', 'subject:for sale']]]]
