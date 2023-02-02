@@ -173,7 +173,7 @@ def test_invalid_parse():
     else:
         raise ValueError("Failed to reject bad parse")
 
-def test_deeply_nested_parse():
+def test_deeply_nested_parse1():
     q = parse_query("subject:For Sale OR subject:wtt OR subject:wtb OR subject:fs")
     assert q == \
         ['union',
@@ -183,3 +183,19 @@ def test_deeply_nested_parse():
           ['union',
            ['search', 'subject:wtt'],
            ['search', 'subject:for sale']]]]
+
+def test_deeply_nested_parse2():
+    q = parse_query("(subject:For Sale OR subject:fs) AND NOT (subject:wtt OR subject:wtb)")
+    assert q == \
+        ['intersect',
+         ['not',
+          ['union',
+           ['search', 'subject:wtb'],
+           ['search', 'subject:wtt'],
+          ],
+         ],
+         ['union',
+          ['search', 'subject:fs'],
+          ['search', 'subject:for sale'],
+         ],
+        ]
