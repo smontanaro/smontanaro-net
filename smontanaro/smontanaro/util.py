@@ -8,7 +8,7 @@ import datetime
 import email.message
 import email.policy
 import gzip
-import html
+import html.parser
 import logging
 import os
 import pickle                   # nosec
@@ -753,3 +753,19 @@ def init_app(app):
     else:
         logging.root.setLevel("DEBUG")
     Message.app = app
+
+class GooglePhotoParser(html.parser.HTMLParser):
+    "Trivial parser that extracts image link from a Google Photos page"
+    def __init__(self):
+        self.ref = ""
+        self.width = self.height = 0
+        super().__init__()
+
+    def handle_starttag(self, tag, attrs):
+        if tag == "img":
+            attr = "src"
+            ref = dict(attrs)[attr]
+            if (mat := re.search(r"(=w([0-9]+)-h([0-9]+)-no)", ref)) is not None:
+                self.ref = ref.replace(mat.group(1), "")
+                self.width = int(mat.group(2))
+                self.height = int(mat.group(3))

@@ -20,6 +20,7 @@ from flask import (redirect, url_for, render_template, abort, jsonify, request,
                    current_app, send_from_directory)
 from flask_wtf import FlaskForm
 import regex as re
+import requests
 from wtforms import StringField, HiddenField, SelectField
 from wtforms.validators import DataRequired
 
@@ -30,7 +31,8 @@ from .srchdb import SRCHDB
 from .query import execute_query
 from .strip import strip_footers
 from .util import (read_message, trim_subject_prefix, clean_msgid,
-                   make_topic_hierarchy, get_topic, generate_link, open_)
+                   make_topic_hierarchy, get_topic, generate_link, open_,
+                   GooglePhotoParser)
 
 SEARCH = {
     "DuckDuckGo": "https://duckduckgo.com/",
@@ -109,6 +111,25 @@ def init_simple():
     def index():
         "index"
         return render_template("main.jinja", title="Home")
+
+    @app.route("/photolink/<fmt>/<width>/<path:path>")
+    def photolink(fmt, width, path):
+        html = GooglePhotoParser()
+        response = requests.get(path, timeout=10)
+        if response.status_code == 200:
+            html.feed(response.text)
+        if not html.ref:
+            return "No image reference found"
+
+        html.ref += f"=w{width}"
+        match fmt.lower():
+            case "html":
+                return f"""<pre>&lt;a href={path}&gt;&lt;img src="{html.ref}" /&gt;&lt;/a&gt;</pre>"""
+            case "forum":
+                return f"<pre>[url={path}][img]{html.ref}[/img][/url]</pre>"
+            case _:
+                return f"Unrecognized format: {fmt}"
+
 
     @app.route("/43bikes")
     @app.route("/43bikes/")
