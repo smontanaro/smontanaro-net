@@ -110,13 +110,29 @@ def init_simple():
         "index"
         return render_template("main.jinja", title="Home")
 
-    @app.route("/<staticbikes>")
-    @app.route("/<staticbikes>/")
-    @app.route("/<staticbikes>/<path:path>")
-    def static_bikes(staticbikes, path="index.html"):
+    @app.route("/43bikes")
+    @app.route("/43bikes/")
+    @app.route("/43bikes/<path:path>")
+    def bikes_43(path="index.html"):
         "static replica sites"
         vtdir = f"{os.environ.get('CRDIR')}/smontanaro/smontanaro/static/bikes"
-        return send_from_directory(vtdir, os.path.join(staticbikes, path))
+        return send_from_directory(vtdir, os.path.join("43bikes", path))
+
+    @app.route("/vintage-trek")
+    @app.route("/vintage-trek/")
+    @app.route("/vintage-trek/<path:path>")
+    def vintage_trek(path="index.html"):
+        "static replica sites"
+        vtdir = f"{os.environ.get('CRDIR')}/smontanaro/smontanaro/static/bikes"
+        return send_from_directory(vtdir, os.path.join("vintage-trek", path))
+
+    ## @app.route("/<staticbikes>")
+    ## @app.route("/<staticbikes>/")
+    ## @app.route("/<staticbikes>/<path:path>")
+    ## def static_bikes(staticbikes, path="index.html"):
+    ##     "static replica sites"
+    ##     vtdir = f"{os.environ.get('CRDIR')}/smontanaro/smontanaro/static/bikes"
+    ##     return send_from_directory(vtdir, os.path.join(staticbikes, path))
 
 def init_indexes():
     app = current_app
