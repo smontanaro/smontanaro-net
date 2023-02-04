@@ -55,5 +55,9 @@ http://localhost:8080/CR/2005/03/sitemap.xml
 http://localhost:8080/2005/03/mybikes
 http://localhost:8080/2005/03/about
 http://localhost:8080/vintage-trek/Trekpromoa.htm
+http://localhost:8080/43bikes/cinelli-sc.html
 # file doesn't exist
 http://localhost:8080/CR/2000/09/9999
+http://localhost:8080/bogus-replica/index.html
+# try to escape from bikes dir
+http://localhost:8080/../../dates.py

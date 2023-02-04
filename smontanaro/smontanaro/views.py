@@ -110,15 +110,13 @@ def init_simple():
         "index"
         return render_template("main.jinja", title="Home")
 
-    @app.route("/vintage-trek")
-    @app.route("/vintage-trek/")
-    @app.route("/vintage-trek/<path:path>")
-    def vintage_trek(path="index.htm"):
-        "vintage-trek.com replica"
-        top = os.environ.get("CRDIR")
-        vtdir = f"{top}/smontanaro/smontanaro/static/bikes/vintage-trek"
-        print(f">>> {vtdir}/{path}", file=sys.stderr)
-        return send_from_directory(vtdir, path)
+    @app.route("/<staticbikes>")
+    @app.route("/<staticbikes>/")
+    @app.route("/<staticbikes>/<path:path>")
+    def static_bikes(staticbikes, path="index.html"):
+        "static replica sites"
+        vtdir = f"{os.environ.get('CRDIR')}/smontanaro/smontanaro/static/bikes"
+        return send_from_directory(vtdir, os.path.join(staticbikes, path))
 
 def init_indexes():
     app = current_app

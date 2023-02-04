@@ -27,10 +27,10 @@ show_topics       GET        /CR/topics/<topic>
 sitemap_by_month  GET        /CR/<year>/<month>/sitemap.xml
 sitemap_index     GET        /sitemap.xml
 static            GET        /static/<path:filename>
+static_bikes      GET        /<staticbikes>
+static_bikes      GET        /<staticbikes>/
+static_bikes      GET        /<staticbikes>/<path:path>
 threads           GET        /CR/<year>/<month>/threads
-vintage_trek      GET        /vintage-trek
-vintage_trek      GET        /vintage-trek/
-vintage_trek      GET        /vintage-trek/<path:path>
 [INFO] Starting gunicorn 20.1.0
 [INFO] Using worker: sync
 127.0.0.1 - - "GET /favicon.ico HTTP/1.1" 302 <size> "-" curl/7.NN
@@ -90,8 +90,13 @@ WARNING:root:Can't render images
 127.0.0.1 - - "GET /CR/2005/03/sitemap.xml HTTP/1.1" 200 <size> "-" curl/7.NN
 127.0.0.1 - - "GET /2005/03/mybikes HTTP/1.1" 302 <size> "-" curl/7.NN
 127.0.0.1 - - "GET /2005/03/about HTTP/1.1" 302 <size> "-" curl/7.NN
+127.0.0.1 - - "GET /vintage-trek/Trekpromoa.htm HTTP/1.1" 200 <size> "-" curl/7.NN
+127.0.0.1 - - "GET /43bikes/cinelli-sc.html HTTP/1.1" 200 <size> "-" curl/7.NN
 # file doesn't exist
 ERROR:root:File not found: ~/src/smontanaro.net/CR/2000-09/eml-files/classicrendezvous.10009.9999.eml
 127.0.0.1 - - "GET /CR/2000/09/9999 HTTP/1.1" 404 <size> "-" curl/7.NN
+127.0.0.1 - - "GET /bogus-replica/index.html HTTP/1.1" 404 <size> "-" curl/7.NN
+# try to escape from bikes dir
+127.0.0.1 - - "GET /dates.py HTTP/1.1" 404 <size> "-" curl/7.NN
 Debug mode enabled.
 [INFO] Shutting down: Master
