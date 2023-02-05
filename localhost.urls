@@ -61,3 +61,5 @@ http://localhost:8080/CR/2000/09/9999
 http://localhost:8080/bogus-replica/index.html
 # try to escape from bikes dir
 http://localhost:8080/../../dates.py
+# generate google photos link
+http://localhost:8080/photolink/html/1200/https://photos.app.goo.gl/qXkghhtQ2rPBhwZp7

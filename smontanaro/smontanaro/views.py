@@ -21,7 +21,7 @@ from flask import (redirect, url_for, render_template, abort, jsonify, request,
 from flask_wtf import FlaskForm
 import regex as re
 import requests
-from wtforms import StringField, HiddenField, SelectField
+from wtforms import IntegerField, StringField, HiddenField, SelectField
 from wtforms.validators import DataRequired
 
 from .exc import NoResponse
@@ -112,23 +112,33 @@ def init_simple():
         "index"
         return render_template("main.jinja", title="Home")
 
-    @app.route("/photolink/<fmt>/<width>/<path:path>")
-    def photolink(fmt, width, path):
+    @app.route("/photolink", methods=["GET", "POST"])
+    def photolink():
+        photo_form = PhotoForm()
+        if not photo_form.validate_on_submit():
+            return render_template('photo.jinja', photo_form=photo_form,
+                                   reference="Enter Google Photo Details",
+                                   title="Google Photo Link Form")
+
         html = GooglePhotoParser()
-        response = requests.get(path, timeout=10)
+        response = requests.get(photo_form.url.data, timeout=10)
         if response.status_code == 200:
             html.feed(response.text)
         if not html.ref:
             return "No image reference found"
 
-        html.ref += f"=w{width}"
-        match fmt.lower():
+        if photo_form.width.data:
+            html.ref += f"=w{photo_form.width.data}"
+        match photo_form.fmt.data.lower():
             case "html":
-                return f"""<pre>&lt;a href={path}&gt;&lt;img src="{html.ref}" /&gt;&lt;/a&gt;</pre>"""
+                reference = (f'&lt;a href={photo_form.url.data}&gt;&#8203;'
+                             f'&lt;img src="{html.ref}" /&gt;&lt;/a&gt;')
             case "forum":
-                return f"<pre>[url={path}][img]{html.ref}[/img][/url]</pre>"
-            case _:
-                return f"Unrecognized format: {fmt}"
+                reference = f"[url={photo_form.url.data}][img]{html.ref}[/img][/url]"
+
+        return render_template('photo.jinja', photo_form=photo_form,
+                               reference=reference,
+                               title="Google Photo Link Form")
 
 
     @app.route("/43bikes")
@@ -425,6 +435,7 @@ def init_extra():
             "search_form": SearchForm(),
             "topic_form": TopicForm(),
             "query_form": QueryForm(),
+            "photo_form": PhotoForm(),
         }
 
 def init_debug():
@@ -677,6 +688,15 @@ def get_nav_items(*, year, month, seq):
         items.append(("Next", url_for("cr_message", **next_seq)))
 
     return items
+
+class PhotoForm(FlaskForm):
+    "simple form for generating links to Google Photo images"
+    url = StringField('Google Photo Image Page:', validators=[DataRequired()])
+    width = IntegerField('width')
+    fmt = SelectField('format', choices=[
+        ("HTML", "HTML"),
+        ("Forum", "Forum"),
+    ], default="Forum")
 
 class TopicForm(FlaskForm):
     "simple form used to add topics to a message"
