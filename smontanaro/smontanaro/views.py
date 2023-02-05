@@ -133,7 +133,7 @@ def init_simple():
             case "html":
                 reference = (f'&lt;a href={photo_form.url.data}&gt;&#8203;'
                              f'&lt;img src="{html.ref}" /&gt;&lt;/a&gt;')
-            case "forum":
+            case "bbcode":
                 reference = f"[url={photo_form.url.data}][img]{html.ref}[/img][/url]"
 
         return render_template('photo.jinja', photo_form=photo_form,
@@ -142,6 +142,9 @@ def init_simple():
 
 
     @app.route("/43bikes")
+    def bike_reroute():
+        return redirect(url_for("bikes_43"))
+
     @app.route("/43bikes/")
     @app.route("/43bikes/<path:path>")
     def bikes_43(path="index.html"):
@@ -150,6 +153,9 @@ def init_simple():
         return send_from_directory(vtdir, os.path.join("43bikes", path))
 
     @app.route("/vintage-trek")
+    def trek_reroute():
+        return redirect(url_for("vintage_trek"))
+
     @app.route("/vintage-trek/")
     @app.route("/vintage-trek/<path:path>")
     def vintage_trek(path="index.html"):
@@ -694,9 +700,9 @@ class PhotoForm(FlaskForm):
     url = StringField('Google Photo Image Page:', validators=[DataRequired()])
     width = IntegerField('width')
     fmt = SelectField('format', choices=[
-        ("HTML", "HTML"),
-        ("Forum", "Forum"),
-    ], default="Forum")
+        ("HTML", "<HTML>"),
+        ("BBCode", "[BBCode]"),
+    ], default="BBCode")
 
 class TopicForm(FlaskForm):
     "simple form used to add topics to a message"
