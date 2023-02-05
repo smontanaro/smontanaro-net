@@ -115,26 +115,40 @@ def init_simple():
     @app.route("/photolink", methods=["GET", "POST"])
     def photolink():
         photo_form = PhotoForm()
-        if not photo_form.validate_on_submit():
+        if request.method == "GET":
+            url = request.args.get("url", default=None)
+            if url is None:
+                return render_template('photo.jinja', form=photo_form)
+            url = urllib.parse.unquote_plus(url)
+            width = request.args.get("width", default="")
+            fmt = request.args.get("fmt", default="bbcode")
+
+            # eprint("+++", query, len(matches), "GET")
+
+        elif not photo_form.validate_on_submit():
             return render_template('photo.jinja', photo_form=photo_form,
                                    reference="",
                                    title="Google Photo Link Form")
+        else:
+            url = photo_form.url.data
+            width = photo_form.width.data
+            fmt = photo_form.fmt.data
 
         html = GooglePhotoParser()
-        response = requests.get(photo_form.url.data, timeout=10)
+        response = requests.get(url, timeout=10)
         if response.status_code == 200:
             html.feed(response.text)
         if not html.ref:
             return "No image reference found"
 
-        if photo_form.width.data:
-            html.ref += f"=w{photo_form.width.data}"
-        match photo_form.fmt.data.lower():
+        if width:
+            html.ref += f"=w{width}"
+        match fmt.lower():
             case "html":
-                reference = (f'&lt;a href={photo_form.url.data}&gt;&#8203;'
+                reference = (f'&lt;a href={url}&gt;&#8203;'
                              f'&lt;img src="{html.ref}" /&gt;&lt;/a&gt;')
             case "bbcode":
-                reference = f"[url={photo_form.url.data}][img]{html.ref}[/img][/url]"
+                reference = f"[url={url}][img]{html.ref}[/img][/url]"
 
         return render_template('photo.jinja', photo_form=photo_form,
                                reference=reference,
