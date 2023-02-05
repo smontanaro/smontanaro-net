@@ -117,7 +117,7 @@ def init_simple():
         photo_form = PhotoForm()
         if not photo_form.validate_on_submit():
             return render_template('photo.jinja', photo_form=photo_form,
-                                   reference="Enter Google Photo Details",
+                                   reference="",
                                    title="Google Photo Link Form")
 
         html = GooglePhotoParser()
