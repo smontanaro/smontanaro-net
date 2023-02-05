@@ -37,9 +37,15 @@ $(REFDB).new : FORCE
 	coverage run -a --rcfile=.coveragerc scripts/makerefsdb.py -d $(REFDB).new CR
 	@echo "Replace $(REFDB) with $(REFDB).new when ready"
 
-lint : FORCE
+lint : mypy bandit pylint
+
+mypy : FORCE
 	-MYPYPATH=typeshed mypy --install-types $(APP_SRC)
+
+bandit : FORCE
 	-TERM=dumb bandit $(APP_SRC)
+
+pylint : FORCE
 	-pylint --rcfile=.pylintrc $(APP_SRC)
 
 test : FORCE
@@ -47,4 +53,4 @@ test : FORCE
 
 FORCE :
 
-.PHONY : FORCE all
+.PHONY : FORCE all lint mypy bandit pylint test
