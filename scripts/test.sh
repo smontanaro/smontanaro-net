@@ -34,6 +34,7 @@ sed -e 's/localhost:[0-9][0-9]*/localhost:5001/' < localhost.urls \
     | while read line ; do
     if [ "x${line:0:1}" = "x#" ] ; then
         echo "${line}" | dateit >> localhost.comments
+        gsleep 0.1
     else
         echo "*** $line ***"
         curl -s $line
