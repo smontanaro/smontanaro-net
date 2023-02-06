@@ -1,16 +1,25 @@
 {% extends "bootstrap.jinja" %}
 
+{% set title = "Google Photo Link Generator" %}
+
 {% block content %}
     <div class="container">
-        <div class="form-group">
-            {% if reference != "" %}
-                <p>
-                    Result:<br/>
-                    <tt>{{ reference }}</tt>
-                </p>
-                <hr/>
-            {% endif %}
+        {% if error.strip() != "" %}
+            <p>
+                <b>Error: {{ error }}</b>
+            </p>
+            <hr/>
+        {% endif %}
 
+        {% if reference.strip() != "" %}
+            <p>
+                Result:<br/>
+                <tt>{{ reference }}</tt>
+            </p>
+            <hr/>
+        {% endif %}
+
+        <div class="form-group">
             <form action="/photolink" method="post">
                 {{ photo_form.csrf_token }}
                 Google Photo URL: {{ photo_form.url(size=50, xclass_="form-control") }}<br/>
