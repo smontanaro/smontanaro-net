@@ -6,6 +6,7 @@ bad_cr            GET        /<year>/<month>/<int:seq>
 bike_reroute      GET        /43bikes
 bikes_43          GET        /43bikes/
 bikes_43          GET        /43bikes/<path:path>
+cr_help_          GET        /CR/help
 cr_index          GET        /CR
 cr_index          GET        /CR/
 cr_index          GET        /CR/<cache>
@@ -15,12 +16,12 @@ cr_message        GET        /CR/<year>/<month>/<seq>
 dates             GET        /CR/<year>/<month>
 dates             GET        /CR/<year>/<month>/dates
 favicon           GET        /favicon.ico
-help_             GET        /CR/help
 index             GET        /
 mybikes           GET        /<year>/<month>/mybikes
 mybikes           GET        /CR/<year>/<month>/mybikes
 old_cr            GET        /<year>-<month>/html/<filename>
 photolink         GET, POST  /photolink
+photolink_help_   GET        /photolink/help
 python            GET        /python
 query             GET, POST  /CR/query
 req               GET        /request/<header>
@@ -104,6 +105,7 @@ ERROR:root:File not found: ~/src/smontanaro.net/CR/2000-09/eml-files/classicrend
 127.0.0.1 - - "GET /dates.py HTTP/1.1" 404 <size> "-" curl/7.NN
 # generate google photos link
 127.0.0.1 - - "GET /photolink HTTP/1.1" 200 <size> "-" curl/7.NN
+127.0.0.1 - - "GET /photolink/help HTTP/1.1" 200 <size> "-" curl/7.NN
 DEBUG:urllib3.connectionpool:Starting new HTTPS connection (1): photos.app.goo.gl:443
 DEBUG:urllib3.connectionpool:https://photos.app.goo.gl:443 "GET /qXkghhtQ2rPBhwZp7 HTTP/1.1" 302 <size>
 DEBUG:urllib3.connectionpool:Starting new HTTPS connection (1): photos.google.com:443
