@@ -114,32 +114,42 @@ def init_simple():
 
     @app.route("/photolink", methods=["GET", "POST"])
     def photolink():
-        photo_form = PhotoForm()
-        if request.method == "GET":
-            url = request.args.get("url", default=None)
+        form = PhotoForm()
+        if request.method == "POST":
+            if form.validate_on_submit():
+                url = form.url.data
+                width = form.width.data
+                fmt = form.fmt.data
+            else:
+                # eprint("+++ POST, no data")
+                # eprint(form.errors)
+                return render_template('photo.jinja', form=form,
+                                       reference="", error="",
+                                       title="Google Photo Link Form")
+
+        elif request.method == "GET":
+            url = request.args.get("url")
             if url is None:
-                return render_template('photo.jinja', form=photo_form)
+                # eprint("+++ GET, no url")
+                return render_template('photo.jinja', form=form,
+                                       error="", reference="")
             url = urllib.parse.unquote_plus(url)
             width = request.args.get("width", default="")
             fmt = request.args.get("fmt", default="bbcode")
 
-            # eprint("+++", query, len(matches), "GET")
-
-        elif not photo_form.validate_on_submit():
-            return render_template('photo.jinja', photo_form=photo_form,
-                                   reference="",
-                                   title="Google Photo Link Form")
-        else:
-            url = photo_form.url.data
-            width = photo_form.width.data
-            fmt = photo_form.fmt.data
+        # eprint(f"+++ url: {url}")
+        # eprint(f"+++ width: {width}")
+        # eprint(f"+++ fmt: {fmt}")
 
         html = GooglePhotoParser()
         response = requests.get(url, timeout=10)
         if response.status_code == 200:
             html.feed(response.text)
         if not html.ref:
-            return "No image reference found"
+            return render_template('photo.jinja', form=form,
+                                   error="No image reference found",
+                                   reference="",
+                                   title="Google Photo Link Form")
 
         if width:
             html.ref += f"=w{width}"
@@ -150,8 +160,8 @@ def init_simple():
             case "bbcode":
                 reference = f"[url={url}][img]{html.ref}[/img][/url]"
 
-        return render_template('photo.jinja', photo_form=photo_form,
-                               reference=reference,
+        return render_template('photo.jinja', form=form,
+                               reference=reference, error="",
                                title="Google Photo Link Form")
 
 
@@ -511,7 +521,7 @@ def init_search():
             if query_form.validate_on_submit():
                 query = urllib.parse.unquote_plus(f"{query_form.query.data}")
                 matches = query_index(query)
-                eprint("+++", query, len(matches), "POST")
+                # eprint("+++", query, len(matches), "POST")
             else:
                 # eprint("+++ empty form")
                 return render_template('cr.jinja', form=query_form)
@@ -712,7 +722,7 @@ def get_nav_items(*, year, month, seq):
 class PhotoForm(FlaskForm):
     "simple form for generating links to Google Photo images"
     url = StringField('Google Photo Image Page:', validators=[DataRequired()])
-    width = IntegerField('width')
+    width = IntegerField('width', default=800)
     fmt = SelectField('format', choices=[
         ("HTML", "<HTML>"),
         ("BBCode", "[BBCode]"),
