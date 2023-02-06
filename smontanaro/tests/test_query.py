@@ -9,6 +9,30 @@ from smontanaro.views import query_index
 from _test_helper import client
 
 
+def test_query_get(client):
+    with client.application.app_context():
+        rv = client.get("/CR/query?page=3&query=faliero+masi&size=20")
+        assert rv.status_code == 200
+
+def test_query_post_arg(client):
+    with client.application.app_context():
+        rv = client.post("/CR/query", data={
+            "query": "colnago",
+        })
+        assert rv.status_code == 200
+
+def test_complex_query(client):
+    with client.application.app_context():
+        rv = client.post("/CR/query", data={
+            "query": "bartali OR coppi",
+        })
+        assert rv.status_code == 200
+
+def test_query_post_empty(client):
+    with client.application.app_context():
+        rv = client.post("/CR/query", data={})
+        assert rv.status_code == 200
+
 def test_low_level_query(client):
     with client.application.app_context():
         for (filename, fragment) in SRCHDB.get_page_fragments("faliero masi"):
@@ -17,7 +41,6 @@ def test_low_level_query(client):
             break
         else:
             raise ValueError("no search results")
-
 
 def test_complex_query1(client):
     with client.application.app_context():
