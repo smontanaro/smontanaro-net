@@ -3,7 +3,7 @@ _about            GET        /CR/<year>/<month>/about
 about             GET        /CR/about
 addtopic          GET, POST  /CR/addtopic
 bad_cr            GET        /<year>/<month>/<int:seq>
-bikes_43          GET        /43bikes
+bike_reroute      GET        /43bikes
 bikes_43          GET        /43bikes/
 bikes_43          GET        /43bikes/<path:path>
 cr_index          GET        /CR
@@ -20,7 +20,7 @@ index             GET        /
 mybikes           GET        /<year>/<month>/mybikes
 mybikes           GET        /CR/<year>/<month>/mybikes
 old_cr            GET        /<year>-<month>/html/<filename>
-photolink         GET        /photolink/<fmt>/<width>/<path:path>
+photolink         GET, POST  /photolink
 python            GET        /python
 query             GET, POST  /CR/query
 req               GET        /request/<header>
@@ -32,7 +32,7 @@ sitemap_by_month  GET        /CR/<year>/<month>/sitemap.xml
 sitemap_index     GET        /sitemap.xml
 static            GET        /static/<path:filename>
 threads           GET        /CR/<year>/<month>/threads
-vintage_trek      GET        /vintage-trek
+trek_reroute      GET        /vintage-trek
 vintage_trek      GET        /vintage-trek/
 vintage_trek      GET        /vintage-trek/<path:path>
 [INFO] Starting gunicorn 20.1.0
@@ -103,10 +103,11 @@ ERROR:root:File not found: ~/src/smontanaro.net/CR/2000-09/eml-files/classicrend
 # try to escape from bikes dir
 127.0.0.1 - - "GET /dates.py HTTP/1.1" 404 <size> "-" curl/7.NN
 # generate google photos link
+127.0.0.1 - - "GET /photolink HTTP/1.1" 200 <size> "-" curl/7.NN
 DEBUG:urllib3.connectionpool:Starting new HTTPS connection (1): photos.app.goo.gl:443
 DEBUG:urllib3.connectionpool:https://photos.app.goo.gl:443 "GET /qXkghhtQ2rPBhwZp7 HTTP/1.1" 302 <size>
 DEBUG:urllib3.connectionpool:Starting new HTTPS connection (1): photos.google.com:443
 DEBUG:urllib3.connectionpool:https://photos.google.com:443 "GET /share/AF1QipMpBo7PpJESYQIRJBk-VXGrd_C7BCYgiEbn4VeudzxqBPLSGFqjQdRVgXVts6236w?key=eFN6NmJVZHV4SmxPamkydWllOVlseTRwQzZCdC13 HTTP/1.1" 200 None
-127.0.0.1 - - "GET /photolink/html/1200/https://photos.app.goo.gl/qXkghhtQ2rPBhwZp7 HTTP/1.1" 200 <size> "-" curl/7.NN
+127.0.0.1 - - "GET /photolink?fmt=html&width=1200&url=https://photos.app.goo.gl/qXkghhtQ2rPBhwZp7 HTTP/1.1" 200 <size> "-" curl/7.NN
 Debug mode enabled.
 [INFO] Shutting down: Master
