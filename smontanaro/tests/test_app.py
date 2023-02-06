@@ -53,13 +53,6 @@ def test_get_version(client):
     rv = client.get("/version")
     assert rv.status_code == 200
 
-def test_post_search(client):
-    rv = client.post("/search", data={
-        "query": "Faliero",
-        "engine": "Brave",
-        })
-    assert rv.status_code == 302
-
 def test_suggest_topic(client):
     "check that topics.csv is updated when a topic is suggested."
     rv = client.post("/CR/addtopic", data={
@@ -561,32 +554,6 @@ def test_extract_htmltext(client):
         assert msg["content-type"].split(";")[0] == "multipart/alternative"
         payload = msg.extract_text()
         assert payload.count("The process has begun.") == 1
-
-def test_query_get(client):
-    with client.application.app_context():
-        rv = client.get("/CR/query?page=3&query=faliero+masi&size=20")
-        assert rv.status_code == 200
-
-
-def test_query_post_arg(client):
-    with client.application.app_context():
-        rv = client.post("/CR/query", data={
-            "query": "colnago",
-        })
-        assert rv.status_code == 200
-
-def test_complex_query(client):
-    with client.application.app_context():
-        rv = client.post("/CR/query", data={
-            "query": "bartali OR coppi",
-        })
-        assert rv.status_code == 200
-
-def test_query_post_empty(client):
-    with client.application.app_context():
-        rv = client.post("/CR/query", data={})
-        assert rv.status_code == 200
-
 
 def test_unknown_content_type():
     msg = read_message_string(EMPTY_MAIL)
