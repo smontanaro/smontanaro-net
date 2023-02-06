@@ -93,9 +93,14 @@ def init_simple():
         return redirect(url_for("about"))
 
     @app.route("/CR/help")
-    def help_():
+    def cr_help_():
         "websites need these"
         return render_template("help.jinja")
+
+    @app.route("/photolink/help")
+    def photolink_help_():
+        "websites need these"
+        return render_template("help-photolink.jinja")
 
     @app.route("/favicon.ico")
     def favicon():

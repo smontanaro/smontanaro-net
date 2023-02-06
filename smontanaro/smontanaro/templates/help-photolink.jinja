@@ -1,0 +1,28 @@
+{% extends "bootstrap.jinja" %}
+
+{% set title = "Google Photolink Help" %}
+
+{% block content %}
+
+    <p>
+        Using the Photolink page you can create HTML or BBCode fragments for
+        Google Photos images. To do that:
+        <ul>
+            <li>Select a photo to copy and poke the share button.<br/>
+                <img src="/static/images/screen1.jpg" width="600" /><br/><br/>
+            </li>
+            <li>In the dialog box displayed, select "Create link."<br/>
+                <img src="/static/images/screen3.jpg" width="400" /><br/><br/>
+            </li>
+            <li>In the <b>next</b> dialog, poke "Create link."<br/>
+                <img src="/static/images/screen4.jpg" width="400" /><br/><br/>
+            </li>
+            <li>Finally (whew!), in the dialog, poke "Copy."<br/>
+                <img src="/static/images/screen5.jpg" width="400" /><br/><br/>
+            </li>
+        </ul>
+        Paste that link into the form on the Photolink page. Choose a width
+        and whether to generate HTML or BBCode, then poke the "Go" button.
+    </p>
+
+{% endblock %}

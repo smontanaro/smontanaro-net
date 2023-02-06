@@ -22,7 +22,8 @@
         <div class="form-group">
             <form action="/photolink" method="post">
                 {{ photo_form.csrf_token }}
-                Google Photo URL: {{ photo_form.url(size=50, xclass_="form-control") }}<br/>
+                Google Photo URL (<a href="/photolink/help">?</a>):
+                    {{ photo_form.url(size=50, xclass_="form-control") }}<br/>
                 Width: {{ photo_form.width(size=5, class_="form-control") }}<br/>
                 Format: {{ photo_form.fmt(class_="form-control") }}<br/>
                 <input class="form-control" name="photo" type="submit" value="Go">
