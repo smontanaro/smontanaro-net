@@ -51,6 +51,10 @@ pylint : FORCE
 test : FORCE
 	bash scripts/test.sh
 
+clean : FORCE
+	rm -rf search_cache dist
+	find . -name __pycache__ | xargs -r rm -rf
+
 FORCE :
 
-.PHONY : FORCE all lint mypy bandit pylint test
+.PHONY : FORCE all lint mypy bandit pylint test clean
