@@ -147,7 +147,13 @@ def init_simple():
         # eprint(f"+++ fmt: {fmt}")
 
         html = GooglePhotoParser()
-        response = requests.get(url, timeout=10)
+        try:
+            response = requests.get(url, timeout=10)
+        except requests.exceptions.ConnectionError:
+            return render_template('photo.jinja', form=form,
+                                   error=f"Invalid URL: {url}",
+                                   reference="",
+                                   title="Google Photo Link Form")
         if response.status_code == 200:
             html.feed(response.text)
         if not html.ref:
