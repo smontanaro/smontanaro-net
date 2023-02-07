@@ -6,8 +6,8 @@ import re
 import sys
 
 def main():
-    tb_line = re.compile(r"gunicorn[[][0-9]+[]]: Traceback")
-    inside_line = re.compile(r"gunicorn[[][0-9]+[]]:  +")
+    tb_line = re.compile(r"gunicorn\[[0-9]+\]: Traceback")
+    inside_line = re.compile(r"gunicorn\[[0-9]+\]:  +")
 
     state = "start"
     for line in sys.stdin:
