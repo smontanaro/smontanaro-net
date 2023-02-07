@@ -2,9 +2,8 @@
 
 "Extract gunicorn traceback info from syslog"
 
+import re
 import sys
-
-import regex as re
 
 def main():
     tb_line = re.compile(r"gunicorn[[][0-9]+[]]: Traceback")
