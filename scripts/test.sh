@@ -34,11 +34,11 @@ sed -e 's/localhost:[0-9][0-9]*/localhost:5001/' < localhost.urls \
     | while read line ; do
     if [ "x${line:0:1}" = "x#" ] ; then
         echo "${line}" | dateit >> localhost.comments
-        gsleep 0.1
     else
         echo "*** $line ***"
         curl -s $line
     fi
+    gsleep 0.03
 done  > $RAW
 
 sleep 1
@@ -68,7 +68,7 @@ coverage run -a --rcfile=.coveragerc scripts/generate_date_index.py -d reference
 
 # Small refdb run to exercise one or two functions only it uses.
 
-coverage run -a --rcfile=.coveragerc scripts/makerefsdb.py -d ref.db.test CR/2005-12
+coverage run -a --rcfile=.coveragerc scripts/makerefsdb.py -d ref.db.test CR/2000-10
 rm -f ref.db.test
 
 # Exercise some bits only csv2topic uses
