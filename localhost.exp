@@ -20,7 +20,8 @@ index             GET        /
 mybikes           GET        /<year>/<month>/mybikes
 mybikes           GET        /CR/<year>/<month>/mybikes
 old_cr            GET        /<year>-<month>/html/<filename>
-photolink         GET, POST  /photolink
+photolink_GET     GET        /photolink
+photolink_POST    POST       /photolink
 photolink_help_   GET        /photolink/help
 python            GET        /python
 query             GET, POST  /CR/query
