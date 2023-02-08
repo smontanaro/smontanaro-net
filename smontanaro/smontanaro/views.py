@@ -25,7 +25,7 @@ from wtforms import IntegerField, StringField, HiddenField, SelectField
 from wtforms.validators import DataRequired
 
 from .exc import NoResponse
-from .log import eprint
+# from .log import eprint
 from .refdb import ensure_db, get_topics_for, get_random_topic
 from .srchdb import SRCHDB
 from .query import execute_query
@@ -117,31 +117,31 @@ def init_simple():
         "index"
         return render_template("main.jinja", title="Home")
 
-    @app.route("/photolink", methods=["GET", "POST"])
-    def photolink():
+    @app.post("/photolink")
+    def photolink_POST():
         form = PhotoForm()
-        if request.method == "POST":
-            if form.validate_on_submit():
-                url = form.url.data
-                width = form.width.data
-                fmt = form.fmt.data
-            else:
-                # eprint("+++ POST, no data")
-                # eprint(form.errors)
-                return render_template('photo.jinja', form=form,
-                                       reference="", error="",
-                                       title="Google Photo Link Form")
+        if form.validate_on_submit():
+            return _photolink_internal(url=form.url.data, width=form.width.data,
+                                       fmt=form.fmt.data, form=form)
+        # eprint(form.errors)
+        return render_template('photo.jinja',
+                               reference="", error="",
+                               title="Google Photo Link Form",
+                               form=form)
 
-        elif request.method == "GET":
-            url = request.args.get("url")
-            if url is None:
-                # eprint("+++ GET, no url")
-                return render_template('photo.jinja', form=form,
-                                       error="", reference="")
-            url = urllib.parse.unquote_plus(url)
-            width = request.args.get("width", default="")
-            fmt = request.args.get("fmt", default="bbcode")
+    @app.get("/photolink")
+    def photolink_GET():
+        form = PhotoForm()
+        url = request.args.get("url")
+        if url is None:
+            return render_template('photo.jinja', form=form,
+                                   error="", reference="")
+        return _photolink_internal(url=urllib.parse.unquote_plus(url),
+                                   width=request.args.get("width", default=""),
+                                   fmt=request.args.get("fmt", default="bbcode"),
+                                   form=form)
 
+    def _photolink_internal(*, url, width, fmt, form):
         # eprint(f"+++ url: {url}")
         # eprint(f"+++ width: {width}")
         # eprint(f"+++ fmt: {fmt}")
@@ -170,11 +170,12 @@ def init_simple():
                              f'&lt;img src="{html.ref}" /&gt;&lt;/a&gt;')
             case "bbcode":
                 reference = f"[url={url}][img]{html.ref}[/img][/url]"
+            case "raw":
+                reference = html.ref
 
         return render_template('photo.jinja', form=form,
                                reference=reference, error="",
                                title="Google Photo Link Form")
-
 
     @app.route("/43bikes")
     def bike_reroute():
@@ -737,6 +738,7 @@ class PhotoForm(FlaskForm):
     fmt = SelectField('format', choices=[
         ("HTML", "<HTML>"),
         ("BBCode", "[BBCode]"),
+        ("Raw", "Raw"),
     ], default="BBCode")
 
 class TopicForm(FlaskForm):
