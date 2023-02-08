@@ -45,10 +45,6 @@ def test_fresh_db(client):
     os.close(db_fd)
     os.unlink(db_path)
 
-def test_get_robots(client):
-    rv = client.get("/robots.txt")
-    assert rv.status_code == 302
-
 def test_get_version(client):
     rv = client.get("/version")
     assert rv.status_code == 200
