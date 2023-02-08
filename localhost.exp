@@ -24,7 +24,8 @@ photolink_GET     GET        /photolink
 photolink_POST    POST       /photolink
 photolink_help_   GET        /photolink/help
 python            GET        /python
-query             GET, POST  /CR/query
+query_GET         GET        /CR/query
+query_POST        POST       /CR/query
 req               GET        /request/<header>
 robots            GET        /robots.txt
 search            GET, POST  /search

@@ -515,36 +515,38 @@ def init_search():
             return redirect(f"{engine}?q={query}")
         return render_template('cr.jinja', search_form=search_form)
 
-    @app.route('/CR/query', methods=['GET', 'POST'])
-    def query():
-        query_form = QueryForm()
-        page = 1
-        size = 100
-        if request.method == "GET":
-            query = request.args.get("query", default=None)
-            if query is None:
-                return render_template('cr.jinja', form=query_form)
-            query = urllib.parse.unquote_plus(query)
-            page = request.args.get("page", default=1, type=int)
-            size = request.args.get("pagesize", default=100, type=int)
+    @app.get('/CR/query')
+    def query_GET():
+        form = QueryForm()
+        query = request.args.get("query", default=None)
+        if query is None:
+            return render_template('cr.jinja', form=form)
+
+        page = request.args.get("page", default=1, type=int)
+        size = request.args.get("pagesize", default=100, type=int)
+        matches = query_index(query)
+        return render_template('page.jinja',
+                               matches=matches,
+                               query=urllib.parse.unquote_plus(query),
+                               page=page,
+                               size=size,
+                               prev_next=build_prev_next(query, matches, page, size))
+
+
+    @app.post('/CR/query')
+    def query_POST():
+        form = QueryForm()
+        if form.validate_on_submit():
+            query = urllib.parse.unquote_plus(f"{form.query.data}")
             matches = query_index(query)
-            # eprint("+++", query, len(matches), "GET")
-        elif request.method == "POST":
-            if query_form.validate_on_submit():
-                query = urllib.parse.unquote_plus(f"{query_form.query.data}")
-                matches = query_index(query)
-                # eprint("+++", query, len(matches), "POST")
-            else:
-                # eprint("+++ empty form")
-                return render_template('cr.jinja', form=query_form)
-        else:
-            raise ValueError(f"Unrecognized request method {request.method}")
+            return render_template('page.jinja',
+                                   matches=query_index(query),
+                                   query=query,
+                                   page=1,
+                                   size=100,
+                                   prev_next=build_prev_next(query, matches, 1, 100))
+        return render_template('cr.jinja', form=form)
 
-        prev_next = build_prev_next(query, matches, page, size)
-
-        return render_template('page.jinja', matches=matches,
-                               query=query, page=page, size=size,
-                               prev_next=prev_next)
 
 
 def build_prev_next(query, matches, page, size):
