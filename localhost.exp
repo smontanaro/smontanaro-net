@@ -28,7 +28,8 @@ query_GET         GET        /CR/query
 query_POST        POST       /CR/query
 req               GET        /request/<header>
 robots            GET        /robots.txt
-search            GET, POST  /search
+search_GET        GET        /search
+search_POST       POST       /search
 show_topics       GET        /CR/topics
 show_topics       GET        /CR/topics/<topic>
 sitemap_by_month  GET        /CR/<year>/<month>/sitemap.xml
@@ -72,11 +73,13 @@ WARNING:root:Can't render images
 127.0.0.1 - - "GET /request/junk HTTP/1.1" 444 <size> "-" curl/7.NN
 # proper /request
 127.0.0.1 - - "GET /request/HTTP_USER_AGENT HTTP/1.1" 200 <size> "-" curl/7.NN
-# search
-127.0.0.1 - - "GET /search?query=Baylis HTTP/1.1" 200 <size> "-" curl/7.NN
+# local search
+127.0.0.1 - - "GET /CR/query?query=Baylis HTTP/1.1" 200 <size> "-" curl/7.NN
 # second time to exercise query cache
-127.0.0.1 - - "GET /search?query=Baylis HTTP/1.1" 200 <size> "-" curl/7.NN
+127.0.0.1 - - "GET /CR/query?query=Baylis HTTP/1.1" 200 <size> "-" curl/7.NN
 127.0.0.1 - - "GET /CR/query HTTP/1.1" 200 <size> "-" curl/7.NN
+# search engine search
+127.0.0.1 - - "GET /search?query=Baylis HTTP/1.1" 302 <size> "-" curl/7.NN
 # topics
 127.0.0.1 - - "GET /CR/topics/BVVW HTTP/1.1" 200 <size> "-" curl/7.NN
 127.0.0.1 - - "GET /CR/topics HTTP/1.1" 200 <size> "-" curl/7.NN

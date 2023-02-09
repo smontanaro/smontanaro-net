@@ -29,11 +29,13 @@ http://localhost:8080/CR/2011/2/1601
 http://localhost:8080/request/junk
 # proper /request
 http://localhost:8080/request/HTTP_USER_AGENT
-# search
-http://localhost:8080/search?query=Baylis
+# local search
+http://localhost:8080/CR/query?query=Baylis
 # second time to exercise query cache
-http://localhost:8080/search?query=Baylis
+http://localhost:8080/CR/query?query=Baylis
 http://localhost:8080/CR/query
+# search engine search
+http://localhost:8080/search?query=Baylis
 # topics
 http://localhost:8080/CR/topics/BVVW
 http://localhost:8080/CR/topics

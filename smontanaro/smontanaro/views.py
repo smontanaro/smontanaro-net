@@ -505,15 +505,27 @@ def init_search():
 
     SRCHDB.set_database(app.config["SRCHDB"])
 
-    @app.route('/search', methods=['GET', 'POST'])
-    def search():
-        search_form = SearchForm()
-        if search_form.validate_on_submit():
-            query = urllib.parse.quote_plus(f"{search_form.query.data}")
-            query += f"+site:{search_form.site.data}"
-            engine = SEARCH.get(search_form.engine.data, SEARCH["Brave"])
+    @app.post('/search')
+    def search_POST():
+        form = SearchForm()
+        if form.validate_on_submit():
+            query = urllib.parse.quote_plus(f"{form.query.data}")
+            engine = SEARCH.get(form.engine.data, "Brave")
+            query += f"+site:{form.site.data}"
             return redirect(f"{engine}?q={query}")
-        return render_template('cr.jinja', search_form=search_form)
+        return render_template('cr.jinja', search_form=form)
+
+    @app.get('/search')
+    def search_GET():
+        form = SearchForm()
+        query = request.args.get("query", default=None)
+        if query is None:
+            return render_template('cr.jinja', search_form=form)
+
+        query = urllib.parse.quote_plus(query)
+        engine = SEARCH.get(request.args.get("engine", "Brave"))
+        query += f"+site:{form.site.data}"
+        return redirect(f"{engine}?q={query}")
 
     @app.get('/CR/query')
     def query_GET():
