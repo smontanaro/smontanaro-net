@@ -663,6 +663,7 @@ def read_message(path):
 PFX_MATCHER = re.compile(r"\[classicrendezvous\]"
                          r"|\[cr\]"
                          r"|cr:"
+                         r"|fwd:"
                          r"|was:"
                          r"|re\[[0-9]\]:"
                          r"|re[-:]"
