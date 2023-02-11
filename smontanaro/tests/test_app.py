@@ -584,18 +584,17 @@ def test_open_invalid_encoding():
     finally:
         os.unlink(f"{name}")
 
-def test_add_term(client):
+def test_have_term(client):
     eprint("Hello World!", file=open_(os.devnull, "w"), dt="")
     with client.application.app_context():
         rowid = 0
+        cur = SRCHDB.cursor()
         try:
             key = "skip m"
-            rowid = SRCHDB.have_term(key)
-            assert rowid == 0
-            rowid = SRCHDB.add_term(key)
-            assert rowid > 0
+            assert SRCHDB.have_term(key) == 0
+            cur.execute("insert into search_terms VALUES (?)", (key,))
+            assert (rowid := SRCHDB.have_term(key)) > 0
         finally:
-            cur = SRCHDB.cursor()
             cur.execute("delete from search_terms where rowid = ?",
                         (rowid,))
 

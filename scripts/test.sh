@@ -75,9 +75,9 @@ rm -f ref.db.test
 coverage run -a --rcfile=.coveragerc scripts/csv2topic.py references.db < topic.csv > /dev/null
 
 # Exercise the code used to build the sqlite search database
-find CR/2007-11/eml-files -name 'class*eml' \
-    | head -1100 \
-    | CRDIR=$(pwd) PYTHONPATH=smontanaro coverage run -a scripts/buildindex.py srch.db.test
+echo "CR/2007-11" | \
+    CRDIR=$(pwd) PYTHONPATH=smontanaro coverage run -a scripts/buildindex.py srch.db.test
+
 n=$(echo "select * from search_terms where term = 'from:dale brown'" | sqlite3 srch.db.test | wc -l)
 m=$(echo "select * from search_terms where term like 'from:% '" | sqlite3 srch.db.test | wc -l)
 rm -f srch.db.test

@@ -2,23 +2,31 @@
 
 "construct dumb index of the old CR archives"
 
+import concurrent.futures
 import csv
+import datetime as dt
 import getopt
+import glob
 import html
 import os
 import string
 import sys
+from threading import Lock
 
 import regex as re
 from textblob import TextBlob
 from textblob.classifiers import NaiveBayesClassifier
 
 from smontanaro.log import eprint
-from smontanaro.srchdb import SRCHDB
+from smontanaro.srchdb import SearchDB, SRCHDB
 from smontanaro.strip import strip_footers, strip_leading_quotes, CRLF
 
 from smontanaro.util import (read_message, trim_subject_prefix,
                              parse_from, read_words, all_words)
+
+# Something in textblob and/or nltk doesn't play nice with no-gil, so just
+# serialize all blobby accesses.
+BLOB_LOCK = Lock()
 
 DB = None
 
@@ -34,28 +42,86 @@ def main():
             return 0
 
     SRCHDB.set_database(args[0])
-    last = ""
-    n = 0
-    cur = SRCHDB.cursor()
-    cur.execute("begin")
-    for f in sys.stdin:
-        parts = f.split("/")
-        if parts[1] != last:
-            eprint(">>>", parts[1])
-            last = parts[1]
-        process_file(f, cur, classifier)
-        n += 1
-        if n % 50 == 0:
-            SRCHDB.commit()
-            cur.execute("begin")
-    SRCHDB.commit()
+    with concurrent.futures.ThreadPoolExecutor(max_workers=os.cpu_count()) as executor:
+        months = {}
+        for month in sys.stdin:
+            month = month.strip()
+            months[executor.submit(process_month, month, classifier)] = month
+        for future in concurrent.futures.as_completed(months):
+            merge_into_srchdb(future.result(), months[future])
 
-    cur.execute("begin")
+    SRCHDB.cursor().execute("begin")
     postprocess_db()
     SRCHDB.commit()
 
     return 0
 
+
+def merge_into_srchdb(db_data, month):
+    "smash all the :memory: databases into the main db, one-by-one"
+    eprint(f"merging {month} into main db")
+
+    # First, take the db data passed back from the thread and reinsert it into
+    # a new in-memory database (sqlite3 doesn't support sharing connections
+    # across threads).
+    db = SearchDB()
+    db.set_database(":memory:")
+    memcur = db.cursor()
+    memcur.execute("begin")
+    # eprint(f"{month} insert {len(db_data['search_terms'])} terms")
+    memcur.executemany("insert into search_terms"
+                       "  (term) VALUES (?)", db_data["search_terms"])
+    # eprint(f"{month} insert {len(db_data['file_search'])} references")
+    memcur.executemany("insert into file_search"
+                       "  (filename, fragment, reference) VALUES (?, ?, ?)",
+                       db_data["file_search"])
+    memcur.execute("commit")
+
+    maincur = SRCHDB.cursor()
+    maincur.execute("begin")
+    n = f = 0
+    memcur2 = db.cursor()
+    for (term, memid) in memcur.execute("select term, rowid from search_terms"):
+        n += 1
+        rowid = add_term(term, maincur)
+        references = [(fname, frag, rowid) for fname, frag in
+            memcur2.execute("select distinct filename,fragment"
+                            "  from file_search fs,"
+                            "    search_terms st"
+                            "  where fs.reference = ?",
+                            (memid,))]
+        f += len(references)
+        maincur.executemany("insert into file_search"
+                            "  (filename, fragment, reference)"
+                            "  values"
+                            "  (?, ?, ?)", references)
+    SRCHDB.commit()
+    eprint(f"{month} merged {n} terms, {f} references into main db")
+
+def process_month(month, classifier):
+    "Process one month's worth of email messages"
+    start = dt.datetime.now()
+    n = 0
+    db = SearchDB()
+    db.set_database(":memory:")
+    cur = db.cursor()
+    cur.execute("begin")
+    emails = glob.glob(f"{month}/eml-files/*.eml")
+    eprint(f"{month} processing {len(emails)} messages")
+    for eml in emails:
+        process_file(eml, cur, month, classifier)
+        n += 1
+        if n % 50 == 0:
+            db.commit()
+            cur.execute("begin")
+    db.commit()
+    result = {
+        "search_terms": list(db.execute("select term from search_terms")),
+        "file_search": set(db.execute("select filename, fragment, reference from file_search")),
+        }
+    db.close()
+    eprint(f"{month} processed {n} emails in {(dt.datetime.now()-start).total_seconds()}s")
+    return result
 
 def filter_positive(cl, text):
     "Only use sentences which score positive with the NaiveBayesClassifier"
@@ -70,7 +136,7 @@ def filter_positive(cl, text):
 
 
 QUOTED = re.compile(r'''\s*"(.*)"\s*$''')
-def process_file(f, cur, classifier):
+def process_file(f, cur, month, classifier):
     "extract bits from one file"
     f = f.strip()
     msg = read_message(f)
@@ -81,25 +147,22 @@ def process_file(f, cur, classifier):
         return
 
     if classifier is not None:
-        payload = filter_positive(classifier, payload)
+        with BLOB_LOCK:
+            payload = filter_positive(classifier, payload)
 
     subject = trim_subject_prefix(msg["subject"])
     mat = QUOTED.match(subject)
     if mat is not None:
-        # eprint(f"  {subject} -> {mat.group(1)}")
         subject = mat.group(1)
     if subject:
         payload = f"{subject}{CRLF}{CRLF}{payload}"
-    for term in get_terms(strip_leading_quotes(strip_footers(payload))):
-        rowid = SRCHDB.add_term(term)
+    terms = sorted(set(get_terms(strip_leading_quotes(strip_footers(payload)))))
+    for term in terms:
+        rowid = add_term(term, cur)
         fragment = create_fragment(payload, term)
-        if fragment:
-            cur.execute("insert into file_search"
-                        " (filename, fragment, reference) values (?, ?, ?)",
-                        (f, fragment, rowid))
-            lastrowid = cur.lastrowid
-            if lastrowid % 10000 == 0:
-                eprint(lastrowid)
+        lastrowid = add_fragment(fragment, f, rowid, cur)
+        if lastrowid % 5000 == 0:
+            eprint(month, lastrowid)
 
     (sender, addr) = parse_from(msg["from"])
 
@@ -111,20 +174,34 @@ def process_file(f, cur, classifier):
                  f"subject:{subject.strip().lower()}",):
         if term in ("from:", "subject:"):
             continue
-        add_term(term, f, cur)
-
+        rowid = add_term(term, cur)
+        add_fragment("", f, rowid, cur)
     for phrase in get_terms(subject):
         if phrase in sub_frags:
             continue
-        add_term(f"subject:{phrase}", f, cur)
+        rowid = add_term(f"subject:{phrase}", cur)
+        add_fragment("", f, rowid, cur)
 
-def add_term(term, f, cur):
-    rowid = SRCHDB.add_term(term)
+def add_fragment(fragment, f, rowid, cur):
     cur.execute("insert into file_search"
                 " (filename, fragment, reference) values (?, ?, ?)",
-                (f, "", rowid))
-    if cur.lastrowid % 10000 == 0:
-        eprint(cur.lastrowid)
+                (f, fragment, rowid))
+    return cur.lastrowid
+
+def have_term(term, cur):
+    "return rowid if we already have term in the database, else zero"
+    result = list(cur.execute("select rowid from search_terms"
+                              "  where term = ?", (term,)).fetchall())
+    if not result:
+        return 0
+    return result[0][0]
+
+def add_term(term, cur):
+    rowid = have_term(term, cur)
+    if not rowid:
+        cur.execute("insert into search_terms values (?)", (term,))
+        rowid = cur.lastrowid
+    return rowid
 
 def create_fragment(payload, term):
     "get a fragment of text from the message matching the term"
@@ -186,7 +263,7 @@ def preprocess(phrase):
     return "" if len(phrase) < 5 or len(phrase) > 30 else phrase
 
 
-def merge_plurals(k):
+def merge_plurals(k, _srchdb):
     "map simple plurals to singular"
     # we only want to consider words/phrases if the last word is in the
     # large dictionary - for example, we shouldn't mess with
@@ -205,7 +282,7 @@ def merge_plurals(k):
     return (old, new, "plural")
 
 
-def merge_ing(k):
+def merge_ing(k, srchdb):
     "map 'ing' endings to base word"
     last = k.split()[-1]
 
@@ -216,27 +293,27 @@ def merge_ing(k):
         # to "bicycl"
         for suffix in ("e", ""):
             if (last[:-3].strip() + suffix in ALL_WORDS and
-                SRCHDB.have_term(old[:-3].strip() + suffix)):
+                srchdb.have_term(old[:-3].strip() + suffix)):
                 new = old[:-3].strip() + suffix
                 why = "-ing"
                 break
     return (old, new, why)
 
 
-def merge_wrong(k):
+def merge_wrong(k, srchdb):
     "merge simple truncations"
     last = k.split()[-1]
 
     old = new = k
     if last not in ALL_WORDS:
         for suffix in ("e", "es", "s"):
-            if last + suffix in ALL_WORDS and SRCHDB.have_term(k+suffix):
+            if last + suffix in ALL_WORDS and srchdb.have_term(k+suffix):
                 new = k + suffix
                 break
     return old, new, "wrong"
 
 
-def merge_exceptions(k):
+def merge_exceptions(k, _srchdb):
     "hand-crafted merge"
     # a CSV file contains 'from' and 'to' columns. The 'from' column can match
     # in two ways, either an exact match for `k` or as an exact match for the
@@ -253,7 +330,7 @@ def merge_exceptions(k):
     return old, new, why
 
 
-def merge_whitespace(k):
+def merge_whitespace(k, _srchdb):
     "strip trailing whitespace and merge if possible"
     old = new = k
     why = "noop"
@@ -265,7 +342,7 @@ def merge_whitespace(k):
 
 
 # pylint: disable=unused-argument
-def strip_nonprint(k):
+def strip_nonprint(k, _srchdb):
     "strip non-printable characters"
     old = new = k
     why = "noop"
@@ -279,7 +356,7 @@ def strip_nonprint(k):
 PUNCT = string.punctuation.replace("-", "")
 PUNCTSET = set(re.sub("[-_]", "", string.punctuation))
 
-def zap_punct(k):
+def zap_punct(k, _srchdb):
     "strip leading or trailing punctuation or whitespace and zap terms with punct & no ' '"
     old = new = k
     why = "noop"
@@ -297,7 +374,7 @@ def zap_punct(k):
     return old, new, why
 
 
-def zap_long_phrases(k):
+def zap_long_phrases(k, _srchdb):
     "mark long phrases for deletion"
     old = k
     why = "noop"
@@ -327,14 +404,14 @@ def postprocess_db():
                       merge_wrong, strip_nonprint, zap_punct,
                       zap_long_phrases):
             # pylint: disable=unused-variable
-            old, new, why = merge(old)
+            old, new, why = merge(old, SRCHDB)
             if not new:
                 eprint("d:", old)
                 to_delete.add(old)
                 break
             if new != old:
                 eprint(f"pp: {new} |= {old} ({why})")
-                SRCHDB.add_term(new)
+                add_term(new, cur)
                 refs.append((
                     cur.execute("select rowid from search_terms"
                                 "  where term = ?", (new,)).fetchone()[0],
@@ -392,17 +469,17 @@ def postprocess_db():
     # belt and suspenders
     to_delete.add("")
 
-    move_terms(move_these)
-    delete_exceptions(to_delete)
-    delete_unreferenced_terms()
+    move_terms(move_these, SRCHDB)
+    delete_exceptions(to_delete, SRCHDB)
+    delete_unreferenced_terms(SRCHDB)
 
-def move_terms(from_to):
+def move_terms(from_to, srchdb):
     "move terms from undesirable value to more desirable real estate."
     eprint("moving some terms")
     # We don't really move them, just change the
     # reference. delete_referenced_items will then take care of eliminating the
     # now orphaned terms.
-    cur = SRCHDB.cursor()
+    cur = srchdb.cursor()
     for (old, new) in from_to:
         try:
             (old_rowid,) = cur.execute("select rowid from search_terms"
@@ -410,16 +487,16 @@ def move_terms(from_to):
         except TypeError:
             eprint("can't find term:", old)
             continue
-        new_rowid = SRCHDB.add_term(new)
+        new_rowid = add_term(new, cur)
         if old.startswith("camp"):
             eprint(f"{old} ({old_rowid}) -> {new} ({new_rowid})")
         cur.execute("update file_search set reference = ?"
                     "  where reference = ?", (new_rowid, old_rowid))
 
 
-def delete_unreferenced_terms():
+def delete_unreferenced_terms(srchdb):
     eprint("deleting unreferenced terms")
-    cur = SRCHDB.cursor()
+    cur = srchdb.cursor()
     cur.execute("select rowid from file_search")
     rowids = [x for (x,) in cur.fetchall()]
 
@@ -441,10 +518,10 @@ def delete_unreferenced_terms():
         eprint(n)
 
 
-def delete_exceptions(to_delete):
+def delete_exceptions(to_delete, srchdb):
     "delete terms we determined aren't worth it."
     eprint(f"deleting {len(to_delete)} sketchy terms")
-    cur = SRCHDB.cursor()
+    cur = srchdb.cursor()
 
     to_delete = list(to_delete)
     n = 0
@@ -480,7 +557,9 @@ def get_terms(text):
     seen = set()
     tpat = TERM_PAT
     dpat = DIMENSION_PAT
-    for phrase in set(TextBlob(text).noun_phrases):
+    with BLOB_LOCK:
+        phrases = sorted(set(TextBlob(text).noun_phrases))
+    for phrase in phrases:
         lphrase = phrase.lower()
         # common bits embedded in cc'd and forwarded messages.
         if "bikelist" in lphrase or lphrase.startswith("subject"):

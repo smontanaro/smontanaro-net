@@ -30,24 +30,21 @@ class SearchDB:
             sqldb_dir = os.path.dirname(sqldb)
             self.cache_index = os.path.join(sqldb_dir,
                 "search_cache", "index.pkl")
+            self.ensure_connection()
 
     def ensure_connection(self):
         "make sure the database and its schema exist"
         if self.connection is not None:
             return
 
-        create = (not os.path.exists(self.sqldb) or
-                  os.path.getsize(self.sqldb) == 0)
         sqlite3.register_converter("TIMESTAMP", convert_ts_bytes)
         self.connection = sqlite3.connect(self.sqldb,
             detect_types=(sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES))
-        if create:
-            self._create_tables()
-            self._ensure_indexes()
+        self._create_tables()
+        self._ensure_indexes()
 
     def get_page_fragments(self, term):
         "return list (filename, fragment) tuples matching term"
-        self.ensure_connection()
         cached = self._read_from_cache(term)
         if not cached:
             cur = self.connection.cursor()
@@ -70,7 +67,6 @@ class SearchDB:
 
     def have_term(self, term):
         "return rowid if we already have term in the database, else zero"
-        self.ensure_connection()
         cur = self.connection.cursor()
         count = cur.execute("select count(*) from search_terms"
                             "  where term = ?", (term,)).fetchone()[0]
@@ -80,24 +76,16 @@ class SearchDB:
                             "  where term = ?", (term,)).fetchone()[0]
         return rowid
 
-    def add_term(self, term):
-        "make sure term is in database, return its rowid"
-        if rowid := self.have_term(term):
-            return rowid
-        cur = self.connection.cursor()
-        cur.execute("insert into search_terms values (?)", (term,))
-        return cur.lastrowid
-
     def _create_tables(self):
         cur = self.connection.cursor()
         cur.execute('''
-            create table search_terms
+            create table if not exists search_terms
               (
                 term TEXT PRIMARY KEY
               )
         ''')
         cur.execute('''
-            create table file_search
+            create table if not exists file_search
               (
                 filename TEXT,
                 fragment TEXT,
@@ -157,7 +145,6 @@ class SearchDB:
             pickle.dump(index, fobj)
 
     def __getattr__(self, attr):
-        self.ensure_connection()
         return getattr(self.connection, attr)
 
 SRCHDB = SearchDB()
