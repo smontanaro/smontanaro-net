@@ -190,11 +190,8 @@ def add_fragment(fragment, f, rowid, cur):
 
 def have_term(term, cur):
     "return rowid if we already have term in the database, else zero"
-    result = list(cur.execute("select rowid from search_terms"
-                              "  where term = ?", (term,)).fetchall())
-    if not result:
-        return 0
-    return result[0][0]
+    return bool(cur.execute("select rowid from search_terms"
+                            "  where term = ?", (term,)).fetchone())
 
 def add_term(term, cur):
     rowid = have_term(term, cur)
