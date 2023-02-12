@@ -212,11 +212,11 @@ def create_fragment(payload, term):
         eprint(pad, term, type(payload))
         raise
 
-    fragment = ""
     if mat is not None:
         pfx, fragment, sfx = [html.escape(s) for s in mat.groups()]
         fragment = f"{pfx}<b>{fragment}</b>{sfx}".strip()
-    return re.sub(r"\s+", " ", fragment)
+        return re.sub(r"\s+", " ", fragment)
+    return ""
 
 
 def read_csv(csv_file):
