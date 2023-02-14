@@ -1,0 +1,28 @@
+{% extends "bootstrap.jinja" %}
+
+{% set title = "One Page Calendar" %}
+
+{% block extrahead %}
+    <link href="/static/css/calendar.css" rel="stylesheet" />
+{% endblock %}
+
+{% block content %}
+    <div class="toast-container">
+        <table class="calendar">
+            <caption>From <em><a href="https://medium.com/starts-with-a-bang/this-one-page-calendar-will-change-how-you-view-the-year-b8ecad85eebd">This one-page calendar will change how you view the year</a></em></caption>
+            <tbody>
+            <tr class="calendar"><td class="calendar-year" rowspan="4" colspan="5">2023</td><td class="calendar">Jan</td><td class="calendar">May</td><td class="calendar">Aug</td><td class="calendar">Feb</td><td class="calendar">Jun</td><td class="calendar">Sep</td><td class="calendar">Apr</td></tr>
+            <tr class="calendar">                                                               <td class="calendar">Oct</td><td class="calendar"></td><td class="calendar"></td><td class="calendar">Mar</td><td class="calendar"></td><td class="calendar">Dec</td><td class="calendar">Jul</td></tr>
+            <tr class="calendar">                                                               <td class="calendar"></td><td class="calendar"></td><td class="calendar"></td><td class="calendar">Nov</td><td class="calendar"></td><td class="calendar"></td><td class="calendar"></td></tr>
+            <tr class="calendar"><td class="calendar"></td><td class="calendar"></td><td class="calendar"></td><td class="calendar"></td><td class="calendar"></td><td class="calendar"></td><td class="calendar"></td></tr>
+            <tr class="calendar"><td class="calendar">1</td><td class="calendar"> 8</td><td class="calendar">15</td><td class="calendar">22</td><td class="calendar">29</td><td class="calendar">Sun</td><td class="calendar">Mon</td><td class="calendar">Tue</td><td class="calendar">Wed</td><td class="calendar">Thu</td><td class="calendar">Fri</td><td class="calendar">Sat</td></tr>
+            <tr class="calendar"><td class="calendar">2</td><td class="calendar"> 9</td><td class="calendar">16</td><td class="calendar">23</td><td class="calendar">30</td><td class="calendar">Mon</td><td class="calendar">Tue</td><td class="calendar">Wed</td><td class="calendar">Thu</td><td class="calendar">Fri</td><td class="calendar">Sat</td><td class="calendar">Sun</td></tr>
+            <tr class="calendar"><td class="calendar">3</td><td class="calendar">10</td><td class="calendar">17</td><td class="calendar">24</td><td class="calendar">31</td><td class="calendar">Tue</td><td class="calendar">Wed</td><td class="calendar">Thu</td><td class="calendar">Fri</td><td class="calendar">Sat</td><td class="calendar">Sun</td><td class="calendar">Mon</td></tr>
+            <tr class="calendar"><td class="calendar">4</td><td class="calendar">11</td><td class="calendar">18</td><td class="calendar">25</td><td class="calendar">  </td><td class="calendar">Wed</td><td class="calendar">Thu</td><td class="calendar">Fri</td><td class="calendar">Sat</td><td class="calendar">Sun</td><td class="calendar">Mon</td><td class="calendar">Tue</td></tr>
+            <tr class="calendar"><td class="calendar">5</td><td class="calendar">12</td><td class="calendar">19</td><td class="calendar">26</td><td class="calendar">  </td><td class="calendar">Thu</td><td class="calendar">Fri</td><td class="calendar">Sat</td><td class="calendar">Sun</td><td class="calendar">Mon</td><td class="calendar">Tue</td><td class="calendar">Wed</td></tr>
+            <tr class="calendar"><td class="calendar">6</td><td class="calendar">13</td><td class="calendar">20</td><td class="calendar">27</td><td class="calendar">  </td><td class="calendar">Fri</td><td class="calendar">Sat</td><td class="calendar">Sun</td><td class="calendar">Mon</td><td class="calendar">Tue</td><td class="calendar">Wed</td><td class="calendar">Thu</td></tr>
+            <tr class="calendar"><td class="calendar">7</td><td class="calendar">14</td><td class="calendar">21</td><td class="calendar">28</td><td class="calendar">  </td><td class="calendar">Sat</td><td class="calendar">Sun</td><td class="calendar">Mon</td><td class="calendar">Tue</td><td class="calendar">Wed</td><td class="calendar">Thu</td><td class="calendar">Fri</td></tr>
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

@@ -1,0 +1,24 @@
+table.calendar {
+    width: 100%;
+    /* border: 1px solid black; */
+    font-weight: bold;
+    font: courier-new;
+    border-collapse: collapse;
+}
+td.calendar {
+    border: 1px solid black;
+    height: 30px;
+    width: 80px;
+    text-align: right;
+}
+td.calendar-noborder {
+    border: 0;
+    height: 30px;
+    width: 80px;
+}
+td.calendar-year {
+    border: 0;
+    font-size: 40px;
+    text-align: center;
+    vertical-align: middle;
+}

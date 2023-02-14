@@ -117,6 +117,11 @@ def init_simple():
         "index"
         return render_template("main.jinja", title="Home")
 
+    @app.route("/calendar")
+    def calendar():
+        "One-page calendar"
+        return render_template("calendar.jinja")
+
     @app.post("/photolink")
     def photolink_POST():
         form = PhotoForm()
