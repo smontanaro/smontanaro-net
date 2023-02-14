@@ -39,7 +39,7 @@ class SearchDB:
 
         sqlite3.register_converter("TIMESTAMP", convert_ts_bytes)
         self.connection = sqlite3.connect(self.sqldb,
-            detect_types=(sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES))
+            detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
         self._create_tables()
         self._ensure_indexes()
 

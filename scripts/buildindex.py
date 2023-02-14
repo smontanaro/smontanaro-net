@@ -132,7 +132,7 @@ def filter_positive(cl, text):
         prob_dist = cl.prob_classify(sent)
         if prob_dist.prob("pos") >= upper:
             positive.append(sent)
-    return "\r\n\r\n".join(positive)
+    return f"{CRLF}{CRLF}".join(positive)
 
 
 QUOTED = re.compile(r'''\s*"(.*)"\s*$''')

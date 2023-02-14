@@ -438,7 +438,7 @@ class Message(email.message.EmailMessage):
         mapped = "&nbsp;(mapped)" if target != word else ""
         if re.match("https?://", word):
             # provide hints for optional breaking of long URLs.
-            split = (urllib.parse.urlsplit(word))
+            split = urllib.parse.urlsplit(word)
             split = split._replace(path=split.path.replace("/", "/<wbr>"))
             word = f"""<a target="_blank" href="{target}">{split.geturl()}</a>{mapped}"""
         return word
