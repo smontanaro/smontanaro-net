@@ -237,10 +237,12 @@ a:hover {
   color: #0a58ca;
 }
 
+/*
 a:not([href]):not([class]), a:not([href]):not([class]):hover {
   color: inherit;
   text-decoration: none;
 }
+*/
 
 pre,
 code,
@@ -5426,7 +5428,7 @@ textarea.form-control-lg {
   width: -moz-max-content;
   width: max-content;
   max-width: 100%;
-  pointer-events: none;
+  /* pointer-events: none; */
 }
 .toast-container > :not(:last-child) {
   margin-bottom: 0.75rem;
