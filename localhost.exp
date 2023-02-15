@@ -6,6 +6,9 @@ bad_cr            GET        /<year>/<month>/<int:seq>
 bike_reroute      GET        /43bikes
 bikes_43          GET        /43bikes/
 bikes_43          GET        /43bikes/<path:path>
+cal_reroute       GET        /calendar
+calendar          GET        /calendar/
+calendar          GET        /calendar/<int:year>
 cr_help_          GET        /CR/help
 cr_index          GET        /CR
 cr_index          GET        /CR/

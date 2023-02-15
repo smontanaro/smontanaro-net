@@ -118,9 +118,32 @@ def init_simple():
         return render_template("main.jinja", title="Home")
 
     @app.route("/calendar")
-    def calendar():
+    def cal_reroute():
+        return redirect(url_for("calendar"))
+
+    @app.route("/calendar/")
+    @app.route("/calendar/<int:year>")
+    def calendar(year=10**22):
         "One-page calendar"
-        return render_template("calendar.jinja")
+        months = [
+            [" ", " ", " ", " ", " ", " ", " ", ],
+            [" ", " ", " ", " ", " ", " ", " ", ],
+            [" ", " ", " ", " ", " ", " ", " ", ],
+            [" ", " ", " ", " ", " ", " ", " ", ],
+            ]
+        if year == 10**22:
+            year = datetime.datetime.now().year
+
+        for month in range(1, 13):
+            dt = datetime.date(year, month, 1)
+            # This computes row index into months[i]. Sunday == 6 is the zeroth
+            # cell.
+            weekday = (dt.weekday() + 1) % 7
+            for i in range(4):
+                if months[i][weekday] == " ":
+                    months[i][weekday] = dt.strftime("%b")
+                    break
+        return render_template("calendar.jinja", year=year, months=months)
 
     @app.post("/photolink")
     def photolink_POST():

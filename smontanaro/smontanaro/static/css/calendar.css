@@ -2,7 +2,8 @@ table.calendar {
     width: 100%;
     /* border: 1px solid black; */
     font-weight: bold;
-    font: courier-new;
+    font-family: Arial;
+    font-size: 16px;
     border-collapse: collapse;
 }
 td.calendar {
@@ -18,7 +19,10 @@ td.calendar-noborder {
 }
 td.calendar-year {
     border: 0;
-    font-size: 40px;
+    font-size: 24px;
     text-align: center;
     vertical-align: middle;
+}
+div.calendar-arrow {
+    font-size: 40px;
 }
