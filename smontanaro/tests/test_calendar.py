@@ -68,3 +68,10 @@ def test_date(client):
             if mat is not None:
                 check.append(mat.group(1))
         assert check == "Apr 12 Wed".split()
+
+def test_bad_date(client):
+    date = datetime.date.today()
+
+    with client.application.app_context():
+        rv = client.get("/calendar/2023/2/29")
+        assert rv.status_code == 500
