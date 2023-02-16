@@ -52,7 +52,7 @@ test : FORCE
 	bash scripts/test.sh
 
 clean : FORCE
-	rm -rf search_cache dist
+	rm -rf search_cache dist htmlcov
 	find . -name __pycache__ | xargs -r rm -rf
 
 FORCE :
