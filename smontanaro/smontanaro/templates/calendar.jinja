@@ -8,7 +8,10 @@
 
 {% block content %}
     <div class="toast-container">
-        <div><a href="/calendar/{{ year-1 }}">{{ year-1 }}</a> | <a href="/calendar/{{ year+1 }}">{{ year+1 }}</a></div>
+        <div><a href="/calendar/{{ year-1 }}">{{ year-1 }}</a>
+            | <a href="/calendar/{{ year+1 }}">{{ year+1 }}</a>
+            | <a href="/calendar/today">Today</a>
+        </div>
         <table class="calendar">
             <caption>From <em><a href="https://medium.com/starts-with-a-bang/this-one-page-calendar-will-change-how-you-view-the-year-b8ecad85eebd">This one-page calendar will change how you view the year</a></em></caption>
             <tbody>
