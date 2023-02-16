@@ -9,6 +9,7 @@ bikes_43          GET        /43bikes/<path:path>
 cal_reroute       GET        /calendar
 calendar          GET        /calendar/
 calendar          GET        /calendar/<int:year>
+calendar_today    GET        /calendar/today
 cr_help_          GET        /CR/help
 cr_index          GET        /CR
 cr_index          GET        /CR/
@@ -119,5 +120,8 @@ DEBUG:urllib3.connectionpool:https://photos.app.goo.gl:443 "GET /qXkghhtQ2rPBhwZ
 DEBUG:urllib3.connectionpool:Starting new HTTPS connection (1): photos.google.com:443
 DEBUG:urllib3.connectionpool:https://photos.google.com:443 "GET /share/AF1QipMpBo7PpJESYQIRJBk-VXGrd_C7BCYgiEbn4VeudzxqBPLSGFqjQdRVgXVts6236w?key=eFN6NmJVZHV4SmxPamkydWllOVlseTRwQzZCdC13 HTTP/1.1" 200 None
 127.0.0.1 - - "GET /photolink?fmt=html&width=1200&url=https://photos.app.goo.gl/qXkghhtQ2rPBhwZp7 HTTP/1.1" 200 <size> "-" curl/7.NN
+# one-page calendar
+127.0.0.1 - - "GET /calendar HTTP/1.1" 302 <size> "-" curl/7.NN
+127.0.0.1 - - "GET /calendar/ HTTP/1.1" 200 <size> "-" curl/7.NN
 Debug mode enabled.
 [INFO] Shutting down: Master

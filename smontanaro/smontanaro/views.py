@@ -121,18 +121,34 @@ def init_simple():
     def cal_reroute():
         return redirect(url_for("calendar"))
 
+    @app.route("/calendar/today")
+    def calendar_today():
+        return redirect(url_for("calendar", year=datetime.date.today().year, today=True))
+
     @app.route("/calendar/")
     @app.route("/calendar/<int:year>")
-    def calendar(year=10**22):
+    def calendar(year=10**22, today=False):
         "One-page calendar"
+        date = datetime.date.today()
+
         months = [
             [" ", " ", " ", " ", " ", " ", " ", ],
             [" ", " ", " ", " ", " ", " ", " ", ],
             [" ", " ", " ", " ", " ", " ", " ", ],
             [" ", " ", " ", " ", " ", " ", " ", ],
             ]
+
+        classes = []
+        for _row in range(12):
+            classes.append([])
+            for _col in range(13):
+                classes[-1].append("calendar")
+
         if year == 10**22:
-            year = datetime.datetime.now().year
+            year = date.year
+
+        if year == date.year:
+            today = True
 
         for month in range(1, 13):
             dt = datetime.date(year, month, 1)
@@ -143,7 +159,28 @@ def init_simple():
                 if months[i][weekday] == " ":
                     months[i][weekday] = dt.strftime("%b")
                     break
-        return render_template("calendar.jinja", year=year, months=months)
+
+        if today:
+            # adjust calendar class to display today's month and date in red.
+            ## day
+            row = (date.day - 1) // 7 + 3
+            col = (date.day - 1) % 7 + 1
+            classes[row][col] = "calendar_today"
+            ## month
+            col = ""
+            for i in range(4):
+                for j in range(7):
+                    if months[i][j] == date.strftime("%b"):
+                        classes[i][j+5] = "calendar_today"
+                        col = j + 5
+                        break
+                if col:
+                    break
+            # day of the week
+            classes[row][col] = "calendar_today"
+
+        return render_template("calendar.jinja", year=year, months=months,
+                               classes=classes)
 
     @app.post("/photolink")
     def photolink_POST():

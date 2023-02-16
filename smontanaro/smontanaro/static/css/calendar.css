@@ -12,6 +12,14 @@ td.calendar {
     width: 80px;
     text-align: right;
 }
+td.calendar_today {
+    color: red;
+    border: 1px solid black;
+    height: 30px;
+    width: 80px;
+    text-align: right;
+
+}
 td.calendar-noborder {
     border: 0;
     height: 30px;
