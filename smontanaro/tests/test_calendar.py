@@ -7,7 +7,8 @@ from _test_helper import client
 
 def test_calendar(client):
     with client.application.app_context():
-        rv = client.get("/calendar/2023")
+        today = datetime.date.today()
+        rv = client.get("/calendar/")
         assert rv.status_code == 200
         checklines = []
         saving = False
@@ -18,10 +19,11 @@ def test_calendar(client):
                 saving = True
             elif saving:
                 checklines.append(re.search(">([^<]+)<", line).group(1).strip())
-        assert checklines == "2023 Jan May Aug Feb Jun Sep Apr".split()
+        assert checklines == f"{today.year} Jan May Aug Feb Jun Sep Apr".split()
 
-def test_calendar_anotheryear(client):
+def test_calendar_year(client):
     with client.application.app_context():
+        today = datetime.date(1989, 1, 1)
         rv = client.get("/calendar/1989")
         assert rv.status_code == 200
         checklines = []
@@ -33,7 +35,7 @@ def test_calendar_anotheryear(client):
                 saving = True
             elif saving:
                 checklines.append(re.search(">([^<]+)<", line).group(1).strip())
-        assert checklines[0] == "1989"
+        assert checklines == f"{today.year} Jan May Aug Feb Jun Sep Apr".split()
 
 def test_today(client):
     date = datetime.date.today()
@@ -53,3 +55,16 @@ def test_today(client):
             elif saving:
                 checklines.append(re.search(">([^<]+)<", line).group(1).strip())
         assert checklines[0] == f"{date.year}"
+
+def test_date(client):
+    date = datetime.date.today()
+
+    with client.application.app_context():
+        rv = client.get("/calendar/1989/4/12")
+        assert rv.status_code == 200
+        check = []
+        for line in rv.text.split("\n"):
+            mat = re.search('"calendar calendar_today">([^<]+)', line)
+            if mat is not None:
+                check.append(mat.group(1))
+        assert check == "Apr 12 Wed".split()

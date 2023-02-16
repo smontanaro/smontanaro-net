@@ -14,10 +14,6 @@ td.calendar {
 }
 td.calendar_today {
     color: red;
-    border: 1px solid black;
-    height: 30px;
-    width: 80px;
-    text-align: right;
 
 }
 td.calendar-noborder {

@@ -9,6 +9,7 @@ bikes_43          GET        /43bikes/<path:path>
 cal_reroute       GET        /calendar
 calendar          GET        /calendar/
 calendar          GET        /calendar/<int:year>
+calendar          GET        /calendar/<int:year>/<int:month>/<int:day>
 calendar_today    GET        /calendar/today
 cr_help_          GET        /CR/help
 cr_index          GET        /CR

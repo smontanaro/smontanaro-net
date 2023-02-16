@@ -127,9 +127,16 @@ def init_simple():
 
     @app.route("/calendar/")
     @app.route("/calendar/<int:year>")
-    def calendar(year=10**22, today=False):
+    @app.route("/calendar/<int:year>/<int:month>/<int:day>")
+    def calendar(year=10**22, month=0, day=0, today=False):
         "One-page calendar"
-        date = datetime.date.today()
+        if year != 10**22 and month > 0 and day > 0:
+            try:
+                date = datetime.date(year, month, day)
+            except ValueError as exc:
+                abort(500, str(exc))
+        else:
+            date = datetime.date.today()
 
         months = [
             [" ", " ", " ", " ", " ", " ", " ", ],
@@ -150,8 +157,8 @@ def init_simple():
         if year == date.year:
             today = True
 
-        for month in range(1, 13):
-            dt = datetime.date(year, month, 1)
+        for m in range(1, 13):
+            dt = datetime.date(year, m, 1)
             # This computes row index into months[i]. Sunday == 6 is the zeroth
             # cell.
             weekday = (dt.weekday() + 1) % 7
@@ -163,21 +170,21 @@ def init_simple():
         if today:
             # adjust calendar class to display today's month and date in red.
             ## day
-            row = (date.day - 1) // 7 + 3
-            col = (date.day - 1) % 7 + 1
-            classes[row][col] = "calendar_today"
+            row = (date.day - 1) % 7 + 4
+            col = (date.day - 1) // 7
+            classes[row][col] += " calendar_today"
             ## month
             col = ""
             for i in range(4):
                 for j in range(7):
                     if months[i][j] == date.strftime("%b"):
-                        classes[i][j+5] = "calendar_today"
+                        classes[i][j+5] += " calendar_today"
                         col = j + 5
                         break
                 if col:
                     break
             # day of the week
-            classes[row][col] = "calendar_today"
+            classes[row][col] += " calendar_today"
 
         return render_template("calendar.jinja", year=year, months=months,
                                classes=classes)
