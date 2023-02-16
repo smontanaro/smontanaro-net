@@ -131,11 +131,14 @@ def init_simple():
     @app.route("/calendar/<int:year>/<int:month>/<int:day>")
     def calendar(year=10**22, month=0, day=0):
         "One-page calendar"
+        error = ""
+
         if year != 10**22 and month > 0 and day > 0:
             try:
                 date = datetime.date(year, month, day)
             except ValueError as exc:
-                abort(500, str(exc))
+                date = datetime.date.today()
+                error = f"Invalid date: {year:4d}-{month:02d}-{day:02d} {exc}"
         else:
             date = datetime.date.today()
 
@@ -187,7 +190,7 @@ def init_simple():
             classes[row][col] += " calendar_today"
 
         return render_template("calendar.jinja", year=year, months=months,
-                               classes=classes)
+                               classes=classes, error=error)
 
     @app.post("/photolink")
     def photolink_POST():
