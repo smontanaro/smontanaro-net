@@ -8,6 +8,12 @@
 
 {% block content %}
     <div class="toast-container">
+        {% if error.strip() != "" %}
+            <p>
+                <b>Error: {{ error }}</b>
+            </p>
+            <hr/>
+        {% endif %}
         <div><a href="/calendar/{{ year-1 }}">{{ year-1 }}</a>
             | <a href="/calendar/{{ year+1 }}">{{ year+1 }}</a>
             | <a href="/calendar/today">Today</a>

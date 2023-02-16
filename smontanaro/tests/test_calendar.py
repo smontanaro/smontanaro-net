@@ -74,4 +74,5 @@ def test_bad_date(client):
 
     with client.application.app_context():
         rv = client.get("/calendar/2023/2/29")
-        assert rv.status_code == 500
+        assert rv.status_code == 200
+        assert "Invalid date" in rv.text
