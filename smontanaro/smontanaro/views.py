@@ -123,12 +123,13 @@ def init_simple():
 
     @app.route("/calendar/today")
     def calendar_today():
-        return redirect(url_for("calendar", year=datetime.date.today().year, today=True))
+        dt = datetime.date.today()
+        return redirect(url_for("calendar", year=dt.year, month=dt.month, day=dt.day))
 
     @app.route("/calendar/")
     @app.route("/calendar/<int:year>")
     @app.route("/calendar/<int:year>/<int:month>/<int:day>")
-    def calendar(year=10**22, month=0, day=0, today=False):
+    def calendar(year=10**22, month=0, day=0):
         "One-page calendar"
         if year != 10**22 and month > 0 and day > 0:
             try:
@@ -154,8 +155,7 @@ def init_simple():
         if year == 10**22:
             year = date.year
 
-        if year == date.year:
-            today = True
+        today = year == date.year
 
         for m in range(1, 13):
             dt = datetime.date(year, m, 1)
