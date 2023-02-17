@@ -120,18 +120,24 @@ def test_read_busted_pickle():
         shutil.rmtree(tmpdir, ignore_errors=True)
 
 def test_under_paren_urlmap(client):
-    msg = read_message("CR/2005-01/eml-files/classicrendezvous.10501.1670.eml")
-    url = "http://www.moots.com/messages/1040.shtml"
-    with client.application.app_context():
-        filt = MessageFilter(msg)
-        filt.filter_message(msg)
-        text = msg.as_html()
-        # need to mimic the path splitting of long urls (see Message.map_url)
-        split = (urllib.parse.urlsplit(url))
-        br_url = split._replace(path=split.path.replace("/", "/<wbr>")).geturl()
-        assert (br_url in text and
-                f"_{url}_" not in text and
-                f"({url})" not in text)
+    save_debug = client.application.config["DEBUG"]
+    try:
+        for debug in (True, False):
+            client.application.config["DEBUG"] = debug
+            msg = read_message("CR/2005-01/eml-files/classicrendezvous.10501.1670.eml")
+            url = "http://www.moots.com/messages/1040.shtml"
+            with client.application.app_context():
+                filt = MessageFilter(msg)
+                filt.filter_message(msg)
+                text = msg.as_html()
+                # need to mimic the path splitting of long urls (see Message.map_url)
+                split = (urllib.parse.urlsplit(url))
+                br_url = split._replace(path=split.path.replace("/", "/<wbr>")).geturl()
+                assert (br_url in text and
+                        f"_{url}_" not in text and
+                        f"({url})" not in text)
+    finally:
+        client.application.config["DEBUG"] = save_debug
 
 def test_map_url():
     # any old message will do (I think)
