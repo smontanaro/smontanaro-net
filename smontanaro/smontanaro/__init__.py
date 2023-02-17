@@ -7,6 +7,7 @@ import toml
 
 from flask import Flask
 
+from . import simple
 from . import util
 from . import views
 from . import exc
@@ -37,5 +38,6 @@ def create_app(test_config=None):
     util.init_app(app)
     views.init_app(app)
     exc.init_app(app)
+    simple.init_app(app)
 
     return app
