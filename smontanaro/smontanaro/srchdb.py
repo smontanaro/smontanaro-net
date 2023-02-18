@@ -89,8 +89,8 @@ class SearchDB:
               (
                 filename TEXT,
                 fragment TEXT,
-                reference TEXT,
-                FOREIGN KEY(reference) REFERENCES search_terms(term)
+                reference INTEGER,
+                FOREIGN KEY(reference) REFERENCES search_terms(rowid)
               )
         ''')
         self.connection.commit()
