@@ -42,7 +42,7 @@ def main():
             return 0
 
     SRCHDB.set_database(args[0])
-    with concurrent.futures.ThreadPoolExecutor(max_workers=os.cpu_count()) as executor:
+    with concurrent.futures.ThreadPoolExecutor() as executor:
         months = {}
         for month in sys.stdin:
             month = month.strip()
@@ -59,44 +59,60 @@ def main():
 
 def merge_into_srchdb(db_data, month):
     "smash all the :memory: databases into the main db, one-by-one"
-    eprint(f"merging {month} into main db")
 
     # First, take the db data passed back from the thread and reinsert it into
     # a new in-memory database (sqlite3 doesn't support sharing connections
     # across threads).
     db = SearchDB()
     db.set_database(":memory:")
-    memcur = db.cursor()
-    memcur.execute("begin")
-    # eprint(f"{month} insert {len(db_data['search_terms'])} terms")
-    memcur.executemany("insert into search_terms"
-                       "  (term) VALUES (?)", db_data["search_terms"])
-    # eprint(f"{month} insert {len(db_data['file_search'])} references")
-    memcur.executemany("insert into file_search"
-                       "  (filename, fragment, reference) VALUES (?, ?, ?)",
-                       db_data["file_search"])
-    memcur.execute("commit")
+    db.deserialize(db_data)
 
+    terms = db.execute("select count(term) from search_terms").fetchone()[0]
+    refs = db.execute("select count(*) from file_search").fetchone()[0]
+    eprint(f"merging {month} ({terms} terms, {refs} references) into main db")
+
+    db.execute("begin")
+    memcur = db.cursor()
     maincur = SRCHDB.cursor()
-    maincur.execute("begin")
-    n = f = 0
-    memcur2 = db.cursor()
-    for (term, memid) in memcur.execute("select term, rowid from search_terms"):
-        n += 1
-        rowid = add_term(term, maincur)
-        references = [(fname, frag, rowid) for fname, frag in
-            memcur2.execute("select distinct filename,fragment"
-                            "  from file_search fs,"
-                            "    search_terms st"
-                            "  where fs.reference = ?",
-                            (memid,))]
-        f += len(references)
-        maincur.executemany("insert into file_search"
-                            "  (filename, fragment, reference)"
-                            "  values"
-                            "  (?, ?, ?)", references)
+
+    missingterms = ({t[0] for t in memcur.execute("select distinct term from search_terms")}
+        - {t[0] for t in maincur.execute("select distinct term from search_terms")})
+
+    # If there are any new terms in the incoming db, insert them into the main db
+    if missingterms:
+        eprint(f"{len(missingterms)} in mem db not yet in main db")
+        maincur.executemany("insert into search_terms (term) VALUES (?)",
+                            list((t,) for t in missingterms))
+
+    # Map the incoming rowids to rowids in the main db
+    memterms = {}
+    for (term, rowid) in memcur.execute("select distinct term, rowid from search_terms"):
+        memterms[term] = rowid
+    mainterms = {}
+    for (term, rowid) in maincur.execute("select distinct term, rowid from search_terms"):
+        mainterms[term] = rowid
+    eprint(f"{len(memterms)} mem db terms, {len(mainterms)} main db terms")
+
+    rowids = {}
+    for t in set(memterms) & set(mainterms):
+        memrowid = memterms[t] if t in memterms else 0
+        mainrowid = mainterms[t] if t in mainterms else 0
+        assert memrowid != 0 and mainrowid != 0
+        rowids[memrowid] = mainrowid
+
+    # Read the incoming file_search table and map references to the main db rowids
+    references = []
+    for filename, fragment, reference in memcur.execute("select filename, fragment, reference"
+                                                        "  from file_search"):
+        reference = int(reference)
+        references.append((filename, fragment, rowids[reference]))
+    maincur.executemany("insert into file_search"
+                        "  (filename, fragment, reference)"
+                        "  values"
+                        "  (?, ?, ?)", references)
+
     SRCHDB.commit()
-    eprint(f"{month} merged {n} terms, {f} references into main db")
+    eprint(f"{month} merged {len(memterms)} terms, {len(references)} references into main db")
 
 def process_month(month, classifier):
     "Process one month's worth of email messages"
@@ -115,10 +131,7 @@ def process_month(month, classifier):
             db.commit()
             cur.execute("begin")
     db.commit()
-    result = {
-        "search_terms": list(db.execute("select term from search_terms")),
-        "file_search": set(db.execute("select filename, fragment, reference from file_search")),
-        }
+    result = db.serialize()
     db.close()
     eprint(f"{month} processed {n} emails in {(dt.datetime.now()-start).total_seconds()}s")
     return result
@@ -161,7 +174,7 @@ def process_file(f, cur, month, classifier):
         rowid = add_term(term, cur)
         fragment = create_fragment(payload, term)
         lastrowid = add_fragment(fragment, f, rowid, cur)
-        if lastrowid % 5000 == 0:
+        if lastrowid % 20000 == 0:
             eprint(month, lastrowid)
 
     (sender, addr) = parse_from(msg["from"])
@@ -506,7 +519,7 @@ def delete_unreferenced_terms(srchdb):
 
     n = 0
     to_delete = list(to_delete)
-    chunksize = 10000
+    chunksize = 20000
     while to_delete:
         ids, to_delete = tuple(to_delete[:chunksize]), to_delete[chunksize:]
         n += chunksize
@@ -522,7 +535,7 @@ def delete_exceptions(to_delete, srchdb):
 
     to_delete = list(to_delete)
     n = 0
-    chunksize = 10000
+    chunksize = 20000
     while to_delete:
         terms, to_delete = tuple(to_delete[:chunksize]), to_delete[chunksize:]
         n += chunksize
