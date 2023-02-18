@@ -12,7 +12,6 @@ from textblob.classifiers import NaiveBayesClassifier
 
 from smontanaro.util import read_message
 
-# FIXME: use curses
 BOLD = "\x1B[1m"
 NORM = "\x1B[m"
 
@@ -65,7 +64,7 @@ def view_subset(pattern, n):
             case "r" | "retrain":
                 cl = train()
                 process_one(f, cl)
-                input("continue?")
+                input("press RET to continue... ")
             case "y" | "yes" | "":
                 pass
             case _:
