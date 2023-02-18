@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 
+"print <a href...> and <img src...> links."
+
 from html.parser import HTMLParser
 import os
 import sys
 
 class MyHTMLParser(HTMLParser):
+    "parse and print links"
     def handle_starttag(self, tag, attrs):
         if tag == "a":
             attr = "href"
