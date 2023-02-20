@@ -23,7 +23,7 @@ _TABLE = {
     'OR':         r'[|][|]',
     'LPAREN':     r'[(]',
     'RPAREN':     r'[)]',
-    'STRING':     r'[-_.:@a-zA-Z0-9]+(?:\s+[-_.:@a-zA-Z0-9]+)*',
+    'STRING':     r'[-_.:@a-zA-Z0-9/]+(?:\s+[-_.:@a-zA-Z0-9/]+)*',
     'SPACE':      (r'\s+', lambda t: None),
 
 }
