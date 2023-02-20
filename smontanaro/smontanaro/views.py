@@ -67,22 +67,22 @@ def init_views():
         with open_(f'{CR}/generated/sitemap.xml', encoding="utf-8") as fobj:
             return fobj.read()
 
-    @app.route("/CR/<year>/<month>/sitemap.xml")
+    @app.route("/CR/<int:year>/<int:month>/sitemap.xml")
     def sitemap_by_month(year, month):
         "websites need these"
         CR = app.config["CR"]
-        with open_(f'{CR}/{year}-{month}/generated/sitemap.xml',
+        with open_(f'{CR}/{year:4d}-{month:02d}/generated/sitemap.xml',
                    encoding="utf-8") as fobj:
             return fobj.read()
 
-    @app.route('/CR/<year>/<month>/mybikes')
-    @app.route('/<year>/<month>/mybikes')
+    @app.route('/CR/<int:year>/<int:month>/mybikes')
+    @app.route('/<int:year>/<int:month>/mybikes')
     def mybikes(year, month):
         "currently broken link - redirect"
         return redirect(url_for("dates", year=year, month=month))
 
-    @app.route('/CR/<year>/<month>/about')
-    @app.route('/<year>/<month>/about')
+    @app.route('/CR/<int:year>/<int:month>/about')
+    @app.route('/<int:year>/<int:month>/about')
     # pylint: disable=unused-argument
     def _about(year, month):
         "currently broken link - redirect"
@@ -97,13 +97,11 @@ def init_indexes():
     app = current_app
     CR = app.config["CR"]
 
-    @app.route("/CR/<year>/<month>")
-    @app.route("/CR/<year>/<month>/dates")
+    @app.route("/CR/<int:year>/<int:month>")
+    @app.route("/CR/<int:year>/<int:month>/dates")
     def dates(year, month):
         "new date index"
 
-        year = int(year)
-        month = int(month)
         date = datetime.date(year, month, 1)
 
         prev_url = month_url(year, month, -1, "dates")
@@ -118,12 +116,10 @@ def init_indexes():
                                prev=prev_url, next=next_url, year=year,
                                month=month)
 
-    @app.route("/CR/<year>/<month>/threads")
+    @app.route("/CR/<int:year>/<int:month>/threads")
     def threads(year, month):
         "new thread index"
 
-        year = int(year)
-        month = int(month)
         date = datetime.date(year, month, 1)
 
         prev_url = month_url(year, month, -1, "threads")
@@ -235,10 +231,10 @@ def init_cr():
             return render_template("crtop.jinja", body=fobj.read(),
                                    title="Old Classic Rendezvous Archive")
 
-    @app.route('/CR/<year>/<month>/<seq>')
+    @app.route('/CR/<int:year>/<int:month>/<int:seq>')
     def cr_message(year, month, seq):
         "render email as html."
-        return email_to_html(int(year), int(month), seq)
+        return email_to_html(year, month, seq)
 
 
 def email_to_html(year, month, seq, note=""):
@@ -315,12 +311,9 @@ def query_index(query):
 def init_redirect():
     app = current_app
 
-    @app.route('/<year>-<month>/html/<filename>')
+    @app.route('/<int:year>-<int:month>/html/<filename>')
     def old_cr(year, month, filename):
         "convert old archive url structure to new."
-
-        # will arrive as a string, but we want an int to force formatting
-        month = int(month, 10)
 
         if filename in ("index.html", "maillist.html"):
             return redirect(url_for("dates", year=year, month=month),
@@ -341,7 +334,7 @@ def init_redirect():
                                 seq=seq),
                         code=301)
 
-    @app.route('/<year>/<month>/<int:seq>')
+    @app.route('/<int:year>/<int:month>/<int:seq>')
     def bad_cr(year, month, seq):
         return redirect(url_for("cr_message", year=year, month=month, seq=f"{seq:04d}"),
                         code=301)
