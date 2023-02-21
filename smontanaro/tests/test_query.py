@@ -1,9 +1,11 @@
 "low-level query tests"
 
+import os
+import pickle
 import time
 
 from smontanaro.query import execute_query, parse_query, execute_structured_query
-from smontanaro.srchdb import SRCHDB
+from smontanaro.srchdb import SRCHDB, CACHE_DIR
 from smontanaro.views import query_index
 
 from _test_helper import client
@@ -121,6 +123,16 @@ def test_query_cache(client):
     # ... but more quickly
     assert result1[0] > result2[0]
 
+def test_missing_cached_file(client):
+    with client.application.app_context():
+        result = execute_query("126mm")
+    with open(os.path.join(CACHE_DIR, "index.pkl"), "rb") as fobj:
+        index = pickle.load(fobj)
+    os.unlink(index["126mm"])
+    with client.application.app_context():
+        result = execute_query("126mm")
+        # cache an already existing search result
+        SRCHDB._save_to_cache("126mm", result)
 
 def test_from_query(client):
     with client.application.app_context():
