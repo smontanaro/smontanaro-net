@@ -10,6 +10,7 @@ from flask import redirect, url_for, render_template, request, send_from_directo
 import requests
 
 from .forms import PhotoForm
+# from .log import eprint
 from .util import GooglePhotoParser
 
 
