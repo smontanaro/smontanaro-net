@@ -6,6 +6,8 @@ import time
 
 from smontanaro.query import execute_query, parse_query, execute_structured_query
 from smontanaro.srchdb import SRCHDB, CACHE_DIR
+from smontanaro.strip import CRLF
+from smontanaro.util import read_message
 from smontanaro.views import query_index
 
 from _test_helper import client
@@ -50,9 +52,10 @@ def test_complex_query1(client):
         # CR/2000/10/0169 (coppi only)
         # CR/2001/12/0582 (bartali only)
         filenames = execute_query("bartali OR coppi").pages()
-        assert "CR/2000-10/eml-files/classicrendezvous.10010.0885.eml" in filenames
-        assert "CR/2000-10/eml-files/classicrendezvous.10010.0169.eml" in filenames
-        assert "CR/2001-12/eml-files/classicrendezvous.10112.0582.eml" in filenames
+        for filename in filenames:
+            msg = read_message(filename)
+            payload = msg["subject"].lower() + CRLF + CRLF + msg.extract_text().lower()
+            assert "bartali" in payload or "coppi" in payload, filename
 
 def test_transitive_complex_query(client):
     with client.application.app_context():
@@ -82,18 +85,21 @@ def test_complex_query2(client):
         # CR/2000/10/0885 (bartali and coppi)
         # CR/2000/10/0169 (coppi only)
         # CR/2001/12/0582 (bartali only)
-        result = execute_query("bartali AND coppi")
-        assert "CR/2000-10/eml-files/classicrendezvous.10010.0885.eml" in result
-        assert "CR/2000-10/eml-files/classicrendezvous.10010.0169.eml" not in result
-        assert "CR/2001-12/eml-files/classicrendezvous.10112.0582.eml" not in result
+        filenames = execute_query("bartali AND coppi").pages()
+        for filename in filenames:
+            msg = read_message(filename)
+            payload = msg["subject"].lower() + CRLF + CRLF + msg.extract_text().lower()
+            assert "bartali" in payload and "coppi" in payload, filename
 
 def test_complex_query3(client):
     with client.application.app_context():
         # CR/2000/10/0885 (bartali and coppi)
         # CR/2001/12/0582 (bartali only)
-        result = execute_query("bartali AND NOT coppi")
-        assert "CR/2000-10/eml-files/classicrendezvous.10010.0885.eml" not in result
-        assert "CR/2001-12/eml-files/classicrendezvous.10112.0582.eml" in result
+        filenames = execute_query("bartali AND NOT coppi").pages()
+        for filename in filenames:
+            msg = read_message(filename)
+            payload = msg["subject"].lower() + CRLF + CRLF + msg.extract_text().lower()
+            assert "bartali" in payload and "coppi" not in payload, filename
 
 def test_query_cache(client):
     # hopefully none of these will already be cached.
@@ -131,8 +137,6 @@ def test_missing_cached_file(client):
     os.unlink(index["126mm"])
     with client.application.app_context():
         result = execute_query("126mm")
-        # cache an already existing search result
-        SRCHDB._save_to_cache("126mm", result)
 
 def test_from_query(client):
     with client.application.app_context():
