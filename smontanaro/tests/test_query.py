@@ -105,7 +105,7 @@ def test_query_cache(client):
         "bartali AND coppi",
         "NOT bartali AND coppi",
         "from:dale brown AND (silk hope OR McClean)",
-        "from:brian baylist AND richard moon",
+        "from:brianbaylis@juno.com AND richard moon",
         ]
 
     result1 = [0.0, {}]
