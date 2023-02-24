@@ -80,7 +80,7 @@ def merge_into_srchdb(db_data, month):
 
     # If there are any new terms in the incoming db, insert them into the main db
     if missingterms:
-        eprint(f"{len(missingterms)} in mem db not yet in main db")
+        eprint(f"{month} {len(missingterms)} in mem db not yet in main db")
         maincur.executemany("insert into search_terms (term) VALUES (?)",
                             list((t,) for t in missingterms))
 
@@ -91,7 +91,7 @@ def merge_into_srchdb(db_data, month):
     mainterms = {}
     for (term, rowid) in maincur.execute("select distinct term, rowid from search_terms"):
         mainterms[term] = rowid
-    eprint(f"{len(memterms)} mem db terms, {len(mainterms)} main db terms")
+    eprint(f"{month} {len(memterms)} mem db terms, {len(mainterms)} main db terms")
 
     rowids = {}
     for t in set(memterms) & set(mainterms):
