@@ -52,9 +52,9 @@ class SearchDB:
             for (filename, fragment) in cur.execute(
                 "select distinct filename, fragment"
                 "  from file_search fs, search_terms st"
-                "  where (st.term like ? or st.term like ? or st.term = ?)"
+                "  where st.term like ?"
                 "    and st.rowid = fs.reference",
-                (f"% {term}", f"{term} %", term,)):
+                (f"%{term}%",)):
                 # with the more generous term matching we can get multiple
                 # fragments per filename. Just return one, which isn't terribly
                 # important.
