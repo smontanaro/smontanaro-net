@@ -4,6 +4,8 @@ import os
 import pickle
 import time
 
+import regex as re
+
 from smontanaro.query import execute_query, parse_query, execute_structured_query
 from smontanaro.srchdb import SRCHDB, CACHE_DIR
 from smontanaro.strip import CRLF
@@ -25,7 +27,7 @@ def test_query_post_arg(client):
         })
         assert rv.status_code == 200
 
-def test_complex_query(client):
+def test_complex_query0(client):
     with client.application.app_context():
         rv = client.post("/CR/query", data={
             "query": "bartali OR coppi",
@@ -45,17 +47,6 @@ def test_low_level_query(client):
             break
         else:
             raise ValueError("no search results")
-
-def test_complex_query1(client):
-    with client.application.app_context():
-        # CR/2000/10/0885 (bartali and coppi)
-        # CR/2000/10/0169 (coppi only)
-        # CR/2001/12/0582 (bartali only)
-        filenames = execute_query("bartali OR coppi").pages()
-        for filename in filenames:
-            msg = read_message(filename)
-            payload = msg["subject"].lower() + CRLF + CRLF + msg.extract_text().lower()
-            assert "bartali" in payload or "coppi" in payload, filename
 
 def test_transitive_complex_query(client):
     with client.application.app_context():
@@ -80,26 +71,42 @@ def test_invalid_not_or_query(client):
         else:
             raise ValueError("Failed to catch OR NOT")
 
+def test_complex_query1(client):
+    with client.application.app_context():
+        # CR/2000/10/0885 (bartali and coppi)
+        # CR/2000/10/0169 (coppi only)
+        # CR/2001/12/0582 (bartali only)
+        _complex_query_helper("bartali OR coppi",
+                              lambda payload: "bartali" in payload or "coppi" in payload)
+
 def test_complex_query2(client):
     with client.application.app_context():
         # CR/2000/10/0885 (bartali and coppi)
         # CR/2000/10/0169 (coppi only)
         # CR/2001/12/0582 (bartali only)
-        filenames = execute_query("bartali AND coppi").pages()
-        for filename in filenames:
-            msg = read_message(filename)
-            payload = msg["subject"].lower() + CRLF + CRLF + msg.extract_text().lower()
-            assert "bartali" in payload and "coppi" in payload, filename
+        _complex_query_helper("bartali AND coppi",
+                              lambda payload: "bartali" in payload or "coppi" in payload)
 
 def test_complex_query3(client):
     with client.application.app_context():
         # CR/2000/10/0885 (bartali and coppi)
         # CR/2001/12/0582 (bartali only)
-        filenames = execute_query("bartali AND NOT coppi").pages()
-        for filename in filenames:
-            msg = read_message(filename)
-            payload = msg["subject"].lower() + CRLF + CRLF + msg.extract_text().lower()
-            assert "bartali" in payload and "coppi" not in payload, filename
+        _complex_query_helper("bartali AND NOT coppi",
+                              lambda payload: (
+                                  re.search(r"[ (;]?bartali\s*[-),.']?", payload) is not None and
+                                  re.search(r"[ (;]?coppi\s*[-),.']?", payload) is None))
+
+def _complex_query_helper(query, check):
+    filenames = execute_query(query).pages()
+    failed = set()
+    for filename in filenames:
+        msg = read_message(filename)
+        payload = msg["subject"].lower() + CRLF + CRLF + msg.extract_text().lower()
+        if check(payload):
+            continue
+        failed.add(filename)
+    if failed:
+        raise ValueError(f"query {query!r} failed for: {failed} ({len(failed)})")
 
 def test_query_cache(client):
     # hopefully none of these will already be cached.
