@@ -16,19 +16,22 @@ from threading import Lock
 import regex as re
 from textblob import TextBlob
 from textblob.classifiers import NaiveBayesClassifier
+from textblob.np_extractors import ConllExtractor
 
 from smontanaro.log import eprint
 from smontanaro.srchdb import SearchDB, SRCHDB
 from smontanaro.strip import strip_footers, strip_leading_quotes, CRLF
 
 from smontanaro.util import (read_message, trim_subject_prefix,
-                             parse_from, read_words, all_words)
+                             parse_from, all_words)
 
 # Something in textblob and/or nltk doesn't play nice with no-gil, so just
 # serialize all blobby accesses.
 BLOB_LOCK = Lock()
 
 DB = None
+
+EXTRACTOR = ConllExtractor()
 
 def main():
     opts, args = getopt.getopt(sys.argv[1:], "ht:")
@@ -139,7 +142,7 @@ def process_month(month, classifier):
 def filter_positive(cl, text):
     "Only use sentences which score positive with the NaiveBayesClassifier"
     positive = []
-    blob = TextBlob(text)
+    blob = TextBlob(text, np_extractor=EXTRACTOR)
     upper = 0.65
     for sent in blob.sentences:
         prob_dist = cl.prob_classify(sent)
@@ -243,36 +246,9 @@ def read_csv(csv_file):
     return records
 
 
-def common_words():
-    word_file = os.path.join(os.path.dirname(__file__), "common-words.txt")
-    return read_words(word_file)
-
-
-def preprocess(phrase):
-    "sanitize interesting phrases"
-    phrase = re.sub("-+$", "", phrase)
-    phrase = phrase.replace("/", " ")
-    if phrase in COMMON_WORDS:
-        return ""
-    words = phrase.split()
-    while words and words[0] in COMMON_WORDS:
-        del words[0]
-    while words and words[-1] in COMMON_WORDS:
-        del words[-1]
-    # Don't care about eBay URLs at this late date.
-    words = [word for word in words if re.search("http.*ebay", word) is None]
-    # Or excessively long "words".
-    words = [word for word in words if len(word) < 40]
-    # Or "words" made up entirely of punctuation.
-    words = [word for word in words if set(word) - PUNCTSET]
-    # Or "words" that look like urls.
-    words = [word for word in words if word.lower()[0:4] != "www."]
-    # Somehow we get stuff like "mother 's" out of the noun phrases. Deal with
-    # that... ¯\_(ツ)_/¯
-    phrase = re.sub(" 's( |$)", r"'s\1", " ".join(words))
-    # Finally, exceedingly long or short phrases are uninteresting.
-    return "" if len(phrase) < 5 or len(phrase) > 30 else phrase
-
+ALL_WORDS = all_words()
+EXCEPTIONS = read_csv(os.path.join(os.path.dirname(__file__),
+                                   "buildindex.exc"))
 
 def merge_plurals(k, _srchdb):
     "map simple plurals to singular"
@@ -554,64 +530,12 @@ def delete_exceptions(to_delete, srchdb):
         eprint(n)
 
 
-COMMON_WORDS = common_words()
-ALL_WORDS = all_words()
-EXCEPTIONS = read_csv(os.path.join(os.path.dirname(__file__),
-                                   "buildindex.exc"))
-
-
-TERM_PAT = re.compile(r"[A-Za-z][-/a-z0-9]{2,}"
-                      r"(?:\s+[A-Za-z][-'/a-z0-9]+)*")
-DIMENSION_PAT = re.compile(r"[0-9]+[a-z]+$")
 def get_terms(text):
     "yield a series of words matching desired pattern"
-    seen = set()
-    tpat = TERM_PAT
-    dpat = DIMENSION_PAT
     with BLOB_LOCK:
-        phrases = sorted(set(TextBlob(text).noun_phrases))
+        phrases = TextBlob(text, np_extractor=EXTRACTOR).noun_phrases
     for phrase in phrases:
-        lphrase = phrase.lower()
-        # common bits embedded in cc'd and forwarded messages.
-        if "bikelist" in lphrase or lphrase.startswith("subject"):
-            continue
-        # not sure where these come from, but there are plenty. delete for now.
-        if lphrase[0:3] == "'s " or len(lphrase) == 1:
-            continue
-        if tpat.match(phrase) is None:
-            # print("   nm:", repr(phrase))
-            continue
-
-        phrase = preprocess(phrase.lower())
-        if not phrase or phrase.count(" ") > 5:
-            # extraordinarily long multi-word phrases
-            continue
-
-        phrase_len = len(phrase)
-        if (" " not in phrase and (phrase_len < 4 or phrase_len > 20) or
-            " " in phrase and phrase_len < 7):
-            # too short or long one-word phrases
-            continue
-
-        words = phrase.split()
-        # Always keep the full phrase
-        if phrase not in seen:
-            seen.add(phrase)
-            yield phrase
-
-        # and the first word, if it matches DIMENSION_PAT (useful stuff like
-        # 126mm, 130bcd, etc).
-        if words[0] not in seen and dpat.match(words[0]) is not None:
-            seen.add(words[0])
-            yield words[0]
-
-        # and any leading subphrases of at least two words.
-        while len(words) > 2:
-            del words[-1]
-            subphrase = " ".join(words)
-            if subphrase not in seen:
-                seen.add(subphrase)
-                yield subphrase
+        yield phrase
 
 
 if __name__ == "__main__":
