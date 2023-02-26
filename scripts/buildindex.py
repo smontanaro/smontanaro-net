@@ -45,7 +45,7 @@ def main():
             return 0
 
     SRCHDB.set_database(args[0])
-    with concurrent.futures.ThreadPoolExecutor() as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=os.cpu_count()) as executor:
         months = {}
         for month in sys.stdin:
             month = month.strip()
@@ -255,6 +255,9 @@ def merge_plurals(k, _srchdb):
     # we only want to consider words/phrases if the last word is in the
     # large dictionary - for example, we shouldn't mess with
     # "harry hetchins" because "hetchin" isn't in the large dictionary.
+    if not k.strip().split():
+        return (k, k, "noop")
+
     last = k.split()[-1]
 
     old = new = k
@@ -271,6 +274,9 @@ def merge_plurals(k, _srchdb):
 
 def merge_ing(k, srchdb):
     "map 'ing' endings to base word"
+    if not k.strip().split():
+        return (k, k, "noop")
+
     last = k.split()[-1]
 
     old = new = k
@@ -289,6 +295,9 @@ def merge_ing(k, srchdb):
 
 def merge_wrong(k, srchdb):
     "merge simple truncations"
+    if not k.strip().split():
+        return (k, k, "noop")
+
     last = k.split()[-1]
 
     old = new = k
@@ -342,6 +351,7 @@ def strip_nonprint(k, _srchdb):
 
 PUNCT = string.punctuation.replace("-", "")
 PUNCTSET = set(re.sub("[-_]", "", string.punctuation))
+PUNCTPAT = re.compile("[-\\[\\]" + "".join(set(string.punctuation) - set("[]-")) + "]")
 
 def zap_punct(k, _srchdb):
     "strip leading or trailing punctuation or whitespace and zap terms with punct & no ' '"
@@ -385,12 +395,13 @@ def postprocess_db():
                                      "  where fs.reference = st.rowid"
                                      "  group by fs.reference"
                                      "  order by st.term"):
+        term = term.strip()
         old = new = term
         why = "noop"
-        for merge in (merge_exceptions, merge_plurals, merge_ing,
-                      merge_wrong, strip_nonprint, zap_punct,
-                      zap_long_phrases):
+        for merge in (merge_plurals, merge_ing, merge_wrong, strip_nonprint,):
             # pylint: disable=unused-variable
+            if not old:
+                break
             old, new, why = merge(old, SRCHDB)
             if not new:
                 eprint("d:", old)
@@ -406,7 +417,7 @@ def postprocess_db():
                                 "  where term = ?", (old,)).fetchone()[0]
                     ))
                 to_delete.add(old)
-                old = new
+                old = new.strip()
 
     for (newid, oldid) in refs:
         cur.execute("update file_search"
@@ -535,7 +546,7 @@ def get_terms(text):
     with BLOB_LOCK:
         phrases = TextBlob(text, np_extractor=EXTRACTOR).noun_phrases
     for phrase in phrases:
-        yield phrase
+        yield PUNCTPAT.sub(" ", phrase)
 
 
 if __name__ == "__main__":
