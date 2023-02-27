@@ -9,9 +9,10 @@ import getopt
 import glob
 import html
 import os
+import queue
 import string
 import sys
-from threading import Lock
+import threading
 
 import regex as re
 from textblob import TextBlob
@@ -24,10 +25,6 @@ from smontanaro.strip import strip_footers, strip_leading_quotes, CRLF
 
 from smontanaro.util import (read_message, trim_subject_prefix,
                              parse_from, all_words)
-
-# Something in textblob and/or nltk doesn't play nice with no-gil, so just
-# serialize all blobby accesses.
-BLOB_LOCK = Lock()
 
 DB = None
 
@@ -44,12 +41,17 @@ def main():
             eprint("sorry, no help yet")
             return 0
 
+    blob_queue = queue.Queue()
+    blob_thread = threading.Thread(target=work_the_blob, args=(blob_queue,))
+    blob_thread.daemon = True
+    blob_thread.start()
+
     SRCHDB.set_database(args[0])
     with concurrent.futures.ThreadPoolExecutor(max_workers=os.cpu_count()) as executor:
         months = {}
         for month in sys.stdin:
             month = month.strip()
-            months[executor.submit(process_month, month, classifier)] = month
+            months[executor.submit(process_month, month, classifier, blob_queue)] = month
         for future in concurrent.futures.as_completed(months):
             merge_into_srchdb(future.result(), months[future])
 
@@ -72,7 +74,7 @@ def merge_into_srchdb(db_data, month):
 
     terms = db.execute("select count(term) from search_terms").fetchone()[0]
     refs = db.execute("select count(*) from file_search").fetchone()[0]
-    eprint(f"merging {month} ({terms} terms, {refs} references) into main db")
+    eprint(f" {month} merging ({terms} terms, {refs} references) into main db")
 
     db.execute("begin")
     memcur = db.cursor()
@@ -83,7 +85,6 @@ def merge_into_srchdb(db_data, month):
 
     # If there are any new terms in the incoming db, insert them into the main db
     if missingterms:
-        eprint(f"{month} {len(missingterms)} in mem db not yet in main db")
         maincur.executemany("insert into search_terms (term) VALUES (?)",
                             list((t,) for t in missingterms))
 
@@ -117,7 +118,7 @@ def merge_into_srchdb(db_data, month):
     SRCHDB.commit()
     eprint(f"{month} merged {len(memterms)} terms, {len(references)} references into main db")
 
-def process_month(month, classifier):
+def process_month(month, classifier, blob_queue):
     "Process one month's worth of email messages"
     start = dt.datetime.now()
     n = 0
@@ -126,9 +127,9 @@ def process_month(month, classifier):
     cur = db.cursor()
     cur.execute("begin")
     emails = glob.glob(f"{month}/eml-files/*.eml")
-    eprint(f"{month} processing {len(emails)} messages")
+    reply_queue = queue.Queue()
     for eml in emails:
-        process_file(eml, cur, month, classifier)
+        process_file(eml, cur, month, classifier, blob_queue, reply_queue)
         n += 1
         if n % 50 == 0:
             db.commit()
@@ -152,7 +153,7 @@ def filter_positive(cl, text):
 
 
 QUOTED = re.compile(r'''\s*"(.*)"\s*$''')
-def process_file(f, cur, month, classifier):
+def process_file(f, cur, month, classifier, blob_queue, reply_queue):
     "extract bits from one file"
     f = f.strip()
     msg = read_message(f)
@@ -163,8 +164,8 @@ def process_file(f, cur, month, classifier):
         return
 
     if classifier is not None:
-        with BLOB_LOCK:
-            payload = filter_positive(classifier, payload)
+        blob_queue.put(reply_queue, "filter+", (classifier, payload))
+        payload = reply_queue.get()
 
     subject = trim_subject_prefix(msg["subject"])
     mat = QUOTED.match(subject)
@@ -172,13 +173,12 @@ def process_file(f, cur, month, classifier):
         subject = mat.group(1)
     if subject:
         payload = f"{subject}{CRLF}{CRLF}{payload}"
-    terms = sorted(set(get_terms(strip_leading_quotes(strip_footers(payload)))))
+    terms = sorted(set(get_terms(strip_leading_quotes(strip_footers(payload)),
+        blob_queue, reply_queue)))
     for term in terms:
         rowid = add_term(term, cur)
         fragment = create_fragment(payload, term)
         lastrowid = add_fragment(fragment, f, rowid, cur)
-        if lastrowid % 20000 == 0:
-            eprint(month, lastrowid)
 
     (sender, addr) = parse_from(msg["from"])
 
@@ -192,11 +192,17 @@ def process_file(f, cur, month, classifier):
             continue
         rowid = add_term(term, cur)
         add_fragment("", f, rowid, cur)
-    for phrase in get_terms(subject):
+    for phrase in get_terms(subject, blob_queue, reply_queue):
         if phrase in sub_frags:
             continue
         rowid = add_term(f"subject:{phrase}", cur)
         add_fragment("", f, rowid, cur)
+
+def get_terms(text, blob_queue, reply_queue):
+    "yield a series of words matching desired pattern"
+    blob_queue.put((reply_queue, "phrase_gen", (text,)))
+    for phrase in reply_queue.get():
+        yield PUNCTPAT.sub(" ", phrase)
 
 def add_fragment(fragment, f, rowid, cur):
     cur.execute("insert into file_search"
@@ -351,7 +357,7 @@ def strip_nonprint(k, _srchdb):
 
 PUNCT = string.punctuation.replace("-", "")
 PUNCTSET = set(re.sub("[-_]", "", string.punctuation))
-PUNCTPAT = re.compile("[-\\[\\]" + "".join(set(string.punctuation) - set("[]-")) + "]")
+PUNCTPAT = re.compile(r"[-\\[\]" + "".join(set(string.punctuation) - set(r"\[]-")) + "]")
 
 def zap_punct(k, _srchdb):
     "strip leading or trailing punctuation or whitespace and zap terms with punct & no ' '"
@@ -541,13 +547,18 @@ def delete_exceptions(to_delete, srchdb):
         eprint(n)
 
 
-def get_terms(text):
-    "yield a series of words matching desired pattern"
-    with BLOB_LOCK:
-        phrases = TextBlob(text, np_extractor=EXTRACTOR).noun_phrases
-    for phrase in phrases:
-        yield PUNCTPAT.sub(" ", phrase)
-
+def work_the_blob(que):
+    while True:
+        (reply_queue, cmd, args) = que.get()
+        match cmd:
+            case "filter+":
+                (classifier, payload) = args
+                reply_queue.put(filter_positive(classifier, payload))
+            case "phrase_gen":
+                (text,) = args
+                reply_queue.put(TextBlob(text, np_extractor=EXTRACTOR).noun_phrases)
+            case _:
+                raise ValueError(f"Unknown command: {cmd}")
 
 if __name__ == "__main__":
     sys.exit(main())
