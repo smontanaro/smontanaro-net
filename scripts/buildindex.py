@@ -6,6 +6,7 @@ import concurrent.futures
 import csv
 import getopt
 import glob
+import html
 import os
 import queue
 import sqlite3
@@ -175,13 +176,16 @@ def add_term(term, dbq):
 def create_fragment(payload, term):
     "get a fragment of text from the message matching the term"
     try:
-        index = payload.index(term)
+        index = payload.lower().index(term.lower())
     except ValueError:
         return ""
 
-    pfx = payload[index-25:index]
-    fragment = payload[index:index+len(term)]
-    sfx = payload[index+len(term):index+len(term)+25]
+    pfx = html.escape(re.sub(r"\s+", " ",
+        payload[index-25:index]))
+    fragment = html.escape(re.sub(r"\s+", " ",
+        payload[index:index+len(term)]))
+    sfx = html.escape(re.sub(r"\s+", " ",
+        payload[index+len(term):index+len(term)+25]))
     return f"{pfx}<b>{fragment}</b>{sfx}".strip()
 
 
