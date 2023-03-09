@@ -23,7 +23,7 @@ def strip_footers(payload):
                      strip_virgin,
                      strip_fastmail,
                      strip_yp,
-                     strip_aol,
+                     # strip_aol,
                      strip_advcorps,
                      strip_yahoo,
                      strip_msn,
@@ -88,7 +88,7 @@ def strip_google_groups_footer(payload):
 
     header = "You received this message because you are subscribed to the Google Groups"
     footer = "For more options, visit this group at http://groups.google.com/group"
-    payload = _strip_helper(payload, header, "s", footer, "Google Groups")
+    payload = _strip_helper(payload, header, "s", footer, "Google Groups", maxlines=4)
     if payload.endswith("\n--"):
         payload = payload[:-2].rstrip()
     return payload
@@ -103,60 +103,61 @@ def strip_bikelist_footer(payload):
 
     header = "Classicrendezvous mailing list"
     footer = "http://www.bikelist.org/mailman/listinfo/classicrendezvous"
-    return _strip_helper(payload, header, "s", footer, "bikelist")
+    return _strip_helper(payload, header, "s", footer, "bikelist", maxlines=5)
 
 def strip_yp(payload):
     "strip Yellow Pages ads"
     header = (".*(search for businesses|get a jump)", re.I)
     footer = (".*yellowpages.(lycos|aol).com", re.I)
-    return _strip_helper(payload, header, "re", footer, "yp")
+    return _strip_helper(payload, header, "re", footer, "yp", maxlines=8)
 
+# broken at the moment...
 def strip_aol(payload):
-    "strip Yahoo! ads"
-    header = ("adventurecorps", re.I)
-    footer = ("newsletter.*adventurecorps", re.I)
-    return _strip_helper(payload, header, "re", footer, "yahoo")
+    "strip AOL ads"
+    header = "_____"
+    footer = (".*yahoo.(ca|com)|yahoo! mail", re.I)
+    return _strip_helper(payload, header, "re", footer, "aol", maxlines=5)
 
 def strip_advcorps(payload):
     "strip AdventureCORPS ads"
-    header = "_____"
-    footer = (".*yahoo.(ca|com)|yahoo! mail", re.I)
-    return _strip_helper(payload, header, "s", footer, "yahoo")
+    header = ("adventurecorps", re.I)
+    footer = ("newsletter.*adventurecorps", re.I)
+    return _strip_helper(payload, header, "re", footer, "advcorps", maxlines=5)
 
 def strip_yahoo(payload):
     "strip Yahoo! ads"
     header = "_____"
     footer = (".*yahoo.(ca|com)|yahoo! mail", re.I)
-    return _strip_helper(payload, header, "s", footer, "yahoo")
+    return _strip_helper(payload, header, "s", footer, "yahoo", maxlines=5)
 
 def strip_juno(payload):
     "strip Juno ads"
     header = "_" * 60
     footer = "https?://.*juno.com"
-    return _strip_helper(payload, header, "s", footer, "juno")
+    return _strip_helper(payload, header, "s", footer, "juno", maxlines=5)
 
 def strip_fastmail(payload):
     "strip fastmail ads"
     header = footer = "http://www.fastmail.fm"
-    return _strip_helper(payload, header, "s", footer, "fastmail")
+    return _strip_helper(payload, header, "s", footer, "fastmail", maxlines=3)
 
 def strip_virgin(payload):
     "strip Virgin Media email bits"
     header = footer = ".*virginmedia.com"
-    return _strip_helper(payload, header, "re", footer, "virgin")
+    return _strip_helper(payload, header, "re", footer, "virgin", maxlines=3)
 
 def strip_virus(payload):
     "strip 'virus checked' lines"
     header = "Virus-checked using McAfee|Outgoing mail is certified Virus Free"
     footer = ("Virus-checked using McAfee|"
               "Version: [0-9]+.[0-9]+.[0-9]+ / Virus Database: [0-9]+ - Release Date:")
-    return _strip_helper(payload, header, "re", footer, "virus")
+    return _strip_helper(payload, header, "re", footer, "virus", maxlines=5)
 
 def strip_msn(payload):
     "a bit looser, hopefully doesn't zap actual content"
     header = ".* MSN"
     footer = ".*https?:.*msn.com"
-    return _strip_helper(payload, header, "re", footer, "msn")
+    return _strip_helper(payload, header, "re", footer, "msn", maxlines=5)
 
 def strip_cr_index_pwds(payload):
     "this occurs on occasion. Strip to remove passwords."
@@ -165,7 +166,7 @@ def strip_cr_index_pwds(payload):
     return _strip_helper(payload, header, "s", footer, "passwords")
 
 # pylint: disable=unused-argument
-def _strip_helper(payload, start, style, end, tag):
+def _strip_helper(payload, start, style, end, tag, maxlines=10**10):
     """strip all lines at the end of the strip between start and end.
 
     as a quick check, if style == 's' and start doesn't appear in the payload,
@@ -181,21 +182,44 @@ def _strip_helper(payload, start, style, end, tag):
     if isinstance(end, tuple):
         end, e_flags = end
 
-    lines = re.split(r"(\n+)", payload)
+    lines = re.split(r"(\r?\n+)", payload)
     state = "start"
     new_payload = []
     pappend = new_payload.append
     smatch = re.compile(f"{QUOTE_PAT}{start}", flags=s_flags).match
     ematch = re.compile(f"{QUOTE_PAT}{end}", flags=e_flags).match
+    stripped = []
     for line in lines:
-        if state == "start":
-            if style == "s" and start in line or smatch(line):
-                state = "stripping"
-                continue
+        if state == "terminated":
             pappend(line)
+        elif state == "start":
+            match style:
+                case "s":
+                    if start not in line:
+                        pappend(line)
+                        continue
+                case "re":
+                    if smatch(line) is None:
+                        pappend(line)
+                        continue
+            i = 0
+            state = "stripping"
+            stripped.append(line)
         else:  # state == "stripping"
-            if style == "s" and end in line or ematch(line):
-                state = "start"
+            stripped.append(line)
+            i += 1
+            if i >= maxlines:
+                state = "terminated"
+                new_payload.extend(stripped)
+            match style:
+                case "s":
+                    if end in line:
+                        state = "start"
+                        stripped = []
+                case "re":
+                    if ematch(line) is not None:
+                        state = "start"
+                        stripped = []
     return "".join(new_payload)
 
 def strip_trailing_underscores(payload):
