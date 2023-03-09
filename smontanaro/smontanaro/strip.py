@@ -108,8 +108,8 @@ def strip_bikelist_footer(payload):
 def strip_yp(payload):
     "strip Yellow Pages ads"
     header = (".*(search for businesses|get a jump)", re.I)
-    footer = (".*yellowpages.(lycos|aol).com", re.I)
-    return _strip_helper(payload, header, "re", footer, "yp", maxlines=8)
+    footer = (".*SRC=lycos10|yellowpages.(lycos|aol).com", re.I)
+    return _strip_helper(payload, header, "re", footer, "yp", maxlines=10)
 
 # broken at the moment...
 def strip_aol(payload):
@@ -190,6 +190,7 @@ def _strip_helper(payload, start, style, end, tag, maxlines=10**10):
     ematch = re.compile(f"{QUOTE_PAT}{end}", flags=e_flags).match
     stripped = []
     for line in lines:
+        # eprint(state, line.rstrip())
         if state == "terminated":
             pappend(line)
         elif state == "start":
@@ -207,19 +208,22 @@ def _strip_helper(payload, start, style, end, tag, maxlines=10**10):
             stripped.append(line)
         else:  # state == "stripping"
             stripped.append(line)
-            i += 1
-            if i >= maxlines:
-                state = "terminated"
-                new_payload.extend(stripped)
             match style:
                 case "s":
                     if end in line:
                         state = "start"
                         stripped = []
+                        continue
                 case "re":
                     if ematch(line) is not None:
                         state = "start"
                         stripped = []
+                        continue
+            i += 1
+            if i >= maxlines:
+                # eprint("terminated without seeing the footer!")
+                state = "terminated"
+                new_payload.extend(stripped)
     return "".join(new_payload)
 
 def strip_trailing_underscores(payload):
