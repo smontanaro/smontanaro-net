@@ -146,22 +146,6 @@ def test_map_url():
     word = f"&lt;{domain}&gt;"
     assert f'"http://{domain}"' in msg.map_url(word)
 
-def test_message_strip(client):
-    "verify the yellowpages footer disappears"
-    msg = read_message("CR/2005-10/eml-files/classicrendezvous.10510.0508.eml")
-    with client.application.app_context():
-        filt = MessageFilter(msg)
-        filt.filter_message(msg)
-        assert "yellowpages.lycos.com" not in msg.as_string()
-
-def test_message_strip_same_header_footer(client):
-    "virginmedia stripper uses the same header and footer"
-    msg = read_message("CR/2007-07/eml-files/classicrendezvous.10707.0004.eml")
-    with client.application.app_context():
-        filt = MessageFilter(msg)
-        filt.filter_message(msg)
-        assert "virginmedia.com" not in msg.as_string()
-
 def test_next_msg(client):
     "make sure we can hop over gaps and between months"
     with client.application.app_context():

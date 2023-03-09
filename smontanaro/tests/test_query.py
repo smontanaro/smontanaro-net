@@ -73,9 +73,6 @@ def test_invalid_not_or_query(client):
 
 def test_complex_query1(client):
     with client.application.app_context():
-        # CR/2000/10/0885 (bartali and coppi)
-        # CR/2000/10/0169 (coppi only)
-        # CR/2001/12/0582 (bartali only)
         _complex_query_helper("bartali OR coppi",
                               lambda payload: "bartali" in payload or "coppi" in payload)
 
@@ -85,16 +82,14 @@ def test_complex_query2(client):
         # CR/2000/10/0169 (coppi only)
         # CR/2001/12/0582 (bartali only)
         _complex_query_helper("bartali AND coppi",
-                              lambda payload: "bartali" in payload or "coppi" in payload)
+                              lambda payload: "bartali" in payload and "coppi" in payload)
 
 def test_complex_query3(client):
     with client.application.app_context():
         # CR/2000/10/0885 (bartali and coppi)
         # CR/2001/12/0582 (bartali only)
         _complex_query_helper("bartali AND NOT coppi",
-                              lambda payload: (
-                                  re.search(r"[ (;]?bartali\s*[-),.']?", payload) is not None and
-                                  re.search(r"[ (;]?coppi\s*[-),.']?", payload) is None))
+                              lambda payload: "bartali" in payload and "coppi" not in payload)
 
 def _complex_query_helper(query, check):
     filenames = execute_query(query).pages()
