@@ -121,6 +121,8 @@ def process_file(fname, classifier, blq, dbq):
     terms = sorted(set(get_terms(strip_leading_quotes(payload), blq)))
 
     for term in terms:
+        if term[0:4] == "http":
+            continue
         rowid = add_term(term, dbq)
         fragment = create_fragment(payload, term)
         add_fragment(fragment, fname, rowid, dbq)
@@ -139,6 +141,8 @@ def process_file(fname, classifier, blq, dbq):
     for phrase in get_terms(subject, blq):
         if phrase in sub_frags:
             continue
+        if phrase[0:4] == "http":
+            continue
         rowid = add_term(f"subject:{phrase}", dbq)
         add_fragment("", fname, rowid, dbq)
 
@@ -146,7 +150,7 @@ def get_terms(text, blq):
     "yield a series of words matching desired pattern"
     blq.put(("phrase_gen", (text,)))
     for phrase in blq.get():
-        yield PUNCTPAT.sub(" ", phrase)
+        yield phrase
 
 def add_fragment(fragment, fname, rowid, dbq):
     "add fragment record to file_search table"
@@ -222,7 +226,10 @@ def merge_exceptions(k, _dbq):
 
 PUNCT = string.punctuation.replace("-", "")
 PUNCTSET = set(re.sub("[-_]", "", string.punctuation))
-PUNCTPAT = re.compile(r"[-\\[\]" + "".join(set(string.punctuation) - set(r"\[]-")) + "]")
+PUNCTPATNODOT = re.compile("[" +
+                           re.escape(string.punctuation.replace(".", "")) +
+                           "]+")
+URLPAT = re.compile("https?://[^ ]+")
 
 def zap_punct(k, _dbq):
     "strip leading or trailing punctuation or whitespace and zap terms with punct & no ' '"
@@ -264,6 +271,10 @@ def work_the_blob(que):
                 rcvq.put(filter_positive(classifier, payload))
             case "phrase_gen":
                 (text,) = args
+                # no URLs
+                text = URLPAT.sub(" ", text)
+                # delete all punctuation other than periods
+                text = PUNCTPATNODOT.sub(" ", text)
                 rcvq.put(TextBlob(text, np_extractor=EXTRACTOR).noun_phrases)
             case _:
                 raise ValueError(f"Unknown command: {cmd}")
