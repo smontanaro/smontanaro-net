@@ -447,7 +447,10 @@ class ShareSQLDB(threading.Thread):
             if (set(term) & nonprint or
                 term[0] in punct or
                 term[-1] in punct_nodot or
-                phonepat.search(term) is not None):
+                phonepat.search(term) is not None or
+                "message id" in term or
+                re.search("message [0-9]", term) is not None or
+                len(term) > 50 and term.count(" ") > 7):
                 to_delete.add(term)
             elif term[-1] == ".":
                 # trim trailing periods
