@@ -450,8 +450,13 @@ class ShareSQLDB(threading.Thread):
                 phonepat.search(term) is not None or
                 "message id" in term or
                 re.search("message [0-9]", term) is not None or
-                len(term) > 50 and term.count(" ") > 7):
+                len(term) > 50 and term.count(" ") > 7 or
+                len(term) > 70 or
+                "classicrendezvous" in term or
+                "bikelist.org" in term):
                 to_delete.add(term)
+            elif term.endswith("original message"):
+                move_these.add((term, term.replace("original message", "").strip()))
             elif term[-1] == ".":
                 # trim trailing periods
                 move_these.add((term, term[:-1]))
