@@ -35,11 +35,13 @@ sed -e 's/localhost:[0-9][0-9]*/localhost:5001/' < localhost.urls \
     if [ "x${line:0:1}" = "x#" ] ; then
         echo "${line}" | dateit >> localhost.comments
     else
+        echo -n "." 1>&2
         echo "*** $line ***"
         curl -s $line
     fi
     gsleep 0.03
 done  > $RAW
+echo 1>&2
 
 sleep 1
 
