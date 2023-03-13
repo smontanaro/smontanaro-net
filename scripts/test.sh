@@ -1,5 +1,12 @@
 #!/bin/bash
 
+if [ "x$CRDIR" = "x" ] ; then
+    export CRDIR=$(pwd)
+fi
+if [ "x$PYTHONPATH" = "x" ] ; then
+    export PYTHONPATH=$(pwd)/smontanaro
+fi
+
 # Run Flask server and throw a bunch of URLs at it. Compare with
 # expected output.
 
@@ -8,6 +15,20 @@
 ACT=localhost.act
 RAW=/tmp/localhost.raw
 WARNINGS=localhost.warnings
+
+VERBOSE=
+while getopts 'vh' OPTION; do
+    case "$OPTION" in
+        v)
+            VERBOSE=-v
+            ;;
+        h)
+            echo "usage: $0 [ -v ]" 1>&2
+            exit 0
+            ;;
+    esac
+done
+shift "$(($OPTIND -1))"
 
 if [ "x$(which gdate | egrep -v 'not found')" = "x" ] ; then
     DATE=date
@@ -61,7 +82,7 @@ sort localhost.comments /tmp/$$.tmp \
 rm localhost.comments /tmp/$$.tmp
 
 # Run our official unit tests
-coverage run -a --rcfile=.coveragerc $(which pytest) -v
+coverage run -a --rcfile=.coveragerc $(which pytest) $VERBOSE
 PYT=$?
 
 # The dates module is only used by a couple auxiliary scripts.
@@ -78,7 +99,7 @@ coverage run -a --rcfile=.coveragerc scripts/csv2topic.py references.db < topic.
 
 # Exercise the code used to build the sqlite search database
 echo "CR/2007-11" | \
-    CRDIR=$(pwd) PYTHONPATH=smontanaro coverage run -a scripts/buildindex.py srch.db.test
+    CRDIR=$(pwd) PYTHONPATH=smontanaro coverage run -a scripts/buildindex.py -t train.csv srch.db.test
 
 n=$(echo "select * from search_terms where term = 'from:dale brown'" | sqlite3 srch.db.test | wc -l)
 m=$(echo "select * from search_terms where term like 'from:% '" | sqlite3 srch.db.test | wc -l)
