@@ -2,9 +2,9 @@
 
 "construct dumb index of the old CR archives"
 
+import argparse
 import concurrent.futures
 import csv
-import getopt
 import glob
 import html
 import os
@@ -33,18 +33,18 @@ EXTRACTOR = ConllExtractor()
 
 def main():
     "process CR archive emails, generating index as SQLite database"
-    opts, args = getopt.getopt(sys.argv[1:], "ht:w:")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-t", "--train", dest="train", help="Training file", default="")
+    parser.add_argument("-w", "--workers", dest="workers", type=int,
+                        default=os.cpu_count() - 1,
+                        help="Number of processing worker threads")
+    parser.add_argument("database", help="SQLite database file")
+    args = parser.parse_args()
+
     classifier = None
-    workers = os.cpu_count() - 1
-    for opt, arg in opts:
-        if opt == "t":
-            with open(arg, "r", encoding="utf-8") as fobj:
-                classifier = NaiveBayesClassifier(fobj, format="csv")
-        elif opt == "-w":
-            workers = int(arg)
-        elif opt == "-h":
-            eprint("sorry, no help yet")
-            return 0
+    if args.train:
+        with open(args.train, "r", encoding="utf-8") as fobj:
+            classifier = NaiveBayesClassifier(fobj, format="csv")
 
     blq = QueuePair()
     blob_thread = threading.Thread(target=work_the_blob, args=(blq,))
@@ -58,7 +58,7 @@ def main():
     db_thread.daemon = True
     db_thread.start()
 
-    dbq.put(("set_db", None, args))
+    dbq.put(("set_db", None, (args.database,)))
     dbq.get_none()
 
     files = set()
@@ -70,7 +70,7 @@ def main():
 
     xfiles = {}
     completed = 0
-    with concurrent.futures.ThreadPoolExecutor(max_workers=workers,
+    with concurrent.futures.ThreadPoolExecutor(max_workers=args.workers,
                                                thread_name_prefix="pfile") as executor:
         while files:
             fnames, files = files[:10], files[10:]
@@ -109,7 +109,7 @@ def process_file(fname, classifier, blq, dbq):
         return
 
     if classifier is not None:
-        blq.put("filter+", (classifier, payload))
+        blq.put(("filter+", (classifier, payload)))
         payload = blq.get()
 
     subject = trim_subject_prefix(msg["subject"])
@@ -372,21 +372,12 @@ class ShareSQLDB(threading.Thread):
                              "  where term = ?", (term,)).fetchone()
         return result[0] if result else 0
 
-    def postprocess(self):
-        "final messing around"
-
+    def merge_various(self):
+        "execute various merge functions, transforming search terms"
         to_delete = set()
-
         refs = []
-
-        terms = self.cur.execute(
-            "select st.term, count(fs.fragment)"
-            "  from search_terms st, file_search fs"
-            "  where fs.reference = st.rowid"
-            "  group by fs.reference"
-            "  order by st.term").fetchall()
-        self.cur.execute("begin")
-        for (term, count) in terms:
+        terms = self.cur.execute("select term from search_terms").fetchall()
+        for (term,) in terms:
             term = term.strip()
             old = new = term
             for merge in (self.merge_plurals, self.merge_ing,
@@ -407,10 +398,16 @@ class ShareSQLDB(threading.Thread):
                     refs.append((new_rowid, old_rowid))
                     to_delete.add(old)
                     old = new.strip()
-
         self.cur.executemany("update file_search"
                              "  set reference = ?"
                              "  where reference = ?", refs)
+        return to_delete
+
+    def postprocess(self):
+        "final messing around"
+
+        self.cur.execute("begin")
+        to_delete = self.merge_various()
         for (term, count) in self.cur.execute(
             "select st.term, count(fs.fragment)"
             " from search_terms st, file_search fs"
@@ -437,32 +434,44 @@ class ShareSQLDB(threading.Thread):
         #   or anything that looks like a (US) phone number
         phonepat = re.compile(r"[0-9]{3,3}[-.][0-9]{3,3}[-.][0-9]{4,4}")
 
-        wordspat = re.compile(r"([a-z]+) .$")
         move_these = set()
 
         self.cur.execute("select term from search_terms"
                          "  where term not like 'from:%'"
                          "    and term not like 'subject:%'")
         for (term,) in self.cur:
+            # terms containing puctuation
             if (set(term) & nonprint or
                 term[0] in punct or
-                term[-1] in punct_nodot or
-                phonepat.search(term) is not None or
-                "message id" in term or
-                re.search("message [0-9]", term) is not None or
-                len(term) > 50 and term.count(" ") > 7 or
-                len(term) > 70 or
-                "classicrendezvous" in term or
-                "bikelist.org" in term):
+                term[-1] in punct_nodot):
                 to_delete.add(term)
+            # phone numbers
+            elif phonepat.search(term) is not None:
+                to_delete.add(term)
+            # terms containing some uninteresting words/patterns
+            elif ("message id" in term or
+                  re.search("message [0-9]", term) is not None or
+                  "classicrendezvous" in term or
+                  "bikelist.org" in term):
+                to_delete.add(term)
+            # really long terms
+            elif (len(term) > 50 and term.count(" ") > 7 or
+                  len(term) > 70):
+                to_delete.add(term)
+            # tweak these
             elif term.endswith("original message"):
                 move_these.add((term, term.replace("original message", "").strip()))
             elif term[-1] == ".":
                 # trim trailing periods
                 move_these.add((term, term[:-1]))
-            elif (mat := wordspat.match(term)) is not None:
+            else:
                 # toss last "word" if it's a single character
-                move_these.add((term, mat.group(1)))
+                words = term.split()
+                while len(words) >= 2 and len(words[-1]) == 1:
+                    words = words[:-1]
+                new_term = " ".join(words).strip()
+                if new_term and new_term != term:
+                    move_these.add((term, new_term))
 
         # belt and suspenders
         to_delete.add("")
