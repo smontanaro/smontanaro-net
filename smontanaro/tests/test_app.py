@@ -8,6 +8,10 @@ import time
 import urllib.parse
 
 import dateutil.parser
+import regex as re
+import pytest
+from pytest import mark as _mark
+pyt_parameterize = _mark.parametrize
 
 from smontanaro.dates import parse_date
 from smontanaro.log import eprint
@@ -44,6 +48,31 @@ def test_fresh_db(client):
         ensure_db(db_path)
     os.close(db_fd)
     os.unlink(db_path)
+
+@pyt_parameterize("yr, mo, prv, nxt",
+                  [
+                   # beginning
+                   (2000, 3, "", "/CR/2000/6/dates"),
+                   # middle with a gap
+                   (2000, 6, "/CR/2000/3/dates", "/CR/2000/8/dates"),
+                   # end
+                   (2011, 2, "/CR/2011/1/dates", ""),
+                   # middle without a gap, but non-integer month
+                   (2003, "6", "/CR/2003/5/dates", "/CR/2003/7/dates"),
+                   ])
+def test_get_nav_items(client, yr, mo, prv, nxt):
+    with client.application.app_context():
+        rv = client.get(f"/CR/{yr}/{mo}/dates")
+        assert rv.status_code == 200
+        page = rv.text
+        if prv and nxt:
+            assert len(re.findall("/CR/[0-9]+/[0-9]+/dates", page)) == 2
+        else:
+            assert len(re.findall("/CR/[0-9]+/[0-9]+/dates", page)) == 1
+        if prv:
+            assert prv in page
+        if nxt:
+            assert nxt in page
 
 def test_get_version(client):
     rv = client.get("/version")
@@ -146,20 +175,36 @@ def test_map_url():
     word = f"&lt;{domain}&gt;"
     assert f'"http://{domain}"' in msg.map_url(word)
 
-def test_next_msg(client):
+@pyt_parameterize("yr, mo, seq, incr, nmo, nseq",
+                         [
+                         # intramonth gap at (2003, 8, 31)
+                          (2003, 8, 32, -1, 8, 30,),
+                          (2003, 8, 30, +1, 8, 32,),
+                          # normal case
+                          (2003, 8, 382, -1, 8, 381,),
+                          (2003, 8, 382, +1, 8, 383,),
+                          # previous month
+                          (2003, 8, 1, -1, 7, 1216,),
+                          # next month
+                          (2003, 7, 1216, +1, 8, 1,),
+                          ])
+def test_next_msg(client, yr, mo, seq ,incr, nmo, nseq):
     "make sure we can hop over gaps and between months"
     with client.application.app_context():
-        # intramonth gap at (2003, 8, 31)
-        assert next_msg(2003, 8, 32, -1)["seq"] == 30
-        # normal case
-        assert next_msg(2003, 8, 382, -1)["seq"] == 381
-        assert next_msg(2003, 8, 382, +1)["seq"] == 383
-        # previous month
-        result = next_msg(2003, 8, 1, -1)
-        assert result["month"] == 7 and result["seq"] == 1216
-        # next month
-        result = next_msg(2003, 7, 1216, +1)
-        assert result["month"] == 8 and result["seq"] == 1
+        assert next_msg(yr, mo, seq, incr)["month"] == nmo
+        assert next_msg(yr, mo, seq, incr)["seq"] == nseq
+
+@pyt_parameterize("yr, mo, seq, incr",
+                         [
+                         # end of the line
+                          (2011, 2, 1643, +1,),
+                          (2000, 3, 1, -1,),
+                          ])
+def test_next_msg_fail(client, yr, mo, seq ,incr):
+    "make sure we can hop over gaps and between months"
+    with client.application.app_context():
+        with pytest.raises(ValueError):
+            nxt = next_msg(yr, mo, seq, incr)
 
 def test_encoded_from(client):
     "check decode of quopri-encoding From:"
@@ -207,13 +252,14 @@ def test_sender_pat():
         (name, email) = parse_from(from_)
         assert name == sender and email == addr
 
-def test_eml_file():
-    for exp, args in [
-            ("classicrendezvous.10509.1592.eml", (2005, 9, 1592)),
-            ("classicrendezvous.10509.0001.eml", (2005, 9, 1)),
-            ("classicrendezvous.10509.0123.eml", (2005, 9, 123)),
-    ]:
-        assert exp == eml_file(*args)
+@pyt_parameterize("exp, yr, mo, seq",
+                  [
+                   ("classicrendezvous.10509.1592.eml", 2005, 9, 1592),
+                   ("classicrendezvous.10509.0001.eml", 2005, 9, 1),
+                   ("classicrendezvous.10509.0123.eml", 2005, 9, 123),
+                   ])
+def test_eml_file(exp, yr, mo, seq):
+    assert exp == eml_file(yr, mo, seq)
 
 def test_fmt_sig1(client):
     with client.application.app_context():
