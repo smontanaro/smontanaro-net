@@ -727,7 +727,7 @@ def make_topic_hierarchy(topics, htopics, prefix):
 def generate_link(r):
     "HTML for a single message"
     root = "" # "(T)&nbsp;" if r['is_root'] else ""
-    sub = re.sub(r"\s+", " ", r["Subject"])
+    sub = re.sub(r"\s+", " ", r["subject"])
     sender = generate_from_html(*parse_from(r["sender"]))
 
     return (f'''<a name="{r['seq']:04d}">'''

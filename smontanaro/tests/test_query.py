@@ -41,9 +41,8 @@ def test_query_post_empty(client):
 
 def test_low_level_query(client):
     with client.application.app_context():
-        for (filename, fragment) in SRCHDB.get_page_fragments("faliero masi"):
-            assert filename
-            assert fragment
+        for (fname, frag, subj, sndr) in SRCHDB.get_page_fragments("faliero masi"):
+            assert fname and frag and subj and sndr
             break
         else:
             raise ValueError("no search results")
@@ -154,7 +153,8 @@ def test_from_query(client):
             assert result.data
         except AssertionError:
             raise ValueError("no search results")
-        assert set(result.data.values()) == set([""])
+
+        assert set(v[0] for v in result.data.values()) == set([""])
 
 def test_trailing_space_from(client):
     with client.application.app_context():

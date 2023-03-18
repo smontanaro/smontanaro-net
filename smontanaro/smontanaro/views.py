@@ -285,19 +285,18 @@ def query_index(query):
     pages = []
     result = execute_query(query.strip())
     for page in sorted(result.pages()):
-        fragment = result[page]
+        (fragment, subject, sender) = result[page]
         match = re.match("CR/([0-9]+)-([0-9]+)/eml-files/"
                          "classicrendezvous.[0-9]+.([0-9]+).eml", page)
         if match is None:
             continue
         yr, mo, seq = [int(x) for x in match.groups()]
-        msg = read_message(page)
         record = {
             "year": yr,
             "month": mo,
             "seq": seq,
-            "Subject": trim_subject_prefix(msg["Subject"]),
-            "sender": msg["from"],
+            "subject": subject,
+            "sender": sender,
         }
         link = generate_link(record)
         if fragment:

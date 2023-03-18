@@ -100,7 +100,10 @@ def execute_structured_query(query):
 
     match query:
         case ["search", search]:
-            result = SearchResult(dict(SRCHDB.get_page_fragments(search)))
+            records = {}
+            for (fname, frag, subj, sender) in SRCHDB.get_page_fragments(search):
+                records[fname] = (frag, subj, sender)
+            result = SearchResult(records)
         case ["not", search]:
             result = execute_structured_query(search)
             result.negate = True

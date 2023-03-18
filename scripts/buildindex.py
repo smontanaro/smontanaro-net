@@ -113,6 +113,7 @@ def process_file(fname, classifier, blq, dbq):
         payload = blq.get()
 
     subject = trim_subject_prefix(msg["subject"])
+    sender = msg["from"]
     mat = QUOTED.match(subject)
     if mat is not None:
         subject = mat.group(1)
@@ -125,7 +126,7 @@ def process_file(fname, classifier, blq, dbq):
             continue
         rowid = add_term(term, dbq)
         fragment = create_fragment(payload, term)
-        add_fragment(fragment, fname, rowid, dbq)
+        add_fragment(fragment, fname, subject, sender, rowid, dbq)
     (sender, addr) = parse_from(msg["from"])
 
     sub_frags = set([subject])
@@ -137,14 +138,14 @@ def process_file(fname, classifier, blq, dbq):
         if term in ("from:", "subject:"):
             continue
         rowid = add_term(term, dbq)
-        add_fragment("", fname, rowid, dbq)
+        add_fragment("", fname, subject, sender, rowid, dbq)
     for phrase in get_terms(subject, blq):
         if phrase in sub_frags:
             continue
         if phrase[0:4] == "http":
             continue
         rowid = add_term(f"subject:{phrase}", dbq)
-        add_fragment("", fname, rowid, dbq)
+        add_fragment("", fname, subject, sender, rowid, dbq)
 
 def get_terms(text, blq):
     "yield a series of words matching desired pattern"
@@ -152,11 +153,12 @@ def get_terms(text, blq):
     for phrase in blq.get():
         yield phrase
 
-def add_fragment(fragment, fname, rowid, dbq):
+def add_fragment(fragment, fname, subject, sender, rowid, dbq):
     "add fragment record to file_search table"
     dbq.put(("insert", ("insert into file_search"
-                        " (filename, fragment, reference) values (?, ?, ?)"),
-             (fname, fragment, rowid)))
+                        " (filename, fragment, subject, sender, reference)"
+                        " values (?, ?, ?, ?, ?)"),
+             (fname, fragment, subject, sender, rowid)))
     return dbq.get()
 
 def have_term(term, dbq):
@@ -320,7 +322,7 @@ class ShareSQLDB(threading.Thread):
 
     def replay_saved(self):
         "replay one caller's saved requests"
-        assert self.txn_caller is None
+        assert self.txn_caller is None    # nosec
         caller = list(self.saved_requests).pop()
         requests = self.saved_requests.pop(caller)
         for ((rcvq, caller), (cmd, stmt, args)) in requests:
@@ -335,7 +337,7 @@ class ShareSQLDB(threading.Thread):
         # Worker never put()s to the QueuePair instance!
         match cmd:
             case "begin":
-                assert self.txn_caller is None, (self.txn_caller, caller)
+                assert self.txn_caller is None, (self.txn_caller, caller) # nosec
                 self.txn_caller = caller
                 self.cur.execute("begin")
                 rcvq.put(None)

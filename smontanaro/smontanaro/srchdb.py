@@ -44,13 +44,13 @@ class SearchDB:
         self._ensure_indexes()
 
     def get_page_fragments(self, term):
-        "return list (filename, fragment) tuples matching term"
+        "return list (filename, fragment, subject, sender) tuples matching term"
         cached = self._read_from_cache(term)
         if not cached:
             cur = self.connection.cursor()
             filenames = set()
-            for (filename, fragment) in cur.execute(
-                "select distinct filename, fragment"
+            for (filename, fragment, subject, sender) in cur.execute(
+                "select distinct filename, fragment, subject, sender"
                 "  from file_search fs, search_terms st"
                 "  where st.term like ?"
                 "    and st.rowid = fs.reference",
@@ -60,10 +60,10 @@ class SearchDB:
                 # important.
                 if filename not in filenames:
                     filenames.add(filename)
-                    cached.append((filename, fragment))
+                    cached.append((filename, fragment, subject, sender))
             self._save_to_cache(term, cached)
-        for (filename, fragment) in cached:
-            yield (filename, fragment)
+        for record in cached:
+            yield record
 
     def have_term(self, term):
         "return rowid if we already have term in the database, else zero"
@@ -89,6 +89,8 @@ class SearchDB:
               (
                 filename TEXT,
                 fragment TEXT,
+                subject TEXT,
+                sender TEXT,
                 reference INTEGER,
                 FOREIGN KEY(reference) REFERENCES search_terms(rowid)
               )
