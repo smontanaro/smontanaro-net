@@ -47,6 +47,11 @@ def test_low_level_query(client):
         else:
             raise ValueError("no search results")
 
+def test_query_contains(client):
+    with client.application.app_context():
+        result = execute_query("bartali")
+        assert 'CR/2009-05/eml-files/classicrendezvous.10905.1095.eml' in result
+
 def test_transitive_complex_query(client):
     with client.application.app_context():
         assert (execute_query("coppi AND bartali").pages() ==

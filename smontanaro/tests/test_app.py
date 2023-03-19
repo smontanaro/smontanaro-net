@@ -8,6 +8,7 @@ import time
 import urllib.parse
 
 import dateutil.parser
+from flask import current_app
 import regex as re
 import pytest
 from pytest import mark as _mark
@@ -101,18 +102,19 @@ def test_suggest_topic(client):
         assert (row["topic"] == "Sturmey-Archer" and
                 row["message-id"] == "<7e.703e8851.30481dcb@aol.com>")
 
-def test_read_message():
+def test_read_message(client):
     "read a message, then a second time to get the pickled version"
-    mfile = "CR/2002-10/eml-files/classicrendezvous.10210.0759.eml"
-    pfile = os.path.splitext(mfile)[0] + ".pck.gz"
-    try:
-        os.unlink(pfile)
-    except FileNotFoundError:
-        pass
-    msg1 = read_message(mfile)
-    assert os.path.exists(pfile)
-    msg2 = read_message(mfile)
-    assert msg1.as_string() == msg2.as_string()
+    with client.application.app_context():
+        mfile = eml_file(2002, 10, 759)
+        pfile = os.path.splitext(mfile)[0] + ".pck.gz"
+        try:
+            os.unlink(pfile)
+        except FileNotFoundError:
+            pass
+        msg1 = read_message(mfile)
+        assert os.path.exists(pfile)
+        msg2 = read_message(mfile)
+        assert msg1.as_string() == msg2.as_string()
 
 def _test_read_busted_helper(tmpdir):
     emlfile = os.path.join(tmpdir, "msg.eml")
@@ -153,9 +155,9 @@ def test_under_paren_urlmap(client):
     try:
         for debug in (True, False):
             client.application.config["DEBUG"] = debug
-            msg = read_message("CR/2005-01/eml-files/classicrendezvous.10501.1670.eml")
             url = "http://www.moots.com/messages/1040.shtml"
             with client.application.app_context():
+                msg = read_message(eml_file(2005, 1, 1670))
                 filt = MessageFilter(msg)
                 filt.filter_message(msg)
                 text = msg.as_html()
@@ -168,12 +170,13 @@ def test_under_paren_urlmap(client):
     finally:
         client.application.config["DEBUG"] = save_debug
 
-def test_map_url():
-    # any old message will do (I think)
-    msg = read_message("CR/2005-01/eml-files/classicrendezvous.10501.1670.eml")
-    domain = "www.wooljersey.com"
-    word = f"&lt;{domain}&gt;"
-    assert f'"http://{domain}"' in msg.map_url(word)
+def test_map_url(client):
+    with client.application.app_context():
+        # any old message will do (I think)
+        msg = read_message(eml_file(2005, 1, 1670))
+        domain = "www.wooljersey.com"
+        word = f"&lt;{domain}&gt;"
+        assert f'"http://{domain}"' in msg.map_url(word)
 
 @pyt_parameterize("yr, mo, seq, incr, nmo, nseq",
                          [
@@ -209,19 +212,18 @@ def test_next_msg_fail(client, yr, mo, seq ,incr):
 def test_encoded_from(client):
     "check decode of quopri-encoding From:"
     with client.application.app_context():
-        mfile = "CR/2002-12/eml-files/classicrendezvous.10212.1259.eml"
-        msg = read_message(mfile)
+        msg = read_message(eml_file(2002, 12, 1259))
         msg.filter_headers()
         assert msg["x-html-from"] is not None
         assert msg["from"] == 'Michael Butler <pariscycles@yahoo.co.uk>'
         header = str(msg["x-html-from"])
         assert header.count("<a href=") == 2
 
-def test_trim_subj():
-    mfile = "CR/2001-01/eml-files/classicrendezvous.10101.0091.eml"
-    msg = read_message(mfile)
-    exp = "Cinelli Myths � aluminium bars, fastback seatstay design"
-    assert trim_subject_prefix(msg["Subject"]) == exp
+def test_trim_subj(client):
+    with client.application.app_context():
+        msg = read_message(eml_file(2001, 1, 91))
+        exp = "Cinelli Myths � aluminium bars, fastback seatstay design"
+        assert trim_subject_prefix(msg["Subject"]) == exp
 
 def test_sender_pat():
     for (from_, sender, addr) in (
@@ -254,16 +256,21 @@ def test_sender_pat():
 
 @pyt_parameterize("exp, yr, mo, seq",
                   [
-                   ("classicrendezvous.10509.1592.eml", 2005, 9, 1592),
-                   ("classicrendezvous.10509.0001.eml", 2005, 9, 1),
-                   ("classicrendezvous.10509.0123.eml", 2005, 9, 123),
+                   ("2005-09/eml-files/classicrendezvous.10509.1592.eml",
+                    2005, 9, 1592),
+                   ("2005-09/eml-files/classicrendezvous.10509.0001.eml",
+                    2005, 9, 1),
+                   ("2005-09/eml-files/classicrendezvous.10509.0123.eml",
+                    2005, 9, 123),
                    ])
-def test_eml_file(exp, yr, mo, seq):
-    assert exp == eml_file(yr, mo, seq)
+def test_eml_file(client, exp, yr, mo, seq):
+    with client.application.app_context():
+        CR = current_app.config["CR"]
+        assert os.path.join(CR, exp) == eml_file(yr, mo, seq)
 
 def test_fmt_sig1(client):
     with client.application.app_context():
-        msg = read_message("CR/2010-07/eml-files/classicrendezvous.11007.0144.eml")
+        msg = read_message(eml_file(2010, 7, 144))
         html = msg.as_html()
         assert ("<br>Ted Ernst" in html and
                 "<br>Palos Verdes Estates" in html and
@@ -271,7 +278,7 @@ def test_fmt_sig1(client):
 
 def test_fmt_sig2(client):
     with client.application.app_context():
-        msg = read_message("CR/2009-03/eml-files/classicrendezvous.10903.0134.eml")
+        msg = read_message(eml_file(2009, 3, 134))
         html = msg.as_html()
         assert ("<br>Ted Ernst" in html and
                 "<br>Palos Verdes Estates" in html and
@@ -279,7 +286,7 @@ def test_fmt_sig2(client):
 
 def test_para_split(client):
     with client.application.app_context():
-        msg = read_message("CR/2009-03/eml-files/classicrendezvous.10903.0144.eml")
+        msg = read_message(eml_file(2009, 3, 144))
         payload = msg.get_payload(decode=True)
         payload = msg.decode(payload)
         payload = strip_leading_quotes(strip_footers(payload))
@@ -548,13 +555,14 @@ def test_empty_payload(client):
         payload = strip_footers(payload)
         assert not payload, payload
 
-def test_subject_fix():
-    msg = read_message("CR/2000-11/eml-files/classicrendezvous.10011.1036.eml")
-    assert msg["Subject"] == "[CR] Danger, items for sale"
+def test_subject_fix(client):
+    with client.application.app_context():
+        msg = read_message(eml_file(2000, 11, 1036))
+        assert msg["Subject"] == "[CR] Danger, items for sale"
 
 def test_long_url_fix(client):
     with client.application.app_context():
-        msg = read_message("CR/2010-05/eml-files/classicrendezvous.11005.1410.eml")
+        msg = read_message(eml_file(2010, 5, 1410))
         payload = msg.get_payload(decode=True)
         payload = msg.decode(payload)
         payload = strip_footers(payload)
@@ -566,14 +574,14 @@ def test_extract_text_mixed(client):
     with client.application.app_context():
         # main type is multipart/mixed with one part being text/html and
         # another image/jpeg
-        msg = read_message("CR/2011-02/eml-files/classicrendezvous.11102.1425.eml")
+        msg = read_message(eml_file(2011, 2, 1425))
         assert msg["content-type"].split(";")[0] == "multipart/mixed"
         payload = msg.extract_text()
         assert payload.count("I am in need of a Mafac") == 1
 
 def test_extract_related(client):
     with client.application.app_context():
-        msg = read_message("CR/2011-02/eml-files/classicrendezvous.11102.1408.eml")
+        msg = read_message(eml_file(2011, 2, 1408))
         assert msg["content-type"].split(";")[0] == "multipart/related"
         payload = msg.extract_text()
         assert payload.count("Any a youse ever seen this before?") == 1
@@ -635,13 +643,14 @@ def test_have_term(client):
                         (rowid,))
 
 
-def test_patch_word_breaks():
-    msg = read_message("CR/2005-07/eml-files/classicrendezvous.10507.0921.eml")
-    raw_body = msg.decode(msg.get_payload(decode=True))
-    patched_body = msg.extract_text()
-    assert " approa\r\nch " in raw_body
-    assert (" approa\r\nch " not in patched_body and
-            " approach " in patched_body)
+def test_patch_word_breaks(client):
+    with client.application.app_context():
+        msg = read_message(eml_file(2005, 7, 921))
+        raw_body = msg.decode(msg.get_payload(decode=True))
+        patched_body = msg.extract_text()
+        assert " approa\r\nch " in raw_body
+        assert (" approa\r\nch " not in patched_body and
+                " approach " in patched_body)
 
 
 def test_words_exceptions():
