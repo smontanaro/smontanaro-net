@@ -23,7 +23,6 @@ def strip_footers(payload):
                      strip_virgin,
                      strip_fastmail,
                      strip_yp,
-                     # strip_aol,
                      strip_advcorps,
                      strip_yahoo,
                      strip_msn,
@@ -76,19 +75,14 @@ def strip_mime(payload):
 
     header = "--- StripMime Report --"
     footer = "---"
-    return _strip_helper(payload, header, "s", footer, "mime")
+    return _strip_helper(payload, header, footer)
 
 def strip_google_groups_footer(payload):
     "strip the later CR mailing list footer"
-    # The footer looks like this:
-    #
-    # Classicrendezvous mailing list
-    # Classicrendezvous@bikelist.org
-    #  http://www.bikelist.org/mailman/listinfo/classicrendezvous
 
     header = "You received this message because you are subscribed to the Google Groups"
     footer = "For more options, visit this group at http://groups.google.com/group"
-    payload = _strip_helper(payload, header, "s", footer, "Google Groups", maxlines=4)
+    payload = _strip_helper(payload, header, footer, maxlines=4)
     if payload.endswith("\n--"):
         payload = payload[:-2].rstrip()
     return payload
@@ -103,78 +97,68 @@ def strip_bikelist_footer(payload):
 
     header = "Classicrendezvous mailing list"
     footer = "http://www.bikelist.org/mailman/listinfo/classicrendezvous"
-    return _strip_helper(payload, header, "s", footer, "bikelist", maxlines=5)
+    return _strip_helper(payload, header, footer, maxlines=5)
 
 def strip_yp(payload):
     "strip Yellow Pages ads"
     header = (".*(search for businesses|get a jump)", re.I)
     footer = (".*SRC=lycos10|yellowpages.(lycos|aol).com", re.I)
-    return _strip_helper(payload, header, "re", footer, "yp", maxlines=10)
-
-# broken at the moment...
-def strip_aol(payload):
-    "strip AOL ads"
-    header = "_____"
-    footer = (".*yahoo.(ca|com)|yahoo! mail", re.I)
-    return _strip_helper(payload, header, "re", footer, "aol", maxlines=5)
+    return _strip_helper(payload, header, footer, maxlines=10)
 
 def strip_advcorps(payload):
     "strip AdventureCORPS ads"
     header = ("adventurecorps", re.I)
     footer = ("newsletter.*adventurecorps", re.I)
-    return _strip_helper(payload, header, "re", footer, "advcorps", maxlines=5)
+    return _strip_helper(payload, header, footer, maxlines=5)
 
 def strip_yahoo(payload):
     "strip Yahoo! ads"
     header = "_____"
     footer = (".*yahoo.(ca|com)|yahoo! mail", re.I)
-    return _strip_helper(payload, header, "s", footer, "yahoo", maxlines=5)
+    return _strip_helper(payload, header, footer, maxlines=5)
 
 def strip_juno(payload):
     "strip Juno ads"
     header = "_" * 60
     footer = "https?://.*juno.com"
-    return _strip_helper(payload, header, "s", footer, "juno", maxlines=5)
+    return _strip_helper(payload, header, footer, maxlines=5)
 
 def strip_fastmail(payload):
     "strip fastmail ads"
     header = footer = "http://www.fastmail.fm"
-    return _strip_helper(payload, header, "s", footer, "fastmail", maxlines=3)
+    return _strip_helper(payload, header, footer, maxlines=3)
 
 def strip_virgin(payload):
     "strip Virgin Media email bits"
     header = footer = ".*virginmedia.com"
-    return _strip_helper(payload, header, "re", footer, "virgin", maxlines=3)
+    return _strip_helper(payload, header, footer, maxlines=3)
 
 def strip_virus(payload):
     "strip 'virus checked' lines"
     header = "Virus-checked using McAfee|Outgoing mail is certified Virus Free"
     footer = ("Virus-checked using McAfee|"
               "Version: [0-9]+.[0-9]+.[0-9]+ / Virus Database: [0-9]+ - Release Date:")
-    return _strip_helper(payload, header, "re", footer, "virus", maxlines=5)
+    return _strip_helper(payload, header, footer, maxlines=5)
 
 def strip_msn(payload):
     "a bit looser, hopefully doesn't zap actual content"
     header = ".* MSN"
     footer = ".*https?:.*msn.com"
-    return _strip_helper(payload, header, "re", footer, "msn", maxlines=5)
+    return _strip_helper(payload, header, footer, maxlines=5)
 
 def strip_cr_index_pwds(payload):
     "this occurs on occasion. Strip to remove passwords."
     header = "Passwords for classicrendezvous-index@catfood.phred.org"
     footer = ".*index%40catfood.phred.org"
-    return _strip_helper(payload, header, "s", footer, "passwords")
+    return _strip_helper(payload, header, footer)
 
 # pylint: disable=unused-argument
-def _strip_helper(payload, start, style, end, tag, maxlines=10**10):
-    """strip all lines at the end of the strip between start and end.
+def _strip_helper(payload, start, end, maxlines=10**10):
+    """Strip all lines at the end of the strip between start and end patterns.
 
-    as a quick check, if style == 's' and start doesn't appear in the payload,
-    return early.
+    After the start pattern is matched, the end pattern must be found
+    before maxlines more lines have been read.
     """
-
-    if style == "s" and start not in payload:
-        return payload
 
     s_flags = e_flags = 0
     if isinstance(start, tuple):
@@ -194,31 +178,18 @@ def _strip_helper(payload, start, style, end, tag, maxlines=10**10):
         if state == "terminated":
             pappend(line)
         elif state == "start":
-            match style:
-                case "s":
-                    if start not in line:
-                        pappend(line)
-                        continue
-                case "re":
-                    if smatch(line) is None:
-                        pappend(line)
-                        continue
+            if smatch(line) is None:
+                pappend(line)
+                continue
             i = 0
             state = "stripping"
             stripped.append(line)
         else:  # state == "stripping"
             stripped.append(line)
-            match style:
-                case "s":
-                    if end in line:
-                        state = "start"
-                        stripped = []
-                        continue
-                case "re":
-                    if ematch(line) is not None:
-                        state = "start"
-                        stripped = []
-                        continue
+            if ematch(line) is not None:
+                state = "start"
+                stripped = []
+                continue
             i += 1
             if i >= maxlines:
                 # eprint("terminated without seeing the footer!")
