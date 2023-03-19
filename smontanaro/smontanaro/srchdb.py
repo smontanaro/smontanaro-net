@@ -25,6 +25,9 @@ class SearchDB:
         # class init and database setting are separated more-or-less as a
         # side-effect of the way Flask works. The singleton SearchDB instance
         # is created below, while the database is set in views.init_search.
+        if self.sqldb is not None and self.sqldb != sqldb:
+            self.sqldb = None
+
         if self.sqldb is None:
             self.sqldb = sqldb
             sqldb_dir = os.path.dirname(sqldb)
@@ -35,7 +38,7 @@ class SearchDB:
     def ensure_connection(self):
         "make sure the database and its schema exist"
         if self.connection is not None:
-            return
+            self.connection.close()
 
         sqlite3.register_converter("TIMESTAMP", convert_ts_bytes)
         self.connection = sqlite3.connect(self.sqldb,
