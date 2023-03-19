@@ -28,7 +28,8 @@ from .srchdb import SRCHDB
 from .query import execute_query
 from .strip import strip_footers
 from .util import (read_message, trim_subject_prefix, clean_msgid,
-                   make_topic_hierarchy, get_topic, generate_link, open_)
+                   make_topic_hierarchy, get_topic, generate_link, open_,
+                   eml_file)
 
 SEARCH = {
     "DuckDuckGo": "https://duckduckgo.com/",
@@ -239,13 +240,9 @@ def init_cr():
 
 def email_to_html(year, month, seq, note=""):
     "convert the email referenced by year, month and seq to html."
-    CR = current_app.config["CR"]
-
     if not isinstance(seq, int):
         seq = int(seq, 10)
-    msg = eml_file(year, month, seq)
-    mydir = os.path.join(CR, f"{year:04d}-{month:02d}", "eml-files")
-    path = os.path.join(mydir, msg)
+    path = eml_file(year, month, seq)
     try:
         message = read_message(path)
     except FileNotFoundError:
@@ -542,7 +539,7 @@ def next_msg(year, month, seq, incr):
     seq += incr
     files = sorted(glob.glob(os.path.join(monthdir, "*.eml")))
     # Fast path. This happens almost all the time.
-    msg = os.path.join(monthdir, eml_file(year, month, seq))
+    msg = eml_file(year, month, seq)
     if msg in files:
         return {
             "year": year,
@@ -622,12 +619,6 @@ def get_nav_items(*, year, month, seq):
         items.append(("Next", url_for("cr_message", **next_seq)))
 
     return items
-
-def eml_file(year, month, seq):
-    "compute email file from sequence number"
-    # MHonARC was written in Perl, so of course Y2k
-    perl_yr = year - 1900
-    return f"classicrendezvous.{perl_yr:3d}{month:02d}.{seq:04d}.eml"
 
 # pylint: disable=too-few-public-methods
 class MessageFilter:

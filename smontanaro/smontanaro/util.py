@@ -17,7 +17,7 @@ import string
 import typing
 import urllib.parse
 
-from flask import url_for
+from flask import url_for, current_app
 import html2text
 import regex as re
 
@@ -736,6 +736,14 @@ def generate_link(r):
             f'''{html.escape(sub)}</a></a>'''
             f''' {sender}''')
 
+
+def eml_file(year, month, seq):
+    "compute email file from sequence number"
+    CR = os.environ.get("CR", "") or current_app.config["CR"]
+    monthdir = os.path.join(CR, f"{year:04d}-{month:02d}", "eml-files")
+    # MHonARC was written in Perl, so of course Y2k
+    perl_yr = year - 1900
+    return f"{monthdir}/classicrendezvous.{perl_yr:3d}{month:02d}.{seq:04d}.eml"
 
 def open_(f, mode="r", encoding=None):
     "use ext to decide if we should compress"
