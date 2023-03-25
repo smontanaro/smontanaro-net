@@ -190,6 +190,7 @@ def test_map_url(client):
                           (2003, 8, 1, -1, 7, 1216,),
                           # next month
                           (2003, 7, 1216, +1, 8, 1,),
+                          (2000, 6, 3, +1, 8, 1,),
                           ])
 def test_next_msg(client, yr, mo, seq ,incr, nmo, nseq):
     "make sure we can hop over gaps and between months"

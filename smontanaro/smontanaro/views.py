@@ -216,18 +216,13 @@ def init_cr():
     CR = app.config["CR"]
 
     @app.route("/CR")
-    @app.route("/CR/<cache>")
     @app.route("/CR/")
     @app.route("/CR/index.html")
     @app.route("/CR/index")
-    def cr_index(cache=None):
+    def cr_index():
         "templated index"
 
-        if cache is not None:
-            # Already filtered...
-            index = os.path.join(CR, "generated", "cache", cache)
-        else:
-            index = f"{CR}/generated/index.body"
+        index = f"{CR}/generated/index.body"
         with open_(index, encoding="utf8") as fobj:
             return render_template("crtop.jinja", body=fobj.read(),
                                    title="Old Classic Rendezvous Archive")
@@ -588,6 +583,7 @@ def next_msg(year, month, seq, incr):
                 "month": month,
                 "seq": seq,
             }
+        # Gap between months, keep going.
         dt = datetime.date(year, month, 15) + incr * 20 * ONE_DAY
         year = dt.year
         month = dt.month
