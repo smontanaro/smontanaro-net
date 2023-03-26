@@ -14,7 +14,6 @@ calendar_today    GET        /calendar/today
 cr_help_          GET        /CR/help
 cr_index          GET        /CR
 cr_index          GET        /CR/
-cr_index          GET        /CR/<cache>
 cr_index          GET        /CR/index
 cr_index          GET        /CR/index.html
 cr_message        GET        /CR/<int:year>/<int:month>/<int:seq>
