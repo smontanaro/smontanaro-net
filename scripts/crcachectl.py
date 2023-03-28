@@ -9,6 +9,8 @@ import sys
 
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument("-v", "--verbose", dest="verbose", default=False,
+                        help="Noisier list output", action="store_true")
     parser.add_argument("-l", "--list", dest="list", default=False,
                         help="List cache keys", action="store_true")
     parser.add_argument("-d", "--delete", dest="keys", action="append",
@@ -23,7 +25,10 @@ def main():
     if args.list:
         print("Cache keys:")
         for key in sorted(index):
-            print(" ", key)
+            print(" ", key, end="")
+            if args.verbose:
+                print(f" ({index[key]})", end="")
+            print()
 
     if args.keys is not None:
         delkeys = set()
