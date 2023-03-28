@@ -8,7 +8,7 @@ def test_photo_post_arg(client):
     url = "https://photos.app.goo.gl/qXkghhtQ2rPBhwZp7"
     with client.application.app_context():
         rv = client.post("/photolink", data={
-            "fmt": "html",
+            "fmt": "HTML",
             "width": 1200,
             "url": url,
         })
