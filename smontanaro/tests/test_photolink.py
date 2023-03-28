@@ -30,7 +30,7 @@ def test_photo_get_arg(client):
 def test_photo_get_raw_arg(client):
     url = urllib.parse.quote_plus("https://photos.app.goo.gl/qXkghhtQ2rPBhwZp7")
     with client.application.app_context():
-        rv = client.get(f"/photolink?url={url}&width=200&fmt=raw")
+        rv = client.get(f"/photolink?url={url}&width=200&fmt=Raw")
         assert rv.status_code == 200
         assert ("https://lh3.googleusercontent.com/L3vjf-NsekujMuWOjkZg-TCpBHNQyao9Y0VrZtj"
                 "DkMmJgvnpEq3uY1-RBTJjTUrEXsbcBWz2_tICWRx6ZqGKqnT-WYDNraV9htZVmUxgKodIDav7"
@@ -39,7 +39,7 @@ def test_photo_get_raw_arg(client):
 def test_photo_get_raw_zero_width(client):
     url = urllib.parse.quote_plus("https://photos.app.goo.gl/qXkghhtQ2rPBhwZp7")
     with client.application.app_context():
-        rv = client.get(f"/photolink?url={url}&fmt=raw")
+        rv = client.get(f"/photolink?url={url}&fmt=Raw")
         assert rv.status_code == 200
         assert ("https://lh3.googleusercontent.com/L3vjf-NsekujMuWOjkZg-TCpBHNQyao9Y0VrZtj"
                 "DkMmJgvnpEq3uY1-RBTJjTUrEXsbcBWz2_tICWRx6ZqGKqnT-WYDNraV9htZVmUxgKodIDav7"

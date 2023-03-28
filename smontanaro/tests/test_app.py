@@ -126,10 +126,8 @@ def test_read_message(client):
     with client.application.app_context():
         mfile = eml_file(2002, 10, 759)
         pfile = os.path.splitext(mfile)[0] + ".pck.gz"
-        try:
+        if os.path.exists(pfile):
             os.unlink(pfile)
-        except FileNotFoundError:
-            pass
         msg1 = read_message(mfile)
         assert os.path.exists(pfile)
         msg2 = read_message(mfile)
@@ -638,13 +636,9 @@ def test_open_invalid_encoding():
     fd, name = tempfile.mkstemp()
     os.close(fd)
     try:
-        try:
+        with pytest.raises(ValueError):
             with open_(f"{name}", "rb", encoding="ascii") as fobj:
                 assert fobj.read() == b"Hello World!"
-        except ValueError:
-            pass
-        else:
-            raise SystemError("Failed to raise ValueError")
     finally:
         os.unlink(f"{name}")
 

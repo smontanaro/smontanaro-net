@@ -12,6 +12,14 @@ def test_post_search(client):
         })
     assert rv.status_code == 302
 
+def test_post_search_no_args(client):
+    rv = client.post("/search", data={})
+    assert rv.status_code == 200
+
+def test_get_search_no_args(client):
+    rv = client.get("/search")
+    assert rv.status_code == 200
+
 def test_reopen_database(client):
     sqldb = SRCHDB.sqldb
     (fdesc, fname) = tempfile.mkstemp()

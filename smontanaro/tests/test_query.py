@@ -4,6 +4,7 @@ import os
 import pickle
 import time
 
+import pytest
 import regex as re
 
 from smontanaro.query import execute_query, parse_query, execute_structured_query
@@ -59,21 +60,13 @@ def test_transitive_complex_query(client):
 
 def test_invalid_not_and_query(client):
     with client.application.app_context():
-        try:
+        with pytest.raises(ValueError):
             execute_query("NOT coppi AND NOT bartali")
-        except ValueError:
-            pass
-        else:
-            raise ValueError("Failed to catch NOT AND NOT")
 
 def test_invalid_not_or_query(client):
     with client.application.app_context():
-        try:
+        with pytest.raises(ValueError):
             execute_query("coppi OR NOT bartali")
-        except ValueError:
-            pass
-        else:
-            raise ValueError("Failed to catch OR NOT")
 
 def test_complex_query1(client):
     with client.application.app_context():
@@ -154,11 +147,7 @@ def test_missing_cached_file(client):
 def test_from_query(client):
     with client.application.app_context():
         result = execute_query("from:mark petry")
-        try:
-            assert result.data
-        except AssertionError:
-            raise ValueError("no search results")
-
+        assert result.data
         assert set(v[0] for v in result.data.values()) == set([""])
 
 def test_trailing_space_from(client):
@@ -209,22 +198,14 @@ def test_parse_not_and_not_query():
 def test_invalid_parse1():
     parsed_query = parse_query("bartali")
     parsed_query[0] = "fred"
-    try:
+    with pytest.raises(ValueError):
         execute_structured_query(parsed_query)
-    except ValueError:
-        pass
-    else:
-        raise ValueError("Failed to reject bad parse")
 
 def test_invalid_parse():
     parsed_query = parse_query("bartali AND coppi")
     parsed_query[0] = "fred"
-    try:
+    with pytest.raises(ValueError):
         execute_structured_query(parsed_query)
-    except ValueError:
-        pass
-    else:
-        raise ValueError("Failed to reject bad parse")
 
 def test_deeply_nested_parse1():
     q = parse_query("subject:For Sale OR subject:wtt OR subject:wtb OR subject:fs")
