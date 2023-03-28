@@ -8,7 +8,7 @@ import time
 import urllib.parse
 
 import dateutil.parser
-from flask import current_app
+from flask import current_app, url_for
 import regex as re
 import pytest
 from pytest import mark as _mark
@@ -23,7 +23,8 @@ from smontanaro.strip import (strip_footers, strip_leading_quotes,
 from smontanaro.util import (read_message, read_message_string, parse_from,
                              trim_subject_prefix, open_, all_words,
                              EXCEPTIONS)
-from smontanaro.views import MessageFilter, eml_file, query_index, next_msg
+from smontanaro.views import (MessageFilter, eml_file, query_index, next_msg,
+                              get_nav_items)
 
 from _test_helper import client
 
@@ -74,6 +75,24 @@ def test_get_nav_items(client, yr, mo, prv, nxt):
             assert prv in page
         if nxt:
             assert nxt in page
+
+@pyt_parameterize("yr, mo, seq",
+                  [
+                   (2001, 3, "1",),
+                   (2001, 3, 12,),
+                   (2011, 2, 1643,),
+                   ])
+def test_get_nav_items2(client, yr, mo, seq):
+    exp_keys = {"Date Index", "Thread Index", "Prev", "Next"}
+    with client.application.app_context():
+        items = dict(get_nav_items(year=yr, month=mo, seq=seq))
+        assert "Date Index" in items and "Thread Index" in items
+        if "Prev" in items:
+            assert items["Prev"] == url_for("cr_message",
+                                            **next_msg(yr, mo, int(seq), -1))
+        if "Next" in items:
+            assert items["Next"] == url_for("cr_message",
+                                            **next_msg(yr, mo, int(seq), +1))
 
 def test_get_version(client):
     rv = client.get("/version")
