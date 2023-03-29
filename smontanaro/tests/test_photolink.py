@@ -15,6 +15,16 @@ def test_photo_post_arg(client):
         assert rv.status_code == 200
         assert url in rv.text
 
+def test_photo_bad_url(client):
+    url = "https://www.flickr.com/photos/49705339@N00/albums/72177720297786696"
+    with client.application.app_context():
+        rv = client.post("/photolink", data={
+            "fmt": "HTML",
+            "width": 1200,
+            "url": url,
+        })
+        assert rv.status_code == 200
+
 def test_photo_post_no_arg(client):
     with client.application.app_context():
         rv = client.post("/photolink", data={})
