@@ -1,6 +1,7 @@
 [run]
 branch = True
 source = smontanaro
+         scripts
 
 [report]
 show_missing = 1
