@@ -195,60 +195,60 @@ def create_fragment(payload, term):
     return f"{pfx}<b>{fragment}</b>{sfx}".strip()
 
 
-def read_csv(csv_file):
-    "read a CSV file but return as single dict, not list of dicts"
-    records = {}
-    with open(csv_file, "r", encoding="utf-8") as fobj:
-        rdr = csv.DictReader(fobj)
-        for row in rdr:
-            records[row["from"]] = row["to"]
-    return records
+## def read_csv(csv_file):
+##     "read a CSV file but return as single dict, not list of dicts"
+##     records = {}
+##     with open(csv_file, "r", encoding="utf-8") as fobj:
+##         rdr = csv.DictReader(fobj)
+##         for row in rdr:
+##             records[row["from"]] = row["to"]
+##     return records
 
 
 ALL_WORDS = all_words()
-EXCEPTIONS = read_csv(os.path.join(os.path.dirname(__file__),
-                                   "buildindex.exc"))
+## EXCEPTIONS = read_csv(os.path.join(os.path.dirname(__file__),
+##                                    "buildindex.exc"))
 
-def merge_exceptions(k, _dbq):
-    "hand-crafted merge"
-    # a CSV file contains 'from' and 'to' columns. The 'from' column can match
-    # in two ways, either an exact match for `k` or as an exact match for the
-    # last word in `k`.
-    last = k.split()[-1]
-    old = new = k
-    why = "noop"
-    if k in EXCEPTIONS:
-        new = EXCEPTIONS[k]
-    elif last in EXCEPTIONS:
-        new = (" ".join(k.split()[:-1] + [EXCEPTIONS[last]])).strip()
-    if new != k:
-        why = "exc"
-    return old, new, why
+## def merge_exceptions(k, _dbq):
+##     "hand-crafted merge"
+##     # a CSV file contains 'from' and 'to' columns. The 'from' column can match
+##     # in two ways, either an exact match for `k` or as an exact match for the
+##     # last word in `k`.
+##     last = k.split()[-1]
+##     old = new = k
+##     why = "noop"
+##     if k in EXCEPTIONS:
+##         new = EXCEPTIONS[k]
+##     elif last in EXCEPTIONS:
+##         new = (" ".join(k.split()[:-1] + [EXCEPTIONS[last]])).strip()
+##     if new != k:
+##         why = "exc"
+##     return old, new, why
 
 
-PUNCT = string.punctuation.replace("-", "")
-PUNCTSET = set(re.sub("[-_]", "", string.punctuation))
+## PUNCT = string.punctuation.replace("-", "")
+## PUNCTSET = set(re.sub("[-_]", "", string.punctuation))
 PUNCTPATNODOT = re.compile("[" +
                            re.escape(string.punctuation.replace(".", "")) +
                            "]+")
 URLPAT = re.compile("https?://[^ ]+")
 
-def zap_punct(k, _dbq):
-    "strip leading or trailing punctuation or whitespace and zap terms with punct & no ' '"
-    old = new = k
-    why = "noop"
-    kstrip = re.sub(f"[ {PUNCT}-]+$", "", old)
-    kstrip = re.sub(f"^[ {PUNCT}-]+", "", kstrip).strip()
-    if kstrip and kstrip[0] == "'":
-        kstrip = ""
-    if old != kstrip:
-        new = kstrip
-        why = "punct"
-    # If term is a single word and contains punctuation other than '-' or '_',
-    # get rid of it.
-    if set(new) & PUNCTSET and " " not in new:
-        new = ""
-    return old, new, why
+## def zap_punct(k, _dbq):
+##     "strip leading or trailing punctuation or whitespace and zap terms with punct & no ' '"
+##     old = new = k
+##     why = "noop"
+##     kstrip = re.sub(f"[ {PUNCT}-]+$", "", old)
+##     kstrip = re.sub(f"^[ {PUNCT}-]+", "", kstrip).strip()
+##     if kstrip and kstrip[0] == "'":
+##         kstrip = ""
+##     if old != kstrip:
+##         new = kstrip
+##         why = "punct"
+##     # If term is a single word and contains punctuation other than '-' or '_',
+##     # get rid of it.
+##     if set(new) & PUNCTSET and " " not in new:
+##         new = ""
+##     return old, new, why
 
 
 def work_the_blob(que):
