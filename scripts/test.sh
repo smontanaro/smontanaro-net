@@ -85,9 +85,20 @@ rm localhost.comments /tmp/$$.tmp
 coverage run -a --rcfile=.coveragerc $(which pytest) $VERBOSE
 PYT=$?
 
+# cover crcachectl script
+coverage run -a --rcfile=.coveragerc scripts/crcachectl.py -l -v -d 126mm
+coverage run -a --rcfile=.coveragerc scripts/crcachectl.py -l --delete-all
+coverage run -a --rcfile=.coveragerc scripts/crcachectl.py -lv
+
 # The dates module is only used by a couple auxiliary scripts.
 coverage run -a --rcfile=.coveragerc scripts/listbydate.py CR/2000-03 >/dev/null
 coverage run -a --rcfile=.coveragerc scripts/generate_date_index.py -d references.db 2000 3 >/dev/null
+
+# Exercise the thread index generator
+coverage run -a --rcfile=.coveragerc scripts/generate_thread_index.py -d references.db 2000 3 >/dev/null
+
+# Exercise findlinks...
+coverage run -a --rcfile=.coveragerc scripts/findlinks.py CR/2000-10/eml-files/*.eml >/dev/null
 
 # Small refdb run to exercise one or two functions only it uses.
 
