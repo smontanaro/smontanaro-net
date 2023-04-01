@@ -148,7 +148,7 @@ class Message(email.message.EmailMessage):
             headers = "<br>\n".join(headers)
             # zap "content-type and content-transfer-encoding" if we
             # aren't debugging
-            if not self.app.config["DEBUG"]:
+            if self.app is None or not self.app.config["DEBUG"]:
                 headers = "\n".join([hdr for hdr in headers.split("\n")
                                            if hdr.split(":")[0].lower()
                                               not in self.content_headers])
@@ -376,6 +376,8 @@ class Message(email.message.EmailMessage):
     @classmethod
     def initialize_urlmap(cls):
         "make sure urlmap is populated"
+        if cls.app is None:
+            return
         mapfile = os.path.join(cls.app.config["CRDIR"], "urlmap.csv")
         stamp = os.path.getmtime(mapfile)
         urlmap = cls.urlmap
