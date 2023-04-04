@@ -46,6 +46,8 @@ if [ -d search_cache ] ; then
     rm -r search_cache
 fi
 
+RUNCOV='coverage run -a --rcfile=.coveragerc'
+
 export PORT=5001 HOST=localhost
 (DOCOVER=true bash $(dirname $0)/run.sh 2>&1 | dateit > /tmp/$$.tmp) &
 sleep 2
@@ -82,23 +84,23 @@ sort localhost.comments /tmp/$$.tmp \
 rm localhost.comments /tmp/$$.tmp
 
 # Run our official unit tests
-coverage run -a --rcfile=.coveragerc $(which pytest) $VERBOSE
+${RUNCOV} $(which pytest) $VERBOSE
 PYT=$?
 
 # cover crcachectl script
-coverage run -a --rcfile=.coveragerc scripts/crcachectl.py -l -v -d 126mm
-coverage run -a --rcfile=.coveragerc scripts/crcachectl.py -l --delete-all
-coverage run -a --rcfile=.coveragerc scripts/crcachectl.py -lv
+${RUNCOV} scripts/crcachectl.py -l -v -d 126mm
+${RUNCOV} scripts/crcachectl.py -l --delete-all
+${RUNCOV} scripts/crcachectl.py -lv
 
 # The dates module is only used by a couple auxiliary scripts.
-coverage run -a --rcfile=.coveragerc scripts/listbydate.py CR/2000-03 >/dev/null
-coverage run -a --rcfile=.coveragerc scripts/generate_date_index.py -d references.db 2000 3 >/dev/null
+${RUNCOV} scripts/listbydate.py CR/2000-03 >/dev/null
+${RUNCOV} scripts/generate_date_index.py -d references.db 2000 3 >/dev/null
 
 # Exercise the thread index generator
-coverage run -a --rcfile=.coveragerc scripts/generate_thread_index.py -d references.db 2000 3 >/dev/null
+${RUNCOV} scripts/generate_thread_index.py -d references.db 2000 3 >/dev/null
 
 # Exercise findlinks...
-coverage run -a --rcfile=.coveragerc scripts/findlinks.py CR/2000-10/eml-files/*.eml >/dev/null
+${RUNCOV} scripts/findlinks.py CR/2000-10/eml-files/*.eml >/dev/null
 
 # Exercise training...
 echo 'yes
@@ -106,20 +108,20 @@ yes
 retrain
 
 foo
-quit' | coverage run -a --rcfile=.coveragerc scripts/training.py 'CR/2001-01/eml-files/*.eml' 15 >/dev/null
+quit' | ${RUNCOV} scripts/training.py 'CR/2001-01/eml-files/*.eml' 15 >/dev/null
 
 # Exercise listbydate...
-coverage run -a --rcfile=.coveragerc scripts/listbydate.py 'CR/2001-01/eml-files' >/dev/null
+${RUNCOV} scripts/listbydate.py 'CR/2001-01/eml-files' >/dev/null
 
 # makesitemap
-coverage run -a --rcfile=.coveragerc scripts/makesitemap.py
+${RUNCOV} scripts/makesitemap.py
 
 # Small refdb run to exercise one or two functions only it uses.
-coverage run -a --rcfile=.coveragerc scripts/makerefsdb.py -d ref.db.test CR/2000-10
+${RUNCOV} scripts/makerefsdb.py -d ref.db.test CR/2000-10
 rm -f ref.db.test
 
 # Exercise some bits only csv2topic uses
-coverage run -a --rcfile=.coveragerc scripts/csv2topic.py references.db < topic.csv > /dev/null
+${RUNCOV} scripts/csv2topic.py references.db < topic.csv > /dev/null
 
 # Exercise the code used to build the sqlite search database
 echo "CR/2007-11" | \
