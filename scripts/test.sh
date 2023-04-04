@@ -42,11 +42,16 @@ dateit () {
     done
 }
 
+RUNCOV='coverage run -a --rcfile=.coveragerc'
+
+runcov () {
+    echo "cover: $1"
+    ${RUNCOV} "$@"
+}
+
 if [ -d search_cache ] ; then
     rm -r search_cache
 fi
-
-RUNCOV='coverage run -a --rcfile=.coveragerc'
 
 export PORT=5001 HOST=localhost
 (DOCOVER=true bash $(dirname $0)/run.sh 2>&1 | dateit > /tmp/$$.tmp) &
@@ -84,23 +89,23 @@ sort localhost.comments /tmp/$$.tmp \
 rm localhost.comments /tmp/$$.tmp
 
 # Run our official unit tests
-${RUNCOV} $(which pytest) $VERBOSE
+runcov $(which pytest) $VERBOSE
 PYT=$?
 
 # cover crcachectl script
-${RUNCOV} scripts/crcachectl.py -l -v -d 126mm
-${RUNCOV} scripts/crcachectl.py -l --delete-all
-${RUNCOV} scripts/crcachectl.py -lv
+runcov scripts/crcachectl.py -l -v -d 126mm
+runcov scripts/crcachectl.py -l --delete-all
+runcov scripts/crcachectl.py -lv
 
 # The dates module is only used by a couple auxiliary scripts.
-${RUNCOV} scripts/listbydate.py CR/2000-03 >/dev/null
-${RUNCOV} scripts/generate_date_index.py -d references.db 2000 3 >/dev/null
+runcov scripts/listbydate.py CR/2000-03 >/dev/null
+runcov scripts/generate_date_index.py -d references.db 2000 3 >/dev/null
 
 # Exercise the thread index generator
-${RUNCOV} scripts/generate_thread_index.py -d references.db 2000 3 >/dev/null
+runcov scripts/generate_thread_index.py -d references.db 2000 3 >/dev/null
 
 # Exercise findlinks...
-${RUNCOV} scripts/findlinks.py CR/2000-10/eml-files/*.eml >/dev/null
+runcov scripts/findlinks.py CR/2000-10/eml-files/*.eml >/dev/null
 
 # Exercise training...
 echo 'yes
@@ -108,25 +113,25 @@ yes
 retrain
 
 foo
-quit' | ${RUNCOV} scripts/training.py 'CR/2001-01/eml-files/*.eml' 15 >/dev/null
+quit' | runcov scripts/training.py 'CR/2001-01/eml-files/*.eml' 15 >/dev/null
 
 # Exercise listbydate...
-${RUNCOV} scripts/listbydate.py 'CR/2001-01/eml-files' >/dev/null
+runcov scripts/listbydate.py 'CR/2001-01/eml-files' >/dev/null
 
 # makesitemap
-${RUNCOV} scripts/makesitemap.py
+runcov scripts/makesitemap.py
 
 # idwj
 find CR/2004-11/eml-files -name '*.eml' \
     | head -300 \
-    | ${RUNCOV} scripts/idwj.py > /dev/null
+    | runcov scripts/idwj.py > /dev/null
 
 # Small refdb run to exercise one or two functions only it uses.
-${RUNCOV} scripts/makerefsdb.py -d ref.db.test CR/2000-10
+runcov scripts/makerefsdb.py -d ref.db.test CR/2000-10
 rm -f ref.db.test
 
 # Exercise some bits only csv2topic uses
-${RUNCOV} scripts/csv2topic.py references.db < topic.csv > /dev/null
+runcov scripts/csv2topic.py references.db < topic.csv > /dev/null
 
 # Exercise the code used to build the sqlite search database
 echo "CR/2007-11" | \
