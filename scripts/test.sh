@@ -116,6 +116,11 @@ ${RUNCOV} scripts/listbydate.py 'CR/2001-01/eml-files' >/dev/null
 # makesitemap
 ${RUNCOV} scripts/makesitemap.py
 
+# idwj
+find CR/2004-11/eml-files -name '*.eml' \
+    | head -300 \
+    | ${RUNCOV} scripts/idwj.py > /dev/null
+
 # Small refdb run to exercise one or two functions only it uses.
 ${RUNCOV} scripts/makerefsdb.py -d ref.db.test CR/2000-10
 rm -f ref.db.test
