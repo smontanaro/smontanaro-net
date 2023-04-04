@@ -1,6 +1,6 @@
 [run]
 branch = True
-source = smontanaro
+source = smontanaro/smontanaro
          scripts
 
 [report]
