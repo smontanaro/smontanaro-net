@@ -80,9 +80,11 @@ def parse_date(timestring):
     if timestring.endswith(")"):
         timestring = re.sub(r"\s*\([^)]*\)$", "", timestring)
     try:
-        timestamp = dateutil.parser.parse(timestring, tzinfos=TZINFOS)
+        # Always create Arrow, so we always have a non-None tzinfo
+        timestamp = arrow.get(dateutil.parser.parse(timestring,
+            tzinfos=TZINFOS))
     except dateutil.parser.ParserError:
         # try arrow with its format capability - fine to let it raise
         # an exception.
-        timestamp = arrow.get(timestring, ARROW_FORMATS).datetime
-    return timestamp
+        timestamp = arrow.get(timestring, ARROW_FORMATS)
+    return timestamp.datetime
