@@ -100,8 +100,21 @@ coverage run -a --rcfile=.coveragerc scripts/generate_thread_index.py -d referen
 # Exercise findlinks...
 coverage run -a --rcfile=.coveragerc scripts/findlinks.py CR/2000-10/eml-files/*.eml >/dev/null
 
-# Small refdb run to exercise one or two functions only it uses.
+# Exercise training...
+echo 'yes
+yes
+retrain
 
+foo
+quit' | coverage run -a --rcfile=.coveragerc scripts/training.py 'CR/2001-01/eml-files/*.eml' 15 >/dev/null
+
+# Exercise listbydate...
+coverage run -a --rcfile=.coveragerc scripts/listbydate.py 'CR/2001-01/eml-files' >/dev/null
+
+# makesitemap
+coverage run -a --rcfile=.coveragerc scripts/makesitemap.py
+
+# Small refdb run to exercise one or two functions only it uses.
 coverage run -a --rcfile=.coveragerc scripts/makerefsdb.py -d ref.db.test CR/2000-10
 rm -f ref.db.test
 
