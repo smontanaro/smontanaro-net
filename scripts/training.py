@@ -51,6 +51,7 @@ def view_subset(pattern, n):
     files = glob.glob(pattern)
     random.shuffle(files)
 
+    result = 0
     for f in files[:n]:
         os.system("clear")                # nosec
         print(f)
@@ -60,7 +61,7 @@ def view_subset(pattern, n):
 
         match (response := input("continue [y]/q/r(etrain)? ").lower()): # nosec
             case "q" | "quit":
-                return 0
+                break
             case "r" | "retrain":
                 cl = train()
                 process_one(f, cl)
@@ -68,8 +69,15 @@ def view_subset(pattern, n):
             case "y" | "yes" | "":
                 pass
             case _:
-                print(f"unrecognized response: {response}")
-                return 1
+                print(f"unrecognized response: {response}", file=sys.stderr)
+                continue
+
+    return result
+
 
 if __name__ == "__main__":
-    sys.exit(view_subset(sys.argv[1], int(sys.argv[2])))
+    try:
+        sys.exit(view_subset(sys.argv[1], int(sys.argv[2])))
+    except (EOFError, KeyboardInterrupt):
+        print()
+        sys.exit(0)
