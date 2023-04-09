@@ -3,7 +3,6 @@
 "associate email address with wooljersey.com URLS"
 
 import csv
-import email
 import sys
 
 from smontanaro.util import read_message
