@@ -191,8 +191,8 @@ def main():
     if args.one:
         try:
             process_one_file(args.one, conn)
-        except ValueError:
-            eprint(f"failed to process message {args.one}")
+        except (KeyError, ValueError):
+            eprint(f"failed to process file {args.one}")
             return 1
         return 0
 
