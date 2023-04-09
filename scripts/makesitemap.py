@@ -70,11 +70,12 @@ def main():
             print(INDEX_HEADER, file=index)
             for year_month in glob.glob("CR/20??-??"):
                 year, month = os.path.split(year_month)[1].split("-")
-                print(MONTH_INDEX.format(year=year, month=month).strip(), file=index)
+                print(MONTH_INDEX.format(year=year, month=month).strip(),
+                      file=index)
                 with open(os.path.join(year_month, "generated", "sitemap.xml"),
                           "w", encoding="utf-8") as sitemap:
                     print(HEADER, file=sitemap)
-                    for emlfile in glob.glob(f"{year_month}/eml-files/class*.eml"):
+                    for emlfile in glob.glob(f"{year_month}/eml-files/*.eml"):
                         emlfile = emlfile.strip()
                         dpath, fpath = os.path.split(emlfile)
                         year, month = dpath.split("/")[1].split("-")
