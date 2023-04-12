@@ -93,9 +93,13 @@ runcov $(which pytest) $VERBOSE
 PYT=$?
 
 # cover crcachectl script
+find search_cache -name 'tmp*' | head -1 | xargs rm
+runcov scripts/crcachectl.py -l
 runcov scripts/crcachectl.py -l -v -d 126mm
-runcov scripts/crcachectl.py -l --delete-all
+runcov scripts/crcachectl.py -d bartali -q
+runcov scripts/crcachectl.py -lq --delete-all
 runcov scripts/crcachectl.py -lv
+runcov scripts/crcachectl.py -qv
 
 # The dates module is only used by a couple auxiliary scripts.
 runcov scripts/listbydate.py CR/2000-03 >/dev/null
@@ -131,7 +135,11 @@ runcov scripts/extracttbfromsyslog.py < syslog.www > /dev/null
 
 # Small refdb run to exercise one or two functions only it uses.
 runcov scripts/makerefsdb.py -d ref.db.test CR/2000-10
-rm -f ref.db.test
+runcov scripts/makerefsdb.py -c -d ref.db.test --one \
+       CR/2001-01/eml-files/classicrendezvous.10101.0001.eml
+cp -p /etc/hosts /tmp/trash
+runcov scripts/makerefsdb.py -d ref.db.test --one /tmp/trash
+rm -f ref.db.test /tmp/trash*
 
 # Exercise some bits only csv2topic uses
 runcov scripts/csv2topic.py references.db < topic.csv > /dev/null
