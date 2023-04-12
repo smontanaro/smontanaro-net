@@ -11,6 +11,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-v", "--verbose", dest="verbose", default=False,
                         help="Noisier list output", action="store_true")
+    parser.add_argument("-q", "--quiet", dest="quiet", default=False,
+                        help="Quieter list output", action="store_true")
     parser.add_argument("-l", "--list", dest="list", default=False,
                         help="List cache keys", action="store_true")
     parser.add_argument("-d", "--delete", dest="keys", action="append",
@@ -21,19 +23,27 @@ def main():
                         help="Name the cache directory")
     args = parser.parse_args()
 
+    if args.quiet and args.verbose:
+        print("Can't be both quiet and verbose!", file=sys.stderr)
+        return 1
+
     with open(os.path.join(args.dir, "index.pkl"), "rb") as cache:
         index = pickle.load(cache)
 
     if args.list:
         if index:
-            print("Cache keys:")
+            if not args.quiet:
+                print("Cache keys:")
             for key in sorted(index):
-                print(" ", key, end="")
+                if not args.quiet:
+                    print(" ", key, end="")
                 if args.verbose:
                     print(f" ({index[key]})", end="")
-                print()
+                if not args.quiet:
+                    print()
         else:
-            print("Empty cache")
+            if not args.quiet:
+                print("Empty cache")
             return 0
 
     if args.keys is not None or args.delete_all:
@@ -45,7 +55,8 @@ def main():
                 # the cache dir.  This is marginally safer and makes testing
                 # easier.
                 fname = os.path.join(args.dir, os.path.basename(index[key]))
-                print("delete", key, fname)
+                if not args.quiet:
+                    print("delete", key, fname)
                 delfnames.add(fname)
                 try:
                     os.unlink(fname)
