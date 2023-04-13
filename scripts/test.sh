@@ -109,7 +109,7 @@ runcov scripts/generate_date_index.py -d references.db 2000 3 >/dev/null
 runcov scripts/generate_thread_index.py -d references.db 2000 3 >/dev/null
 
 # Exercise findlinks...
-runcov scripts/findlinks.py CR/2000-10/eml-files/*.eml >/dev/null
+runcov scripts/findlinks.py CR/2004-01/eml-files/*.eml >/dev/null
 
 # Exercise training...
 echo 'yes
