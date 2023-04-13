@@ -27,9 +27,6 @@ def main():
                         continue
                     else:
                         break
-            if msg.defects:
-                print(fname, msg.defects, file=sys.stderr)
-                continue
             stamp = parse_date(msg["Date"])
             pairs.append((stamp, fname))
     for (stamp, fname) in sorted(pairs):
