@@ -1,189 +1,188 @@
 <!DOCTYPE html>
-<html lang=en>
- <head>
-  <title>Centurion Facet</title>
-  <meta charset="utf-8" />
-  <link href="/styles.css" rel="stylesheet" type="text/css" />
- </head>
- <body>
-    <header>
-   <h1><a href="/" title="Vintage Centurion Bicycles Home">
-    <img src="/images/Vintage_centurion_logo1024_0.jpg" alt="Vintage Centurion Bicycles Home" /></a></h1>
-  </header>
-   <nav>
-    <ul>
-     <li><a href="/">Home</a></li>
-     <li><a href="/about.shtml">About Us</a></li>
-     <li><a href="/models/models.shtml" title="Centurion Models">Models</a>
-      <ul>
-       <li><a href="/models/competition/competition.shtml" title="Competition Model Centurion Bikes WSI">Competition Models</a>
-        <ul>
-           <li><a href="/models/competition/professional.shtml">Professional (1973-78)</a></li>
-           <li><a href="/models/competition/semi-pro.shtml">Semi-Pro (1978-81)</a></li>
-           <li><a href="/models/competition/turbo.shtml" title="Turbo 83/84">Turbo (1983-84)</a></li>
-		   <li><a href="/models/competition/trac.shtml" title="Trac">Trac (1983)</a></li>
-           <li><a href="/models/competition/comp-ta.shtml">Comp TA (1984)</a></li>
-           <li><a href="/models/competition/cinelli-equipe.shtml" title="1985 Centurion Cinelli Equipe">Cinelli Equipe (1985)</a></li>
-           <li><a href="/models/competition/prestige.shtml" title="Prestige">Prestige (1985,86,89)</a></li>
-           <li><a href="/models/competition/facet.shtml" title="Facet">Facet (1986)</a></li>
-           <li><a href="/models/competition/ironman/ironman.shtml" title="History and Information of Ironman Centurions">Ironman (1985-89)</a>
-            <ul>
-             <li><a href="/models/competition/ironman/85-86.shtml" title="Ironman">Ironman 1985/1986</a></li>
-             <li><a href="/models/competition/ironman/87-89_master.shtml" title="Ironman Master models">Ironman Master (87-89)</a></li>
-             <li><a href="/models/competition/ironman/87-89_expert.shtml" title="Ironman Expert Models">Ironman Expert (87-89)</a></li>
-			 <li><a href="/models/competition/ironman/87-womens_expert.shtml" title="Ironman Expert Models">Ironman Expert Womens (87)</a></li>
-             <li><a href="/models/competition/ironman/88_carbon.shtml" title="Ironman Carbon Model 1988">Ironman Carbon (1988)</a></li>
-            </ul>
-           </li>
-           <li><a href="/models/competition/elite.shtml">Elite RS/Super</a></li>
-		   <li><a href="/models/competition/carbonr.shtml" title="Carbon R">Carbon R (1989)</a></li>
-          </ul>
-         </li>
-         <li><a href="/models/touring/touring.shtml" title="Touring Bikes">Touring Models</a>
-          <ul>
-           <li><a href="/models/touring/protour.shtml">Pro Tour (1976-84)</a></li>
-           <li><a href="/models/touring/elite-gt.shtml">Elite GT (1984)</a></li>
-          </ul>
-         </li>
-         <li><a href="/models/sports-rec/sports-rec.shtml" title="Sports and Recreational Models">Sport Models</a>
-          <ul>
-           <li><a href="/models/sports-rec/lemans.shtml" title="Lemans Models">LeMans (RS) (1970-1989)</a></li>
-           <li><a href="/models/sports-rec/accordo.shtml" title="1982-1989 Accordo">Accordo (RS) (1982-1989)</a></li>
-          </ul>
-        </li>
-        </ul>
-       </li>
-       <li><a href="/literature/literature.shtml" title="Digital version of Printed Literature">Literature</a>
-        <ul>
-         <li><a href="/literature/centurion-catalogs.shtml" title="Scans of original Centurion catalogs">Catalogs</a></li>
-         <li><a href="/literature/articles/articles.shtml" title="Articles pertaining to Centurion and Western States Imports aka WSI">Articles</a>
-          <ul>
-           <li><a href="/literature/articles/la-times.shtml" title="LA times article on WSI and the Centurion Brand">LA Times Article 10/1986</a></li>
-          </ul>
-         </li>
-         <li><a href="/literature/ads.shtml">Advertisements</a></li>
-         <li><a href="/literature/reviews/reviews.shtml" title="Magazine Reviews">Reviews</a>
-          <ul>
-           <li><a href="/literature/reviews/77-protour.shtml" title="Pro Tour Dec 1976 Bicycling Mag review">Bicycling 1977 ProTour</a></li>
-           <li><a href="/literature/reviews/cinelli-article.shtml">1985 Cinelli Equipe Article</a></li>
-           <li><a href="/literature/reviews/86-ironman-review.shtml">1986 Ironman Review</a></li>
-           <li><a href="/literature/reviews/87-expert-bicycling.shtml">1987 Expert Ironman Review</a></li>
-          </ul>
-         </li>
-         <li><a href="/literature/wsi-locations.shtml">WSI Locations</a></li>
-        </ul>
-       </li>
-       <li><a href="/years/years.shtml">What Year is it?</a>
-        <ul>
-         <li><a href="/years/sn-deciphering.shtml" title="Serial Number Deciphering for build year">SN deciphering</a></li>
-         <li><a href="/years/modelbyyear.shtml" title="A break down of what models were offered during a particular year">Models By Year</a></li>
-         <li><a href="/years/modelbycolor.shtml" title="A break down of the colors offered each year">Model Years by Color</a></li>
-         <li><a href="/years/headbadges.shtml" title="Visual guide to the Centurion headbadge logos">HeadBadges</a></li>
-         <li><a href="/years/dt-logo.shtml" title="A historical tour of Centurion DownTube Logos">DownTube Logos</a></li>
-        </ul>
-       </li>
-       <li><a href="/tech/tech.shtml" title="Centurion Tech">Tech</a>
-        <ul>
-         <li><a href="/tech/frame-differences.shtml" title="Cataloging the differences between the IM Master and Expert">IM frame differences</a></li>
-         <li><a href="/tech/89-geometry.shtml">1989 Ironman geometry</a></li>
-        </ul>
-       </li>
-    </ul>
-  </nav>
-
-  <h1>Facet (1986)</h1>
-  <img alt="" src="images/1986_Facet_800.jpg" />
-  <p>Only available in 1986 the Facet was the only Centurion model that was made with a aluminum frame. the frame was a tig welded 7000 Grade Oversized Aluminum tubing. finished in Yellow with a Jet Black Fork. The Facet featured Suntour Sprint componentry. full specs are below. 1986 was the only year the Facet or any aluminum tubing bike was available from Centurion.</p>
-  <p>The Facet was also used in the Centurion/Shimano/Avenir/Texas Metros Cycling team which competed in the 7-11 Cup.Series The race team which consisted of Susan Ehlers, Marianne Berglund, Peggy Maass, Rebecca Daughton, and Bunki Bunkaitas. Used specially prepared Facet Bikes that were painted Pink with Dura Ace groupset. </p>
-  <table>
-   <tbody>
-    <tr>
-     <th>Frame Construction</th>
-      <td>7000 Grade oversize Aluminum Alloy Tubing, 2 sets of waterbottle Bosses</td>
-    </tr>
-    <tr>
-     <th>Fork</th>
-      <td>Tange Unicrown Aluminum Alloy</td>
-    </tr>
-    <tr>
-     <th>Brake</th>
-      <td>Dia Compe RGC 400 Dark anodized sidepull with AGC aero levers</td>
-    </tr>
-    <tr>
-     <th>Chain</th>
-      <td>Sun Tour Sprint, bevelled plates. Silver and Black</td>
-    </tr>
-    <tr>
-     <th>Crankset</th>
-      <td>Sun Tour Sprint, 53/42t Sealed System BB assembly (Anatomic Sizing)</td>
-    </tr>
-    <tr>
-     <th>Derailleurs</th>
-      <td>Sun Tour Sprint Front and Rear, Dark Anodized. With Sprint Power Levers</td>
-    </tr>
-    <tr>
-     <th>Freewheel</th>
-      <td>Sun Tour Winner 12-21t 7 Speed. Silver , Sealed System</td>
-    </tr>
-    <tr>
-     <th>Handlebar</th>
-      <td>Nitto B-115 Aluminum Alloy. Pelten padded tape. Anatomic Sizing</td>
-    </tr>
-    <tr>
-     <th>Headset</th>
-      <td>Sun Tour Sprint Aluminum Alloy Sealed System.</td>
-    </tr>
-    <tr>
-     <th>Hubs</th>
-      <td>Sun Tour Sprint, Small flange alloy, Quick Release, Sealed bearing system 32 hole</td>
-    </tr>
-    <tr>
-     <th>Pedals</th>
-      <td>Sun Tour Sprint. Sealed System. Cat Eye Plastic toe clips with Sugino nylon straps.</td>
-    </tr>
-    <tr>
-     <th>Rims</th>
-      <td>Wolber Alpine hard anodized 700x20c 32 Hole</td>
-    </tr>
-    <tr>
-     <th>Seat</th>
-      <td>Selle Italia Turbo Genuine Suede Calfskin</td>
-    </tr>
-    <tr>
-     <th>Seatpost</th>
-      <td>SR CT-P5 25.4mm</td>
-    </tr>
-    <tr>
-     <th>Spokes</th>
-      <td>Asahi Stainless Steel 14Ga with black chrome nipples</td>
-    </tr>
-    <tr>
-     <th>Stem</th>
-      <td>Nitto young, Aluminum Alloy Anatomic Sizing</td>
-    </tr>
-    <tr>
-     <th>Tires</th>
-      <td>Panaracer Vertex 700x23c Semi-smooth tread, Rated 115 psi.</td>
-    </tr>
-    <tr>
-     <th>Frame Sizes</th>
-      <td>48, 50, 52, 54, 56, 58, 60cm</td>
-    </tr>
-    <tr>
-     <th>Colors</th>
-      <td>Yellow with Jet Black Dualtone. Clear Coated</td>
-    </tr>
-    <tr>
-     <th>MSRP</th>
-      <td>$699.99</td>
-    </tr>
-    <tr>
-     <th>Weight</th>
-      <td>22 lbs (56cm)</td>
-    </tr>
-   </tbody>
-  </table>
-   <p></p>
-   <p>2019 Vintage-Centurion.com</p> 
- </body>
+<html lang="en">
+<head>
+<title>Centurion Facet</title>
+<meta charset="utf-8"/>
+<link href="../../styles.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<header>
+<h1><a href="../../index.html" title="Vintage Centurion Bicycles Home">
+<img alt="Vintage Centurion Bicycles Home" src="../../images/Vintage_centurion_logo1024_0.jpg"/></a></h1>
+</header>
+<nav>
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../about.shtml">About Us</a></li>
+<li><a href="../../models/models.shtml" title="Centurion Models">Models</a>
+<ul>
+<li><a href="../../models/competition/competition.shtml" title="Competition Model Centurion Bikes WSI">Competition Models</a>
+<ul>
+<li><a href="../../models/competition/professional.shtml">Professional (1973-78)</a></li>
+<li><a href="../../models/competition/semi-pro.shtml">Semi-Pro (1978-81)</a></li>
+<li><a href="../../models/competition/turbo.shtml" title="Turbo 83/84">Turbo (1983-84)</a></li>
+<li><a href="../../models/competition/trac.shtml" title="Trac">Trac (1983)</a></li>
+<li><a href="../../models/competition/comp-ta.shtml">Comp TA (1984)</a></li>
+<li><a href="../../models/competition/cinelli-equipe.shtml" title="1985 Centurion Cinelli Equipe">Cinelli Equipe (1985)</a></li>
+<li><a href="../../models/competition/prestige.shtml" title="Prestige">Prestige (1985,86,89)</a></li>
+<li><a href="../../models/competition/facet.shtml" title="Facet">Facet (1986)</a></li>
+<li><a href="../../models/competition/ironman/ironman.shtml" title="History and Information of Ironman Centurions">Ironman (1985-89)</a>
+<ul>
+<li><a href="../../models/competition/ironman/85-86.shtml" title="Ironman">Ironman 1985/1986</a></li>
+<li><a href="../../models/competition/ironman/87-89_master.shtml" title="Ironman Master models">Ironman Master (87-89)</a></li>
+<li><a href="../../models/competition/ironman/87-89_expert.shtml" title="Ironman Expert Models">Ironman Expert (87-89)</a></li>
+<li><a href="../../models/competition/ironman/87-womens_expert.shtml" title="Ironman Expert Models">Ironman Expert Womens (87)</a></li>
+<li><a href="../../models/competition/ironman/88_carbon.shtml" title="Ironman Carbon Model 1988">Ironman Carbon (1988)</a></li>
+</ul>
+</li>
+<li><a href="../../models/competition/elite.shtml">Elite RS/Super</a></li>
+<li><a href="../../models/competition/carbonr.shtml" title="Carbon R">Carbon R (1989)</a></li>
+</ul>
+</li>
+<li><a href="../../models/touring/touring.shtml" title="Touring Bikes">Touring Models</a>
+<ul>
+<li><a href="../../models/touring/protour.shtml">Pro Tour (1976-84)</a></li>
+<li><a href="../../models/touring/elite-gt.shtml">Elite GT (1984)</a></li>
+</ul>
+</li>
+<li><a href="../../models/sports-rec/sports-rec.shtml" title="Sports and Recreational Models">Sport Models</a>
+<ul>
+<li><a href="../../models/sports-rec/lemans.shtml" title="Lemans Models">LeMans (RS) (1970-1989)</a></li>
+<li><a href="../../models/sports-rec/accordo.shtml" title="1982-1989 Accordo">Accordo (RS) (1982-1989)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="../../literature/literature.shtml" title="Digital version of Printed Literature">Literature</a>
+<ul>
+<li><a href="../../literature/centurion-catalogs.shtml" title="Scans of original Centurion catalogs">Catalogs</a></li>
+<li><a href="../../literature/articles/articles.shtml" title="Articles pertaining to Centurion and Western States Imports aka WSI">Articles</a>
+<ul>
+<li><a href="../../literature/articles/la-times.shtml" title="LA times article on WSI and the Centurion Brand">LA Times Article 10/1986</a></li>
+</ul>
+</li>
+<li><a href="../../literature/ads.shtml">Advertisements</a></li>
+<li><a href="../../literature/reviews/reviews.shtml" title="Magazine Reviews">Reviews</a>
+<ul>
+<li><a href="../../literature/reviews/77-protour.shtml" title="Pro Tour Dec 1976 Bicycling Mag review">Bicycling 1977 ProTour</a></li>
+<li><a href="../../literature/reviews/cinelli-article.shtml">1985 Cinelli Equipe Article</a></li>
+<li><a href="../../literature/reviews/86-ironman-review.shtml">1986 Ironman Review</a></li>
+<li><a href="../../literature/reviews/87-expert-bicycling.shtml">1987 Expert Ironman Review</a></li>
+</ul>
+</li>
+<li><a href="../../literature/wsi-locations.shtml">WSI Locations</a></li>
+</ul>
+</li>
+<li><a href="../../years/years.shtml">What Year is it?</a>
+<ul>
+<li><a href="../../years/sn-deciphering.shtml" title="Serial Number Deciphering for build year">SN deciphering</a></li>
+<li><a href="../../years/modelbyyear.shtml" title="A break down of what models were offered during a particular year">Models By Year</a></li>
+<li><a href="../../years/modelbycolor.shtml" title="A break down of the colors offered each year">Model Years by Color</a></li>
+<li><a href="../../years/headbadges.shtml" title="Visual guide to the Centurion headbadge logos">HeadBadges</a></li>
+<li><a href="../../years/dt-logo.shtml" title="A historical tour of Centurion DownTube Logos">DownTube Logos</a></li>
+</ul>
+</li>
+<li><a href="../../tech/tech.shtml" title="Centurion Tech">Tech</a>
+<ul>
+<li><a href="../../tech/frame-differences.shtml" title="Cataloging the differences between the IM Master and Expert">IM frame differences</a></li>
+<li><a href="../../tech/89-geometry.shtml">1989 Ironman geometry</a></li>
+</ul>
+</li>
+</ul>
+</nav>
+<h1>Facet (1986)</h1>
+<img alt="" src="images/1986_Facet_800.jpg"/>
+<p>Only available in 1986 the Facet was the only Centurion model that was made with a aluminum frame. the frame was a tig welded 7000 Grade Oversized Aluminum tubing. finished in Yellow with a Jet Black Fork. The Facet featured Suntour Sprint componentry. full specs are below. 1986 was the only year the Facet or any aluminum tubing bike was available from Centurion.</p>
+<p>The Facet was also used in the Centurion/Shimano/Avenir/Texas Metros Cycling team which competed in the 7-11 Cup.Series The race team which consisted of Susan Ehlers, Marianne Berglund, Peggy Maass, Rebecca Daughton, and Bunki Bunkaitas. Used specially prepared Facet Bikes that were painted Pink with Dura Ace groupset. </p>
+<table>
+<tbody>
+<tr>
+<th>Frame Construction</th>
+<td>7000 Grade oversize Aluminum Alloy Tubing, 2 sets of waterbottle Bosses</td>
+</tr>
+<tr>
+<th>Fork</th>
+<td>Tange Unicrown Aluminum Alloy</td>
+</tr>
+<tr>
+<th>Brake</th>
+<td>Dia Compe RGC 400 Dark anodized sidepull with AGC aero levers</td>
+</tr>
+<tr>
+<th>Chain</th>
+<td>Sun Tour Sprint, bevelled plates. Silver and Black</td>
+</tr>
+<tr>
+<th>Crankset</th>
+<td>Sun Tour Sprint, 53/42t Sealed System BB assembly (Anatomic Sizing)</td>
+</tr>
+<tr>
+<th>Derailleurs</th>
+<td>Sun Tour Sprint Front and Rear, Dark Anodized. With Sprint Power Levers</td>
+</tr>
+<tr>
+<th>Freewheel</th>
+<td>Sun Tour Winner 12-21t 7 Speed. Silver , Sealed System</td>
+</tr>
+<tr>
+<th>Handlebar</th>
+<td>Nitto B-115 Aluminum Alloy. Pelten padded tape. Anatomic Sizing</td>
+</tr>
+<tr>
+<th>Headset</th>
+<td>Sun Tour Sprint Aluminum Alloy Sealed System.</td>
+</tr>
+<tr>
+<th>Hubs</th>
+<td>Sun Tour Sprint, Small flange alloy, Quick Release, Sealed bearing system 32 hole</td>
+</tr>
+<tr>
+<th>Pedals</th>
+<td>Sun Tour Sprint. Sealed System. Cat Eye Plastic toe clips with Sugino nylon straps.</td>
+</tr>
+<tr>
+<th>Rims</th>
+<td>Wolber Alpine hard anodized 700x20c 32 Hole</td>
+</tr>
+<tr>
+<th>Seat</th>
+<td>Selle Italia Turbo Genuine Suede Calfskin</td>
+</tr>
+<tr>
+<th>Seatpost</th>
+<td>SR CT-P5 25.4mm</td>
+</tr>
+<tr>
+<th>Spokes</th>
+<td>Asahi Stainless Steel 14Ga with black chrome nipples</td>
+</tr>
+<tr>
+<th>Stem</th>
+<td>Nitto young, Aluminum Alloy Anatomic Sizing</td>
+</tr>
+<tr>
+<th>Tires</th>
+<td>Panaracer Vertex 700x23c Semi-smooth tread, Rated 115 psi.</td>
+</tr>
+<tr>
+<th>Frame Sizes</th>
+<td>48, 50, 52, 54, 56, 58, 60cm</td>
+</tr>
+<tr>
+<th>Colors</th>
+<td>Yellow with Jet Black Dualtone. Clear Coated</td>
+</tr>
+<tr>
+<th>MSRP</th>
+<td>$699.99</td>
+</tr>
+<tr>
+<th>Weight</th>
+<td>22 lbs (56cm)</td>
+</tr>
+</tbody>
+</table>
+<p></p>
+<p>2019 Vintage-Centurion.com</p>
+</body>
 </html>

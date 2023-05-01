@@ -1,153 +1,152 @@
 <!DOCTYPE html>
-<html lang=en>
- <head>
-  <title>Centurion LeMans (RS)</title>
-  <meta charset="utf-8" />
-  <link href="/styles.css" rel="stylesheet" type="text/css" />
- </head>
- <body>
-    <header>
-   <h1><a href="/" title="Vintage Centurion Bicycles Home">
-    <img src="/images/Vintage_centurion_logo1024_0.jpg" alt="Vintage Centurion Bicycles Home" /></a></h1>
-  </header>
-   <nav>
-    <ul>
-     <li><a href="/">Home</a></li>
-     <li><a href="/about.shtml">About Us</a></li>
-     <li><a href="/models/models.shtml" title="Centurion Models">Models</a>
-      <ul>
-       <li><a href="/models/competition/competition.shtml" title="Competition Model Centurion Bikes WSI">Competition Models</a>
-        <ul>
-           <li><a href="/models/competition/professional.shtml">Professional (1973-78)</a></li>
-           <li><a href="/models/competition/semi-pro.shtml">Semi-Pro (1978-81)</a></li>
-           <li><a href="/models/competition/turbo.shtml" title="Turbo 83/84">Turbo (1983-84)</a></li>
-		   <li><a href="/models/competition/trac.shtml" title="Trac">Trac (1983)</a></li>
-           <li><a href="/models/competition/comp-ta.shtml">Comp TA (1984)</a></li>
-           <li><a href="/models/competition/cinelli-equipe.shtml" title="1985 Centurion Cinelli Equipe">Cinelli Equipe (1985)</a></li>
-           <li><a href="/models/competition/prestige.shtml" title="Prestige">Prestige (1985,86,89)</a></li>
-           <li><a href="/models/competition/facet.shtml" title="Facet">Facet (1986)</a></li>
-           <li><a href="/models/competition/ironman/ironman.shtml" title="History and Information of Ironman Centurions">Ironman (1985-89)</a>
-            <ul>
-             <li><a href="/models/competition/ironman/85-86.shtml" title="Ironman">Ironman 1985/1986</a></li>
-             <li><a href="/models/competition/ironman/87-89_master.shtml" title="Ironman Master models">Ironman Master (87-89)</a></li>
-             <li><a href="/models/competition/ironman/87-89_expert.shtml" title="Ironman Expert Models">Ironman Expert (87-89)</a></li>
-			 <li><a href="/models/competition/ironman/87-womens_expert.shtml" title="Ironman Expert Models">Ironman Expert Womens (87)</a></li>
-             <li><a href="/models/competition/ironman/88_carbon.shtml" title="Ironman Carbon Model 1988">Ironman Carbon (1988)</a></li>
-            </ul>
-           </li>
-           <li><a href="/models/competition/elite.shtml">Elite RS/Super</a></li>
-		   <li><a href="/models/competition/carbonr.shtml" title="Carbon R">Carbon R (1989)</a></li>
-          </ul>
-         </li>
-         <li><a href="/models/touring/touring.shtml" title="Touring Bikes">Touring Models</a>
-          <ul>
-           <li><a href="/models/touring/protour.shtml">Pro Tour (1976-84)</a></li>
-           <li><a href="/models/touring/elite-gt.shtml">Elite GT (1984)</a></li>
-          </ul>
-         </li>
-         <li><a href="/models/sports-rec/sports-rec.shtml" title="Sports and Recreational Models">Sport Models</a>
-          <ul>
-           <li><a href="/models/sports-rec/lemans.shtml" title="Lemans Models">LeMans (RS) (1970-1989)</a></li>
-           <li><a href="/models/sports-rec/accordo.shtml" title="1982-1989 Accordo">Accordo (RS) (1982-1989)</a></li>
-          </ul>
-        </li>
-        </ul>
-       </li>
-       <li><a href="/literature/literature.shtml" title="Digital version of Printed Literature">Literature</a>
-        <ul>
-         <li><a href="/literature/centurion-catalogs.shtml" title="Scans of original Centurion catalogs">Catalogs</a></li>
-         <li><a href="/literature/articles/articles.shtml" title="Articles pertaining to Centurion and Western States Imports aka WSI">Articles</a>
-          <ul>
-           <li><a href="/literature/articles/la-times.shtml" title="LA times article on WSI and the Centurion Brand">LA Times Article 10/1986</a></li>
-          </ul>
-         </li>
-         <li><a href="/literature/ads.shtml">Advertisements</a></li>
-         <li><a href="/literature/reviews/reviews.shtml" title="Magazine Reviews">Reviews</a>
-          <ul>
-           <li><a href="/literature/reviews/77-protour.shtml" title="Pro Tour Dec 1976 Bicycling Mag review">Bicycling 1977 ProTour</a></li>
-           <li><a href="/literature/reviews/cinelli-article.shtml">1985 Cinelli Equipe Article</a></li>
-           <li><a href="/literature/reviews/86-ironman-review.shtml">1986 Ironman Review</a></li>
-           <li><a href="/literature/reviews/87-expert-bicycling.shtml">1987 Expert Ironman Review</a></li>
-          </ul>
-         </li>
-         <li><a href="/literature/wsi-locations.shtml">WSI Locations</a></li>
-        </ul>
-       </li>
-       <li><a href="/years/years.shtml">What Year is it?</a>
-        <ul>
-         <li><a href="/years/sn-deciphering.shtml" title="Serial Number Deciphering for build year">SN deciphering</a></li>
-         <li><a href="/years/modelbyyear.shtml" title="A break down of what models were offered during a particular year">Models By Year</a></li>
-         <li><a href="/years/modelbycolor.shtml" title="A break down of the colors offered each year">Model Years by Color</a></li>
-         <li><a href="/years/headbadges.shtml" title="Visual guide to the Centurion headbadge logos">HeadBadges</a></li>
-         <li><a href="/years/dt-logo.shtml" title="A historical tour of Centurion DownTube Logos">DownTube Logos</a></li>
-        </ul>
-       </li>
-       <li><a href="/tech/tech.shtml" title="Centurion Tech">Tech</a>
-        <ul>
-         <li><a href="/tech/frame-differences.shtml" title="Cataloging the differences between the IM Master and Expert">IM frame differences</a></li>
-         <li><a href="/tech/89-geometry.shtml">1989 Ironman geometry</a></li>
-        </ul>
-       </li>
-    </ul>
-  </nav>
-
-  <h1>LeMans (RS) (1970-1989):</h1>
-   <p>The model which introduced the Centurion brand and probably the most popular model through 1984 It evolved constantly over the years, In the beginning of Centurion there was two models the LeMans and the lower end Sport. 
+<html lang="en">
+<head>
+<title>Centurion LeMans (RS)</title>
+<meta charset="utf-8"/>
+<link href="../../styles.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<header>
+<h1><a href="../../index.html" title="Vintage Centurion Bicycles Home">
+<img alt="Vintage Centurion Bicycles Home" src="../../images/Vintage_centurion_logo1024_0.jpg"/></a></h1>
+</header>
+<nav>
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../about.shtml">About Us</a></li>
+<li><a href="../../models/models.shtml" title="Centurion Models">Models</a>
+<ul>
+<li><a href="../../models/competition/competition.shtml" title="Competition Model Centurion Bikes WSI">Competition Models</a>
+<ul>
+<li><a href="../../models/competition/professional.shtml">Professional (1973-78)</a></li>
+<li><a href="../../models/competition/semi-pro.shtml">Semi-Pro (1978-81)</a></li>
+<li><a href="../../models/competition/turbo.shtml" title="Turbo 83/84">Turbo (1983-84)</a></li>
+<li><a href="../../models/competition/trac.shtml" title="Trac">Trac (1983)</a></li>
+<li><a href="../../models/competition/comp-ta.shtml">Comp TA (1984)</a></li>
+<li><a href="../../models/competition/cinelli-equipe.shtml" title="1985 Centurion Cinelli Equipe">Cinelli Equipe (1985)</a></li>
+<li><a href="../../models/competition/prestige.shtml" title="Prestige">Prestige (1985,86,89)</a></li>
+<li><a href="../../models/competition/facet.shtml" title="Facet">Facet (1986)</a></li>
+<li><a href="../../models/competition/ironman/ironman.shtml" title="History and Information of Ironman Centurions">Ironman (1985-89)</a>
+<ul>
+<li><a href="../../models/competition/ironman/85-86.shtml" title="Ironman">Ironman 1985/1986</a></li>
+<li><a href="../../models/competition/ironman/87-89_master.shtml" title="Ironman Master models">Ironman Master (87-89)</a></li>
+<li><a href="../../models/competition/ironman/87-89_expert.shtml" title="Ironman Expert Models">Ironman Expert (87-89)</a></li>
+<li><a href="../../models/competition/ironman/87-womens_expert.shtml" title="Ironman Expert Models">Ironman Expert Womens (87)</a></li>
+<li><a href="../../models/competition/ironman/88_carbon.shtml" title="Ironman Carbon Model 1988">Ironman Carbon (1988)</a></li>
+</ul>
+</li>
+<li><a href="../../models/competition/elite.shtml">Elite RS/Super</a></li>
+<li><a href="../../models/competition/carbonr.shtml" title="Carbon R">Carbon R (1989)</a></li>
+</ul>
+</li>
+<li><a href="../../models/touring/touring.shtml" title="Touring Bikes">Touring Models</a>
+<ul>
+<li><a href="../../models/touring/protour.shtml">Pro Tour (1976-84)</a></li>
+<li><a href="../../models/touring/elite-gt.shtml">Elite GT (1984)</a></li>
+</ul>
+</li>
+<li><a href="../../models/sports-rec/sports-rec.shtml" title="Sports and Recreational Models">Sport Models</a>
+<ul>
+<li><a href="../../models/sports-rec/lemans.shtml" title="Lemans Models">LeMans (RS) (1970-1989)</a></li>
+<li><a href="../../models/sports-rec/accordo.shtml" title="1982-1989 Accordo">Accordo (RS) (1982-1989)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="../../literature/literature.shtml" title="Digital version of Printed Literature">Literature</a>
+<ul>
+<li><a href="../../literature/centurion-catalogs.shtml" title="Scans of original Centurion catalogs">Catalogs</a></li>
+<li><a href="../../literature/articles/articles.shtml" title="Articles pertaining to Centurion and Western States Imports aka WSI">Articles</a>
+<ul>
+<li><a href="../../literature/articles/la-times.shtml" title="LA times article on WSI and the Centurion Brand">LA Times Article 10/1986</a></li>
+</ul>
+</li>
+<li><a href="../../literature/ads.shtml">Advertisements</a></li>
+<li><a href="../../literature/reviews/reviews.shtml" title="Magazine Reviews">Reviews</a>
+<ul>
+<li><a href="../../literature/reviews/77-protour.shtml" title="Pro Tour Dec 1976 Bicycling Mag review">Bicycling 1977 ProTour</a></li>
+<li><a href="../../literature/reviews/cinelli-article.shtml">1985 Cinelli Equipe Article</a></li>
+<li><a href="../../literature/reviews/86-ironman-review.shtml">1986 Ironman Review</a></li>
+<li><a href="../../literature/reviews/87-expert-bicycling.shtml">1987 Expert Ironman Review</a></li>
+</ul>
+</li>
+<li><a href="../../literature/wsi-locations.shtml">WSI Locations</a></li>
+</ul>
+</li>
+<li><a href="../../years/years.shtml">What Year is it?</a>
+<ul>
+<li><a href="../../years/sn-deciphering.shtml" title="Serial Number Deciphering for build year">SN deciphering</a></li>
+<li><a href="../../years/modelbyyear.shtml" title="A break down of what models were offered during a particular year">Models By Year</a></li>
+<li><a href="../../years/modelbycolor.shtml" title="A break down of the colors offered each year">Model Years by Color</a></li>
+<li><a href="../../years/headbadges.shtml" title="Visual guide to the Centurion headbadge logos">HeadBadges</a></li>
+<li><a href="../../years/dt-logo.shtml" title="A historical tour of Centurion DownTube Logos">DownTube Logos</a></li>
+</ul>
+</li>
+<li><a href="../../tech/tech.shtml" title="Centurion Tech">Tech</a>
+<ul>
+<li><a href="../../tech/frame-differences.shtml" title="Cataloging the differences between the IM Master and Expert">IM frame differences</a></li>
+<li><a href="../../tech/89-geometry.shtml">1989 Ironman geometry</a></li>
+</ul>
+</li>
+</ul>
+</nav>
+<h1>LeMans (RS) (1970-1989):</h1>
+<p>The model which introduced the Centurion brand and probably the most popular model through 1984 It evolved constantly over the years, In the beginning of Centurion there was two models the LeMans and the lower end Sport. 
    Now the Lemans was not a exotic Italian or French bike. it did not have Campagnolo components . what it did have was a very well functioning Suntour components. by 1974 the LeMans had Suntour V GT Luxe. 
    which was top of the line for Suntour in 1974. in these the days before Cyclone and Superbe</p>
-   <p>By the mid eighties they became the LeMans RS model, which was now a solid and popular income-generating, mid-priced machine.</p>
-   <p>1976 high-tensile steel frame,10-speed Front Derailleur: Suntour SL Rear Derailleur: Suntour V-GT Luxe Shifters: Suntour Barcons Freewheel: Suntour Pro-Compe Cranks: SR Apex Brakes: Dia-Compe Centerpull Rims: Araya Hubs: Suntour Sunshine Bars: Sakae Road Champion Randonneur Seat: Elina Super Pro </p>
-   <p>1980s (Early) 12-speed with a Tange Infinity tubeset and a mix of Suntour and Sugino components.</p>
-   <p>1987 it boasted the somewhat lighter and seamless double-butted Tange #2 tubeset and Shimano's "Light Action, Light Touch" group.</p>
-   <img alt="Centurion Lemans" src="images/early-lemans-green.jpg" />
-   <p>Early 70s Model </p>
-   <h2>1974 Lemans</h2>
-   <p>Frame: Hand Brazed Hi-Tension Steel lugs with brazed on cable stops</p>
-   <p>Fork: High Tension butted steel with special chrome steel crown, chrome tips and drop forged ends</p>
-   <p>Paint: Double undercoat with two coats of baked enamel, Finished with a highly resistant clear lacquer.</p>
-   <p>Brakes: DiaCompe alloy center pull with quick release, </p>
-   <p>Brake-Levers: alloy racing levers and safety levers</p>
-   <p>Rear Derailleur: SunTour Wide range VGT/LUXE alloy </p>
-   <p>Front Derailleur: Suntour SL alloy front, </p>
-   <p>Shifters: Suntour Power stem shifters</p>
-   <p>Freewheel: 14t-28t, 5 Speed</p>
-   <p>Crankset: Tourney 5 Pin Cotterless alloy 52/40t </p>
-   <p>Pedals: MKS Balanced Rat Traps</p>
-   <p>Wheels:Araya Steel Rims</p>
-   <p>Hubs: Sunshine Alloy Wide Flange</p>
-   <p>Tires: Special Centurion 85lb Hi-Pressure Gumwall Tires</p>
-   <p>Handlebar: Sakae Custom Road Champion Engraved alloy drop bar with black tape and plugs</p>
-   <p>Stem: Sakae alloy allen head stem</p>
-   <p>Saddle: Naugahyde covered fully padded racing saddle with quilted top</p>
-   <p>Extras: Alloy Spoke Protector and two inch rear reflectors.</p>
-   <p>Sizes: 19" 21" 23" 25"</p>
-   Colors: Red, Blue, Silver, Coffee, Yellow, Green</p>
+<p>By the mid eighties they became the LeMans RS model, which was now a solid and popular income-generating, mid-priced machine.</p>
+<p>1976 high-tensile steel frame,10-speed Front Derailleur: Suntour SL Rear Derailleur: Suntour V-GT Luxe Shifters: Suntour Barcons Freewheel: Suntour Pro-Compe Cranks: SR Apex Brakes: Dia-Compe Centerpull Rims: Araya Hubs: Suntour Sunshine Bars: Sakae Road Champion Randonneur Seat: Elina Super Pro </p>
+<p>1980s (Early) 12-speed with a Tange Infinity tubeset and a mix of Suntour and Sugino components.</p>
+<p>1987 it boasted the somewhat lighter and seamless double-butted Tange #2 tubeset and Shimano's "Light Action, Light Touch" group.</p>
+<img alt="Centurion Lemans" src="images/early-lemans-green.jpg"/>
+<p>Early 70s Model </p>
+<h2>1974 Lemans</h2>
+<p>Frame: Hand Brazed Hi-Tension Steel lugs with brazed on cable stops</p>
+<p>Fork: High Tension butted steel with special chrome steel crown, chrome tips and drop forged ends</p>
+<p>Paint: Double undercoat with two coats of baked enamel, Finished with a highly resistant clear lacquer.</p>
+<p>Brakes: DiaCompe alloy center pull with quick release, </p>
+<p>Brake-Levers: alloy racing levers and safety levers</p>
+<p>Rear Derailleur: SunTour Wide range VGT/LUXE alloy </p>
+<p>Front Derailleur: Suntour SL alloy front, </p>
+<p>Shifters: Suntour Power stem shifters</p>
+<p>Freewheel: 14t-28t, 5 Speed</p>
+<p>Crankset: Tourney 5 Pin Cotterless alloy 52/40t </p>
+<p>Pedals: MKS Balanced Rat Traps</p>
+<p>Wheels:Araya Steel Rims</p>
+<p>Hubs: Sunshine Alloy Wide Flange</p>
+<p>Tires: Special Centurion 85lb Hi-Pressure Gumwall Tires</p>
+<p>Handlebar: Sakae Custom Road Champion Engraved alloy drop bar with black tape and plugs</p>
+<p>Stem: Sakae alloy allen head stem</p>
+<p>Saddle: Naugahyde covered fully padded racing saddle with quilted top</p>
+<p>Extras: Alloy Spoke Protector and two inch rear reflectors.</p>
+<p>Sizes: 19" 21" 23" 25"</p>
+   Colors: Red, Blue, Silver, Coffee, Yellow, Green
    <h2>1972 Ladies Lemans</h2>
-   <p> Sizes: 19" , 21"
-   <p>Colors: Red, Blue, Silver, Yellow
-   <h2>1988 model</h2>
-    <img alt="1988 Centurion Lemans" src="images/1988_lemans_yellow.jpg" />
-    <img alt="1988 Centurion Lemans" src="images/1988_lemans-pink.jpg" />
-    <p>1988 Specs</p>
-    <p>Frame: Tange #2</p>
-    <p>Fork: Tange 2001 Mangaloy </p>
-    <p>Stays: Tange 2001 Mangaloy</p>
-    <p>Grouppo: drivetrain was complete Shimano Exage Sport, including pedals. </p>
-    <p>Wheels: Exage Sport hubs laced to Araya 700C rims. </p>
-    <p>Freewheel: 12-26T, 6 speed cassette</p>
-    <p>Chainrings: 42/52T </p>
-    <p>Bars: Kusuki aluminum models</p>
-    <p>Stem: Kusuki aluminum models. </p>
-    <p>Saddle: Centurion branded Vetta. </p>
-    <p>Weight:claimed 24.5 lbs ( 56cm frame). </p>
-    <p>Sizes 46, 48, 50, 52, 54, 56, 58, 60 &amp; 64 cm.  </p>
-    <p>MSRP $425 US retail. </p>
-   <h2>1989 model</h2>
-    <img alt="" src="images/1989_lemans_blue.jpg" />
-    <img alt="" src="images/1989_lemans_purple.jpg" />
-    <p>1989 it appeared with the Tange #2 tubeset but fitted with Shimano Sport LX components. Alot of times the color schemes may have been used the year before on the higher models, as example the lemans above with the white to purplesmoke fade paint, although this was available on the 1988 Models,given the Decals, this was a 1989 model. Dont let the colors trick you.</p>
-    <p>In the mid 70's the LeMans sold for $139. and the Super LeMans for $189.</p>
-  <p></p>
-   <p>2019 Vintage-Centurion.com</p> 
- </body>
+<p> Sizes: 19" , 21"
+   </p><p>Colors: Red, Blue, Silver, Yellow
+   </p><h2>1988 model</h2>
+<img alt="1988 Centurion Lemans" src="images/1988_lemans_yellow.jpg"/>
+<img alt="1988 Centurion Lemans" src="images/1988_lemans-pink.jpg"/>
+<p>1988 Specs</p>
+<p>Frame: Tange #2</p>
+<p>Fork: Tange 2001 Mangaloy </p>
+<p>Stays: Tange 2001 Mangaloy</p>
+<p>Grouppo: drivetrain was complete Shimano Exage Sport, including pedals. </p>
+<p>Wheels: Exage Sport hubs laced to Araya 700C rims. </p>
+<p>Freewheel: 12-26T, 6 speed cassette</p>
+<p>Chainrings: 42/52T </p>
+<p>Bars: Kusuki aluminum models</p>
+<p>Stem: Kusuki aluminum models. </p>
+<p>Saddle: Centurion branded Vetta. </p>
+<p>Weight:claimed 24.5 lbs ( 56cm frame). </p>
+<p>Sizes 46, 48, 50, 52, 54, 56, 58, 60 &amp; 64 cm.  </p>
+<p>MSRP $425 US retail. </p>
+<h2>1989 model</h2>
+<img alt="" src="images/1989_lemans_blue.jpg"/>
+<img alt="" src="images/1989_lemans_purple.jpg"/>
+<p>1989 it appeared with the Tange #2 tubeset but fitted with Shimano Sport LX components. Alot of times the color schemes may have been used the year before on the higher models, as example the lemans above with the white to purplesmoke fade paint, although this was available on the 1988 Models,given the Decals, this was a 1989 model. Dont let the colors trick you.</p>
+<p>In the mid 70's the LeMans sold for $139. and the Super LeMans for $189.</p>
+<p></p>
+<p>2019 Vintage-Centurion.com</p>
+</body>
 </html>

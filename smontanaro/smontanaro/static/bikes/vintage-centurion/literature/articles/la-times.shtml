@@ -1,133 +1,132 @@
 <!DOCTYPE html>
-<html lang=en>
- <head>
-  <title>Centurion LA Times Article 10/1986</title>
-  <meta charset="utf-8" />
-  <link href="/styles.css" rel="stylesheet" type="text/css" />
- </head>
- <body>
-    <header>
-   <h1><a href="/" title="Vintage Centurion Bicycles Home">
-    <img src="/images/Vintage_centurion_logo1024_0.jpg" alt="Vintage Centurion Bicycles Home" /></a></h1>
-  </header>
-   <nav>
-    <ul>
-     <li><a href="/">Home</a></li>
-     <li><a href="/about.shtml">About Us</a></li>
-     <li><a href="/models/models.shtml" title="Centurion Models">Models</a>
-      <ul>
-       <li><a href="/models/competition/competition.shtml" title="Competition Model Centurion Bikes WSI">Competition Models</a>
-        <ul>
-           <li><a href="/models/competition/professional.shtml">Professional (1973-78)</a></li>
-           <li><a href="/models/competition/semi-pro.shtml">Semi-Pro (1978-81)</a></li>
-           <li><a href="/models/competition/turbo.shtml" title="Turbo 83/84">Turbo (1983-84)</a></li>
-		   <li><a href="/models/competition/trac.shtml" title="Trac">Trac (1983)</a></li>
-           <li><a href="/models/competition/comp-ta.shtml">Comp TA (1984)</a></li>
-           <li><a href="/models/competition/cinelli-equipe.shtml" title="1985 Centurion Cinelli Equipe">Cinelli Equipe (1985)</a></li>
-           <li><a href="/models/competition/prestige.shtml" title="Prestige">Prestige (1985,86,89)</a></li>
-           <li><a href="/models/competition/facet.shtml" title="Facet">Facet (1986)</a></li>
-           <li><a href="/models/competition/ironman/ironman.shtml" title="History and Information of Ironman Centurions">Ironman (1985-89)</a>
-            <ul>
-             <li><a href="/models/competition/ironman/85-86.shtml" title="Ironman">Ironman 1985/1986</a></li>
-             <li><a href="/models/competition/ironman/87-89_master.shtml" title="Ironman Master models">Ironman Master (87-89)</a></li>
-             <li><a href="/models/competition/ironman/87-89_expert.shtml" title="Ironman Expert Models">Ironman Expert (87-89)</a></li>
-			 <li><a href="/models/competition/ironman/87-womens_expert.shtml" title="Ironman Expert Models">Ironman Expert Womens (87)</a></li>
-             <li><a href="/models/competition/ironman/88_carbon.shtml" title="Ironman Carbon Model 1988">Ironman Carbon (1988)</a></li>
-            </ul>
-           </li>
-           <li><a href="/models/competition/elite.shtml">Elite RS/Super</a></li>
-		   <li><a href="/models/competition/carbonr.shtml" title="Carbon R">Carbon R (1989)</a></li>
-          </ul>
-         </li>
-         <li><a href="/models/touring/touring.shtml" title="Touring Bikes">Touring Models</a>
-          <ul>
-           <li><a href="/models/touring/protour.shtml">Pro Tour (1976-84)</a></li>
-           <li><a href="/models/touring/elite-gt.shtml">Elite GT (1984)</a></li>
-          </ul>
-         </li>
-         <li><a href="/models/sports-rec/sports-rec.shtml" title="Sports and Recreational Models">Sport Models</a>
-          <ul>
-           <li><a href="/models/sports-rec/lemans.shtml" title="Lemans Models">LeMans (RS) (1970-1989)</a></li>
-           <li><a href="/models/sports-rec/accordo.shtml" title="1982-1989 Accordo">Accordo (RS) (1982-1989)</a></li>
-          </ul>
-        </li>
-        </ul>
-       </li>
-       <li><a href="/literature/literature.shtml" title="Digital version of Printed Literature">Literature</a>
-        <ul>
-         <li><a href="/literature/centurion-catalogs.shtml" title="Scans of original Centurion catalogs">Catalogs</a></li>
-         <li><a href="/literature/articles/articles.shtml" title="Articles pertaining to Centurion and Western States Imports aka WSI">Articles</a>
-          <ul>
-           <li><a href="/literature/articles/la-times.shtml" title="LA times article on WSI and the Centurion Brand">LA Times Article 10/1986</a></li>
-          </ul>
-         </li>
-         <li><a href="/literature/ads.shtml">Advertisements</a></li>
-         <li><a href="/literature/reviews/reviews.shtml" title="Magazine Reviews">Reviews</a>
-          <ul>
-           <li><a href="/literature/reviews/77-protour.shtml" title="Pro Tour Dec 1976 Bicycling Mag review">Bicycling 1977 ProTour</a></li>
-           <li><a href="/literature/reviews/cinelli-article.shtml">1985 Cinelli Equipe Article</a></li>
-           <li><a href="/literature/reviews/86-ironman-review.shtml">1986 Ironman Review</a></li>
-           <li><a href="/literature/reviews/87-expert-bicycling.shtml">1987 Expert Ironman Review</a></li>
-          </ul>
-         </li>
-         <li><a href="/literature/wsi-locations.shtml">WSI Locations</a></li>
-        </ul>
-       </li>
-       <li><a href="/years/years.shtml">What Year is it?</a>
-        <ul>
-         <li><a href="/years/sn-deciphering.shtml" title="Serial Number Deciphering for build year">SN deciphering</a></li>
-         <li><a href="/years/modelbyyear.shtml" title="A break down of what models were offered during a particular year">Models By Year</a></li>
-         <li><a href="/years/modelbycolor.shtml" title="A break down of the colors offered each year">Model Years by Color</a></li>
-         <li><a href="/years/headbadges.shtml" title="Visual guide to the Centurion headbadge logos">HeadBadges</a></li>
-         <li><a href="/years/dt-logo.shtml" title="A historical tour of Centurion DownTube Logos">DownTube Logos</a></li>
-        </ul>
-       </li>
-       <li><a href="/tech/tech.shtml" title="Centurion Tech">Tech</a>
-        <ul>
-         <li><a href="/tech/frame-differences.shtml" title="Cataloging the differences between the IM Master and Expert">IM frame differences</a></li>
-         <li><a href="/tech/89-geometry.shtml">1989 Ironman geometry</a></li>
-        </ul>
-       </li>
-    </ul>
-  </nav>
-
-  <h1>LA Times Article 10/1986</h1>
-   <h2>ON A ROLL: WSI, After a 1970 Start by Default, Has Been Picking Up Speed Ever Since</h2>
-    <p><a href="http://articles.latimes.com/1986/oct/07">October 07, 1986</a> | ALAN GOLDSTEIN | Times Staff Writer</p>
-    <p>Sixteen years ago, Mitchell Weiner--then an importer of odds and ends like plastic binders, locks and door stops--got a request from the British bicycle firm Raleigh to bring in 10-speeds from the Far East.</p>
-    <p>Eager for the new business, Weiner ordered thousands of bikes from a Japanese manufacturer through his firm, Western States Import. But, he says, once they were delivered to WSI's warehouse, Raleigh canceled its request, deciding instead to continue making its bicycles in England.</p>
-    <p>Timing Is Just Right</p>
-    <p>For Weiner, that meant it was time to get into the business of selling bikes. Luckily for him, that timing turned out to be superb--10-speeds were selling in record numbers to baby-boomers then in high school and college. WSI got off at a good clip, and two years after getting into the bicycle business by accident, it was selling nothing but bikes.</p>
-    <p>Now Newbury Park-based WSI's Centurion and Diamond Back labels are almost as familiar to serious cyclists as Raleigh. Centurion is especially known for its Ironman model, named for the combined swimming, cycling and running race held annually in Hawaii.</p>
-    <p>On top of that, over the last three years WSI has enjoyed its greatest sales growth with Diamond Back "fat-tire" bicycles, which are designed to navigate rocky hills, sand dunes and potholes.</p>
-    <p>None of the bikes actually is made by WSI. Ever since it entered the bicycle business, WSI has been strictly an importer and distributor.</p>
-    <p>"Boxes in, boxes out. Everything else is marketing," said WSI's executive vice president, Michael L. Bobrick.</p>
-    <p>That mode of operation seems to suit Weiner, a self-described "hands-off" chief executive who built his own personal computer using a kit and who would rather talk about databases than bicycles.</p>
-    <p>"I've never been a bicycle nut or anything, but the business has been good to me," said Weiner, 54, a Romanian immigrant who speaks with a light accent. Weiner bicycles occasionally on weekends, but usually gets around in a Mercedes-Benz sedan bearing the license plate BKE KING.</p>
-    <p>The privately held company has grown fast. Sales last year were $37 million, up 68% over the last three years. This year, the company expects sales to top $50 million, and Bobrick projects revenue of $65 million for 1987.</p>
-    <p>It's a small portion of the overall $2.3-billion-a-year bicycle market in the United States, but the company fares well in its medium to high-end niche: the $200 to $1,200 retail price range.</p>
-    <p>Competitors Use Same Parts</p>
-    <p>WSI's chief competitors are West Coast Cycle in Culver City, importers of Nishiki bicycles, as well as such manufacturers as Raleigh, Peugeot, Fuji, Cannondale and Bianchi.</p>
-    <p>Most of those companies rely on the same component manufacturers. For example, the same derailleurs, or gear-shifting mechanisms, from the Japanese firms Shimano and Sun Tour appear on dozens of bike models.</p>
-    <p>WSI, and even manufacturers like Fuji, simply choose which components they want on their models. Many savvy bike buyers decide which components they want, then choose the bikes offering them.</p>
-    <p>"Beyond choosing components and the right price points, selling your bicycles comes down to colors, decals and the tape on the handlebars," said Sidney Dunofsky, president of West Coast Cycle.</p>
-    <p>Consumers also have a choice of bicycle styles. After noticing the slowdown in sales of lightweight racers several years ago, most bike makers began selling fat-tire bikes.</p>
-    <p>"Everyone realized the fat-tire bike trend is part of a logical sequence," said Bobrick. "They're more comfortable, less wobbly and you sit upright, not hunched over. People just like them better."</p>
-    <p>Fat-tire bikes especially attracted older customers who are easily intimidated by racing bicycles with dropped handlebars and hard, narrow seats.</p>
-    <p>The market still has room to grow, industry officials say. Although fat-tire bikes are already popular on both coasts, they are only beginning to make inroads in the rest of the country, said Stuart Meyers, publisher of American Bicyclist, a New York-based magazine.</p>
-    <p>Fat-tire bikes have the back-to-basics look, and fall into three main categories. Mountain bikes, which often have the most sophisticated derailleurs, tend to be the most rugged, with springs under the seats and tougher frames.</p>
-    <p>Beach cruisers are popular with the surfing set and usually have no extra speeds. City bikes, also called all-purpose bikes, are a combination of the two, with frames designed to withstand crashing into curbs while having as many as 12 to 15 speeds to help conquer hills.</p>
-    <p>Triathlon models are increasingly popular. The Centurion Ironman is envied by others in the business, Dunofsky of West Coast Cycle said, because it has become associated with the Ironman race.</p>
-    <p>WSI promotes the bike with triathlon star Dave Scott, whose signature appears on the frame and who sometimes rides Centurion bikes in races.</p>
-    <p>The company also sells helmets, gloves and clothes, as well as equipment like brake systems, seat posts, wheel rims and kickstands imported from Europe and the Far East.</p>
-    <p>About half of WSI's 140 staffers work at company warehouses in Dallas, Denver and Dayton, N.J. Another 70 work at the headquarters and main warehouse in Newbury Park.</p>
-    <p>Weiner helped refine the software for the computer system that monitors the company's inventory. He says he is fascinated by computers, and likes to tell people that, although he goes to work only four days a week, he remains in touch via a personal computer in his Brentwood home.</p>
-    <p>At the office, Weiner listens to international shortwave radio to stay sharp in foreign languages. He first came to the United States when he was 16, but still likes to hear news from Eastern Europe, and often tunes into Radio Bucharest.</p>
-    <p>He says he picked the name Centurion for the first batch of bikes he sold--the ones that he originally ordered for Raleigh--because at the time he was reading a Joseph Wambaugh novel titled "The New Centurions." As it turned out, Raleigh eventually began making bikes in Taiwan and sold its U.S. operations to Huffy Corp.</p>
-    <p>Weiner, who owns 85% of WSI, plans a public offering of its stock in two years. Bobrick, 43, an MBA from UCLA, owns the remaining 15%.</p>
-    <p>Bobrick owned a West Los Angeles bike shop when he met Weiner in 1971 and sold some of the first Centurions. A year later, he gave up his shop to invest in WSI.</p>
-    <p> </p>
-    <p><em>This article is property of LA Times and is only posted here for prosperity sake. Vintage Centurion.com makes no claims intentionally or implied of ownership of the article. </em></p>
-    <p><em>Retrieved from Los Angeles Times Website 12/31/2016 at <a href="http://articles.latimes.com/1986-10-07/business/fi-4968_1_mitchell-weiner">http://articles.latimes.com/1986-10-07/business/fi-4968_1_mitchell-weiner</a></em></p>
- </body>
+<html lang="en">
+<head>
+<title>Centurion LA Times Article 10/1986</title>
+<meta charset="utf-8"/>
+<link href="../../styles.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<header>
+<h1><a href="../../index.html" title="Vintage Centurion Bicycles Home">
+<img alt="Vintage Centurion Bicycles Home" src="../../images/Vintage_centurion_logo1024_0.jpg"/></a></h1>
+</header>
+<nav>
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../about.shtml">About Us</a></li>
+<li><a href="../../models/models.shtml" title="Centurion Models">Models</a>
+<ul>
+<li><a href="../../models/competition/competition.shtml" title="Competition Model Centurion Bikes WSI">Competition Models</a>
+<ul>
+<li><a href="../../models/competition/professional.shtml">Professional (1973-78)</a></li>
+<li><a href="../../models/competition/semi-pro.shtml">Semi-Pro (1978-81)</a></li>
+<li><a href="../../models/competition/turbo.shtml" title="Turbo 83/84">Turbo (1983-84)</a></li>
+<li><a href="../../models/competition/trac.shtml" title="Trac">Trac (1983)</a></li>
+<li><a href="../../models/competition/comp-ta.shtml">Comp TA (1984)</a></li>
+<li><a href="../../models/competition/cinelli-equipe.shtml" title="1985 Centurion Cinelli Equipe">Cinelli Equipe (1985)</a></li>
+<li><a href="../../models/competition/prestige.shtml" title="Prestige">Prestige (1985,86,89)</a></li>
+<li><a href="../../models/competition/facet.shtml" title="Facet">Facet (1986)</a></li>
+<li><a href="../../models/competition/ironman/ironman.shtml" title="History and Information of Ironman Centurions">Ironman (1985-89)</a>
+<ul>
+<li><a href="../../models/competition/ironman/85-86.shtml" title="Ironman">Ironman 1985/1986</a></li>
+<li><a href="../../models/competition/ironman/87-89_master.shtml" title="Ironman Master models">Ironman Master (87-89)</a></li>
+<li><a href="../../models/competition/ironman/87-89_expert.shtml" title="Ironman Expert Models">Ironman Expert (87-89)</a></li>
+<li><a href="../../models/competition/ironman/87-womens_expert.shtml" title="Ironman Expert Models">Ironman Expert Womens (87)</a></li>
+<li><a href="../../models/competition/ironman/88_carbon.shtml" title="Ironman Carbon Model 1988">Ironman Carbon (1988)</a></li>
+</ul>
+</li>
+<li><a href="../../models/competition/elite.shtml">Elite RS/Super</a></li>
+<li><a href="../../models/competition/carbonr.shtml" title="Carbon R">Carbon R (1989)</a></li>
+</ul>
+</li>
+<li><a href="../../models/touring/touring.shtml" title="Touring Bikes">Touring Models</a>
+<ul>
+<li><a href="../../models/touring/protour.shtml">Pro Tour (1976-84)</a></li>
+<li><a href="../../models/touring/elite-gt.shtml">Elite GT (1984)</a></li>
+</ul>
+</li>
+<li><a href="../../models/sports-rec/sports-rec.shtml" title="Sports and Recreational Models">Sport Models</a>
+<ul>
+<li><a href="../../models/sports-rec/lemans.shtml" title="Lemans Models">LeMans (RS) (1970-1989)</a></li>
+<li><a href="../../models/sports-rec/accordo.shtml" title="1982-1989 Accordo">Accordo (RS) (1982-1989)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="../../literature/literature.shtml" title="Digital version of Printed Literature">Literature</a>
+<ul>
+<li><a href="../../literature/centurion-catalogs.shtml" title="Scans of original Centurion catalogs">Catalogs</a></li>
+<li><a href="../../literature/articles/articles.shtml" title="Articles pertaining to Centurion and Western States Imports aka WSI">Articles</a>
+<ul>
+<li><a href="../../literature/articles/la-times.shtml" title="LA times article on WSI and the Centurion Brand">LA Times Article 10/1986</a></li>
+</ul>
+</li>
+<li><a href="../../literature/ads.shtml">Advertisements</a></li>
+<li><a href="../../literature/reviews/reviews.shtml" title="Magazine Reviews">Reviews</a>
+<ul>
+<li><a href="../../literature/reviews/77-protour.shtml" title="Pro Tour Dec 1976 Bicycling Mag review">Bicycling 1977 ProTour</a></li>
+<li><a href="../../literature/reviews/cinelli-article.shtml">1985 Cinelli Equipe Article</a></li>
+<li><a href="../../literature/reviews/86-ironman-review.shtml">1986 Ironman Review</a></li>
+<li><a href="../../literature/reviews/87-expert-bicycling.shtml">1987 Expert Ironman Review</a></li>
+</ul>
+</li>
+<li><a href="../../literature/wsi-locations.shtml">WSI Locations</a></li>
+</ul>
+</li>
+<li><a href="../../years/years.shtml">What Year is it?</a>
+<ul>
+<li><a href="../../years/sn-deciphering.shtml" title="Serial Number Deciphering for build year">SN deciphering</a></li>
+<li><a href="../../years/modelbyyear.shtml" title="A break down of what models were offered during a particular year">Models By Year</a></li>
+<li><a href="../../years/modelbycolor.shtml" title="A break down of the colors offered each year">Model Years by Color</a></li>
+<li><a href="../../years/headbadges.shtml" title="Visual guide to the Centurion headbadge logos">HeadBadges</a></li>
+<li><a href="../../years/dt-logo.shtml" title="A historical tour of Centurion DownTube Logos">DownTube Logos</a></li>
+</ul>
+</li>
+<li><a href="../../tech/tech.shtml" title="Centurion Tech">Tech</a>
+<ul>
+<li><a href="../../tech/frame-differences.shtml" title="Cataloging the differences between the IM Master and Expert">IM frame differences</a></li>
+<li><a href="../../tech/89-geometry.shtml">1989 Ironman geometry</a></li>
+</ul>
+</li>
+</ul>
+</nav>
+<h1>LA Times Article 10/1986</h1>
+<h2>ON A ROLL: WSI, After a 1970 Start by Default, Has Been Picking Up Speed Ever Since</h2>
+<p><a href="http://articles.latimes.com/1986/oct/07">October 07, 1986</a> | ALAN GOLDSTEIN | Times Staff Writer</p>
+<p>Sixteen years ago, Mitchell Weiner--then an importer of odds and ends like plastic binders, locks and door stops--got a request from the British bicycle firm Raleigh to bring in 10-speeds from the Far East.</p>
+<p>Eager for the new business, Weiner ordered thousands of bikes from a Japanese manufacturer through his firm, Western States Import. But, he says, once they were delivered to WSI's warehouse, Raleigh canceled its request, deciding instead to continue making its bicycles in England.</p>
+<p>Timing Is Just Right</p>
+<p>For Weiner, that meant it was time to get into the business of selling bikes. Luckily for him, that timing turned out to be superb--10-speeds were selling in record numbers to baby-boomers then in high school and college. WSI got off at a good clip, and two years after getting into the bicycle business by accident, it was selling nothing but bikes.</p>
+<p>Now Newbury Park-based WSI's Centurion and Diamond Back labels are almost as familiar to serious cyclists as Raleigh. Centurion is especially known for its Ironman model, named for the combined swimming, cycling and running race held annually in Hawaii.</p>
+<p>On top of that, over the last three years WSI has enjoyed its greatest sales growth with Diamond Back "fat-tire" bicycles, which are designed to navigate rocky hills, sand dunes and potholes.</p>
+<p>None of the bikes actually is made by WSI. Ever since it entered the bicycle business, WSI has been strictly an importer and distributor.</p>
+<p>"Boxes in, boxes out. Everything else is marketing," said WSI's executive vice president, Michael L. Bobrick.</p>
+<p>That mode of operation seems to suit Weiner, a self-described "hands-off" chief executive who built his own personal computer using a kit and who would rather talk about databases than bicycles.</p>
+<p>"I've never been a bicycle nut or anything, but the business has been good to me," said Weiner, 54, a Romanian immigrant who speaks with a light accent. Weiner bicycles occasionally on weekends, but usually gets around in a Mercedes-Benz sedan bearing the license plate BKE KING.</p>
+<p>The privately held company has grown fast. Sales last year were $37 million, up 68% over the last three years. This year, the company expects sales to top $50 million, and Bobrick projects revenue of $65 million for 1987.</p>
+<p>It's a small portion of the overall $2.3-billion-a-year bicycle market in the United States, but the company fares well in its medium to high-end niche: the $200 to $1,200 retail price range.</p>
+<p>Competitors Use Same Parts</p>
+<p>WSI's chief competitors are West Coast Cycle in Culver City, importers of Nishiki bicycles, as well as such manufacturers as Raleigh, Peugeot, Fuji, Cannondale and Bianchi.</p>
+<p>Most of those companies rely on the same component manufacturers. For example, the same derailleurs, or gear-shifting mechanisms, from the Japanese firms Shimano and Sun Tour appear on dozens of bike models.</p>
+<p>WSI, and even manufacturers like Fuji, simply choose which components they want on their models. Many savvy bike buyers decide which components they want, then choose the bikes offering them.</p>
+<p>"Beyond choosing components and the right price points, selling your bicycles comes down to colors, decals and the tape on the handlebars," said Sidney Dunofsky, president of West Coast Cycle.</p>
+<p>Consumers also have a choice of bicycle styles. After noticing the slowdown in sales of lightweight racers several years ago, most bike makers began selling fat-tire bikes.</p>
+<p>"Everyone realized the fat-tire bike trend is part of a logical sequence," said Bobrick. "They're more comfortable, less wobbly and you sit upright, not hunched over. People just like them better."</p>
+<p>Fat-tire bikes especially attracted older customers who are easily intimidated by racing bicycles with dropped handlebars and hard, narrow seats.</p>
+<p>The market still has room to grow, industry officials say. Although fat-tire bikes are already popular on both coasts, they are only beginning to make inroads in the rest of the country, said Stuart Meyers, publisher of American Bicyclist, a New York-based magazine.</p>
+<p>Fat-tire bikes have the back-to-basics look, and fall into three main categories. Mountain bikes, which often have the most sophisticated derailleurs, tend to be the most rugged, with springs under the seats and tougher frames.</p>
+<p>Beach cruisers are popular with the surfing set and usually have no extra speeds. City bikes, also called all-purpose bikes, are a combination of the two, with frames designed to withstand crashing into curbs while having as many as 12 to 15 speeds to help conquer hills.</p>
+<p>Triathlon models are increasingly popular. The Centurion Ironman is envied by others in the business, Dunofsky of West Coast Cycle said, because it has become associated with the Ironman race.</p>
+<p>WSI promotes the bike with triathlon star Dave Scott, whose signature appears on the frame and who sometimes rides Centurion bikes in races.</p>
+<p>The company also sells helmets, gloves and clothes, as well as equipment like brake systems, seat posts, wheel rims and kickstands imported from Europe and the Far East.</p>
+<p>About half of WSI's 140 staffers work at company warehouses in Dallas, Denver and Dayton, N.J. Another 70 work at the headquarters and main warehouse in Newbury Park.</p>
+<p>Weiner helped refine the software for the computer system that monitors the company's inventory. He says he is fascinated by computers, and likes to tell people that, although he goes to work only four days a week, he remains in touch via a personal computer in his Brentwood home.</p>
+<p>At the office, Weiner listens to international shortwave radio to stay sharp in foreign languages. He first came to the United States when he was 16, but still likes to hear news from Eastern Europe, and often tunes into Radio Bucharest.</p>
+<p>He says he picked the name Centurion for the first batch of bikes he sold--the ones that he originally ordered for Raleigh--because at the time he was reading a Joseph Wambaugh novel titled "The New Centurions." As it turned out, Raleigh eventually began making bikes in Taiwan and sold its U.S. operations to Huffy Corp.</p>
+<p>Weiner, who owns 85% of WSI, plans a public offering of its stock in two years. Bobrick, 43, an MBA from UCLA, owns the remaining 15%.</p>
+<p>Bobrick owned a West Los Angeles bike shop when he met Weiner in 1971 and sold some of the first Centurions. A year later, he gave up his shop to invest in WSI.</p>
+<p> </p>
+<p><em>This article is property of LA Times and is only posted here for prosperity sake. Vintage Centurion.com makes no claims intentionally or implied of ownership of the article. </em></p>
+<p><em>Retrieved from Los Angeles Times Website 12/31/2016 at <a href="http://articles.latimes.com/1986-10-07/business/fi-4968_1_mitchell-weiner">http://articles.latimes.com/1986-10-07/business/fi-4968_1_mitchell-weiner</a></em></p>
+</body>
 </html>

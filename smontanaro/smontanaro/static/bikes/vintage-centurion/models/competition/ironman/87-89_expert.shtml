@@ -1,429 +1,424 @@
 <!DOCTYPE html>
-<html lang=en>
- <head>
-  <title>Centurion Ironman Expert (1987-1989)</title>
-  <meta charset="utf-8" />
-  <link href="/styles.css" rel="stylesheet" type="text/css" />
- </head>
- <body>
-    <header>
-   <h1><a href="/" title="Vintage Centurion Bicycles Home">
-    <img src="/images/Vintage_centurion_logo1024_0.jpg" alt="Vintage Centurion Bicycles Home" /></a></h1>
-  </header>
-   <nav>
-    <ul>
-     <li><a href="/">Home</a></li>
-     <li><a href="/about.shtml">About Us</a></li>
-     <li><a href="/models/models.shtml" title="Centurion Models">Models</a>
-      <ul>
-       <li><a href="/models/competition/competition.shtml" title="Competition Model Centurion Bikes WSI">Competition Models</a>
-        <ul>
-           <li><a href="/models/competition/professional.shtml">Professional (1973-78)</a></li>
-           <li><a href="/models/competition/semi-pro.shtml">Semi-Pro (1978-81)</a></li>
-           <li><a href="/models/competition/turbo.shtml" title="Turbo 83/84">Turbo (1983-84)</a></li>
-		   <li><a href="/models/competition/trac.shtml" title="Trac">Trac (1983)</a></li>
-           <li><a href="/models/competition/comp-ta.shtml">Comp TA (1984)</a></li>
-           <li><a href="/models/competition/cinelli-equipe.shtml" title="1985 Centurion Cinelli Equipe">Cinelli Equipe (1985)</a></li>
-           <li><a href="/models/competition/prestige.shtml" title="Prestige">Prestige (1985,86,89)</a></li>
-           <li><a href="/models/competition/facet.shtml" title="Facet">Facet (1986)</a></li>
-           <li><a href="/models/competition/ironman/ironman.shtml" title="History and Information of Ironman Centurions">Ironman (1985-89)</a>
-            <ul>
-             <li><a href="/models/competition/ironman/85-86.shtml" title="Ironman">Ironman 1985/1986</a></li>
-             <li><a href="/models/competition/ironman/87-89_master.shtml" title="Ironman Master models">Ironman Master (87-89)</a></li>
-             <li><a href="/models/competition/ironman/87-89_expert.shtml" title="Ironman Expert Models">Ironman Expert (87-89)</a></li>
-			 <li><a href="/models/competition/ironman/87-womens_expert.shtml" title="Ironman Expert Models">Ironman Expert Womens (87)</a></li>
-             <li><a href="/models/competition/ironman/88_carbon.shtml" title="Ironman Carbon Model 1988">Ironman Carbon (1988)</a></li>
-            </ul>
-           </li>
-           <li><a href="/models/competition/elite.shtml">Elite RS/Super</a></li>
-		   <li><a href="/models/competition/carbonr.shtml" title="Carbon R">Carbon R (1989)</a></li>
-          </ul>
-         </li>
-         <li><a href="/models/touring/touring.shtml" title="Touring Bikes">Touring Models</a>
-          <ul>
-           <li><a href="/models/touring/protour.shtml">Pro Tour (1976-84)</a></li>
-           <li><a href="/models/touring/elite-gt.shtml">Elite GT (1984)</a></li>
-          </ul>
-         </li>
-         <li><a href="/models/sports-rec/sports-rec.shtml" title="Sports and Recreational Models">Sport Models</a>
-          <ul>
-           <li><a href="/models/sports-rec/lemans.shtml" title="Lemans Models">LeMans (RS) (1970-1989)</a></li>
-           <li><a href="/models/sports-rec/accordo.shtml" title="1982-1989 Accordo">Accordo (RS) (1982-1989)</a></li>
-          </ul>
-        </li>
-        </ul>
-       </li>
-       <li><a href="/literature/literature.shtml" title="Digital version of Printed Literature">Literature</a>
-        <ul>
-         <li><a href="/literature/centurion-catalogs.shtml" title="Scans of original Centurion catalogs">Catalogs</a></li>
-         <li><a href="/literature/articles/articles.shtml" title="Articles pertaining to Centurion and Western States Imports aka WSI">Articles</a>
-          <ul>
-           <li><a href="/literature/articles/la-times.shtml" title="LA times article on WSI and the Centurion Brand">LA Times Article 10/1986</a></li>
-          </ul>
-         </li>
-         <li><a href="/literature/ads.shtml">Advertisements</a></li>
-         <li><a href="/literature/reviews/reviews.shtml" title="Magazine Reviews">Reviews</a>
-          <ul>
-           <li><a href="/literature/reviews/77-protour.shtml" title="Pro Tour Dec 1976 Bicycling Mag review">Bicycling 1977 ProTour</a></li>
-           <li><a href="/literature/reviews/cinelli-article.shtml">1985 Cinelli Equipe Article</a></li>
-           <li><a href="/literature/reviews/86-ironman-review.shtml">1986 Ironman Review</a></li>
-           <li><a href="/literature/reviews/87-expert-bicycling.shtml">1987 Expert Ironman Review</a></li>
-          </ul>
-         </li>
-         <li><a href="/literature/wsi-locations.shtml">WSI Locations</a></li>
-        </ul>
-       </li>
-       <li><a href="/years/years.shtml">What Year is it?</a>
-        <ul>
-         <li><a href="/years/sn-deciphering.shtml" title="Serial Number Deciphering for build year">SN deciphering</a></li>
-         <li><a href="/years/modelbyyear.shtml" title="A break down of what models were offered during a particular year">Models By Year</a></li>
-         <li><a href="/years/modelbycolor.shtml" title="A break down of the colors offered each year">Model Years by Color</a></li>
-         <li><a href="/years/headbadges.shtml" title="Visual guide to the Centurion headbadge logos">HeadBadges</a></li>
-         <li><a href="/years/dt-logo.shtml" title="A historical tour of Centurion DownTube Logos">DownTube Logos</a></li>
-        </ul>
-       </li>
-       <li><a href="/tech/tech.shtml" title="Centurion Tech">Tech</a>
-        <ul>
-         <li><a href="/tech/frame-differences.shtml" title="Cataloging the differences between the IM Master and Expert">IM frame differences</a></li>
-         <li><a href="/tech/89-geometry.shtml">1989 Ironman geometry</a></li>
-        </ul>
-       </li>
-    </ul>
-  </nav>
-
-  <h1>Ironman Expert Dave Scott (1987-1989)</h1>
-   <p>Starting in 1987 The Dave Scott Ironman was offered in two models the Expert and the Master. The Master retained the Shimano 600 Componentry and the Expert was the cheaper version of the Ironman, and it featured the new Shimano 105 components which was a redesigned grouppo from its predecessor 105 "Golden Arrow". 105 Brakes with SLR was favored at that time over the more expensive 600 since it featured the Shimano SLR system, 600 would get SLR a year later in 1988</p>
-   <p>It is unclear but in 1989 Centurion dropped the use of Shimano 105 and the expert was outfitted with Suntour GPX componentry. As with the rest of the centurion line 1989 would be the last year.  </p>
-   <p>The sloped fork crown of the Master was replaced by a unicrown fork. the Copper Arayas were replaced with the  Wolber Super Champion Alpines until 1987  and ultimately becoming the Araya CTL 370 in 1988 and 1989. The expert continued the famous ironman color of red/white, and for 1987 only it also came in the famous/infamous Magenta/Yellow "Miami Vice" theme. </p>
-   <p>1988 Brought on a couple changes but mainly was the Paint schemes that changed. The paint scheme has changed from contrasting head/Seat tubes to a fade paint job that the outside colors are the secondary and the primary color is in the middle.</p>
-   <p>The final year of the expert, in 1989 it received a grouppo change, Suntour's new grouppo GPX was introduced and was utilized on the 1989 Expert. also in this year they utilized  a solid color for the first time on the Ironman's with the expert being a Solid Black color scheme.</p>
-      <p></p>
-	      <p></p>
-  <h4>1987</h4>
-   <img alt="" src="images/1987 Expert.jpg" />
-   <img alt="" src="images/1987 Expert2.jpg" />
-    <p></p>
-   <img alt="1987 Centurion Ironman Expert Magenta/Yellow " src="images/1987_expert-mv.jpg" />
-   <p>1987 Ironman Expert Magenta/Yellow (source: fleslider)</p>
-       <p></p>
-	   <img alt="1987 Centurion Ironman Expert Red/White " src="images/1987_expert_red.jpg" />
-   <p>1987 Ironman Expert Red/White (source:Unknown)</p>
-       <p></p>
-   <p>Specs:</p>
+<html lang="en">
+<head>
+<title>Centurion Ironman Expert (1987-1989)</title>
+<meta charset="utf-8"/>
+<link href="../../../styles.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<header>
+<h1><a href="../../../index.html" title="Vintage Centurion Bicycles Home">
+<img alt="Vintage Centurion Bicycles Home" src="../../../images/Vintage_centurion_logo1024_0.jpg"/></a></h1>
+</header>
+<nav>
+<ul>
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../about.shtml">About Us</a></li>
+<li><a href="../../../models/models.shtml" title="Centurion Models">Models</a>
+<ul>
+<li><a href="../../../models/competition/competition.shtml" title="Competition Model Centurion Bikes WSI">Competition Models</a>
+<ul>
+<li><a href="../../../models/competition/professional.shtml">Professional (1973-78)</a></li>
+<li><a href="../../../models/competition/semi-pro.shtml">Semi-Pro (1978-81)</a></li>
+<li><a href="../../../models/competition/turbo.shtml" title="Turbo 83/84">Turbo (1983-84)</a></li>
+<li><a href="../../../models/competition/trac.shtml" title="Trac">Trac (1983)</a></li>
+<li><a href="../../../models/competition/comp-ta.shtml">Comp TA (1984)</a></li>
+<li><a href="../../../models/competition/cinelli-equipe.shtml" title="1985 Centurion Cinelli Equipe">Cinelli Equipe (1985)</a></li>
+<li><a href="../../../models/competition/prestige.shtml" title="Prestige">Prestige (1985,86,89)</a></li>
+<li><a href="../../../models/competition/facet.shtml" title="Facet">Facet (1986)</a></li>
+<li><a href="../../../models/competition/ironman/ironman.shtml" title="History and Information of Ironman Centurions">Ironman (1985-89)</a>
+<ul>
+<li><a href="../../../models/competition/ironman/85-86.shtml" title="Ironman">Ironman 1985/1986</a></li>
+<li><a href="../../../models/competition/ironman/87-89_master.shtml" title="Ironman Master models">Ironman Master (87-89)</a></li>
+<li><a href="../../../models/competition/ironman/87-89_expert.shtml" title="Ironman Expert Models">Ironman Expert (87-89)</a></li>
+<li><a href="../../../models/competition/ironman/87-womens_expert.shtml" title="Ironman Expert Models">Ironman Expert Womens (87)</a></li>
+<li><a href="../../../models/competition/ironman/88_carbon.shtml" title="Ironman Carbon Model 1988">Ironman Carbon (1988)</a></li>
+</ul>
+</li>
+<li><a href="../../../models/competition/elite.shtml">Elite RS/Super</a></li>
+<li><a href="../../../models/competition/carbonr.shtml" title="Carbon R">Carbon R (1989)</a></li>
+</ul>
+</li>
+<li><a href="../../../models/touring/touring.shtml" title="Touring Bikes">Touring Models</a>
+<ul>
+<li><a href="../../../models/touring/protour.shtml">Pro Tour (1976-84)</a></li>
+<li><a href="../../../models/touring/elite-gt.shtml">Elite GT (1984)</a></li>
+</ul>
+</li>
+<li><a href="../../../models/sports-rec/sports-rec.shtml" title="Sports and Recreational Models">Sport Models</a>
+<ul>
+<li><a href="../../../models/sports-rec/lemans.shtml" title="Lemans Models">LeMans (RS) (1970-1989)</a></li>
+<li><a href="../../../models/sports-rec/accordo.shtml" title="1982-1989 Accordo">Accordo (RS) (1982-1989)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="../../../literature/literature.shtml" title="Digital version of Printed Literature">Literature</a>
+<ul>
+<li><a href="../../../literature/centurion-catalogs.shtml" title="Scans of original Centurion catalogs">Catalogs</a></li>
+<li><a href="../../../literature/articles/articles.shtml" title="Articles pertaining to Centurion and Western States Imports aka WSI">Articles</a>
+<ul>
+<li><a href="../../../literature/articles/la-times.shtml" title="LA times article on WSI and the Centurion Brand">LA Times Article 10/1986</a></li>
+</ul>
+</li>
+<li><a href="../../../literature/ads.shtml">Advertisements</a></li>
+<li><a href="../../../literature/reviews/reviews.shtml" title="Magazine Reviews">Reviews</a>
+<ul>
+<li><a href="../../../literature/reviews/77-protour.shtml" title="Pro Tour Dec 1976 Bicycling Mag review">Bicycling 1977 ProTour</a></li>
+<li><a href="../../../literature/reviews/cinelli-article.shtml">1985 Cinelli Equipe Article</a></li>
+<li><a href="../../../literature/reviews/86-ironman-review.shtml">1986 Ironman Review</a></li>
+<li><a href="../../../literature/reviews/87-expert-bicycling.shtml">1987 Expert Ironman Review</a></li>
+</ul>
+</li>
+<li><a href="../../../literature/wsi-locations.shtml">WSI Locations</a></li>
+</ul>
+</li>
+<li><a href="../../../years/years.shtml">What Year is it?</a>
+<ul>
+<li><a href="../../../years/sn-deciphering.shtml" title="Serial Number Deciphering for build year">SN deciphering</a></li>
+<li><a href="../../../years/modelbyyear.shtml" title="A break down of what models were offered during a particular year">Models By Year</a></li>
+<li><a href="../../../years/modelbycolor.shtml" title="A break down of the colors offered each year">Model Years by Color</a></li>
+<li><a href="../../../years/headbadges.shtml" title="Visual guide to the Centurion headbadge logos">HeadBadges</a></li>
+<li><a href="../../../years/dt-logo.shtml" title="A historical tour of Centurion DownTube Logos">DownTube Logos</a></li>
+</ul>
+</li>
+<li><a href="../../../tech/tech.shtml" title="Centurion Tech">Tech</a>
+<ul>
+<li><a href="../../../tech/frame-differences.shtml" title="Cataloging the differences between the IM Master and Expert">IM frame differences</a></li>
+<li><a href="../../../tech/89-geometry.shtml">1989 Ironman geometry</a></li>
+</ul>
+</li>
+</ul>
+</nav>
+<h1>Ironman Expert Dave Scott (1987-1989)</h1>
+<p>Starting in 1987 The Dave Scott Ironman was offered in two models the Expert and the Master. The Master retained the Shimano 600 Componentry and the Expert was the cheaper version of the Ironman, and it featured the new Shimano 105 components which was a redesigned grouppo from its predecessor 105 "Golden Arrow". 105 Brakes with SLR was favored at that time over the more expensive 600 since it featured the Shimano SLR system, 600 would get SLR a year later in 1988</p>
+<p>It is unclear but in 1989 Centurion dropped the use of Shimano 105 and the expert was outfitted with Suntour GPX componentry. As with the rest of the centurion line 1989 would be the last year.  </p>
+<p>The sloped fork crown of the Master was replaced by a unicrown fork. the Copper Arayas were replaced with the  Wolber Super Champion Alpines until 1987  and ultimately becoming the Araya CTL 370 in 1988 and 1989. The expert continued the famous ironman color of red/white, and for 1987 only it also came in the famous/infamous Magenta/Yellow "Miami Vice" theme. </p>
+<p>1988 Brought on a couple changes but mainly was the Paint schemes that changed. The paint scheme has changed from contrasting head/Seat tubes to a fade paint job that the outside colors are the secondary and the primary color is in the middle.</p>
+<p>The final year of the expert, in 1989 it received a grouppo change, Suntour's new grouppo GPX was introduced and was utilized on the 1989 Expert. also in this year they utilized  a solid color for the first time on the Ironman's with the expert being a Solid Black color scheme.</p>
+<p></p>
+<p></p>
+<h4>1987</h4>
+<img alt="" src="images/1987 Expert.jpg"/>
+<img alt="" src="images/1987 Expert2.jpg"/>
+<p></p>
+<img alt="1987 Centurion Ironman Expert Magenta/Yellow " src="images/1987_expert-mv.jpg"/>
+<p>1987 Ironman Expert Magenta/Yellow (source: fleslider)</p>
+<p></p>
+<img alt="1987 Centurion Ironman Expert Red/White " src="images/1987_expert_red.jpg"/>
+<p>1987 Ironman Expert Red/White (source:Unknown)</p>
+<p></p>
+<p>Specs:</p>
 <table>
-    <tbody>
-     <tr>    
+<tbody>
+<tr>
 <td>Frame</td>
-     <td>Frame - Tange #1 Steel, Lugged</td>
- </tr>
-     <tr>
-      <td>Fork</td>
+<td>Frame - Tange #1 Steel, Lugged</td>
+</tr>
+<tr>
+<td>Fork</td>
 <td>Tange  unicrown (TIG-welded)</td>
 </tr>
-     <tr>
-      <td>General Groupset Notes</td>
-     <td>Shimano 105 (1050 Series)</td>
- </tr>
-     <tr>
-     <td>Hubs</td>
+<tr>
+<td>General Groupset Notes</td>
+<td>Shimano 105 (1050 Series)</td>
+</tr>
+<tr>
+<td>Hubs</td>
 <td>Shimano 105 126mm QR,(HB-1050)32f/32r except 62/64cm frames = 36f/36r</td>
- </tr>
-     <tr>     
+</tr>
+<tr>
 <td>Rims/Spokes</td>
 <td>Wolber Super Champion Alpine / 14g</td>
- </tr>
-     <tr>
-     <td>Tires</td>
+</tr>
+<tr>
+<td>Tires</td>
 <td>Panaracer Tecnova 700c X 20</td>
- </tr>
-     <tr>     
-<td>Front Derailleur</td> 
+</tr>
+<tr>
+<td>Front Derailleur</td>
 <td>Shimano 105 (FD-1050)</td>
- </tr>
-     <tr>     
-<td>Rear Derailleur</td> 
+</tr>
+<tr>
+<td>Rear Derailleur</td>
 <td>Shimano 105 6 Speed SIS (RD-1050)</td>
- </tr>
-     <tr>     
+</tr>
+<tr>
 <td>Shifters</td>
 <td>Shimano 105 F(Friction)/R(6 Speed SIS) (SL-1050)</td>
- </tr>
-     <tr>     
-<td>Chain</td> 
+</tr>
+<tr>
+<td>Chain</td>
 <td>Shimano Uniglide</td>
- </tr>
-     <tr>     
+</tr>
+<tr>
 <td>Cranks</td>
 <td>Shimano 105 Biopace 52/42, 130mm Bolt spacing (FC-1050)</td>
- </tr>
-     <tr>     
+</tr>
+<tr>
 <td>Freewheel</td>
 <td>Shimano MF-Z012 6-Speed13-24t</td>
- </tr>
-     <tr>     
+</tr>
+<tr>
 <td>Pedals</td>
 <td>Shimano 105 Toe Clips with White Straps (PD-1050)</td>
- </tr>
-     <tr>     
+</tr>
+<tr>
 <td>Headset</td>
 <td>Shimano 105 (HS-1050)</td>
- </tr>
-     <tr>     
-<td>Seatpost</td> 
+</tr>
+<tr>
+<td>Seatpost</td>
 <td>Sugino SP-KCL 27.0 mm Graduated Scale (inches)</td>
- </tr>
-     <tr>     
+</tr>
+<tr>
 <td>Saddle</td>
 <td>Vetta Mundial Race Genuine Suede (included white lycra cover)</td>
- </tr>
-     <tr>     
+</tr>
+<tr>
 <td>Bar/Stem </td>
 <td>Nitto Olympiade 40cm / Nitto 90mm Stem</td>
- </tr>
-     <tr>     
-<td>Brake Levers</td> 
+</tr>
+<tr>
+<td>Brake Levers</td>
 <td>Shimano 105 SLR w/AERO Brake Levers (BL-1051)</td>
- </tr>
-     <tr>     
+</tr>
+<tr>
 <td>Brakes </td>
 <td>Shimano 105 SLR Calipers (BR-1050)</td>
- </tr>
-     <tr>     
+</tr>
+<tr>
 <td>Colors </td>
 <td>Magenta/Yellow or Guards Red/White</td>
- </tr>
-     <tr>     
-<td>Sizes</td>
- <td>48cm - 64cm(2cm Increments)</td>
- </tr>
-     <tr>     
-<td>Weight</td>
-<td>(56CM) 22.55 lbs , Frame- 4.55 lbs, Fork-1.50 lbs</td>
- </tr>
-     <tr>     
-<td>MSRP </td>
-<td>$520.00 USD</td>
-  </tr>   
-</tbody>
-   </table>
-	    <p></p>
-		    <p></p>
-   <h4>1988:</h4>
-   <img alt="" src="images/1988 Expert.jpg" />
-   <img alt="1988 Expert Ironman Marine Green / White" src="images/1988_master-aqua.jpg" />
-   <p>1988 Expert Bright Marine Green/White (source unknown)</p>
-   <img alt="" src="images/1988_expert-red.jpg" />
-   <p>1988 Expert, Red/White (source Craigslist)</p>
-       <p></p>
-   <p>The Experts were "straight" fades, with one color blending into another</p>
- 
-<table>
-    <tbody>
-     <tr>    
-<td>Frame</td>
-     <td>Frame - Tange #1 Steel, Lugged</td>
- </tr>
-     <tr>
-      <td>Fork</td>
-<td>Tange unicrown (TIG-welded)</td>
 </tr>
-     <tr>
-      <td>General Groupset Notes</td>
-     <td>Shimano 105 (1050 Series)</td>
- </tr>
-     <tr>
-     <td>Hubs</td>
-<td>Shimano 105 126mm QR, (HB-1050)(32h-48-60cm)(36h-62,64cm)</td>
- </tr>
-     <tr>     
-<td>Rims/Spokes</td>
-<td>Wolber Super Champion Alpine / 14g</td>
- </tr>
-     <tr>
-     <td>Tires</td>
-<td>Panaracer Tecnova 700c X 20</td>
- </tr>
-     <tr>     
-<td>Front Derailleur</td> 
-<td>Shimano 105 (FD-1050)</td>
- </tr>
-     <tr>     
-<td>Rear Derailleur</td> 
-<td>Shimano 105 6 Speed SIS (RD-1050)</td>
- </tr>
-     <tr>     
-<td>Shifters</td>
-<td>Shimano 105 F(Friction)/R(6 Speed SIS) (SL-1050)</td>
- </tr>
-     <tr>     
-<td>Chain</td> 
-<td>Shimano Uniglide</td>
- </tr>
-     <tr>     
-<td>Cranks</td>
-<td>Shimano 105 Biopace 52/42, 130mm Bolt spacing (FC-1050)</td>
- </tr>
-     <tr>     
-<td>Freewheel</td>
-<td>Shimano MF-Z012 6-Speed13-24t</td>
- </tr>
-     <tr>     
-<td>Pedals</td>
-<td>Shimano 105 Toe Clips with White Straps (PD-1050)</td>
- </tr>
-     <tr>     
-<td>Headset</td>
-<td>Shimano 105 (HS-1050)</td>
- </tr>
-     <tr>     
-<td>Seatpost</td> 
-<td>Sugino SP-KCL 27.0 mm</td>
- </tr>
-     <tr>     
-<td>Saddle</td>
-<td>Vetta Suede</td>
- </tr>
-     <tr>     
-<td>Bar/Stem </td>
-<td>Nitto B115 Olympiade / Nitto Young 9cm Stem</td>
- </tr>
-     <tr>     
-<td>Brake Levers</td> 
-<td>Shimano 105 SLR w/AERO Brake Levers (BL-1051)</td>
- </tr>
-     <tr>     
-<td>Brakes </td>
-<td>Shimano 105 SLR Calipers (BR-1050)</td>
- </tr>
-     <tr>     
-<td>Colors </td>
-<td>Guards Red/White, Marine Green/White</td>
- </tr>
-     <tr>     
-<td>Sizes</td>
- <td>48cm - 64cm(2cm Increments)</td>
- </tr>
-     <tr>     
-<td>Weight</td>
-<td>(56CM) 22.55 lbs , Frame- 4.55 lbs, Fork-1.50 lbs</td>
- </tr>
-     <tr>     
-<td>MSRP </td>
-<td>$520.00 USD</td>
-  </tr>   
-</tbody>
-   </table>
-
-
-
-	    <p></p>
-		    <p></p>
-   <h4>1989:</h4>
-   <img alt="" src="images/1989 Expert.jpg" />
-   <img alt="1989 Centurion Ironman Expert Black" src="images/1989_expert_blk.jpg" />
-   <p>1989 Ironman Expert Black  (source: fleslider)</p>
-   <img alt="1989 Centurion Ironman Expert Smoke blue" src="images/1989_expert-smoke.jpg" />
-   <p>1989 Ironman Expert Blue Smoke/White (source: unknown)</p>
-       <p></p>
-   <p>Specs:</p>
-<table>
-    <tbody>
-     <tr>
-	<td>Frame</td>
-<td>Tange #1 Steel, Lugged</td>
-</tr>
-     <tr>     
-<td>Gruppo</td>
-<td>Suntour GPX 7spd.</td>
-</tr>
-     <tr>
-	 <td>Brake Levers</td>
-<td>Suntour GPX (BL-GP00) Note*</td>
-</tr>
-     <tr>
-     <td>Brakes</td>
-<td>Suntour GPX (BA-GP00-S)</td>
-</tr>
-     <tr>     
-<td>Bottom Bracket</td>
-<td>Tange/Kajita w/Lip Seals English/ISO: 1.370 x 24</td>
-</tr>
-     <tr>     
-<td>Chain</td>
-<td>SunTour GPX Accushift</td>
-</tr>
-     <tr>     
-<td>Cranks</td>
-<td>Suntour GPX 52/42t (CW-GP00)</td>
-</tr>
-     <tr>     
-<td>Derailleur R</td>
-<td>Suntour GPX  (RD-GP00 SSB)</td>
-</tr>
-     <tr>     
-<td>Derailleur F</td>
-<td>Suntour GPX 28.6mm Clamp, Bottom Pull FD-GP00 SSH</td>
-</tr>
-     <tr>     
-<td>Freewheel</td>
-<td>Suntour 7 Speed 13-14-15-17-19-21-24t (FW-AL00-U7)</td>
-</tr>
-     <tr>     
-<td>Handlebars</td>
-<td>Kusuki Winpista w/Padded Vinyl tape</td>
-</tr>
-     <tr>     
-<td>Headset</td>
-<td>Tange Levin CD</td>
-</tr>
-     <tr>     
-<td>Hubs</td>
-<td>36 hole Suntour GPX hubs. Freewheel (HB-GP00-F/R)</td>
-</tr>
-     <tr>     
-<td>Pedals</td>
-<td>Sampson/SR Clipless</td>
-</tr>
-     <tr>     
-<td>Rims/Spokes</td>
-<td>Araya CTL-370  w/14g</td>
-</tr>
-     <tr>     
-<td>Stem</td>
-<td>SR Custom</td>
-</tr>
-     <tr>     
-<td>Seatpost</td>
-<td>SR LaPrade 27.2 mm L=220mm</td>
-</tr>
-     <tr>     
-<td>Tires</td>
-<td>Panaracer Tecnova II Clincher 700cx18, 135psi</td>
-</tr>
-     <tr>     
-<td>Colors</td>
-<td>Solid Black or Smokey Blue/White</td>
-</tr>
-     <tr>     
+<tr>
 <td>Sizes</td>
 <td>48cm - 64cm(2cm Increments)</td>
 </tr>
-     <tr>     
+<tr>
 <td>Weight</td>
-     <td>(60CM) 23 lbs 1/4oz , Frame-4 lbs 13-1/2oz, Fork-1lb 10-3/4oz</td>
+<td>(56CM) 22.55 lbs , Frame- 4.55 lbs, Fork-1.50 lbs</td>
 </tr>
-     <tr>     
+<tr>
+<td>MSRP </td>
+<td>$520.00 USD</td>
+</tr>
+</tbody>
+</table>
+<p></p>
+<p></p>
+<h4>1988:</h4>
+<img alt="" src="images/1988 Expert.jpg"/>
+<img alt="1988 Expert Ironman Marine Green / White" src="images/1988_master-aqua.jpg"/>
+<p>1988 Expert Bright Marine Green/White (source unknown)</p>
+<img alt="" src="images/1988_expert-red.jpg"/>
+<p>1988 Expert, Red/White (source Craigslist)</p>
+<p></p>
+<p>The Experts were "straight" fades, with one color blending into another</p>
+<table>
+<tbody>
+<tr>
+<td>Frame</td>
+<td>Frame - Tange #1 Steel, Lugged</td>
+</tr>
+<tr>
+<td>Fork</td>
+<td>Tange unicrown (TIG-welded)</td>
+</tr>
+<tr>
+<td>General Groupset Notes</td>
+<td>Shimano 105 (1050 Series)</td>
+</tr>
+<tr>
+<td>Hubs</td>
+<td>Shimano 105 126mm QR, (HB-1050)(32h-48-60cm)(36h-62,64cm)</td>
+</tr>
+<tr>
+<td>Rims/Spokes</td>
+<td>Wolber Super Champion Alpine / 14g</td>
+</tr>
+<tr>
+<td>Tires</td>
+<td>Panaracer Tecnova 700c X 20</td>
+</tr>
+<tr>
+<td>Front Derailleur</td>
+<td>Shimano 105 (FD-1050)</td>
+</tr>
+<tr>
+<td>Rear Derailleur</td>
+<td>Shimano 105 6 Speed SIS (RD-1050)</td>
+</tr>
+<tr>
+<td>Shifters</td>
+<td>Shimano 105 F(Friction)/R(6 Speed SIS) (SL-1050)</td>
+</tr>
+<tr>
+<td>Chain</td>
+<td>Shimano Uniglide</td>
+</tr>
+<tr>
+<td>Cranks</td>
+<td>Shimano 105 Biopace 52/42, 130mm Bolt spacing (FC-1050)</td>
+</tr>
+<tr>
+<td>Freewheel</td>
+<td>Shimano MF-Z012 6-Speed13-24t</td>
+</tr>
+<tr>
+<td>Pedals</td>
+<td>Shimano 105 Toe Clips with White Straps (PD-1050)</td>
+</tr>
+<tr>
+<td>Headset</td>
+<td>Shimano 105 (HS-1050)</td>
+</tr>
+<tr>
+<td>Seatpost</td>
+<td>Sugino SP-KCL 27.0 mm</td>
+</tr>
+<tr>
+<td>Saddle</td>
+<td>Vetta Suede</td>
+</tr>
+<tr>
+<td>Bar/Stem </td>
+<td>Nitto B115 Olympiade / Nitto Young 9cm Stem</td>
+</tr>
+<tr>
+<td>Brake Levers</td>
+<td>Shimano 105 SLR w/AERO Brake Levers (BL-1051)</td>
+</tr>
+<tr>
+<td>Brakes </td>
+<td>Shimano 105 SLR Calipers (BR-1050)</td>
+</tr>
+<tr>
+<td>Colors </td>
+<td>Guards Red/White, Marine Green/White</td>
+</tr>
+<tr>
+<td>Sizes</td>
+<td>48cm - 64cm(2cm Increments)</td>
+</tr>
+<tr>
+<td>Weight</td>
+<td>(56CM) 22.55 lbs , Frame- 4.55 lbs, Fork-1.50 lbs</td>
+</tr>
+<tr>
+<td>MSRP </td>
+<td>$520.00 USD</td>
+</tr>
+</tbody>
+</table>
+<p></p>
+<p></p>
+<h4>1989:</h4>
+<img alt="" src="images/1989 Expert.jpg"/>
+<img alt="1989 Centurion Ironman Expert Black" src="images/1989_expert_blk.jpg"/>
+<p>1989 Ironman Expert Black  (source: fleslider)</p>
+<img alt="1989 Centurion Ironman Expert Smoke blue" src="images/1989_expert-smoke.jpg"/>
+<p>1989 Ironman Expert Blue Smoke/White (source: unknown)</p>
+<p></p>
+<p>Specs:</p>
+<table>
+<tbody>
+<tr>
+<td>Frame</td>
+<td>Tange #1 Steel, Lugged</td>
+</tr>
+<tr>
+<td>Gruppo</td>
+<td>Suntour GPX 7spd.</td>
+</tr>
+<tr>
+<td>Brake Levers</td>
+<td>Suntour GPX (BL-GP00) Note*</td>
+</tr>
+<tr>
+<td>Brakes</td>
+<td>Suntour GPX (BA-GP00-S)</td>
+</tr>
+<tr>
+<td>Bottom Bracket</td>
+<td>Tange/Kajita w/Lip Seals English/ISO: 1.370 x 24</td>
+</tr>
+<tr>
+<td>Chain</td>
+<td>SunTour GPX Accushift</td>
+</tr>
+<tr>
+<td>Cranks</td>
+<td>Suntour GPX 52/42t (CW-GP00)</td>
+</tr>
+<tr>
+<td>Derailleur R</td>
+<td>Suntour GPX  (RD-GP00 SSB)</td>
+</tr>
+<tr>
+<td>Derailleur F</td>
+<td>Suntour GPX 28.6mm Clamp, Bottom Pull FD-GP00 SSH</td>
+</tr>
+<tr>
+<td>Freewheel</td>
+<td>Suntour 7 Speed 13-14-15-17-19-21-24t (FW-AL00-U7)</td>
+</tr>
+<tr>
+<td>Handlebars</td>
+<td>Kusuki Winpista w/Padded Vinyl tape</td>
+</tr>
+<tr>
+<td>Headset</td>
+<td>Tange Levin CD</td>
+</tr>
+<tr>
+<td>Hubs</td>
+<td>36 hole Suntour GPX hubs. Freewheel (HB-GP00-F/R)</td>
+</tr>
+<tr>
+<td>Pedals</td>
+<td>Sampson/SR Clipless</td>
+</tr>
+<tr>
+<td>Rims/Spokes</td>
+<td>Araya CTL-370  w/14g</td>
+</tr>
+<tr>
+<td>Stem</td>
+<td>SR Custom</td>
+</tr>
+<tr>
+<td>Seatpost</td>
+<td>SR LaPrade 27.2 mm L=220mm</td>
+</tr>
+<tr>
+<td>Tires</td>
+<td>Panaracer Tecnova II Clincher 700cx18, 135psi</td>
+</tr>
+<tr>
+<td>Colors</td>
+<td>Solid Black or Smokey Blue/White</td>
+</tr>
+<tr>
+<td>Sizes</td>
+<td>48cm - 64cm(2cm Increments)</td>
+</tr>
+<tr>
+<td>Weight</td>
+<td>(60CM) 23 lbs 1/4oz , Frame-4 lbs 13-1/2oz, Fork-1lb 10-3/4oz</td>
+</tr>
+<tr>
 <td>MSRP</td>
 <td>$650.00 USD</td>
 </tr>
-    </tbody>
-   </table>
-     <p></p>
-   <p>* Index Mode:23T Max, Friction Mode: 26T Max  (max difference 13T), total capacity 26t</p>
-    <p></p>
-	 <img alt="1989 Expert Specs" src="images/89 Expert.jpg" />
-   <p>Source Unknown</p>
-       <p></p>
-   <p>2020 Vintage-Centurion.com</p> 
- </body>
+</tbody>
+</table>
+<p></p>
+<p>* Index Mode:23T Max, Friction Mode: 26T Max  (max difference 13T), total capacity 26t</p>
+<p></p>
+<img alt="1989 Expert Specs" src="images/89 Expert.jpg"/>
+<p>Source Unknown</p>
+<p></p>
+<p>2020 Vintage-Centurion.com</p>
+</body>
 </html>
