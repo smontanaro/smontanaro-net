@@ -780,3 +780,17 @@ class GooglePhotoParser(html.parser.HTMLParser):
                 self.ref = ref.replace(mat.group(1), "")
                 self.width = int(mat.group(2))
                 self.height = int(mat.group(3))
+
+class MyHTMLParser(html.parser.HTMLParser):
+    "parse and print links"
+    def handle_starttag(self, tag, attrs):
+        if tag == "a":
+            attr = "href"
+        elif tag == "img":
+            attr = "src"
+        else:
+            return
+        ref = dict(attrs)[attr]
+        if (ref and ref[0:6] not in ("http:/", "https:") and
+            not os.path.exists(ref)):
+            print(tag, attr, ref)
