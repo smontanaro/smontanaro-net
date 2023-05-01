@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang=en>
+ <head>
+  <title>Centurion Ironman</title>
+  <meta charset="utf-8" />
+  <link href="/styles.css" rel="stylesheet" type="text/css" />
+ </head>
+ <body>
+    <header>
+   <h1><a href="/" title="Vintage Centurion Bicycles Home">
+    <img src="/images/Vintage_centurion_logo1024_0.jpg" alt="Vintage Centurion Bicycles Home" /></a></h1>
+  </header>
+   <nav>
+    <ul>
+     <li><a href="/">Home</a></li>
+     <li><a href="/about.shtml">About Us</a></li>
+     <li><a href="/models/models.shtml" title="Centurion Models">Models</a>
+      <ul>
+       <li><a href="/models/competition/competition.shtml" title="Competition Model Centurion Bikes WSI">Competition Models</a>
+        <ul>
+           <li><a href="/models/competition/professional.shtml">Professional (1973-78)</a></li>
+           <li><a href="/models/competition/semi-pro.shtml">Semi-Pro (1978-81)</a></li>
+           <li><a href="/models/competition/turbo.shtml" title="Turbo 83/84">Turbo (1983-84)</a></li>
+		   <li><a href="/models/competition/trac.shtml" title="Trac">Trac (1983)</a></li>
+           <li><a href="/models/competition/comp-ta.shtml">Comp TA (1984)</a></li>
+           <li><a href="/models/competition/cinelli-equipe.shtml" title="1985 Centurion Cinelli Equipe">Cinelli Equipe (1985)</a></li>
+           <li><a href="/models/competition/prestige.shtml" title="Prestige">Prestige (1985,86,89)</a></li>
+           <li><a href="/models/competition/facet.shtml" title="Facet">Facet (1986)</a></li>
+           <li><a href="/models/competition/ironman/ironman.shtml" title="History and Information of Ironman Centurions">Ironman (1985-89)</a>
+            <ul>
+             <li><a href="/models/competition/ironman/85-86.shtml" title="Ironman">Ironman 1985/1986</a></li>
+             <li><a href="/models/competition/ironman/87-89_master.shtml" title="Ironman Master models">Ironman Master (87-89)</a></li>
+             <li><a href="/models/competition/ironman/87-89_expert.shtml" title="Ironman Expert Models">Ironman Expert (87-89)</a></li>
+			 <li><a href="/models/competition/ironman/87-womens_expert.shtml" title="Ironman Expert Models">Ironman Expert Womens (87)</a></li>
+             <li><a href="/models/competition/ironman/88_carbon.shtml" title="Ironman Carbon Model 1988">Ironman Carbon (1988)</a></li>
+            </ul>
+           </li>
+           <li><a href="/models/competition/elite.shtml">Elite RS/Super</a></li>
+		   <li><a href="/models/competition/carbonr.shtml" title="Carbon R">Carbon R (1989)</a></li>
+          </ul>
+         </li>
+         <li><a href="/models/touring/touring.shtml" title="Touring Bikes">Touring Models</a>
+          <ul>
+           <li><a href="/models/touring/protour.shtml">Pro Tour (1976-84)</a></li>
+           <li><a href="/models/touring/elite-gt.shtml">Elite GT (1984)</a></li>
+          </ul>
+         </li>
+         <li><a href="/models/sports-rec/sports-rec.shtml" title="Sports and Recreational Models">Sport Models</a>
+          <ul>
+           <li><a href="/models/sports-rec/lemans.shtml" title="Lemans Models">LeMans (RS) (1970-1989)</a></li>
+           <li><a href="/models/sports-rec/accordo.shtml" title="1982-1989 Accordo">Accordo (RS) (1982-1989)</a></li>
+          </ul>
+        </li>
+        </ul>
+       </li>
+       <li><a href="/literature/literature.shtml" title="Digital version of Printed Literature">Literature</a>
+        <ul>
+         <li><a href="/literature/centurion-catalogs.shtml" title="Scans of original Centurion catalogs">Catalogs</a></li>
+         <li><a href="/literature/articles/articles.shtml" title="Articles pertaining to Centurion and Western States Imports aka WSI">Articles</a>
+          <ul>
+           <li><a href="/literature/articles/la-times.shtml" title="LA times article on WSI and the Centurion Brand">LA Times Article 10/1986</a></li>
+          </ul>
+         </li>
+         <li><a href="/literature/ads.shtml">Advertisements</a></li>
+         <li><a href="/literature/reviews/reviews.shtml" title="Magazine Reviews">Reviews</a>
+          <ul>
+           <li><a href="/literature/reviews/77-protour.shtml" title="Pro Tour Dec 1976 Bicycling Mag review">Bicycling 1977 ProTour</a></li>
+           <li><a href="/literature/reviews/cinelli-article.shtml">1985 Cinelli Equipe Article</a></li>
+           <li><a href="/literature/reviews/86-ironman-review.shtml">1986 Ironman Review</a></li>
+           <li><a href="/literature/reviews/87-expert-bicycling.shtml">1987 Expert Ironman Review</a></li>
+          </ul>
+         </li>
+         <li><a href="/literature/wsi-locations.shtml">WSI Locations</a></li>
+        </ul>
+       </li>
+       <li><a href="/years/years.shtml">What Year is it?</a>
+        <ul>
+         <li><a href="/years/sn-deciphering.shtml" title="Serial Number Deciphering for build year">SN deciphering</a></li>
+         <li><a href="/years/modelbyyear.shtml" title="A break down of what models were offered during a particular year">Models By Year</a></li>
+         <li><a href="/years/modelbycolor.shtml" title="A break down of the colors offered each year">Model Years by Color</a></li>
+         <li><a href="/years/headbadges.shtml" title="Visual guide to the Centurion headbadge logos">HeadBadges</a></li>
+         <li><a href="/years/dt-logo.shtml" title="A historical tour of Centurion DownTube Logos">DownTube Logos</a></li>
+        </ul>
+       </li>
+       <li><a href="/tech/tech.shtml" title="Centurion Tech">Tech</a>
+        <ul>
+         <li><a href="/tech/frame-differences.shtml" title="Cataloging the differences between the IM Master and Expert">IM frame differences</a></li>
+         <li><a href="/tech/89-geometry.shtml">1989 Ironman geometry</a></li>
+        </ul>
+       </li>
+    </ul>
+  </nav>
+
+<h1>IronMan (1985-89)</h1>
+ <img alt="Dave Scott on 1987 Ironman" src="images/Dave_Scott_1987.jpg" />
+ <table>
+  <tbody>
+   <tr>
+    <td>Production Start:</td>
+    <td>1985</td>
+   </tr>
+   <tr>
+    <td>Production End:</td>
+    <td>1989</td>
+   </tr>
+   <tr>
+    <td>Predecessor:</td>
+    <td>Comp T/A</td>
+   </tr>
+   <tr>
+    <td>Sucessor</td>
+    <td>Diamondback Expert/Master TG </td>
+   </tr>
+   <tr>
+    <td>Variants</td>
+    <td>Master, Expert, Carbon</td>
+   </tr>
+  </tbody>
+ </table>
+ <h2>History:</h2>
+ <p>In 1985 Centurion Introduced the Ironman, it was a mid-range model that was aimed at the growing popularity of Triathlons. The best and most well known Triathlon was the Ironman Race in Hawaii, this captured the interest of many people and more Triathlons began sprouting up all over, So in 1984 centurion took their current model the Comp TA, Which rumor has it they were in some legal talks with BF Goodrich over the Comp T/A name and renamed the "Comp TA" as the "Ironman Dave Scott". And as he noted in his book Dave Scott collaborated with Centurion to create this model</p>
+ <p>In 1986 The Ironman continued with Shimano 600, and since SIS had been introduced the Ironman now wore Shimano 600 SIS grouppo, or N600 as it was marketed.  The Frame kept the Tange #1 tubing but wore a new paint scheme. all of the frame graphics got revised. This started the Geometric Shape on the Centurion logos on bike which would reach its pinnacle in 1988. </p>
+ <p>1987 Saw a major change for the Ironman as it was now split into two different models, the current Ironman with the 600 SIS was now called the Ironman Master, and another model was introduced the Ironman Expert. this model featured the all new redesign of Shimano 105, with technology such as SIS, SLR, BioPace. this model had alot of bang for the buck. It also was the year for even wilder paint, as The memphis Design group style was in full swing with the popularity of Miami Vice. Centurion Offered the Ironman Expert in 2 different colors. the usual red and white (also offered in 1986) and the very bold Magenta and Yellow model (some refer to it as pink, but for 1987 that was way to dark to be pink, think pastels). The Master model had a Aqua and White and Yellow and White paint scheme. </p>
+ <p>1988 The Expert retained most of all the same componentry that was offered in 1987. Master model was released with the new 7 speed Shimano 600 Ultegra. The paint scheme had changed again along with different colors and more creative paint schemes as the Master featured. the format of the paint was different, the Headtube/Fork was the secondary color and would fade into the primary color on the down tube and top tube. and fading back after the seatpost on the Seat Stay and Chain Stay returning to the secondary color. </p>
+ <p>1989: The Ironman returns for the 5th year. The Master continues the custom paint scheme and Shimano 600 Ultegra. The Expert no longer had Shimano 105 it featured Suntour's new grouppo GPX. there was some frame geometry changes for the 1989 Models that made them tighter. the color schemes had calmed down a bit with the introduction of solid color schemes with the Master in a solid Red paint scheme and the Expert with a Black paint scheme  </p>
+ <p>The Ironman model name was dropped in 1990, and WSI dropped the Centurion name and Introduced the road bikes in the Diamondback brand which was primarily BMX and Mountain Bikes previously. For the first couple years they featured a  "Centurion Designed" decal. They continued on with the  Master TG and Expert TG. The geometry was more relaxed, but the "Master" and "Expert" names still lived on, as did the marble fade paint jobs. The Master featured 105 instead of 600.</p>
+ <hr/>
+ <h2>Models:</h2>
+ <p>Over the 5 year span the Centurion Ironman was available, there were numerous iterations of the model </p>
+ <table>
+  <tbody>
+   <tr>
+    <td>1985</td>
+    <td><a href="85-86.shtml">Ironman Dave Scott</a></td>
+   </tr>
+   <tr>
+    <td>1986</td>
+    <td><a href="85-86.shtml">Ironman Dave Scott</a></td>
+   </tr>
+   <tr>
+    <td>1987</td>
+    <td><a href="87-89_master.shtml">Ironman Dave Scott Master</a></td>
+   </tr>
+   <tr>
+    <td>1987</td>
+    <td><a href="87-89_expert.shtml">Ironman Dave Scott Expert</a></td>
+   </tr>
+   <tr>
+    <td>1987</td>
+    <td><a href="87-89_expert.shtml">Ironman Dave Scott Expert Women's</a></td>
+   </tr>
+   <tr>
+    <td>1988</td>
+    <td><a href="88_carbon.shtml">Ironman Dave Scott Carbon</a></td>
+   </tr>
+   <tr>
+    <td>1988</td>
+    <td><a href="87-89_master.shtml">Ironman Dave Scott Master</a></td>
+   </tr>
+   <tr>
+    <td>1988</td>
+    <td><a href="87-89_expert.shtml">Ironman Dave Scott Expert</a></td>
+   </tr>
+   <tr>
+    <td>1989</td>
+    <td><a href="87-89_master.shtml">Ironman Dave Scott Master</a></td>
+   </tr>
+   <tr>
+    <td>1989</td>
+    <td><a href="87-89_expert.shtml">Ironman Dave Scott Expert</a></td>
+   </tr>
+  </tbody>
+ </table>
+ <hr/>
+ <h2>Frame Sizing Ironman:</h2>
+ <p>Centurion measurement for the Ironman frame sizing, was from the c-bb to the t-top tube. Centurion referred to it as "to the lowest part of the scallop on the side of seat lug." In reality it is the same as the top of the top tube.</p>
+ <hr/>
+ <table>
+  <caption><h3>Color Combinations</h3></caption>
+  <thead>
+   <tr>
+    <th>Year</th>
+    <th>Model</th>
+    <th>Color 1</th>
+    <th>Color 2</th>
+    <th>Notes</th>
+   </tr>
+  </thead>
+  <tbody>
+   <tr>
+    <td>1985</td>
+    <td>Ironman</td>
+    <td>Titanium Silver/Blue Grey</td>
+    <td>Metallic Red/Silver</td>
+    <td>Contrasting Headtube</td>
+   </tr>
+   <tr>
+    <td>1986</td>
+    <td>Ironman</td>
+    <td>Guards Red/White</td>
+    <td>Anthracite/Sliver</td>
+    <td>Contrasting Headtube/Seattube</td>
+   </tr>
+   <tr>
+    <td>1987</td>
+    <td>Ironman Expert</td>
+    <td>Magenta/Yellow*</td>
+    <td>Guards Red/White</td>
+    <td>Contrasting Headtube/Seattube</td>
+   </tr>
+   <tr>
+    <td>1987</td>
+    <td>Ironman Expert Womens</td>
+    <td>Peach/White</td>
+    <td>N/A</td>
+    <td>Contrasting Headtube/Seattube</td>
+   </tr>
+   <tr>
+    <td>1987</td>
+    <td>Ironman Master</td>
+    <td>Marine Green/White</td>
+    <td>Yellow/White</td>
+    <td>Contrasting Headtube/Seattube</td>
+   </tr>
+   <tr>
+    <td>1988</td>
+    <td>Ironman Carbon</td>
+    <td>Clearcoated Carbon w/Polished Lugs</td>
+    <td>N/A</td>
+    <td> </td>
+   </tr>
+   <tr>
+    <td>1988</td>
+    <td>Ironman Expert</td>
+    <td>Guards Red/White </td>
+    <td>Marine Green/White</td>
+    <td>Fade</td>
+   </tr>
+   <tr>
+    <td>1988</td>
+    <td>Ironman Master</td>
+    <td>Yellow/White</td>
+    <td>Purple Smoke/White Fade</td>
+    <td>Fade</td>
+   </tr>
+   <tr>
+    <td>1989</td>
+    <td>Ironman Expert</td>
+    <td>Black (solid)</td>
+    <td>Blue Smoke/White Fade</td>
+    <td>Fade or Solid Color</td>
+   </tr>
+   <tr>
+    <td>1989</td>
+    <td>Ironman Master</td>
+    <td>Red (solid)</td>
+    <td>Grey Marble/White Fade</td>
+    <td>Fade or Solid Color<br/></td>
+   </tr>
+  </tbody>
+ </table>
+ <p>* Magenta/Yellow Color, Commonly mistaken today as pink in color. but is truly Magenta. in the late 80's pink was alot lighter of a color in popular culture. In many fan groups this color scheme is referred to as a Miami Vice Ironman.</p>
+</body>
+</html>

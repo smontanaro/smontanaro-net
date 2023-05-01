@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang=en>
+ <head>
+  <title>Centurion Prestige</title>
+  <meta charset="utf-8" />
+  <link href="/styles.css" rel="stylesheet" type="text/css" />
+ </head>
+ <body>
+    <header>
+   <h1><a href="/" title="Vintage Centurion Bicycles Home">
+    <img src="/images/Vintage_centurion_logo1024_0.jpg" alt="Vintage Centurion Bicycles Home" /></a></h1>
+  </header>
+   <nav>
+    <ul>
+     <li><a href="/">Home</a></li>
+     <li><a href="/about.shtml">About Us</a></li>
+     <li><a href="/models/models.shtml" title="Centurion Models">Models</a>
+      <ul>
+       <li><a href="/models/competition/competition.shtml" title="Competition Model Centurion Bikes WSI">Competition Models</a>
+        <ul>
+           <li><a href="/models/competition/professional.shtml">Professional (1973-78)</a></li>
+           <li><a href="/models/competition/semi-pro.shtml">Semi-Pro (1978-81)</a></li>
+           <li><a href="/models/competition/turbo.shtml" title="Turbo 83/84">Turbo (1983-84)</a></li>
+		   <li><a href="/models/competition/trac.shtml" title="Trac">Trac (1983)</a></li>
+           <li><a href="/models/competition/comp-ta.shtml">Comp TA (1984)</a></li>
+           <li><a href="/models/competition/cinelli-equipe.shtml" title="1985 Centurion Cinelli Equipe">Cinelli Equipe (1985)</a></li>
+           <li><a href="/models/competition/prestige.shtml" title="Prestige">Prestige (1985,86,89)</a></li>
+           <li><a href="/models/competition/facet.shtml" title="Facet">Facet (1986)</a></li>
+           <li><a href="/models/competition/ironman/ironman.shtml" title="History and Information of Ironman Centurions">Ironman (1985-89)</a>
+            <ul>
+             <li><a href="/models/competition/ironman/85-86.shtml" title="Ironman">Ironman 1985/1986</a></li>
+             <li><a href="/models/competition/ironman/87-89_master.shtml" title="Ironman Master models">Ironman Master (87-89)</a></li>
+             <li><a href="/models/competition/ironman/87-89_expert.shtml" title="Ironman Expert Models">Ironman Expert (87-89)</a></li>
+			 <li><a href="/models/competition/ironman/87-womens_expert.shtml" title="Ironman Expert Models">Ironman Expert Womens (87)</a></li>
+             <li><a href="/models/competition/ironman/88_carbon.shtml" title="Ironman Carbon Model 1988">Ironman Carbon (1988)</a></li>
+            </ul>
+           </li>
+           <li><a href="/models/competition/elite.shtml">Elite RS/Super</a></li>
+		   <li><a href="/models/competition/carbonr.shtml" title="Carbon R">Carbon R (1989)</a></li>
+          </ul>
+         </li>
+         <li><a href="/models/touring/touring.shtml" title="Touring Bikes">Touring Models</a>
+          <ul>
+           <li><a href="/models/touring/protour.shtml">Pro Tour (1976-84)</a></li>
+           <li><a href="/models/touring/elite-gt.shtml">Elite GT (1984)</a></li>
+          </ul>
+         </li>
+         <li><a href="/models/sports-rec/sports-rec.shtml" title="Sports and Recreational Models">Sport Models</a>
+          <ul>
+           <li><a href="/models/sports-rec/lemans.shtml" title="Lemans Models">LeMans (RS) (1970-1989)</a></li>
+           <li><a href="/models/sports-rec/accordo.shtml" title="1982-1989 Accordo">Accordo (RS) (1982-1989)</a></li>
+          </ul>
+        </li>
+        </ul>
+       </li>
+       <li><a href="/literature/literature.shtml" title="Digital version of Printed Literature">Literature</a>
+        <ul>
+         <li><a href="/literature/centurion-catalogs.shtml" title="Scans of original Centurion catalogs">Catalogs</a></li>
+         <li><a href="/literature/articles/articles.shtml" title="Articles pertaining to Centurion and Western States Imports aka WSI">Articles</a>
+          <ul>
+           <li><a href="/literature/articles/la-times.shtml" title="LA times article on WSI and the Centurion Brand">LA Times Article 10/1986</a></li>
+          </ul>
+         </li>
+         <li><a href="/literature/ads.shtml">Advertisements</a></li>
+         <li><a href="/literature/reviews/reviews.shtml" title="Magazine Reviews">Reviews</a>
+          <ul>
+           <li><a href="/literature/reviews/77-protour.shtml" title="Pro Tour Dec 1976 Bicycling Mag review">Bicycling 1977 ProTour</a></li>
+           <li><a href="/literature/reviews/cinelli-article.shtml">1985 Cinelli Equipe Article</a></li>
+           <li><a href="/literature/reviews/86-ironman-review.shtml">1986 Ironman Review</a></li>
+           <li><a href="/literature/reviews/87-expert-bicycling.shtml">1987 Expert Ironman Review</a></li>
+          </ul>
+         </li>
+         <li><a href="/literature/wsi-locations.shtml">WSI Locations</a></li>
+        </ul>
+       </li>
+       <li><a href="/years/years.shtml">What Year is it?</a>
+        <ul>
+         <li><a href="/years/sn-deciphering.shtml" title="Serial Number Deciphering for build year">SN deciphering</a></li>
+         <li><a href="/years/modelbyyear.shtml" title="A break down of what models were offered during a particular year">Models By Year</a></li>
+         <li><a href="/years/modelbycolor.shtml" title="A break down of the colors offered each year">Model Years by Color</a></li>
+         <li><a href="/years/headbadges.shtml" title="Visual guide to the Centurion headbadge logos">HeadBadges</a></li>
+         <li><a href="/years/dt-logo.shtml" title="A historical tour of Centurion DownTube Logos">DownTube Logos</a></li>
+        </ul>
+       </li>
+       <li><a href="/tech/tech.shtml" title="Centurion Tech">Tech</a>
+        <ul>
+         <li><a href="/tech/frame-differences.shtml" title="Cataloging the differences between the IM Master and Expert">IM frame differences</a></li>
+         <li><a href="/tech/89-geometry.shtml">1989 Ironman geometry</a></li>
+        </ul>
+       </li>
+    </ul>
+  </nav>
+
+  <h1>Prestige (1985,1986,1989)</h1>
+  <p>Started in 1985 the Prestige was made with Tange's highest grade tubing "Tange Prestige" in 1989 The Montogomery Securities/Avenir Team used the Prestige as their Team bikes. the Frame geometry is setup for Criterium </p>
+  
+  <img alt="" src="images/1985_prestige.jpg" />
+  <table>
+   <tbody>
+    <tr>
+     <th colspan="2">1985 Specs</th>
+    </tr>
+    <tr>
+     <th>Frame Construction</th>
+      <td>Full Tange Prestige Double butted Chrome Moly, All investment cast lugs</td>
+    </tr>
+    <tr>
+     <th>Fork</th>
+      <td>Tange Prestige, Fluted Steering tube, Investment Cast Crown</td>
+    </tr>
+    <tr>
+     <th>Brake</th>
+      <td>Shimano New Dura-Ace Sidepull, Hooded New Dura-Ace Levers</td>
+    </tr>
+    <tr>
+     <th>Chain</th>
+      <td>DID Dai Hard Bevelled plates Chrome Plated</td>
+    </tr>
+    <tr>
+     <th>Crankset</th>
+      <td>Shimano New Dura-Ace Dark Anodized. 52/42t Anatomic Sizing</td>
+    </tr>
+    <tr>
+     <th>Derailleurs</th>
+      <td>Shimano New Dura-Ace dark anodized, S.I.S system, Brazed on Levers</td>
+    </tr>
+    <tr>
+     <th>Freewheel</th>
+      <td>Shimano New Dura-Ace. Thread on type 13-21 t 6-speed</td>
+    </tr>
+    <tr>
+     <th>Handlebar</th>
+      <td>Nitto 175 Aluminum Alloy. Pelten padded tape. Anatomic Sizing</td>
+    </tr>
+    <tr>
+     <th>Headset</th>
+      <td>Shimano New Dura-Ace Alloy Sealed System.</td>
+    </tr>
+    <tr>
+     <th>Hubs</th>
+      <td>Shimano New Dura-Ace 32h Sealed system</td>
+    </tr>
+    <tr>
+     <th>Pedals</th>
+      <td>Shimano New Dura-Ace aero with integrated toe clip/strap</td>
+    </tr>
+    <tr>
+     <th>Rims</th>
+      <td>Mavic GP-4 Hard anodized 32 hole for tubular tires</td>
+    </tr>
+    <tr>
+     <th>Seat</th>
+      <td>Selle Italia Turbo Genuine Suede Calfskin</td>
+    </tr>
+    <tr>
+     <th>Seatpost</th>
+      <td>Shimano Dura-Ace EX, 27.4mm</td>
+    </tr>
+    <tr>
+     <th>Spokes</th>
+      <td>Asahi Stainless Steel 14-15-14 Ga</td>
+    </tr>
+    <tr>
+     <th>Stem</th>
+      <td>Nitto NTC-A, Forged Aluminum Alloy, Anatomic Sizing</td>
+    </tr>
+    <tr>
+     <th>Tires</th>
+      <td>Vittoria Nuovo Pro 260gm. Cotton Casing tubular</td>
+    </tr>
+    <tr>
+     <th>Frame Sizes</th>
+      <td>50, 52, 54, 56, 58, 60, 62, 64cm</td>
+    </tr>
+    <tr>
+     <th>Colors</th>
+      <td>Anthracite with Silver Two Tone seat/head tubes Protective Clearcoat</td>
+    </tr>
+   </tbody>
+  </table>
+  <p></p>
+  <p></p>
+  <img alt="" src="images/1986-Prestige_600.jpg" />
+  <p>Specs taken from 1986 Centurion Catalog</p>
+  <table>
+   <tbody>
+    <tr>
+     <th colspan="2">1986 Specs</th>
+    </tr>
+    <tr>
+     <th>Frame Construction</th>
+      <td>Full Tange Prestige Double butted Chrome Moly, All investment cast lugs</td>
+    </tr>
+    <tr>
+     <th>Fork</th>
+      <td>Tange Prestige, Special Centurion narrow sloping crown</td>
+    </tr>
+    <tr>
+     <th>Brake</th>
+      <td>Shimano New Dura-Ace Sidepull, New Dura-Ace Levers</td>
+    </tr>
+    <tr>
+     <th>Chain</th>
+      <td>Dura-Ace</td>
+    </tr>
+    <tr>
+     <th>Crankset</th>
+      <td>Shimano New Dura-Ace Dark Anodized. 53/42t Anatomic Sizing</td>
+    </tr>
+    <tr>
+     <th>Rear Derailleur</th>
+      <td>Shimano New Dura-Ace S.I.S index system, RD-7401</td>
+    </tr>
+	<tr>
+     <th>Front Derailleur</th>
+      <td>Shimano New Dura-Ace FD-7400</td>
+    </tr>
+    <tr>
+     <th>Freewheel</th>
+      <td>Shimano New Dura-Ace. Thread on type13-21t 6-speed</td>
+    </tr>
+    <tr>
+     <th>Handlebar</th>
+      <td>Nitto 175 Aluminum Alloy. Pelten padded tape. Anatomic Sizing</td>
+    </tr>
+    <tr>
+     <th>Headset</th>
+      <td>Shimano New Dura-Ace Sealed System. HS-7400</td>
+    </tr>
+    <tr>
+     <th>Hubs</th>
+      <td>Shimano New Dura-Ace Sealed bearing system 32 hole</td>
+    </tr>
+    <tr>
+     <th>Pedals</th>
+      <td>Shimano New Dura-Ace aero with integrated clips</td>
+    </tr>
+    <tr>
+     <th>Rims</th>
+      <td>Wolber Aubisque Tubular 32 Hole</td>
+    </tr>
+    <tr>
+     <th>Seat</th>
+      <td>Selle Italia Turbo Genuine Suede Calfskin</td>
+    </tr>
+    <tr>
+     <th>Seatpost</th>
+      <td>Shimano Dura-Ace EX, 27.2mm</td>
+    </tr>
+    <tr>
+     <th>Spokes</th>
+      <td>Asahi Butted Stainless Steel 14-15-14 Ga</td>
+    </tr>
+    <tr>
+     <th>Stem</th>
+      <td>Nitto NTC-A, Forged. Anatomic Sizing</td>
+    </tr>
+    <tr>
+     <th>Tires</th>
+      <td>Wolber Corsa 80. Cotton Casing tubular</td>
+    </tr>
+    <tr>
+     <th>Frame Sizes</th>
+      <td>48, 50, 52, 54, 56, 58, 60, 62, 64cm</td>
+    </tr>
+    <tr>
+     <th>Colors</th>
+      <td>Lavender with Silver Dualtone. Protective Clearcoat</td>
+    </tr>
+   </tbody>
+  </table>
+  <p></p>
+  <p></p>
+  <img alt="" src="images/1989_Prestige_flickr-meadowann.jpg" />
+  <p>Picture Retrieved 4/2016 from Flickr user meadowann</p>
+  <p></p>
+  <img alt="" src="images/1989_Prestige_logo.jpg" />
+  <table>
+   <tbody>
+    <tr>
+     <th colspan="2">1989 Specs</th>
+    </tr>
+    <tr>
+     <th>Frame Construction</th>
+      <td>Full Tange Prestige Double butted Chrome Moly, All investment cast lugs</td>
+    </tr>
+    <tr>
+     <th>Fork</th>
+      <td>Tange Prestige, Special Centurion narrow sloping crown</td>
+    </tr>
+ <tr>
+     <th>Bottom Bracket</th>
+      <td>Tange Square taper 68mm Shell</td>
+    </tr>
+    <tr>
+     <th>Brake Levers</th>
+      <td>Shimano 600 Ultegra SLR (BL-6400) White Hoods</td>
+    </tr>
+	<tr>
+     <th>Brakes</th>
+      <td>Shimano 600 Ultegra (BR-6400)</td>
+    </tr>
+    <tr>
+     <th>Chain</th>
+      <td>Shimano 600 Ultegra (CH-6400) Black/Silver Plates</td>
+    </tr>
+    <tr>
+     <th>Crankset</th>
+      <td>Shimano 600 Ultegra (FC-6400) </td>
+    </tr>
+    <tr>
+     <th>Front Derailleur</th>
+      <td>Double, Shimano 600 Ultegra (FD-6400)</td>
+    </tr>
+	 <tr>
+     <th>Rear Derailleur</th>
+      <td>7-Speed, Shimano 600 Ultegra (RD-6400)</td>
+    </tr>
+    <tr>
+     <th>Cassette</th>
+      <td>Shimano 600 Ultegra (CS-6400) 7 Speed</td>
+    </tr>
+	 <tr>
+     <th>Shift Levers</th>
+      <td>Shimano 600 Ultegra (SL-6400) R:7-Speed SIS with Friction option. F:Friction</td>
+    </tr>
+    <tr>
+     <th>Handlebar</th>
+      <td>Nitto B115 &gt; White Tape, Width: 62cm-420mm</td>
+    </tr>
+    <tr>
+     <th>Headset</th>
+      <td>Shimano 600 Ultegra (HS-6400)</td>
+    </tr>
+    <tr>
+     <th>Hubs</th>
+      <td>Shimano 600 Ultegra (R:FH-6400 F:HB-6400)</td>
+    </tr>
+    <tr>
+     <th>Pedals</th>
+      <td>Sampson/SR Clipless (cleats included)</td>
+    </tr>
+    <tr>
+     <th>Rims</th>
+      <td>Araya CTL-370</td>
+    </tr>
+    <tr>
+     <th>Seat</th>
+      <td>Avenir Turbogel</td>
+    </tr>
+    <tr>
+     <th>Seatpost</th>
+      <td>Sugino</td>
+    </tr>
+    <tr>
+     <th>Spokes</th>
+      <td>F:28/R:32 Stainless Silver/ Black Nipples</td>
+    </tr>
+    <tr>
+     <th>Stem</th>
+      <td>Nitto</td>
+    </tr>
+    <tr>
+     <th>Tires</th>
+      <td>Need &gt;</td>
+    </tr>
+    <tr>
+     <th>Frame Sizes</th>
+      <td>48, 50, 52, 54, 56, 58, 60, 62, 64cm</td>
+    </tr>
+	 <tr>
+      <th>Scheme</th>
+      <td>fade</td>
+     </tr>
+     <tr>
+      <th>Head Badge</th>
+      <td>Heavy "C" w/o shading<br/>
+          "Made in Japan" below</td>
+     </tr>
+     <tr>
+      <th>DT Decal</th>
+      <td>"Centurion" unshaded thinner font</td>
+     </tr>
+     <tr>
+      <th>TT Decal</th>
+      <td>"PRESTIGE"</td>
+     </tr>
+     <tr>
+      <th>Seattube Decal</th>
+      <td><p>Top: geographic themed "Tange Prestige"</p>
+          <p>Base: "Made in Japan/Designed in USA"</p></td>
+     </tR>
+     <tr>
+      <th>Seat Stay Decal</th>
+      <td>"Centurion" below caps</td>
+     </tr>
+     <tr>
+      <th>Fork Decals</th>
+      <td>Clear "Tange Prestige"</td>
+     </tr>
+	      <tr>
+      <th>Chainstay Protector</th>
+      <td>Black rubber with white lettering "Centurion"</td>
+     </tr>
+     <tr>
+      <th>Color</th>
+      <td>Blue Smoke Fade. Protective Clearcoat</td>
+     </tr>
+   </tbody>
+  </table>
+   <p></p>
+   <p>2020 Vintage-Centurion.com</p> 
+ </body>
+</html>

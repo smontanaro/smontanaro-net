@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang=en>
+ <head>
+  <title>Centurion Ironman Master (1987-1989)</title>
+  <meta charset="utf-8" />
+  <link href="/styles.css" rel="stylesheet" type="text/css" />
+ </head>
+ <body>
+    <header>
+   <h1><a href="/" title="Vintage Centurion Bicycles Home">
+    <img src="/images/Vintage_centurion_logo1024_0.jpg" alt="Vintage Centurion Bicycles Home" /></a></h1>
+  </header>
+   <nav>
+    <ul>
+     <li><a href="/">Home</a></li>
+     <li><a href="/about.shtml">About Us</a></li>
+     <li><a href="/models/models.shtml" title="Centurion Models">Models</a>
+      <ul>
+       <li><a href="/models/competition/competition.shtml" title="Competition Model Centurion Bikes WSI">Competition Models</a>
+        <ul>
+           <li><a href="/models/competition/professional.shtml">Professional (1973-78)</a></li>
+           <li><a href="/models/competition/semi-pro.shtml">Semi-Pro (1978-81)</a></li>
+           <li><a href="/models/competition/turbo.shtml" title="Turbo 83/84">Turbo (1983-84)</a></li>
+		   <li><a href="/models/competition/trac.shtml" title="Trac">Trac (1983)</a></li>
+           <li><a href="/models/competition/comp-ta.shtml">Comp TA (1984)</a></li>
+           <li><a href="/models/competition/cinelli-equipe.shtml" title="1985 Centurion Cinelli Equipe">Cinelli Equipe (1985)</a></li>
+           <li><a href="/models/competition/prestige.shtml" title="Prestige">Prestige (1985,86,89)</a></li>
+           <li><a href="/models/competition/facet.shtml" title="Facet">Facet (1986)</a></li>
+           <li><a href="/models/competition/ironman/ironman.shtml" title="History and Information of Ironman Centurions">Ironman (1985-89)</a>
+            <ul>
+             <li><a href="/models/competition/ironman/85-86.shtml" title="Ironman">Ironman 1985/1986</a></li>
+             <li><a href="/models/competition/ironman/87-89_master.shtml" title="Ironman Master models">Ironman Master (87-89)</a></li>
+             <li><a href="/models/competition/ironman/87-89_expert.shtml" title="Ironman Expert Models">Ironman Expert (87-89)</a></li>
+			 <li><a href="/models/competition/ironman/87-womens_expert.shtml" title="Ironman Expert Models">Ironman Expert Womens (87)</a></li>
+             <li><a href="/models/competition/ironman/88_carbon.shtml" title="Ironman Carbon Model 1988">Ironman Carbon (1988)</a></li>
+            </ul>
+           </li>
+           <li><a href="/models/competition/elite.shtml">Elite RS/Super</a></li>
+		   <li><a href="/models/competition/carbonr.shtml" title="Carbon R">Carbon R (1989)</a></li>
+          </ul>
+         </li>
+         <li><a href="/models/touring/touring.shtml" title="Touring Bikes">Touring Models</a>
+          <ul>
+           <li><a href="/models/touring/protour.shtml">Pro Tour (1976-84)</a></li>
+           <li><a href="/models/touring/elite-gt.shtml">Elite GT (1984)</a></li>
+          </ul>
+         </li>
+         <li><a href="/models/sports-rec/sports-rec.shtml" title="Sports and Recreational Models">Sport Models</a>
+          <ul>
+           <li><a href="/models/sports-rec/lemans.shtml" title="Lemans Models">LeMans (RS) (1970-1989)</a></li>
+           <li><a href="/models/sports-rec/accordo.shtml" title="1982-1989 Accordo">Accordo (RS) (1982-1989)</a></li>
+          </ul>
+        </li>
+        </ul>
+       </li>
+       <li><a href="/literature/literature.shtml" title="Digital version of Printed Literature">Literature</a>
+        <ul>
+         <li><a href="/literature/centurion-catalogs.shtml" title="Scans of original Centurion catalogs">Catalogs</a></li>
+         <li><a href="/literature/articles/articles.shtml" title="Articles pertaining to Centurion and Western States Imports aka WSI">Articles</a>
+          <ul>
+           <li><a href="/literature/articles/la-times.shtml" title="LA times article on WSI and the Centurion Brand">LA Times Article 10/1986</a></li>
+          </ul>
+         </li>
+         <li><a href="/literature/ads.shtml">Advertisements</a></li>
+         <li><a href="/literature/reviews/reviews.shtml" title="Magazine Reviews">Reviews</a>
+          <ul>
+           <li><a href="/literature/reviews/77-protour.shtml" title="Pro Tour Dec 1976 Bicycling Mag review">Bicycling 1977 ProTour</a></li>
+           <li><a href="/literature/reviews/cinelli-article.shtml">1985 Cinelli Equipe Article</a></li>
+           <li><a href="/literature/reviews/86-ironman-review.shtml">1986 Ironman Review</a></li>
+           <li><a href="/literature/reviews/87-expert-bicycling.shtml">1987 Expert Ironman Review</a></li>
+          </ul>
+         </li>
+         <li><a href="/literature/wsi-locations.shtml">WSI Locations</a></li>
+        </ul>
+       </li>
+       <li><a href="/years/years.shtml">What Year is it?</a>
+        <ul>
+         <li><a href="/years/sn-deciphering.shtml" title="Serial Number Deciphering for build year">SN deciphering</a></li>
+         <li><a href="/years/modelbyyear.shtml" title="A break down of what models were offered during a particular year">Models By Year</a></li>
+         <li><a href="/years/modelbycolor.shtml" title="A break down of the colors offered each year">Model Years by Color</a></li>
+         <li><a href="/years/headbadges.shtml" title="Visual guide to the Centurion headbadge logos">HeadBadges</a></li>
+         <li><a href="/years/dt-logo.shtml" title="A historical tour of Centurion DownTube Logos">DownTube Logos</a></li>
+        </ul>
+       </li>
+       <li><a href="/tech/tech.shtml" title="Centurion Tech">Tech</a>
+        <ul>
+         <li><a href="/tech/frame-differences.shtml" title="Cataloging the differences between the IM Master and Expert">IM frame differences</a></li>
+         <li><a href="/tech/89-geometry.shtml">1989 Ironman geometry</a></li>
+        </ul>
+       </li>
+    </ul>
+  </nav>
+
+  <h1>Ironman Master Dave Scott (1987-1989)</h1>
+   <p>The Master designation was added in 1987 and carried on through the final year of the ironmans in 1989. This differentiated it from the new Ironman Expert that was also introduced in 1987. While the Master kept the 600 grouppo as the previously model Ironman, the Expert had the new 105 Grouppo. The Frames were similar to the expert, Same geometery and tubing (Tange #1) But there was differences in the Lugs that were used on the Master as compared to the Expert but for the most part the  main difference was the color and the Master had a crowned fork, unlike the Expert which had a unicrown. </p>
+   <p>1987, Had shimano 600 SIS (6200 Series) like the 1986 Model Ironman. and featured the std two tone paint that had been available on Centurions since 1986. with the secondary color on the Headtube and the Seattube.</p>
+   <p>1988, Saw numerous changes the Master now included the new Shimano 7 speed 600 Ultegra grouppo.(6400 Series)  and the paint scheme changed to either a fade or a marble/smoke effect with the secondary color on the Headtube/Fork and SeatStay/Chain Stay</p>
+   <p>1989, Kept the Shimano 600 Ultegra (6400 Series) and retained a marbe paint fade along with a solid color paint scheme Guards Red.?</p>
+   <p>1988 &amp; 1989 were spec'd the same except for paint, saddle (1988 - Selle italia, 1989 - Avenir) and pedals (1988 - Shimano 600, 1989 - Sampson).</p>
+  <h4>1987</h4>
+   <img alt="" src="images/1987 Master.JPG" />
+   <img alt="" src="images/1987 Master2.jpg" />
+   <img alt="1987 Centurion Ironman Master Marine Green/White" src="images/1987_master-aqua.jpg" />
+   <p>1987 Centurion Ironman Master Marine Green/White (source: fleslider)</p>
+   <p></p>
+   <table>
+    <tbody>
+     <tr>
+      <td>Frame</td>
+      <td>Tange #1</td>
+     </tr>
+     <tr>
+      <td>Fork</td>
+      <td>Tange sloped crown (TIG-welded)</td>
+     </tr>
+     <tr>
+      <td>General Groupset Notes</td>
+      <td>Shimano 600EX<br/>
+          Anodizing:(* bronze) (#dark grey)</td>
+     </tr>
+     <tr>
+      <td>BB</td>
+      <td>Sugino</td>
+     </tr>
+     <tr>
+      <td>Crank</td>
+      <td>*Shimano 600 (FC-6207) bio-pace 53-42T</td>
+     </tr>
+     <tr>
+      <td>Gears</td>
+      <td>Shimano 600 (MF-6208) UG 13-14-15-17-19-21T 6 speed freewheel</td>
+     </tr>
+     <tr>
+      <td>Shifters</td>
+      <td>Shimano 600 (SL-6208) SIS</td>
+     </tr>
+     <tr>
+      <td>F-Derailleur</td>
+      <td>Shimano 600 (FD-6207) 28.6 clamp</td>
+     </tr>
+     <tr>
+      <td>R-Derailleur</td>
+      <td>Shimano 600 (RD-6208) SIS short cage</td>
+     </tr>
+     <tr>
+      <td>Pedals</td>
+      <td>Shimano 600 (PD-6207) toe clips</td>
+     </tr>
+     <tr>
+      <td>Brakes</td>
+      <td>*Shimano 600 (BR-6208)</td>
+     </tr>
+     <tr>
+      <td>Brake Levers</td>
+      <td>*Shimano 600 (BL-6209) aero</td>
+     </tr>
+     <tr>
+      <td>Bars</td>
+      <td>Nitto B115<br/>
+          390 &lt;=54cm<br/>
+          420 &gt;=56cm</td>
+     </tr>
+     <tr>
+      <td>Stem</td>
+      <td>Nitto</td>
+     </tr>
+     <tr>
+      <td>Headset</td>
+      <td>Shimano 600 (HP-6207) star nut</td>
+     </tr>
+     <tr>
+      <td>Seatpost</td>
+      <td>Sugino SP-KCL graduated scale 27.0</td>
+     </tr>
+     <tr>
+      <td>Saddle</td>
+      <td>Selle Italia Turbo</td>
+     </tr>
+     <tr>
+      <td>Hubs</td>
+      <td>Shimano 600 (HB-6207) 32f/32r except 62/64cm frames = 36f/36r</td>
+     </tr>
+     <tr>
+      <td>Rims</td>
+      <td>#Wolber Super Champion Alpine</td>
+     </tr>
+     <tr>
+      <td>Tires</td>
+      <td>Panaracer Technova II</td>
+     </tr>
+     <tr>
+      <td>Scheme</td>
+      <td>Contrasting headtube &amp; seatube</td>
+     </tr>
+     <tr>
+      <td>Head Badge</td>
+      <td>Heavy "C" w/o shading</td>
+     </tr>
+     <tr>
+      <td>DT Decal</td>
+      <td>"Centurion" unshaded thinner font, more graduated thickness</td>
+     </tr>
+     <tr>
+      <td>TT Decal</td>
+      <td>"Ironman Master Dave Scott"</td>
+     </tr>
+     <tr>
+      <td>Seattube Decal</td>
+      <td><p>Top: Blue "Tange 1"</p>
+          <p>Base: "Quality from Japan/Designed in USA"</p>
+      </td>
+     </tr>
+     <tr>
+      <td>Seat Stay Decal</td>
+      <td>"Centurion" below caps</td>
+     </tr>
+     <tr>
+      <td>Fork Decals</td>
+      <td>Fork Blade: Red "Tange"<br/>
+          Crown: "Centurion"</td>
+     </tr>
+     <tr>
+      <td>Color #1</td>
+      <td>Marine Green/White</td>
+     </tr>
+     <tr>
+      <td>Color #2</td>
+      <td>Yellow/ White</td>
+     </tr>
+     <tr>
+      <td>MSRP:</td>
+      <td>$650.00 (1987)</td>
+     </tr>
+    </tbody>
+   </table>
+   <p></p>
+  <h4>1988</h4>
+   <img alt="" src="images/1988 Master.jpg" />
+   <img alt="" src="images/1988 Master2.jpg" />
+   <img alt="1988 Centurion Ironman Master Purple/White" src="images/88_master_IM_slider.jpg" />
+   <p>1988 Ironman Master Purple Smoke /White (source:fleslider)</p>
+   <p></p>
+   <img alt="1988 Centurion Ironman Master Yellow/White" src="images/nesposito_88_master_yel.jpg" />
+   <p>1988 Ironman Master Yellow/White (source:nesposito)</p>
+   <p></p>
+   <table>
+    <tbody>
+     <tr>
+      <td>Frame</td>
+      <td>Tange 1</td>
+     </tr>
+     <tr>
+      <td>Fork</td>
+      <td>Tange unicrown</td>
+     </tr>
+     <tr>
+      <td>General Groupset Notes</td>
+      <td>Shimano 600 Ultegra (6400 (Tricolor)</td>
+     </tr>
+     <tr>
+      <td>BB</td>
+      <td>Tange</td>
+     </tr>
+     <tr>
+      <td>Crank</td>
+      <td>Shimano 600 Ultegra (FC-6400) bio-pace 53-42T</td>
+     </tr>
+     <tr>
+      <td>Gears</td>
+      <td>Shimano 600 Ultegra UG 13-14-15-17-19-21-24T (CS-6400) 7 speed cassette</td>
+     </tr>
+     <tr>
+      <td>Shifters</td>
+      <td>Shimano 600 Ultegra (SL-6400) SIS</td>
+     </tr>
+     <tr>
+      <td>F-Derailleur</td>
+      <td>Shimano 600 Ultegra (FD-6400) 28.6 clamp</td>
+     </tr>
+     <tr>
+      <td>R-Derailleur</td>
+      <td>Shimano 600 Ultegra (RD-6400) SIS short cage</td>
+     </tr>
+     <tr>
+      <td>Pedals</td>
+      <td>Shimano 600 Ultegra (PD-6400) toe clips</td>
+     </tr>
+     <tr>
+      <td>Brakes</td>
+      <td>Shimano 600 Ultegra (BR-6400)</td>
+     </tr>
+     <tr>
+      <td>Brake Levers</td>
+      <td>Shimano 600 Ultegra (BL-6401) aero SLR</td>
+     </tr>
+     <tr>
+      <td>Bars</td>
+      <td>Nitto B115<br/>
+          390 &lt;=54cm<br/>
+          420 &gt;=56cm</td>
+     </tr>
+     <tr>
+      <td>Stem</td>
+      <td>Nitto</td>
+     </tr>
+     <tr>
+      <td>Headset</td>
+      <td>Shimano 600 Ultegra (HP-6400)</td>
+     </tr>
+     <tr>
+      <td>Seatpost</td>
+      <td>Sugino non-fluted 27.0</td>
+     </tr>
+     <tr>
+      <td>Saddle</td>
+      <td>Selle Italia Turbo</td>
+     </tr>
+     <tr>
+      <td>Hubs</td>
+      <td>Shimano 600 Ultegra (F:HB-6400 R:FH-6400) 28f/32r except 60-64cm frames = 32f/32r</td>
+     </tr>
+     <tr>
+      <td>Rims</td>
+      <td>Araya CTL-370</td>
+     </tr>
+     <tr>
+      <td>Tires</td>
+      <td>Panaracer Technova II</td>
+     </tr>
+     <tr>
+      <td>Scheme</td>
+      <td>fade (primary color in the center fading to secondary color at the HeadTube and Fork on the front and Chainstay and Seatstay at the back.)</td>
+     </tr>
+     <tr>
+      <td>Head Badge</td>
+      <td>Heavy "C" w/o shading<br/>
+          "Made in Japan" below</td>
+     </tr>
+     <tr>
+      <td>DT Decal</td>
+      <td>"Centurion" unshaded thinner font, more graduated thickness</td>
+     </tr>
+     <tr>
+      <td>TT Decal</td>
+      <td>"Ironman Master Dave Scott"</td>
+     </tr>
+     <tr>
+      <td>Seattube Decal</td>
+      <td><p>Top: Clear "Tange 1"</p>
+          <p>Base: "Made in Japan/Designed in USA"</p>
+      </td>
+     </tr>
+     <tr>
+      <td>Seat Stay Decal</td>
+      <td>Geometric Shapes &amp; Squiggles</td>
+     </tr>
+     <tr>
+      <td>Fork Decals</td>
+      <td>Clear Tange</td>
+     </tr>
+     <tr>
+      <td>Color #1</td>
+      <td>Purple Smoke Fade</td>
+     </tr>
+     <tr>
+      <td>Color #2</td>
+      <td>Yellow/White Fade</td>
+     </tr>
+    </tbody>
+   </table>
+   <p></p>
+   <p></p>
+  <h4>1989</h4>
+   <img alt="" src="images/1989 Master.JPG" />
+   <img alt="1989 Centurion Ironman Master Red" src="images/1989_Master%20Red.jpg" />
+   <p>1989 Ironman Master Red (Source Craigslist)</p>
+   <p></p>
+   <img alt="1989 Centurion Ironman Master white/gray" src="images/1989_master_hardrock.jpg" />
+   <p>1989 Ironman Master White/Gray Granite  (Source Unknown)</p>
+   <p></p>
+   <img alt="" src="images/1989_Blue_master.jpg" />
+   <p>1989 Ironman Master Blue Water (Source:JimDandy)</p>
+   <p></p>
+   <p>1989 continued the fades and Introduced solids. From an 1989 Advertisement, "This new Centurion is our most aggresive frame geometry ever. Short chainstays, a proportionally longer top tube, steep 74 1/2 degree head angle on the mid and large sizesand a geometrically matched fork rake combine in a competition-ready package.</p>
+   <table>
+    <tbody>
+     <tr>
+      <td>Frame</td>
+      <td>Tange Champion #1</td>
+     </tr>
+     <tr>
+      <td>Fork</td>
+      <td>Tange Champion #1 Unicrown (TIG-welded)</td>
+     </tr>
+     <tr>
+      <td>General Groupset Notes</td>
+      <td>Shimano 600 Ultegra (Tricolor)</td>
+     </tr>
+     <tr>
+      <td>BB</td>
+      <td>?</td>
+     </tr>
+     <tr>
+      <td>Crank</td>
+      <td>Shimano 600 Ultegra (FC-6400) bio-pace 52-42T</td>
+     </tr>
+     <tr>
+      <td>Gears</td>
+      <td>Shimano 600 Ultegra UG 13-14-15-17-19-21-24T (CS-6400) 7 speed cassette</td>
+     </tr>
+     <tr>
+      <td>Shifters</td>
+      <td>Shimano 600 Ultegra (SL-6400) 7 Speed SIS</td>
+     </tr>
+     <tr>
+      <td>F-Derailleur</td>
+      <td>Shimano 600 Ultegra (FD-6400) 28.6 clamp</td>
+     </tr>
+     <tr>
+      <td>R-Derailleur</td>
+      <td>Shimano 600 Ultegra (RD-6400) SIS short cage</td>
+     </tr>
+     <tr>
+      <td>Pedals</td>
+      <td>Sampson/SR Clipless</td>
+     </tr>
+     <tr>
+      <td>Brakes</td>
+      <td>Shimano 600 Ultegra SIS single pivot calipers (BR-6400)</td>
+     </tr>
+     <tr>
+      <td>Brake Levers</td>
+      <td>Shimano 600 Ultegra (BL-6401) aero SLR</td>
+     </tr>
+     <tr>
+      <td>Bars</td>
+      <td>SR?</td>
+     </tr>
+     <tr>
+      <td>Stem</td>
+      <td>Nitto</td>
+     </tr>
+     <tr>
+      <td>Headset</td>
+      <td>Tange Levin CD</td>
+     </tr>
+     <tr>
+      <td>Seatpost</td>
+      <td>SR Laprade fluted 27.2</td>
+     </tr>
+     <tr>
+      <td>Saddle</td>
+      <td>Avenir Turbogel</td>
+     </tr>
+     <tr>
+      <td>Hubs</td>
+      <td>Shimano 600 Ultegra HB-6400, FH-6400 back:32h, Front:28h (32h Front 58cm frame and larger)</td>
+     </tr>
+     <tr>
+      <td>Rims</td>
+      <td>Araya CTL-370 700c Dark Anodized, back:32h, Front:28h (32h Front 58cm frame and larger)</td>
+     </tr>
+     <tr>
+      <td>Tires</td>
+      <td>Panaracer Technova II 700c</td>
+     </tr>
+     <tr>
+      <td>Scheme</td>
+      <td>solid or fade</td>
+     </tr>
+     <tr>
+      <td>Head Badge</td>
+      <td>Heavy "C" w/o shading<br/>
+          "Made in Japan" below</td>
+     </tr>
+     <tr>
+      <td>DT Decal</td>
+      <td>"Centurion" unshaded thinner font</td>
+     </tr>
+     <tr>
+      <td>TT Decal</td>
+      <td>"Ironman Master Dave Scott"</td>
+     </tr>
+     <tr>
+      <td>Seattube Decal</td>
+      <td><p>Top: geographic themed "Tange #1"</p>
+          <p>Base: "Made in Japan/Designed in USA"</p></td>
+     </tr>
+     <tr>
+      <td>Seat Stay Decal</td>
+      <td>"Centurion" below caps</td>
+     </tr>
+     <tr>
+      <td>Fork Decals</td>
+      <td>Clear "Tange"</td>
+     </tr>
+     <tr>
+      <td>Color #1</td>
+      <td>Guards Red</td>
+     </tr>
+     <tr>
+      <td>Color #2</td>
+      <td>Grey Marble / White Dualtone</td>
+     </tr>
+	 <tr>
+      <td>Color #3</td>
+      <td>Blue Marble / White Dualtone</td>
+     </tr>
+    </tbody>
+   </table>
+   <p></p>
+   <p>2020 Vintage-Centurion.com</p> 
+ </body>
+</html>

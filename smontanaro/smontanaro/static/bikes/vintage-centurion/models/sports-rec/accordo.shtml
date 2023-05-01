@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang=en>
+ <head>
+  <title>Centurion Accordo</title>
+  <meta charset="utf-8" />
+  <link href="/styles.css" rel="stylesheet" type="text/css" />
+ </head>
+ <body>
+    <header>
+   <h1><a href="/" title="Vintage Centurion Bicycles Home">
+    <img src="/images/Vintage_centurion_logo1024_0.jpg" alt="Vintage Centurion Bicycles Home" /></a></h1>
+  </header>
+   <nav>
+    <ul>
+     <li><a href="/">Home</a></li>
+     <li><a href="/about.shtml">About Us</a></li>
+     <li><a href="/models/models.shtml" title="Centurion Models">Models</a>
+      <ul>
+       <li><a href="/models/competition/competition.shtml" title="Competition Model Centurion Bikes WSI">Competition Models</a>
+        <ul>
+           <li><a href="/models/competition/professional.shtml">Professional (1973-78)</a></li>
+           <li><a href="/models/competition/semi-pro.shtml">Semi-Pro (1978-81)</a></li>
+           <li><a href="/models/competition/turbo.shtml" title="Turbo 83/84">Turbo (1983-84)</a></li>
+		   <li><a href="/models/competition/trac.shtml" title="Trac">Trac (1983)</a></li>
+           <li><a href="/models/competition/comp-ta.shtml">Comp TA (1984)</a></li>
+           <li><a href="/models/competition/cinelli-equipe.shtml" title="1985 Centurion Cinelli Equipe">Cinelli Equipe (1985)</a></li>
+           <li><a href="/models/competition/prestige.shtml" title="Prestige">Prestige (1985,86,89)</a></li>
+           <li><a href="/models/competition/facet.shtml" title="Facet">Facet (1986)</a></li>
+           <li><a href="/models/competition/ironman/ironman.shtml" title="History and Information of Ironman Centurions">Ironman (1985-89)</a>
+            <ul>
+             <li><a href="/models/competition/ironman/85-86.shtml" title="Ironman">Ironman 1985/1986</a></li>
+             <li><a href="/models/competition/ironman/87-89_master.shtml" title="Ironman Master models">Ironman Master (87-89)</a></li>
+             <li><a href="/models/competition/ironman/87-89_expert.shtml" title="Ironman Expert Models">Ironman Expert (87-89)</a></li>
+			 <li><a href="/models/competition/ironman/87-womens_expert.shtml" title="Ironman Expert Models">Ironman Expert Womens (87)</a></li>
+             <li><a href="/models/competition/ironman/88_carbon.shtml" title="Ironman Carbon Model 1988">Ironman Carbon (1988)</a></li>
+            </ul>
+           </li>
+           <li><a href="/models/competition/elite.shtml">Elite RS/Super</a></li>
+		   <li><a href="/models/competition/carbonr.shtml" title="Carbon R">Carbon R (1989)</a></li>
+          </ul>
+         </li>
+         <li><a href="/models/touring/touring.shtml" title="Touring Bikes">Touring Models</a>
+          <ul>
+           <li><a href="/models/touring/protour.shtml">Pro Tour (1976-84)</a></li>
+           <li><a href="/models/touring/elite-gt.shtml">Elite GT (1984)</a></li>
+          </ul>
+         </li>
+         <li><a href="/models/sports-rec/sports-rec.shtml" title="Sports and Recreational Models">Sport Models</a>
+          <ul>
+           <li><a href="/models/sports-rec/lemans.shtml" title="Lemans Models">LeMans (RS) (1970-1989)</a></li>
+           <li><a href="/models/sports-rec/accordo.shtml" title="1982-1989 Accordo">Accordo (RS) (1982-1989)</a></li>
+          </ul>
+        </li>
+        </ul>
+       </li>
+       <li><a href="/literature/literature.shtml" title="Digital version of Printed Literature">Literature</a>
+        <ul>
+         <li><a href="/literature/centurion-catalogs.shtml" title="Scans of original Centurion catalogs">Catalogs</a></li>
+         <li><a href="/literature/articles/articles.shtml" title="Articles pertaining to Centurion and Western States Imports aka WSI">Articles</a>
+          <ul>
+           <li><a href="/literature/articles/la-times.shtml" title="LA times article on WSI and the Centurion Brand">LA Times Article 10/1986</a></li>
+          </ul>
+         </li>
+         <li><a href="/literature/ads.shtml">Advertisements</a></li>
+         <li><a href="/literature/reviews/reviews.shtml" title="Magazine Reviews">Reviews</a>
+          <ul>
+           <li><a href="/literature/reviews/77-protour.shtml" title="Pro Tour Dec 1976 Bicycling Mag review">Bicycling 1977 ProTour</a></li>
+           <li><a href="/literature/reviews/cinelli-article.shtml">1985 Cinelli Equipe Article</a></li>
+           <li><a href="/literature/reviews/86-ironman-review.shtml">1986 Ironman Review</a></li>
+           <li><a href="/literature/reviews/87-expert-bicycling.shtml">1987 Expert Ironman Review</a></li>
+          </ul>
+         </li>
+         <li><a href="/literature/wsi-locations.shtml">WSI Locations</a></li>
+        </ul>
+       </li>
+       <li><a href="/years/years.shtml">What Year is it?</a>
+        <ul>
+         <li><a href="/years/sn-deciphering.shtml" title="Serial Number Deciphering for build year">SN deciphering</a></li>
+         <li><a href="/years/modelbyyear.shtml" title="A break down of what models were offered during a particular year">Models By Year</a></li>
+         <li><a href="/years/modelbycolor.shtml" title="A break down of the colors offered each year">Model Years by Color</a></li>
+         <li><a href="/years/headbadges.shtml" title="Visual guide to the Centurion headbadge logos">HeadBadges</a></li>
+         <li><a href="/years/dt-logo.shtml" title="A historical tour of Centurion DownTube Logos">DownTube Logos</a></li>
+        </ul>
+       </li>
+       <li><a href="/tech/tech.shtml" title="Centurion Tech">Tech</a>
+        <ul>
+         <li><a href="/tech/frame-differences.shtml" title="Cataloging the differences between the IM Master and Expert">IM frame differences</a></li>
+         <li><a href="/tech/89-geometry.shtml">1989 Ironman geometry</a></li>
+        </ul>
+       </li>
+    </ul>
+  </nav>
+
+  <h1>Accordo (RS) 1982-1989</h1>
+  <p>This upper, entry level model featured a Tange Infinity main triangle with stays and forks that varied from hi-tensile steel to CrMo, depending on the year. deraileurs were Shimano Light Action for 1985-1988, with Exage used in 1989. First introduced in 1985 as the Accordo RS it would remain in the Centurion line up until 1989 when the Centurion name was dropped and they started carrying the Diamond name.</p>
+   <h2>1982</h2>
+    <img alt="" src="images/1982_accordo.jpg" />
+   <h2>1984</h2>
+    <table><caption>1984 Accordo Specs</caption>
+     <tbody>
+      <tr>
+       <td>Frame</td>
+       <td>Tange 900 Chromoly Double Butted Main tube</td>
+      </tr>
+      <tr>
+       <td>Size</td>
+       <td><p>Men's 19 1/2,21, 23,25</p>
+           <p>Mixte 17,19,21</p></td>
+      </tr>
+      <tr>
+       <td>Fork</td>
+       <td>Tange Hi-Tension</td>
+      </tr>
+      <tr>
+       <td>Rear Deraileur</td>
+       <td>Suntour AR GT </td>
+      </tr>
+      <tr>
+       <td>Front Deraileur</td>
+       <td>Suntour AR GT</td>
+      </tr>
+      <tr>
+       <td>Shifters</td>
+       <td>Suntour AR-GT Friction Stem mounted</td>
+      </tr>
+      <tr>
+       <td>Crankset</td>
+       <td>Sugino RT Forged Aluminum  Sealed BB Assy</td>
+      </tr>
+      <tr>
+       <td>Chainrings</td>
+       <td>40/52t Steel</td>
+      </tr>
+      <tr>
+       <td>Pedals</td>
+       <td>MKS Steel Balance Rat Trap</td>
+      </tr>
+      <tr>
+       <td>Chain</td>
+       <td>DID Black</td>
+      </tr>
+      <tr>
+       <td>Freewheel</td>
+       <td>Suntour 14-28t 6 Speed </td>
+      </tr>
+      <tr>
+       <td>Brakes</td>
+       <td>Dia Compe N500 Side Pull with Quick Release and Safety Levers</td>
+      </tr>
+      <tr>
+       <td>Brake Levers</td>
+       <td>Dia Compe Levers with "Safety Levers"</td>
+      </tr>
+      <tr>
+       <td>Seatpost</td>
+       <td>Stainless Steel</td>
+      </tr>
+      <tr>
+       <td>Saddle</td>
+       <td>Vetta Anatomic Simulated Leather</td>
+      </tr>
+      <tr>
+       <td>Stem</td>
+       <td>SR NSR Aluminum</td>
+      </tr>
+      <tr>
+       <td>Handlebars</td>
+       <td>SR Custom Steel</td>
+      </tr>
+      <tr>
+       <td>Headset</td>
+       <td>Centurion Steel Sealed System</td>
+      </tr>
+      <tr>
+       <td>Hubs</td>
+       <td>Suzue Small Flange QR, Aluminum Sealed System</td>
+      </tr>
+      <tr>
+       <td>Rims</td>
+       <td>Araya 16A/5 22mm 495Gm, 27x1 1/2 Silver Anodized Aluminum 36H</td>
+      </tr>
+      <tr>
+       <td>Spokes</td>
+       <td>High Carbon Steel 14 gauge</td>
+      </tr>
+      <tr>
+       <td>Tires</td>
+       <td>Gumwall 90PSI 27x1 1/4</td>
+      </tr>
+      <tr>
+       <td>Color 1</td>
+       <td>Super Metallic Red</td>
+      </tr>
+      <tr>
+       <td>Color 2</td>
+       <td>Super Metallic BlueGray</td>
+      </tr>
+      <tr>
+       <td>Color 3</td>
+       <td>Super Metallic Beige</td>
+      </tr>
+      <tr>
+       <td>Scheme</td>
+       <td> </td>
+      </tr>
+      <tr>
+       <td>Headbadge</td>
+       <td> </td>
+      </tr>
+      <tr>
+       <td>Downtube Decal</td>
+       <td> </td>
+      </tr>
+      <tr>
+       <td>Toptube Decal</td>
+       <td> </td>
+      </tr>
+      <tr>
+       <td>Seattube Decal</td>
+       <td> </td>
+      </tr>
+      <tr>
+       <td>Seat Stay Decal</td>
+       <td> </td>
+      </tr>
+      <tr>
+       <td>Chain Stay Decal</td>
+       <td> </td>
+      </tr>
+     </tbody>
+    </table>
+    <h2>1985</h2>
+     <p>Coming Soon</p>
+    <h2>1986</h2>
+    <table><caption>1986 Accordo Specs</caption>
+     <tbody>
+      <tr>
+       <td>Frame</td>
+       <td>Tange Infinity Double Butted cromo 3 main tubes</td>
+      </tr>
+      <tr>
+       <td>Size</td>
+       <td>19 3/4, 21,23,25"</td>
+      </tr>
+      <tr>
+       <td>Fork</td>
+       <td>Tange High Tension Steel Centurion Design Crown, Forged Tips</td>
+      </tr>
+      <tr>
+       <td>Rear Deraileur</td>
+       <td>Shimano L-523 Light Action</td>
+      </tr>
+      <tr>
+       <td>Front Deraileur</td>
+       <td>Shimano Z-204 Light Action</td>
+      </tr>
+      <tr>
+       <td>Shifters</td>
+       <td>Shimano Stem mounted </td>
+      </tr>
+      <tr>
+       <td>Crankset</td>
+       <td>Sugino VP Sealed Bottom Bracket</td>
+      </tr>
+      <tr>
+       <td>Pedals</td>
+       <td>Steel RatTraps</td>
+      </tr>
+      <tr>
+       <td>Chainrings</td>
+       <td>52/40T</td>
+      </tr>
+      <tr>
+       <td>Chain</td>
+       <td>Shimano UG Beveled Plates Silver/Black</td>
+      </tr>
+      <tr>
+       <td>Freewheel</td>
+       <td>Shimano Z 13-28T 6 Speed Silver</td>
+      </tr>
+      <tr>
+       <td>Brakes</td>
+       <td>Shimano Z QR Sidepull</td>
+      </tr>
+      <tr>
+       <td>Brake Levers</td>
+       <td>DiaCompe AC-265 Aero Levers with Extension Levers</td>
+      </tr>
+      <tr>
+       <td>Seatpost</td>
+       <td>Sugino SP-KCL 27.0mm with Graduated Scale</td>
+      </tr>
+      <tr>
+       <td>Saddle</td>
+       <td>Vetta Anatomic</td>
+      </tr>
+      <tr>
+       <td>Stem</td>
+       <td>Kusuki Win Sigma , Aluminum Alloy</td>
+      </tr>
+      <tr>
+       <td>Handlebars</td>
+       <td>Kusuki KD Alloy Center reinforced Pelten Padded Tape</td>
+      </tr>
+      <tr>
+       <td>Headset</td>
+       <td>Centurion Steel</td>
+      </tr>
+      <tr>
+       <td>Hubs</td>
+       <td>Centurion Suzue Small Flange Sealed Alloy QR Front and Rear</td>
+      </tr>
+      <tr>
+       <td>Rims</td>
+       <td>Araya SP-30 27x1 Aluminum Alloy</td>
+      </tr>
+      <tr>
+       <td>Tires</td>
+       <td>Panaracer 27x 1 1/8 Rated 100psi Skinwall</td>
+      </tr>
+      <tr>
+       <td>Spokes</td>
+       <td>Asahi Stailess Steel 14ga</td>
+      </tr>
+      <tr>
+       <td>Color 1</td>
+       <td>Anthracite with Silver Dualtone</td>
+      </tr>
+      <tr>
+       <td>Color 2</td>
+       <td>Blue with Silver Dualtone</td>
+      </tr>
+      <tr>
+       <td>Scheme</td>
+       <td> </td>
+      </tr>
+      <tr>
+       <td>Headbadge</td>
+       <td> </td>
+      </tr>
+      <tr>
+       <td>Downtube Decal</td>
+       <td> </td>
+      </tr>
+      <tr>
+       <td>Toptube Decal</td>
+       <td> </td>
+      </tr>
+      <tr>
+       <td>Seattube Decal</td>
+       <td> </td>
+      </tr>
+      <tr>
+       <td>Seat Stay Decal</td>
+       <td> </td>
+      </tr>
+      <tr>
+       <td>Chain Stay Decal</td>
+       <td> </td>
+      </tr>
+     </tbody>
+    </table>
+    <h2>1987</h2>
+     <img alt="" src="images/1987_accordo.jpg" />
+     <table><caption>1987 Accordo RS Specs</caption>
+      <tbody>
+       <tr>
+        <td>Frame</td>
+        <td>Tange Infinity Double Butted cromo 3 main tubes</td>
+       </tr>
+       <tr>
+        <td>Size</td>
+        <td>19 3/4, 21,23,25"</td>
+       </tr>
+       <tr>
+        <td>Fork</td>
+        <td>Tange High Tension Steel Centurion Design Crown, Forged Tips</td>
+       </tr>
+       <tr>
+        <td>Rear Deraileur</td>
+        <td>Shimano L-523 SIS Light Action</td>
+       </tr>
+       <tr>
+        <td>Front Deraileur</td>
+        <td>Shimano Z-204 Light Action</td>
+       </tr>
+       <tr>
+        <td>Shifters</td>
+        <td>Shimano SIS Light Action Downtube Mounted</td>
+       </tr>
+       <tr>
+        <td>Crankset</td>
+        <td>Sugino VP Sealed Bottom Bracket</td>
+       </tr>
+       <tr>
+        <td>Pedals</td>
+        <td>Steel RatTraps</td>
+       </tr>
+       <tr>
+        <td>Chainrings</td>
+        <td>52/40T</td>
+       </tr>
+       <tr>
+        <td>Chain</td>
+        <td>Shimano UG Beveled Plates Silver/Black</td>
+       </tr>
+       <tr>
+        <td>Freewheel</td>
+        <td>Shimano Z 14-28T 6 Speed Silver</td>
+       </tr>
+       <tr>
+        <td>Brakes</td>
+        <td>Shimano L-490 SLR </td>
+       </tr>
+       <tr>
+        <td>Brake Levers</td>
+        <td>Shimano Aero Levers </td>
+       </tr>
+       <tr>
+        <td>Seatpost</td>
+        <td>Delta CP-S 27.0mm with Graduated Scale</td>
+       </tr>
+       <tr>
+        <td>Saddle</td>
+        <td>Vetta Anatomic with Lycra Cover</td>
+       </tr>
+       <tr>
+        <td>Stem</td>
+        <td>Delta , Aluminum Alloy</td>
+       </tr>
+       <tr>
+        <td>Handlebars</td>
+        <td>Centurion reinforced w/  Padded Tape</td>
+       </tr>
+       <tr>
+        <td>Headset</td>
+        <td>Centurion Steel</td>
+       </tr>
+       <tr>
+        <td>Hubs</td>
+        <td>Centurion Suzue Small Flange Sealed Alloy QR Front and Rear</td>
+       </tr>
+       <tr>
+        <td>Rims</td>
+        <td>Weinmann 913 700x20c Aluminum Alloy</td>
+       </tr>
+       <tr>
+        <td>Tires</td>
+        <td>Cheng Shin 700x25c Skinwalls</td>
+       </tr>
+       <tr>
+        <td>Spokes</td>
+        <td>Asahi Stailess Steel 14ga</td>
+       </tr>
+       <tr>
+        <td>Color 1</td>
+        <td>Guards Red with White  Dualtone</td>
+       </tr>
+       <tr>
+        <td>Color 2</td>
+        <td>Yellow with White Dualtone</td>
+       </tr>
+       <tr>
+        <td>Scheme</td>
+        <td> </td>
+       </tr>
+       <tr>
+        <td>Headbadge</td>
+        <td> </td>
+       </tr>
+       <tr>
+        <td>Downtube Decal</td>
+        <td> </td>
+       </tr>
+       <tr>
+        <td>Toptube Decal</td>
+        <td> </td>
+       </tr>
+       <tr>
+        <td>Seattube Decal</td>
+        <td> </td>
+       </tr>
+       <tr>
+        <td>Seat Stay Decal</td>
+        <td> </td>
+       </tr>
+       <tr>
+        <td>Chain Stay Decal</td>
+        <td> </td>
+       </tr>
+      </tbody>
+     </table>
+     <h2>1988</h2>
+      <img alt="1988 Centurion Accordo" src="images/1988_accordo-aqua.jpg" />
+      <table><caption><img alt="" src="images/1988_accordo-red.jpg"/>1988 Accordo Specs</caption>
+       <tbody>
+        <tr>
+         <td>Frame</td>
+         <td>Tange Infinity</td>
+        </tr>
+        <tr>
+         <td>Fork</td>
+         <td>Hi Ten </td>
+        </tr>
+        <tr>
+         <td>Rear Deraileur</td>
+         <td>Shimano Light Action</td>
+        </tr>
+        <tr>
+         <td>Front Deraileur</td>
+         <td>Shimano Light Action</td>
+        </tr>
+        <tr>
+         <td>Shifters</td>
+         <td>Shimano Light Action</td>
+        </tr>
+        <tr>
+         <td>Crankset</td>
+         <td>Shimano Light Action</td>
+        </tr>
+        <tr>
+         <td>Chainrings</td>
+         <td>52/42 Biopace</td>
+        </tr>
+        <tr>
+         <td>Chain</td>
+         <td> </td>
+        </tr>
+        <tr>
+         <td>Freewheel</td>
+         <td>6 Speed </td>
+        </tr>
+        <tr>
+         <td>Brakes</td>
+         <td>Shimano Light Action</td>
+        </tr>
+        <tr>
+         <td>Brake Levers</td>
+         <td>Shimano Light Action</td>
+        </tr>
+        <tr>
+         <td>Seatpost</td>
+         <td>SR-Lapadre</td>
+        </tr>
+        <tr>
+         <td>Saddle</td>
+         <td>Centurion Anatomical (Vetta)</td>
+        </tr>
+        <tr>
+         <td>Stem</td>
+         <td>Custom </td>
+        </tr>
+        <tr>
+         <td>Handlebars</td>
+         <td>Centurion</td>
+        </tr>
+        <tr>
+         <td>Color 1</td>
+         <td>Teal/White</td>
+        </tr>
+        <tr>
+         <td>Scheme</td>
+         <td>Front/Rear fade to middle</td>
+        </tr>
+        <tr>
+         <td>Headbadge</td>
+         <td> </td>
+        </tr>
+        <tr>
+         <td>Downtube Decal</td>
+         <td> </td>
+        </tr>
+        <tr>
+         <td>Toptube Decal</td>
+         <td>Accordo with Geometric Shapes</td>
+        </tr>
+        <tr>
+         <td>Seattube Decal</td>
+         <td>Made in Taiwan Decal, Tange Infinity Decal</td>
+        </tr>
+        <tr>
+         <td>Seat Stay Decal</td>
+         <td>Geometric Shapes</td>
+        </tr>
+        <tr>
+         <td>Chain Stay Decal</td>
+         <td> </td>
+        </tr>
+       </tbody>
+      </table>
+      <h2>1989</h2>
+       <img alt="1989 Centurion Accordo" src="images/1989_accordo-blk.jpg" />
+       <table><caption>1989 Accordo Specs</caption>
+        <tbody>
+         <tr>
+          <td>Frame</td>
+          <td>Tange Infinity</td>
+         </tr>
+         <tr>
+          <td>Fork</td>
+          <td>Hi Ten </td>
+         </tr>
+         <tr>
+          <td>Rear Deraileur</td>
+          <td>Shimano Exage</td>
+         </tr>
+         <tr>
+          <td>Front Deraileur</td>
+          <td>Shimano Exage</td>
+         </tr>
+         <tr>
+          <td>Shifters</td>
+          <td>Shimano Sport LX</td>
+         </tr>
+         <tr>
+          <td>Crankset</td>
+          <td>Shimano Exage</td>
+         </tr>
+         <tr>
+          <td>Chainrings</td>
+          <td>52/42 Biopace</td>
+         </tr>
+         <tr>
+          <td>Chain</td>
+          <td> </td>
+         </tr>
+         <tr>
+          <td>Freewheel</td>
+          <td>6 Speed </td>
+         </tr>
+         <tr>
+          <td>Brakes</td>
+          <td>Shimano Exage</td>
+         </tr>
+         <tr>
+          <td>Brake Levers</td>
+          <td>Shimano Light Exage</td>
+         </tr>
+         <tr>
+          <td>Seatpost</td>
+          <td>SR-Lapadre</td>
+         </tr>
+         <tr>
+          <td>Saddle</td>
+          <td>Centurion Anatomical (Vetta)</td>
+         </tr>
+         <tr>
+          <td>Stem</td>
+          <td>Custom </td>
+         </tr>
+         <tr>
+          <td>Handlebars</td>
+          <td>Centurion</td>
+         </tr>
+         <tr>
+          <td>Color 1</td>
+          <td>Black</td>
+         </tr>
+         <tr>
+          <td>Scheme</td>
+          <td>None</td>
+         </tr>
+         <tr>
+          <td>Headbadge</td>
+          <td> </td>
+         </tr>
+         <tr>
+          <td>Downtube Decal</td>
+          <td> </td>
+         </tr>
+         <tr>
+          <td>Toptube Decal</td>
+          <td>Accordo</td>
+         </tr>
+         <tr>
+          <td>Seattube Decal</td>
+          <td>Made in Taiwan Decal, Tange Infinity Decal</td>
+         </tr>
+         <tr>
+          <td>Seat Stay Decal</td>
+          <td>Centurion</td>
+         </tr>
+         <tr>
+          <td>Chain Stay Decal</td>
+          <td>Centurion</td>
+         </tr>
+        </tbody>
+       </table>
+  <p></p>
+   <p>2019 Vintage-Centurion.com</p> 
+ </body>
+</html>
