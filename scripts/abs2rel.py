@@ -4,19 +4,22 @@
 
 import argparse
 import os
-import re
 import sys
 
 from bs4 import BeautifulSoup
 
 def main():
-    top = sys.argv[1]
-    for (dirpath, dirnames, fnames) in os.walk(top):
+    parser = argparse.ArgumentParser()
+    parser.add_argument(dest="top", help="top-level directory to process")
+    parser.add_argument("-n", "--dry-run", dest="dry_run", default=False,
+                        action="store_true", help="Don't write any output")
+    args = parser.parse_args()
+    for (dirpath, _dirnames, fnames) in os.walk(args.top):
         dp_comps = dirpath.split("/")
         rel = "/".join([".."] * (len(dp_comps) - 1)) or "."
-        process_dir(dirpath, fnames, rel)
+        process_dir(dirpath, fnames, rel, args.dry_run)
 
-def process_dir(dirpath, fnames, rel):
+def process_dir(dirpath, fnames, rel, dry_run):
     print(dirpath, rel)
     for fname in fnames:
         if not fname.endswith("html"):
@@ -24,19 +27,23 @@ def process_dir(dirpath, fnames, rel):
         infname = os.path.join(dirpath, fname)
         with open(infname) as inp:
             raw = inp.read()
-        os.rename(infname, os.path.join(dirpath, f"old-{fname}"))
+        if not dry_run:
+            os.rename(infname, os.path.join(dirpath, f"old-{fname}"))
         soup = BeautifulSoup(raw, features="lxml")
         for (tag, attr) in (("img", "src"),
                             ("a", "href"),
                             ("link", "href")):
             for elt in soup.find_all(tag):
-                if elt[attr][0] == "/":
+                if elt[attr] and elt[attr][0] == "/":
                     newattr = rel + elt[attr]
                     if newattr.endswith("/"):
                         newattr += "index.html"
-                    elt[attr] = newattr
-        with open(infname, "w") as out:
-            out.write(str(soup))
+                    if elt[attr] != newattr:
+                        print(attr, elt[attr], "->", newattr)
+                        elt[attr] = newattr
+        if not dry_run:
+            with open(infname, "w") as out:
+                out.write(str(soup))
 
 if __name__ == "__main__":
     sys.exit(main())
