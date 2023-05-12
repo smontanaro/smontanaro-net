@@ -133,6 +133,9 @@ find CR/2004-11/eml-files -name '*.eml' \
 # extracttbfromsyslog
 runcov scripts/extracttbfromsyslog.py < syslog.www > /dev/null
 
+# abs2rel
+runcov scripts/abs2rel.py -n smontanaro/smontanaro/static/bikes/43bikes
+
 # Small refdb run to exercise one or two functions only it uses.
 runcov scripts/makerefsdb.py -d ref.db.test CR/2000-10
 runcov scripts/makerefsdb.py -c -d ref.db.test --one \
