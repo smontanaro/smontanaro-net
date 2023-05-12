@@ -154,18 +154,6 @@ def init_simple():
         vtdir = f"{os.environ.get('CRDIR')}/smontanaro/smontanaro/static/bikes"
         return send_from_directory(vtdir, os.path.join("vintage-trek", path))
 
-    @app.route("/vintage-centurion")
-    def centurion_reroute():
-        return redirect(url_for("vintage_centurion"))
-
-    @app.route("/vintage-centurion/")
-    @app.route("/vintage-centurion/<path:path>")
-    def vintage_centurion(path="index.html"):
-        "static replica sites"
-        vtdir = f"{os.environ.get('CRDIR')}/smontanaro/smontanaro/static/bikes"
-        return send_from_directory(vtdir, os.path.join("vintage-centurion",
-                                                       path))
-
 def get_month_table(year):
     "return months table for the given year"
     months = [
