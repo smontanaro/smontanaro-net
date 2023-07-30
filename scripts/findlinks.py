@@ -2,7 +2,6 @@
 
 "print <a href...> and <img src...> links."
 
-import os
 import sys
 
 from smontanaro.util import MyHTMLParser
