@@ -96,6 +96,7 @@ PYT=$?
 find search_cache -name 'tmp*' | head -1 | xargs rm
 runcov scripts/crcachectl.py -l
 runcov scripts/crcachectl.py -l -v -d 126mm
+runcov scripts/crcachectl.py --empty
 runcov scripts/crcachectl.py -d bartali -q
 runcov scripts/crcachectl.py -lq --delete-all
 runcov scripts/crcachectl.py -lv
