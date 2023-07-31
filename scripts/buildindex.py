@@ -4,7 +4,7 @@
 
 import argparse
 import concurrent.futures
-import csv
+# import csv
 import glob
 import html
 import os
