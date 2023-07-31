@@ -25,7 +25,7 @@ def process_dir(dirpath, fnames, rel, dry_run):
         if not fname.endswith("html"):
             continue
         infname = os.path.join(dirpath, fname)
-        with open(infname) as inp:
+        with open(infname, encoding="utf-8") as inp:
             raw = inp.read()
         if not dry_run:
             os.rename(infname, os.path.join(dirpath, f"old-{fname}"))
@@ -42,7 +42,7 @@ def process_dir(dirpath, fnames, rel, dry_run):
                         print(attr, elt[attr], "->", newattr)
                         elt[attr] = newattr
         if not dry_run:
-            with open(infname, "w") as out:
+            with open(infname, "w", encoding="utf-8") as out:
                 out.write(str(soup))
 
 if __name__ == "__main__":
