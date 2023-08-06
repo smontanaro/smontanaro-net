@@ -26,3 +26,4 @@ urllib3
 Werkzeug
 wrapt
 WTForms
+~/src/sprdpl
