@@ -75,7 +75,9 @@ sleep 1
 
 pkill -f gunicorn
 
-PYTHONPATH=smontanaro flask routes | egrep --color=never 'GET|POST' | sort > $ACT
+flask routes \
+    | egrep --color=never 'GET|POST' \
+    | sort > $ACT
 
 sort localhost.comments /tmp/$$.tmp \
     | sed -e 's/^[0-9][0-9]:[0-9][0-9]:[0-9][0-9][.0-9]* //' \
@@ -99,6 +101,7 @@ runcov scripts/crcachectl.py -l -v -d 126mm
 runcov scripts/crcachectl.py --empty
 runcov scripts/crcachectl.py -d bartali -q
 runcov scripts/crcachectl.py -lq --delete-all
+runcov scripts/crcachectl.py --delete-all
 runcov scripts/crcachectl.py -lv
 runcov scripts/crcachectl.py -qv
 
@@ -150,7 +153,7 @@ runcov scripts/csv2topic.py references.db < topic.csv > /dev/null
 
 # Exercise the code used to build the sqlite search database
 echo "CR/2007-11" | \
-    CRDIR=$(pwd) PYTHONPATH=smontanaro coverage run -a scripts/buildindex.py -t train.csv srch.db.test
+    CRDIR=$(pwd) coverage run -a scripts/buildindex.py -t train.csv srch.db.test
 
 n=$(echo "select * from search_terms where term = 'from:dale brown'" | sqlite3 srch.db.test | wc -l)
 m=$(echo "select * from search_terms where term like 'from:% '" | sqlite3 srch.db.test | wc -l)
@@ -172,4 +175,4 @@ fi
 rm -rf htmlcov
 coverage html
 
-diff -u localhost.exp $ACT && test $PYT -eq 0 && echo "success" || echo "failure"
+diff -wu localhost.exp $ACT && test $PYT -eq 0 && echo "success" || echo "failure"
