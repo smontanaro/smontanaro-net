@@ -43,85 +43,85 @@ threads           GET        /CR/<int:year>/<int:month>/threads
 trek_reroute      GET        /vintage-trek
 vintage_trek      GET        /vintage-trek/
 vintage_trek      GET        /vintage-trek/<path:path>
-[INFO] Starting gunicorn 20.1.0
+[INFO] Starting gunicorn 21.2.0
 [INFO] Using worker: sync
-127.0.0.1 - - "GET /favicon.ico HTTP/1.1" 302 <size> "-" curl/7.NN
-127.0.0.1 - - "GET /robots.txt HTTP/1.1" 302 <size> "-" curl/7.NN
-127.0.0.1 - - "GET /env HTTP/1.1" 200 <size> "-" curl/7.NN
-127.0.0.1 - - "GET /api/help HTTP/1.1" 200 <size> "-" curl/7.NN
-127.0.0.1 - - "GET / HTTP/1.1" 200 <size> "-" curl/7.NN
-127.0.0.1 - - "GET /CR/ HTTP/1.1" 200 <size> "-" curl/7.NN
-127.0.0.1 - - "GET /CR/about HTTP/1.1" 200 <size> "-" curl/7.NN
-127.0.0.1 - - "GET /CR/help HTTP/1.1" 200 <size> "-" curl/7.NN
-127.0.0.1 - - "GET /2001-05/html/threads.html HTTP/1.1" 301 <size> "-" curl/7.NN
-127.0.0.1 - - "GET /2003-09/html/maillist.html HTTP/1.1" 301 <size> "-" curl/7.NN
-127.0.0.1 - - "GET /2004-09/html/msg00032.html HTTP/1.1" 301 <size> "-" curl/7.NN
-127.0.0.1 - - "GET /CR/2001/05/threads HTTP/1.1" 200 <size> "-" curl/7.NN
-127.0.0.1 - - "GET /CR/2001/05/ HTTP/1.1" 404 <size> "-" curl/7.NN
+127.0.0.1 - - "GET /favicon.ico HTTP/1.1" 302 <size> "-" curl
+127.0.0.1 - - "GET /robots.txt HTTP/1.1" 302 <size> "-" curl
+127.0.0.1 - - "GET /env HTTP/1.1" 200 <size> "-" curl
+127.0.0.1 - - "GET /api/help HTTP/1.1" 200 <size> "-" curl
+127.0.0.1 - - "GET / HTTP/1.1" 200 <size> "-" curl
+127.0.0.1 - - "GET /CR/ HTTP/1.1" 200 <size> "-" curl
+127.0.0.1 - - "GET /CR/about HTTP/1.1" 200 <size> "-" curl
+127.0.0.1 - - "GET /CR/help HTTP/1.1" 200 <size> "-" curl
+127.0.0.1 - - "GET /2001-05/html/threads.html HTTP/1.1" 301 <size> "-" curl
+127.0.0.1 - - "GET /2003-09/html/maillist.html HTTP/1.1" 301 <size> "-" curl
+127.0.0.1 - - "GET /2004-09/html/msg00032.html HTTP/1.1" 301 <size> "-" curl
+127.0.0.1 - - "GET /CR/2001/05/threads HTTP/1.1" 200 <size> "-" curl
+127.0.0.1 - - "GET /CR/2001/05/ HTTP/1.1" 404 <size> "-" curl
 # invalid old-style message url
-127.0.0.1 - - "GET /2004-09/html/msg.html HTTP/1.1" 404 <size> "-" curl/7.NN
+127.0.0.1 - - "GET /2004-09/html/msg.html HTTP/1.1" 404 <size> "-" curl
 # bogus charset
-127.0.0.1 - - "GET /CR/2005/06/0640 HTTP/1.1" 200 <size> "-" curl/7.NN
+127.0.0.1 - - "GET /CR/2005/06/0640 HTTP/1.1" 200 <size> "-" curl
 # a couple different indexes
-127.0.0.1 - - "GET /CR/2000/03/threads HTTP/1.1" 200 <size> "-" curl/7.NN
-127.0.0.1 - - "GET /CR/2000/06/dates HTTP/1.1" 200 <size> "-" curl/7.NN
+127.0.0.1 - - "GET /CR/2000/03/threads HTTP/1.1" 200 <size> "-" curl
+127.0.0.1 - - "GET /CR/2000/06/dates HTTP/1.1" 200 <size> "-" curl
 # no content-type, quotes original message
-127.0.0.1 - - "GET /CR/2002/04/0346 HTTP/1.1" 200 <size> "-" curl/7.NN
-127.0.0.1 - - "GET /CR/2001/01/0656 HTTP/1.1" 200 <size> "-" curl/7.NN
+127.0.0.1 - - "GET /CR/2002/04/0346 HTTP/1.1" 200 <size> "-" curl
+127.0.0.1 - - "GET /CR/2001/01/0656 HTTP/1.1" 200 <size> "-" curl
 # multipart/mixed
-127.0.0.1 - - "GET /CR/2001/01/0307 HTTP/1.1" 200 <size> "-" curl/7.NN
-127.0.0.1 - - "GET /CR/2009/09/01323 HTTP/1.1" 200 <size> "-" curl/7.NN
+127.0.0.1 - - "GET /CR/2001/01/0307 HTTP/1.1" 200 <size> "-" curl
+127.0.0.1 - - "GET /CR/2009/09/01323 HTTP/1.1" 200 <size> "-" curl
 WARNING:root:Can't render images
-127.0.0.1 - - "GET /CR/2011/2/1601 HTTP/1.1" 200 <size> "-" curl/7.NN
+127.0.0.1 - - "GET /CR/2011/2/1601 HTTP/1.1" 200 <size> "-" curl
 # non-standard response
-127.0.0.1 - - "GET /request/junk HTTP/1.1" 444 <size> "-" curl/7.NN
+127.0.0.1 - - "GET /request/junk HTTP/1.1" 444 <size> "-" curl
 # proper /request
-127.0.0.1 - - "GET /request/HTTP_USER_AGENT HTTP/1.1" 200 <size> "-" curl/7.NN
+127.0.0.1 - - "GET /request/HTTP_USER_AGENT HTTP/1.1" 200 <size> "-" curl
 # local search
-127.0.0.1 - - "GET /CR/query?query=Baylis HTTP/1.1" 200 <size> "-" curl/7.NN
+127.0.0.1 - - "GET /CR/query?query=Baylis HTTP/1.1" 200 <size> "-" curl
 # second time to exercise query cache
-127.0.0.1 - - "GET /CR/query?query=Baylis HTTP/1.1" 200 <size> "-" curl/7.NN
-127.0.0.1 - - "GET /CR/query HTTP/1.1" 200 <size> "-" curl/7.NN
+127.0.0.1 - - "GET /CR/query?query=Baylis HTTP/1.1" 200 <size> "-" curl
+127.0.0.1 - - "GET /CR/query HTTP/1.1" 200 <size> "-" curl
 # search engine search
-127.0.0.1 - - "GET /search?query=Baylis HTTP/1.1" 302 <size> "-" curl/7.NN
+127.0.0.1 - - "GET /search?query=Baylis HTTP/1.1" 302 <size> "-" curl
 # topics
-127.0.0.1 - - "GET /CR/topics/BVVW HTTP/1.1" 200 <size> "-" curl/7.NN
-127.0.0.1 - - "GET /CR/topics HTTP/1.1" 200 <size> "-" curl/7.NN
+127.0.0.1 - - "GET /CR/topics/BVVW HTTP/1.1" 200 <size> "-" curl
+127.0.0.1 - - "GET /CR/topics HTTP/1.1" 200 <size> "-" curl
 # url mapping
-127.0.0.1 - - "GET /CR/2004/05/0026 HTTP/1.1" 200 <size> "-" curl/7.NN
+127.0.0.1 - - "GET /CR/2004/05/0026 HTTP/1.1" 200 <size> "-" curl
 # url mapping with query
-127.0.0.1 - - "GET /CR/2006/11/1740 HTTP/1.1" 200 <size> "-" curl/7.NN
+127.0.0.1 - - "GET /CR/2006/11/1740 HTTP/1.1" 200 <size> "-" curl
 # quoted-printable encoding, but missing header
-127.0.0.1 - - "GET /CR/2008/05/1123 HTTP/1.1" 200 <size> "-" curl/7.NN
+127.0.0.1 - - "GET /CR/2008/05/1123 HTTP/1.1" 200 <size> "-" curl
 # bad msg ref
-127.0.0.1 - - "GET /2008/05/1123 HTTP/1.1" 301 <size> "-" curl/7.NN
+127.0.0.1 - - "GET /2008/05/1123 HTTP/1.1" 301 <size> "-" curl
 # Message-ID reference contains whitespace...
-127.0.0.1 - - "GET /CR/2006/10/0542 HTTP/1.1" 200 <size> "-" curl/7.NN
+127.0.0.1 - - "GET /CR/2006/10/0542 HTTP/1.1" 200 <size> "-" curl
 # Miscellaneous
-127.0.0.1 - - "GET /python HTTP/1.1" 200 <size> "-" curl/7.NN
-127.0.0.1 - - "GET /sitemap.xml HTTP/1.1" 200 <size> "-" curl/7.NN
-127.0.0.1 - - "GET /CR/addtopic HTTP/1.1" 200 <size> "-" curl/7.NN
-127.0.0.1 - - "GET /CR/2005/03/sitemap.xml HTTP/1.1" 200 <size> "-" curl/7.NN
-127.0.0.1 - - "GET /2005/03/mybikes HTTP/1.1" 302 <size> "-" curl/7.NN
-127.0.0.1 - - "GET /2005/03/about HTTP/1.1" 302 <size> "-" curl/7.NN
-127.0.0.1 - - "GET /vintage-trek/Trekpromoa.htm HTTP/1.1" 200 <size> "-" curl/7.NN
-127.0.0.1 - - "GET /43bikes/cinelli-sc.html HTTP/1.1" 200 <size> "-" curl/7.NN
+127.0.0.1 - - "GET /python HTTP/1.1" 200 <size> "-" curl
+127.0.0.1 - - "GET /sitemap.xml HTTP/1.1" 200 <size> "-" curl
+127.0.0.1 - - "GET /CR/addtopic HTTP/1.1" 200 <size> "-" curl
+127.0.0.1 - - "GET /CR/2005/03/sitemap.xml HTTP/1.1" 200 <size> "-" curl
+127.0.0.1 - - "GET /2005/03/mybikes HTTP/1.1" 302 <size> "-" curl
+127.0.0.1 - - "GET /2005/03/about HTTP/1.1" 302 <size> "-" curl
+127.0.0.1 - - "GET /vintage-trek/Trekpromoa.htm HTTP/1.1" 200 <size> "-" curl
+127.0.0.1 - - "GET /43bikes/cinelli-sc.html HTTP/1.1" 200 <size> "-" curl
 # file doesn't exist
 ERROR:root:File not found: ~/src/smontanaro.net/CR/2000-09/eml-files/classicrendezvous.10009.9999.eml
-127.0.0.1 - - "GET /CR/2000/09/9999 HTTP/1.1" 404 <size> "-" curl/7.NN
-127.0.0.1 - - "GET /bogus-replica/index.html HTTP/1.1" 404 <size> "-" curl/7.NN
+127.0.0.1 - - "GET /CR/2000/09/9999 HTTP/1.1" 404 <size> "-" curl
+127.0.0.1 - - "GET /bogus-replica/index.html HTTP/1.1" 404 <size> "-" curl
 # try to escape from bikes dir
-127.0.0.1 - - "GET /dates.py HTTP/1.1" 404 <size> "-" curl/7.NN
+127.0.0.1 - - "GET /dates.py HTTP/1.1" 404 <size> "-" curl
 # generate google photos link
-127.0.0.1 - - "GET /photolink HTTP/1.1" 200 <size> "-" curl/7.NN
-127.0.0.1 - - "GET /photolink/help HTTP/1.1" 200 <size> "-" curl/7.NN
+127.0.0.1 - - "GET /photolink HTTP/1.1" 200 <size> "-" curl
+127.0.0.1 - - "GET /photolink/help HTTP/1.1" 200 <size> "-" curl
 DEBUG:urllib3.connectionpool:Starting new HTTPS connection (1): photos.app.goo.gl:443
 DEBUG:urllib3.connectionpool:https://photos.app.goo.gl:443 "GET /qXkghhtQ2rPBhwZp7 HTTP/1.1" 302 <size>
 DEBUG:urllib3.connectionpool:Starting new HTTPS connection (1): photos.google.com:443
 DEBUG:urllib3.connectionpool:https://photos.google.com:443 "GET /share/AF1QipMpBo7PpJESYQIRJBk-VXGrd_C7BCYgiEbn4VeudzxqBPLSGFqjQdRVgXVts6236w?key=eFN6NmJVZHV4SmxPamkydWllOVlseTRwQzZCdC13 HTTP/1.1" 200 None
-127.0.0.1 - - "GET /photolink?fmt=html&width=1200&url=https://photos.app.goo.gl/qXkghhtQ2rPBhwZp7 HTTP/1.1" 200 <size> "-" curl/7.NN
+127.0.0.1 - - "GET /photolink?fmt=html&width=1200&url=https://photos.app.goo.gl/qXkghhtQ2rPBhwZp7 HTTP/1.1" 200 <size> "-" curl
 # one-page calendar
-127.0.0.1 - - "GET /calendar HTTP/1.1" 302 <size> "-" curl/7.NN
-127.0.0.1 - - "GET /calendar/ HTTP/1.1" 200 <size> "-" curl/7.NN
+127.0.0.1 - - "GET /calendar HTTP/1.1" 302 <size> "-" curl
+127.0.0.1 - - "GET /calendar/ HTTP/1.1" 200 <size> "-" curl
 Debug mode enabled.
 [INFO] Shutting down: Master

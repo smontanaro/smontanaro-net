@@ -7,7 +7,10 @@ import pickle                             # nosec
 import sqlite3
 import tempfile
 
-from .dates import convert_ts_bytes
+from .dates import register_sqlite3_adapters as _RSA
+_RSA()
+del _RSA
+
 # from .log import eprint
 
 CACHE_DIR = os.path.join(os.environ.get("CRDIR", os.getcwd()),
@@ -40,7 +43,6 @@ class SearchDB:
         if self.connection is not None:
             self.connection.close()
 
-        sqlite3.register_converter("TIMESTAMP", convert_ts_bytes)
         self.connection = sqlite3.connect(self.sqldb,
             detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
         self._create_tables()

@@ -139,7 +139,7 @@ def test_missing_cached_file(client):
     with client.application.app_context():
         result = execute_query("126mm")
     with open(os.path.join(CACHE_DIR, "index.pkl"), "rb") as fobj:
-        index = pickle.load(fobj)
+        index = pickle.load(fobj)       # nosec
     os.unlink(index["126mm"])
     with client.application.app_context():
         result = execute_query("126mm")

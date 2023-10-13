@@ -47,4 +47,4 @@ dependencies = [
 include = ["smontanaro"]
 
 [project.urls]
-"Homepage" = "https://ww.smontanaro.net/"
+"Homepage" = "https://www.smontanaro.net/"

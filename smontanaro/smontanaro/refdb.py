@@ -6,12 +6,13 @@ import os
 import random
 import sqlite3
 
-from .dates import convert_ts_bytes
+from .dates import register_sqlite3_adapters as _RSA
+_RSA()
+del _RSA
 
 def ensure_db(sqldb):
     "make sure the database and its schema exist"
     create = not os.path.exists(sqldb) or os.path.getsize(sqldb) == 0
-    sqlite3.register_converter("TIMESTAMP", convert_ts_bytes)
     conn = sqlite3.connect(sqldb, detect_types=(sqlite3.PARSE_DECLTYPES
                                                 | sqlite3.PARSE_COLNAMES))
     if create:

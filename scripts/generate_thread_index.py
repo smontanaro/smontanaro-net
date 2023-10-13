@@ -9,6 +9,8 @@ import sys
 from smontanaro import dates, create_app
 from smontanaro.util import generate_link
 
+dates.register_sqlite3_adapters()
+
 def thread_key(record):
     "groupby key func"
     return record["messageid"]
@@ -73,7 +75,6 @@ def main():
          "SERVER_NAME": "smontanaro.net",
          })
 
-    sqlite3.register_converter("TIMESTAMP", dates.convert_ts_bytes)
     conn = sqlite3.connect(args.sqldb, detect_types=(sqlite3.PARSE_DECLTYPES
                                                      | sqlite3.PARSE_COLNAMES))
     conn.row_factory = sqlite3.Row

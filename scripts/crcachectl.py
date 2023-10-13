@@ -4,7 +4,7 @@
 
 import argparse
 import os
-import pickle
+import pickle                           # nosec
 import sys
 
 def main():
@@ -30,7 +30,7 @@ def main():
         return 1
 
     with open(relpath("index.pkl", args.dir), "rb") as cache:
-        index = pickle.load(cache)
+        index = pickle.load(cache)      # nosec
 
     if args.list:
         if index:
@@ -46,7 +46,7 @@ def main():
                         print(" missing", end="")
                     else:
                         with open(path, "rb") as fp:
-                            if not pickle.load(fp):
+                            if not pickle.load(fp): # nosec
                                 print(" empty", end="")
                 if not args.quiet:
                     print()
@@ -63,7 +63,7 @@ def main():
                 delkeys.add(key)
             else:
                 with open(relpath(index[key], args.dir), "rb") as fp:
-                    if not pickle.load(fp):
+                    if not pickle.load(fp): # nosec
                         delkeys.add(key)
     elif args.keys is not None:
         delkeys = set(args.keys)
