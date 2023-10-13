@@ -3,6 +3,7 @@ astroid
 certifi
 charset-normalizer
 click
+coverage
 Flask
 Flask-WTF
 gunicorn
@@ -17,7 +18,7 @@ mccabe
 platformdirs
 pylint
 python-dateutil
-regex
+regex @ git+https://github.com/smontanaro/mrab-regex
 requests
 six
 textblob
@@ -26,4 +27,4 @@ urllib3
 Werkzeug
 wrapt
 WTForms
-~/src/sprdpl
+sprdpl @ git+https://github.com/smontanaro/sprdpl
