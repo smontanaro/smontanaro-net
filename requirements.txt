@@ -1,5 +1,7 @@
 arrow
 astroid
+bandit
+beautifulsoup4
 certifi
 charset-normalizer
 click
@@ -15,8 +17,10 @@ Jinja2
 lazy-object-proxy
 MarkupSafe
 mccabe
+mypy
 platformdirs
 pylint
+pytest
 python-dateutil
 regex @ git+https://github.com/smontanaro/mrab-regex
 requests
