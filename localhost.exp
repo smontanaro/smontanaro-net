@@ -43,7 +43,7 @@ threads           GET        /CR/<int:year>/<int:month>/threads
 trek_reroute      GET        /vintage-trek
 vintage_trek      GET        /vintage-trek/
 vintage_trek      GET        /vintage-trek/<path:path>
-[INFO] Starting gunicorn 21.2.0
+[INFO] Starting gunicorn
 [INFO] Using worker: sync
 127.0.0.1 - - "GET /favicon.ico HTTP/1.1" 302 <size> "-" curl
 127.0.0.1 - - "GET /robots.txt HTTP/1.1" 302 <size> "-" curl

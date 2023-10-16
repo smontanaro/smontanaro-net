@@ -16,6 +16,21 @@ ACT=localhost.act
 RAW=/tmp/localhost.raw
 WARNINGS=localhost.warnings
 
+# Mac requires gsleep for subsecond sleeps, Linux doesn't.
+if [ "x$(which gsleep | egrep -v 'not found')" = "x" ] ; then
+    SLEEP=sleep
+else
+    SLEEP=gsleep
+fi
+
+# Mac requires gdate for %N
+if [ "x$(which gdate | egrep -v 'not found')" = "x" ] ; then
+    DATE=date
+else
+    DATE=gdate
+fi
+
+
 VERBOSE=
 while getopts 'vh' OPTION; do
     case "$OPTION" in
@@ -29,12 +44,6 @@ while getopts 'vh' OPTION; do
     esac
 done
 shift "$(($OPTIND -1))"
-
-if [ "x$(which gdate | egrep -v 'not found')" = "x" ] ; then
-    DATE=date
-else
-    DATE=gdate
-fi
 
 dateit () {
     while read line ; do
@@ -55,7 +64,7 @@ fi
 
 export PORT=5001 HOST=localhost
 (DOCOVER=true bash $(dirname $0)/run.sh 2>&1 | dateit > /tmp/$$.tmp) &
-sleep 2
+$SLEEP 2
 
 rm -f localhost.comments
 sed -e 's/localhost:[0-9][0-9]*/localhost:5001/' < localhost.urls \
@@ -67,11 +76,11 @@ sed -e 's/localhost:[0-9][0-9]*/localhost:5001/' < localhost.urls \
         echo "*** $line ***"
         curl -s $line
     fi
-    gsleep 0.03
+    $SLEEP 0.03
 done  > $RAW
 echo 1>&2
 
-sleep 1
+$SLEEP 1
 
 pkill -f gunicorn
 
@@ -85,6 +94,7 @@ sort localhost.comments /tmp/$$.tmp \
           -e 's;^.[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] [0-9][0-9]:[0-9][0-9]:[0-9][0-9] -[0-9]*. .[0-9]*. .INFO.;[INFO];' \
           -e 's:HTTP/1.1" \([2-5][0-9][0-9]\) [0-9][0-9]*:HTTP/1.1" \1 <size>:' \
           -e 's:"curl/[0-9][0-9.]*.*:curl:' \
+          -e 's:Starting gunicorn .*:Starting gunicorn:' \
           -e 's:/[^/]*/skip:~:' \
     | awk -f $(dirname $0)/filter.awk \
           >> $ACT
