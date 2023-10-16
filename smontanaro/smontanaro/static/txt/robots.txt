@@ -1,6 +1,9 @@
 User-agent: Yandex
 Disallow: /
 
+User-agent: Bytespider
+Disallow: /
+
 User-agent: *
 Disallow: /cgi-bin
 Disallow: /search
