@@ -7,6 +7,11 @@ if [ "x$PYTHONPATH" = "x" ] ; then
     export PYTHONPATH=$(pwd)/smontanaro
 fi
 
+echo "+++++++++++++++++++++++++++"
+type python
+python --version
+echo "+++++++++++++++++++++++++++"
+
 # Run Flask server and throw a bunch of URLs at it. Compare with
 # expected output.
 
