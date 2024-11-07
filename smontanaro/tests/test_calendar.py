@@ -7,8 +7,7 @@ from _test_helper import client
 
 def test_calendar(client):
     with client.application.app_context():
-        today = datetime.date.today()
-        rv = client.get("/calendar/")
+        rv = client.get("/calendar/2023")
         assert rv.status_code == 200
         checklines = []
         saving = False
@@ -19,7 +18,7 @@ def test_calendar(client):
                 saving = True
             elif saving:
                 checklines.append(re.search(">([^<]+)<", line).group(1).strip())
-        assert checklines == f"{today.year} Jan May Aug Feb Jun Sep Apr".split()
+        assert checklines == f"2023 Jan May Aug Feb Jun Sep Apr".split()
 
 def test_calendar_year(client):
     with client.application.app_context():
