@@ -93,11 +93,13 @@ flask routes \
     | egrep --color=never 'GET|POST' \
     | sort > $ACT
 
+# The HTTP/1.?1 pattern is because it appears Google Photos sometimes
+# sends back HTTP/11... ¯\_(ツ)_/¯
 sort localhost.comments /tmp/$$.tmp \
     | sed -e 's/^[0-9][0-9]:[0-9][0-9]:[0-9][0-9][.0-9]* //' \
           -e 's;.../.../....:..:..:.. -..... ;;' \
           -e 's;^.[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] [0-9][0-9]:[0-9][0-9]:[0-9][0-9] -[0-9]*. .[0-9]*. .INFO.;[INFO];' \
-          -e 's:HTTP/1.1" \([2-5][0-9][0-9]\) [0-9][0-9]*:HTTP/1.1" \1 <size>:' \
+          -e 's:HTTP/1[.]*1" \([2-5][0-9][0-9]\) [0-9][0-9]*:HTTP/1.1" \1 <size>:' \
           -e 's:"curl/[0-9][0-9.]*.*:curl:' \
           -e 's:Starting gunicorn .*:Starting gunicorn:' \
           -e 's:/[^/]*/skip:~:' \
