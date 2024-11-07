@@ -51,7 +51,8 @@ class SearchDB:
     def get_page_fragments(self, term):
         "return list (filename, fragment, subject, sender) tuples matching term"
         cached = self._read_from_cache(term)
-        if not cached:
+        if cached is None:              # Have yet to search for this term
+            cached = []
             cur = self.connection.cursor()
             filenames = set()
             for (filename, fragment, subject, sender) in cur.execute(
@@ -114,9 +115,12 @@ class SearchDB:
 
     def _read_from_cache(self, term):
         "look up term in cache and return whatever is there"
+        # None return value means we haven't seen this search term before. In
+        # contrast, a completed search with no results would return an empty
+        # list.
         if not os.path.exists(self.cache_index):
             # eprint(f"cache miss (no index): {term!r}")
-            return []
+            return None
         with open(self.cache_index, "rb") as fobj:
             index = pickle.load(fobj)         # nosec
         if term in index:
@@ -130,7 +134,7 @@ class SearchDB:
                 with open(self.cache_index, "wb") as fobj:
                     pickle.dump(index, fobj)
         # eprint(f"cache miss (missing term): {term!r}")
-        return []
+        return None
 
     def _save_to_cache(self, term, result):
         "save search result to cache"
