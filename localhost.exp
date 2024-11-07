@@ -116,7 +116,7 @@ ERROR:root:File not found: ~/src/smontanaro.net/CR/2000-09/eml-files/classicrend
 127.0.0.1 - - "GET /photolink HTTP/1.1" 200 <size> "-" curl
 127.0.0.1 - - "GET /photolink/help HTTP/1.1" 200 <size> "-" curl
 DEBUG:urllib3.connectionpool:Starting new HTTPS connection (1): photos.app.goo.gl:443
-DEBUG:urllib3.connectionpool:https://photos.app.goo.gl:443 "GET /qXkghhtQ2rPBhwZp7 HTTP/1.1" 302 <size>
+DEBUG:urllib3.connectionpool:https://photos.app.goo.gl:443 "GET /WimaQtK4CcfiK5XX9 HTTP/1.1" 302 <size>
 DEBUG:urllib3.connectionpool:Starting new HTTPS connection (1): photos.google.com:443
 DEBUG:urllib3.connectionpool:https://photos.google.com:443 "GET /share/AF1QipMpBo7PpJESYQIRJBk-VXGrd_C7BCYgiEbn4VeudzxqBPLSGFqjQdRVgXVts6236w?key=eFN6NmJVZHV4SmxPamkydWllOVlseTRwQzZCdC13 HTTP/1.1" 200 None
 127.0.0.1 - - "GET /photolink?fmt=html&width=1200&url=https://photos.app.goo.gl/qXkghhtQ2rPBhwZp7 HTTP/1.1" 200 <size> "-" curl

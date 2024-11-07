@@ -66,7 +66,7 @@ http://localhost:8080/../../dates.py
 # generate google photos link
 http://localhost:8080/photolink
 http://localhost:8080/photolink/help
-http://localhost:8080/photolink?fmt=html&width=1200&url=https://photos.app.goo.gl/qXkghhtQ2rPBhwZp7
+http://localhost:8080/photolink?fmt=html&width=1200&url=https://photos.app.goo.gl/WimaQtK4CcfiK5XX9
 # one-page calendar
 http://localhost:8080/calendar
 http://localhost:8080/calendar/
