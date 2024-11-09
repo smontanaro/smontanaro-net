@@ -3,7 +3,8 @@
 "Parse search queries into a structured form"
 
 # Queries can be simple strings (including "from:" or "subject:" prefixes)
-# which can be connected by AND and OR and surrounded by parens.
+# which can be connected by AND and OR and surrounded by parens. Terms can be
+# prefixed by NOT as well, though it's use is limited.
 #
 # For example:
 #
