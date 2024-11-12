@@ -21,6 +21,10 @@ ACT=localhost.act
 RAW=/tmp/localhost.raw
 WARNINGS=localhost.warnings
 
+TRASH=/tmp/trash.$$
+DB=ref.db.test
+trap "rm -f ${TRASH} ${DB}" EXIT
+
 # Mac requires gsleep for subsecond sleeps, Linux doesn't.
 if [ "x$(which gsleep | egrep -v 'not found')" = "x" ] ; then
     SLEEP=sleep
@@ -158,12 +162,11 @@ runcov scripts/extracttbfromsyslog.py < syslog.www > /dev/null
 runcov scripts/abs2rel.py -n smontanaro/smontanaro/static/bikes/43bikes/derosa-web
 
 # Small refdb run to exercise one or two functions only it uses.
-runcov scripts/makerefsdb.py -d ref.db.test CR/2000-10
-runcov scripts/makerefsdb.py -c -d ref.db.test --one \
+runcov scripts/makerefsdb.py -d %{DB} CR/2000-10
+runcov scripts/makerefsdb.py -c -d %{DB} --one \
        CR/2001-01/eml-files/classicrendezvous.10101.0001.eml
-cp -p /etc/hosts /tmp/trash
-runcov scripts/makerefsdb.py -d ref.db.test --one /tmp/trash
-rm -f ref.db.test /tmp/trash*
+cp -p /etc/hosts ${TRASH}
+runcov scripts/makerefsdb.py -d %{DB} --one ${TRASH}
 
 # Exercise some bits only csv2topic uses
 runcov scripts/csv2topic.py references.db < topic.csv > /dev/null
