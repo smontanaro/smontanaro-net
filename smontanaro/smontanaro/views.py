@@ -51,6 +51,11 @@ RIGHT_ARROW = "\N{RIGHTWARDS ARROW}"
 def init_views():
     app = current_app
 
+    @app.route("/resistance")
+    def resistance():
+        "home for resistance calendar"
+        return render_template("resistance.jinja")
+
     @app.route("/python")
     def python():
         "my old python stuff"
