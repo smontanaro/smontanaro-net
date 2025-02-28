@@ -8,9 +8,10 @@ HOST=${HOST:-localhost}
 
 RCFILE=$PWD/.coveragerc
 
-CMD="$(which gunicorn) --error-logfile=/dev/stderr --access-logfile=/dev/stderr --bind $HOST:$PORT wsgi:app"
 if [ "x$DOCOVER" = "xtrue" ] ; then
-    coverage run -a --rcfile=$RCFILE $CMD
-else
-    $CMD
+    COV="coverage run -a --rcfile=$RCFILE"
 fi
+
+${COV} $(which gunicorn) --pythonpath=$(pwd)/smontanaro \
+       --error-logfile=/dev/stderr --access-logfile=/dev/stderr \
+       --bind $HOST:$PORT wsgi:app
