@@ -54,7 +54,7 @@ def init_views():
     @app.route("/resistance")
     def resistance():
         "home for resistance calendar"
-        return render_template("resistance.jinja")
+        return redirect("https://weresist.it/calendar.html")
 
     @app.route("/python")
     def python():
