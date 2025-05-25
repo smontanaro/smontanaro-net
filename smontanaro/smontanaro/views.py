@@ -81,11 +81,10 @@ def init_views():
                    encoding="utf-8") as fobj:
             return fobj.read()
 
-    @app.route('/CR/<int:year>/<int:month>/mybikes')
-    @app.route('/<int:year>/<int:month>/mybikes')
-    def mybikes(year, month):
-        "currently broken link - redirect"
-        return redirect(url_for("dates", year=year, month=month))
+    @app.route('/mybikes')
+    def mybikes():
+        "talk about my bikes a bit..."
+        return render_template("mybikes.jinja")
 
     @app.route('/CR/<int:year>/<int:month>/about')
     @app.route('/<int:year>/<int:month>/about')
