@@ -21,16 +21,16 @@ dates             GET        /CR/<int:year>/<int:month>
 dates             GET        /CR/<int:year>/<int:month>/dates
 favicon           GET        /favicon.ico
 index             GET        /
-mybikes           GET        /<int:year>/<int:month>/mybikes
-mybikes           GET        /CR/<int:year>/<int:month>/mybikes
+mybikes           GET        /mybikes
 old_cr            GET        /<int:year>-<int:month>/html/<filename>
 photolink_GET     GET        /photolink
-photolink_POST    POST       /photolink
 photolink_help_   GET        /photolink/help
+photolink_POST    POST       /photolink
 python            GET        /python
 query_GET         GET        /CR/query
 query_POST        POST       /CR/query
 req               GET        /request/<header>
+resistance        GET        /resistance
 robots            GET        /robots.txt
 search_GET        GET        /search
 search_POST       POST       /search
@@ -102,7 +102,7 @@ WARNING:root:Can't render images
 127.0.0.1 - - "GET /sitemap.xml HTTP/1.1" 200 <size> "-" curl
 127.0.0.1 - - "GET /CR/addtopic HTTP/1.1" 200 <size> "-" curl
 127.0.0.1 - - "GET /CR/2005/03/sitemap.xml HTTP/1.1" 200 <size> "-" curl
-127.0.0.1 - - "GET /2005/03/mybikes HTTP/1.1" 302 <size> "-" curl
+127.0.0.1 - - "GET /mybikes HTTP/1.1" 200 <size> "-" curl
 127.0.0.1 - - "GET /2005/03/about HTTP/1.1" 302 <size> "-" curl
 127.0.0.1 - - "GET /vintage-trek/Trekpromoa.htm HTTP/1.1" 200 <size> "-" curl
 127.0.0.1 - - "GET /43bikes/cinelli-sc.html HTTP/1.1" 200 <size> "-" curl
@@ -118,7 +118,7 @@ ERROR:root:File not found: ~/src/smontanaro.net/CR/2000-09/eml-files/classicrend
 DEBUG:urllib3.connectionpool:Starting new HTTPS connection (1): photos.app.goo.gl:443
 DEBUG:urllib3.connectionpool:https://photos.app.goo.gl:443 "GET /WimaQtK4CcfiK5XX9 HTTP/1.1" 302 <size>
 DEBUG:urllib3.connectionpool:Starting new HTTPS connection (1): photos.google.com:443
-DEBUG:urllib3.connectionpool:https://photos.google.com:443 "GET /share/AF1QipPCsFGXMiNen4klwMZr19-TvS06mqq81GQQ5EEYWsZ4ynbJ_n6i0f8nGWD28Qyqtw?key=RmpvLXQzdXVaQXBZU1R5R2NGbmV3bnVZU084c3dR HTTP/11" 200 None
+DEBUG:urllib3.connectionpool:https://photos.google.com:443 "GET /share/AF1QipPCsFGXMiNen4klwMZr19-TvS06mqq81GQQ5EEYWsZ4ynbJ_n6i0f8nGWD28Qyqtw?key=RmpvLXQzdXVaQXBZU1R5R2NGbmV3bnVZU084c3dR HTTP/1.1" 200 None
 127.0.0.1 - - "GET /photolink?fmt=html&width=1200&url=https://photos.app.goo.gl/WimaQtK4CcfiK5XX9 HTTP/1.1" 200 <size> "-" curl
 # one-page calendar
 127.0.0.1 - - "GET /calendar HTTP/1.1" 302 <size> "-" curl
