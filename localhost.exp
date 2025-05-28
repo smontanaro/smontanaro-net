@@ -36,8 +36,9 @@ search_GET        GET        /search
 search_POST       POST       /search
 show_topics       GET        /CR/topics
 show_topics       GET        /CR/topics/<topic>
+sitemap           GET        /sitemap.xml
 sitemap_by_month  GET        /CR/<int:year>/<int:month>/sitemap.xml
-sitemap_index     GET        /sitemap.xml
+sitemap_index     GET        /sitemap_index.xml
 static            GET        /static/<path:filename>
 threads           GET        /CR/<int:year>/<int:month>/threads
 trek_reroute      GET        /vintage-trek
@@ -99,7 +100,7 @@ WARNING:root:Can't render images
 127.0.0.1 - - "GET /CR/2006/10/0542 HTTP/1.1" 200 <size> "-" curl
 # Miscellaneous
 127.0.0.1 - - "GET /python HTTP/1.1" 200 <size> "-" curl
-127.0.0.1 - - "GET /sitemap.xml HTTP/1.1" 200 <size> "-" curl
+127.0.0.1 - - "GET /sitemap.xml HTTP/1.1" 302 <size> "-" curl
 127.0.0.1 - - "GET /CR/addtopic HTTP/1.1" 200 <size> "-" curl
 127.0.0.1 - - "GET /CR/2005/03/sitemap.xml HTTP/1.1" 200 <size> "-" curl
 127.0.0.1 - - "GET /mybikes HTTP/1.1" 200 <size> "-" curl
