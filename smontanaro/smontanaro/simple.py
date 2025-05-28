@@ -26,6 +26,16 @@ def init_simple():
         "websites need these"
         return redirect(url_for("static", filename="txt/robots.txt"))
 
+    @app.route("/sitemap.xml")
+    def robots():
+        "websites need these"
+        return redirect(url_for("static", filename="txt/sitemap.xml"))
+
+    @app.route("/sitemap_index.xml")
+    def robots():
+        "websites need these"
+        return redirect(url_for("static", filename="txt/sitemap_index.xml"))
+
     @app.route("/")
     def index():
         "index"
