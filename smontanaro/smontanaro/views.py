@@ -66,13 +66,6 @@ def init_views():
         "websites need these"
         return render_template("about.jinja")
 
-    @app.route("/sitemap.xml")
-    def sitemap_index():
-        "websites need these"
-        CR = app.config["CR"]
-        with open_(f'{CR}/generated/sitemap.xml', encoding="utf-8") as fobj:
-            return fobj.read()
-
     @app.route("/CR/<int:year>/<int:month>/sitemap.xml")
     def sitemap_by_month(year, month):
         "websites need these"
