@@ -27,12 +27,12 @@ def init_simple():
         return redirect(url_for("static", filename="txt/robots.txt"))
 
     @app.route("/sitemap.xml")
-    def robots():
+    def sitemap():
         "websites need these"
         return redirect(url_for("static", filename="txt/sitemap.xml"))
 
     @app.route("/sitemap_index.xml")
-    def robots():
+    def sitemap_index():
         "websites need these"
         return redirect(url_for("static", filename="txt/sitemap_index.xml"))
 
