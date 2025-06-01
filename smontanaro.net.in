@@ -4,7 +4,6 @@
 
        server_name www.smontanaro.net;
 
-include(crawler-block.txt)
        return 301 https://www.smontanaro.net$request_uri;
     }
 
