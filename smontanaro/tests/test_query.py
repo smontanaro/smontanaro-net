@@ -178,6 +178,10 @@ def test_parse_and_or_query():
          ["search", "valetti"],
          ]
 
+def test_parse_ampersand_query():
+    assert parse_query("Jerome & Elizabeth Moos") == \
+        ["search", "jerome & elizabeth moos"]
+
 def test_parse_parens_query():
     assert parse_query("(Valetti OR Bartali) AND Coppi") == \
         ["intersect",

@@ -19,12 +19,12 @@ from .srchdb import SRCHDB
 
 
 _TABLE = {
-    'NOT':        r'~',
-    'AND':        r'&&',
-    'OR':         r'[|][|]',
+    'NOT':        r'¬',
+    'AND':        r'∧∧',
+    'OR':         r'∨∨',
     'LPAREN':     r'[(]',
     'RPAREN':     r'[)]',
-    'STRING':     r'[-_.:@a-zA-Z0-9/]+(?:\s+[-_.:@a-zA-Z0-9/]+)*',
+    'STRING':     r'[-_.&:@a-zA-Z0-9/]+(?:\s+[-_.&:@a-zA-Z0-9/]+)*',
     'SPACE':      (r'\s+', lambda t: None),
 
 }
@@ -56,9 +56,9 @@ _RULES = [
 _PARSER = parse.Parser(_RULES, 'expr')
 
 def parse_query(query):
-    query = re.sub(r"\bOR\b", "||", query)
-    query = re.sub(r"\bAND\b", "&&", query)
-    query = re.sub(r"\bNOT\b", "~", query)
+    query = re.sub(r"\bOR\b", "∨∨", query)
+    query = re.sub(r"\bAND\b", "∧∧", query)
+    query = re.sub(r"\bNOT\b", "¬", query)
     return _PARSER.parse(_LEXER.input(query))
 
 def execute_query(query):
