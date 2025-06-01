@@ -1,8 +1,8 @@
-        if ($http_user_agent ~ (megaindex.com|semrush.com|petalsearch.com) ) {
+        if ($http_user_agent ~ (dotbot|anthropic|facebookexternalhit|ahrefs.com|megaindex.com|semrush.com|petalsearch.com) ) {
         return 403;
         }
 
-        if ($http_user_agent ~ (babbar.tech|webmeup-crawler.com|help@moz.com) ) {
+        if ($http_user_agent ~ (gptbot|babbar.tech|webmeup-crawler.com|help@moz.com) ) {
         return 403;
         }
 
