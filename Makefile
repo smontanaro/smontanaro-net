@@ -33,6 +33,9 @@ $(DATES) $(THREADS) &: $(VIEWS) scripts/gen-bodies.sh \
 	mkdir -p $(GENDIRS)
 	bash scripts/gen-bodies.sh
 
+smontanaro.net : smontanaro.net.in crawler-block.txt
+	m4 smontanaro.net.in > smontanaro.net
+
 $(REFDB).new : FORCE
 	coverage run -a --rcfile=.coveragerc scripts/makerefsdb.py -d $(REFDB).new CR
 	@echo "Replace $(REFDB) with $(REFDB).new when ready"

@@ -1,0 +1,11 @@
+        if ($http_user_agent ~ (megaindex.com|semrush.com|petalsearch.com) ) {
+        return 403;
+        }
+
+        if ($http_user_agent ~ (babbar.tech|webmeup-crawler.com|help@moz.com) ) {
+        return 403;
+        }
+
+        if ($http_user_agent ~ (mj12bot.com|yandex.com) ) {
+        return 403;
+        }

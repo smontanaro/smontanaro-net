@@ -1,0 +1,47 @@
+    server {
+       listen 80;
+       listen [::]:80;
+
+       server_name www.smontanaro.net;
+
+include(crawler-block.txt)
+       return 301 https://www.smontanaro.net$request_uri;
+    }
+
+    server {
+        listen 443 ssl;
+        listen [::]:443 ssl;
+
+        server_name www.smontanaro.net;
+
+        ssl_certificate     /etc/letsencrypt/live/smontanaro.net/fullchain.pem;
+        ssl_certificate_key /etc/letsencrypt/live/smontanaro.net/privkey.pem;
+
+include(crawler-block.txt)
+	location /robots.txt {
+	    root $HOME/website/smontanaro/smontanaro/static/txt/;
+	}
+
+	location /favicon.ico {
+	    root $HOME/website/smontanaro/smontanaro/static/images/;
+	}
+
+	location /static/ {
+	    root $HOME/website/smontanaro/smontanaro;
+	}
+
+        location / {
+            include /etc/nginx/proxy_params;
+            proxy_pass http://unix:$HOME/website/smontanaro.sock;
+        }
+
+        location ~ [.](php|asp|aspx|env|git|cgi) {
+	    return 444;
+        }
+
+        location ~ /(apple-touch-icon|_ignition|Autodiscover|actuator|ads.txt|wp-includes/wlwmanifest.xml|cgi-bin) {
+	    return 444;
+        }
+
+        rewrite ^/cr(.*) /CR$1 permanent;
+    }
