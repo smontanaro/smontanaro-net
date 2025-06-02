@@ -20,7 +20,7 @@
         return 403;
         }
 
-        if ($http_user_agent ~ (gptbot|babbar.tech|webmeup-crawler.com|help@moz.com) ) {
+        if ($http_user_agent ~ (meta-externalagent|gptbot|babbar.tech|webmeup-crawler.com|help@moz.com) ) {
         return 403;
         }
 
