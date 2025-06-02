@@ -29,20 +29,20 @@
         }
 
 	location /robots.txt {
-	    root $HOME/website/smontanaro/smontanaro/static/txt/;
+	    root /home/skip/website/smontanaro/smontanaro/static/txt/;
 	}
 
 	location /favicon.ico {
-	    root $HOME/website/smontanaro/smontanaro/static/images/;
+	    root /home/skip/website/smontanaro/smontanaro/static/images/;
 	}
 
 	location /static/ {
-	    root $HOME/website/smontanaro/smontanaro;
+	    root /home/skip/website/smontanaro/smontanaro;
 	}
 
         location / {
             include /etc/nginx/proxy_params;
-            proxy_pass http://unix:$HOME/website/smontanaro.sock;
+            proxy_pass http://unix:/home/skip/website/smontanaro.sock;
         }
 
         location ~ [.](php|asp|aspx|env|git|cgi) {
