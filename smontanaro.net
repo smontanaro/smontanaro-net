@@ -24,7 +24,7 @@
         return 403;
         }
 
-        if ($http_user_agent ~ (grammarly|applebot|amazonbot|mj12bot.com|yandex.com|blex-crawler) ) {
+        if ($http_user_agent ~ (dataforseobot|grammarly|applebot|amazonbot|mj12bot.com|yandex.com|blex-crawler) ) {
         return 403;
         }
 
