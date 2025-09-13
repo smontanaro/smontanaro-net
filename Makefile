@@ -1,7 +1,7 @@
 # The static generation bits
 
 # Requires GNU Make 4.3 or greater!
-V43 = $(shell test $(shell echo $(MAKE_VERSION) | sed -e 's/[.]//') -ge 43 && echo "yes" || echo no)
+V43 = $(shell test $(shell echo $(MAKE_VERSION) | sed -e 's/[.]//g') -ge 43 && echo "yes" || echo no)
 ifeq ($(V43), no)
     $(error "GNU Make >= 4.3 is required")
 endif
