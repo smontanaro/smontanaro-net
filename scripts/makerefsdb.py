@@ -76,7 +76,7 @@ def insert_references(message, conn, filename):
         conn.execute("insert into messages"
                      "  values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
                      (msgid, filename, sender, subject, year, month, seq,
-                      0, stamp))
+                      0, stamp.isoformat()))
     except sqlite3.IntegrityError:
         eprint(f"dup: {msgid} {filename}")
         return nrecs
