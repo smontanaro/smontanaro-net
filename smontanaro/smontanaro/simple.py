@@ -31,6 +31,11 @@ def init_simple():
         "websites need these"
         return redirect(url_for("static", filename="txt/sitemap.xml"))
 
+    @app.route("/python/<filename>")
+    def python_redir(filename):
+        "adjust to structural change in website"
+        return redirect(url_for("static", filename=f"python/{filename}"))
+
     @app.route("/sitemap_index.xml")
     def sitemap_index():
         "websites need these"
