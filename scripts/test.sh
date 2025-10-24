@@ -39,10 +39,20 @@ else
     DATE=gdate
 fi
 
+runcov () {
+    python "$@"
+}
 
 VERBOSE=
-while getopts 'vh' OPTION; do
+while getopts 'vhc' OPTION; do
     case "$OPTION" in
+        c)
+            RUNCOV='coverage run -a --rcfile=.coveragerc'
+            runcov () {
+                echo "cover: $1"
+                ${RUNCOV} "$@"
+            }
+            ;;
         v)
             VERBOSE=-v
             ;;
@@ -58,13 +68,6 @@ dateit () {
     while read line ; do
         echo "$($DATE +%T.%N) ${line}"
     done
-}
-
-RUNCOV='coverage run -a --rcfile=.coveragerc'
-
-runcov () {
-    echo "cover: $1"
-    ${RUNCOV} "$@"
 }
 
 if [ -d search_cache ] ; then
