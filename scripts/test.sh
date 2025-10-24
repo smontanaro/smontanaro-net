@@ -158,8 +158,10 @@ find CR/2004-11/eml-files -name '*.eml' \
     | head -300 \
     | runcov scripts/idwj.py > /dev/null
 
-# extracttbfromsyslog
-runcov scripts/extracttbfromsyslog.py < syslog.www > /dev/null
+if [ -r syslog.www ] ; then
+    # extracttbfromsyslog
+    runcov scripts/extracttbfromsyslog.py < syslog.www > /dev/null
+fi
 
 # abs2rel
 runcov scripts/abs2rel.py -n smontanaro/smontanaro/static/bikes/43bikes/derosa-web
