@@ -1,16 +1,16 @@
-_about            GET        /<int:year>/<int:month>/about
-_about            GET        /CR/<int:year>/<int:month>/about
 about             GET        /CR/about
+_about            GET        /CR/<int:year>/<int:month>/about
+_about            GET        /<int:year>/<int:month>/about
 addtopic          GET, POST  /CR/addtopic
 bad_cr            GET        /<int:year>/<int:month>/<int:seq>
 bike_reroute      GET        /43bikes
 bikes_43          GET        /43bikes/
 bikes_43          GET        /43bikes/<path:path>
-cal_reroute       GET        /calendar
 calendar          GET        /calendar/
 calendar          GET        /calendar/<int:year>
 calendar          GET        /calendar/<int:year>/<int:month>/<int:day>
 calendar_today    GET        /calendar/today
+cal_reroute       GET        /calendar
 cr_help_          GET        /CR/help
 cr_index          GET        /CR
 cr_index          GET        /CR/
