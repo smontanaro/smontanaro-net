@@ -23,7 +23,7 @@ WARNINGS=localhost.warnings
 
 TRASH=/tmp/trash.$$
 DB=ref.db.test
-trap "rm -f ${TRASH} ${DB}" EXIT
+trap "rm -f ${TRASH} ${DB} localhost.comments /tmp/$$.tmp" EXIT
 
 # Mac requires gsleep for subsecond sleeps, Linux doesn't.
 if [ "x$(which gsleep | egrep -v 'not found')" = "x" ] ; then
@@ -40,16 +40,19 @@ else
 fi
 
 runcov () {
+    echo "run: $1" 1>&2
     python "$@"
 }
 
 VERBOSE=
+export DOCOVER=
 while getopts 'vhc' OPTION; do
     case "$OPTION" in
         c)
+	    export DOCOVER=true
             RUNCOV='coverage run -a --rcfile=.coveragerc'
             runcov () {
-                echo "cover: $1"
+                echo "cover: $1" 1>&2
                 ${RUNCOV} "$@"
             }
             ;;
@@ -75,7 +78,7 @@ if [ -d search_cache ] ; then
 fi
 
 export PORT=5001 HOST=localhost
-(DOCOVER=true bash $(dirname $0)/run.sh 2>&1 | dateit > /tmp/$$.tmp) &
+(bash $(dirname $0)/run.sh 2>&1 | dateit > /tmp/$$.tmp) &
 $SLEEP 2
 
 rm -f localhost.comments
@@ -98,21 +101,21 @@ pkill -f gunicorn
 
 flask routes \
     | egrep --color=never 'GET|POST' \
-    | sort > $ACT
+    | sed -e 's/[ ]*$//' \
+    | sort -s -d -k 1,1 > $ACT
 
 # The HTTP/1.?1 pattern is because it appears Google Photos sometimes
 # sends back HTTP/11... ¯\_(ツ)_/¯
 sort localhost.comments /tmp/$$.tmp \
     | sed -e 's/^[0-9][0-9]:[0-9][0-9]:[0-9][0-9][.0-9]* //' \
-          -e 's;.../.../....:..:..:.. -..... ;;' \
-          -e 's;^.[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] [0-9][0-9]:[0-9][0-9]:[0-9][0-9] -[0-9]*. .[0-9]*. .INFO.;[INFO];' \
           -e 's:HTTP/1[.]*1" \([2-5][0-9][0-9]\) [0-9][0-9]*:HTTP/1.1" \1 <size>:' \
           -e 's:"curl/[0-9][0-9.]*.*:curl:' \
-          -e 's:Starting gunicorn .*:Starting gunicorn:' \
-          -e 's:/[^/]*/skip:~:' \
-    | awk -f $(dirname $0)/filter.awk \
-          >> $ACT
-rm localhost.comments /tmp/$$.tmp
+          -e 's/[[][^]]*] //g' \
+	  -e 's:Starting gunicorn .*:Starting gunicorn:' \
+          -e "s:${HOME}:~:" \
+    | egrep -v '^DEBUG:urllib3.connectionpool' \
+    | awk -f scripts/filter.awk \
+    >> $ACT
 
 # Run our official unit tests
 runcov $(which pytest) $VERBOSE
@@ -178,7 +181,7 @@ runcov scripts/csv2topic.py references.db < topic.csv > /dev/null
 
 # Exercise the code used to build the sqlite search database
 echo "CR/2007-11" | \
-    CRDIR=$(pwd) coverage run -a scripts/buildindex.py -t train.csv srch.db.test
+    CRDIR=$(pwd) runcov scripts/buildindex.py -t train.csv srch.db.test
 
 n=$(echo "select * from search_terms where term = 'from:dale brown'" | sqlite3 srch.db.test | wc -l)
 m=$(echo "select * from search_terms where term like 'from:% '" | sqlite3 srch.db.test | wc -l)
@@ -200,4 +203,4 @@ fi
 rm -rf htmlcov
 coverage html
 
-diff -wu localhost.exp $ACT && test $PYT -eq 0 && echo "success" || echo "failure"
+diff -wub localhost.exp $ACT && test $PYT -eq 0 && echo "success" || echo "failure"
