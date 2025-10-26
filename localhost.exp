@@ -1,24 +1,24 @@
-about             GET        /CR/about
-_about            GET        /CR/<int:year>/<int:month>/about
 _about            GET        /<int:year>/<int:month>/about
+_about            GET        /CR/<int:year>/<int:month>/about
+about             GET        /CR/about
 addtopic          GET, POST  /CR/addtopic
 bad_cr            GET        /<int:year>/<int:month>/<int:seq>
 bike_reroute      GET        /43bikes
-bikes_43          GET        /43bikes/
 bikes_43          GET        /43bikes/<path:path>
-calendar          GET        /calendar/
-calendar          GET        /calendar/<int:year>
+bikes_43          GET        /43bikes/
 calendar          GET        /calendar/<int:year>/<int:month>/<int:day>
+calendar          GET        /calendar/<int:year>
+calendar          GET        /calendar/
 calendar_today    GET        /calendar/today
 cal_reroute       GET        /calendar
 cr_help_          GET        /CR/help
-cr_index          GET        /CR
-cr_index          GET        /CR/
 cr_index          GET        /CR/index
 cr_index          GET        /CR/index.html
+cr_index          GET        /CR/
+cr_index          GET        /CR
 cr_message        GET        /CR/<int:year>/<int:month>/<int:seq>
-dates             GET        /CR/<int:year>/<int:month>
 dates             GET        /CR/<int:year>/<int:month>/dates
+dates             GET        /CR/<int:year>/<int:month>
 favicon           GET        /favicon.ico
 index             GET        /
 mybikes           GET        /mybikes
@@ -35,18 +35,18 @@ resistance        GET        /resistance
 robots            GET        /robots.txt
 search_GET        GET        /search
 search_POST       POST       /search
-show_topics       GET        /CR/topics
 show_topics       GET        /CR/topics/<topic>
+show_topics       GET        /CR/topics
 sitemap           GET        /sitemap.xml
 sitemap_by_month  GET        /CR/<int:year>/<int:month>/sitemap.xml
 sitemap_index     GET        /sitemap_index.xml
 static            GET        /static/<path:filename>
 threads           GET        /CR/<int:year>/<int:month>/threads
 trek_reroute      GET        /vintage-trek
-vintage_trek      GET        /vintage-trek/
 vintage_trek      GET        /vintage-trek/<path:path>
-[INFO] Starting gunicorn
-[INFO] Using worker: sync
+vintage_trek      GET        /vintage-trek/
+Starting gunicorn
+Using worker: sync
 127.0.0.1 - - "GET /favicon.ico HTTP/1.1" 302 <size> "-" curl
 127.0.0.1 - - "GET /robots.txt HTTP/1.1" 302 <size> "-" curl
 127.0.0.1 - - "GET /env HTTP/1.1" 200 <size> "-" curl
@@ -117,13 +117,9 @@ ERROR:root:File not found: ~/src/smontanaro.net/CR/2000-09/eml-files/classicrend
 # generate google photos link
 127.0.0.1 - - "GET /photolink HTTP/1.1" 200 <size> "-" curl
 127.0.0.1 - - "GET /photolink/help HTTP/1.1" 200 <size> "-" curl
-DEBUG:urllib3.connectionpool:Starting new HTTPS connection (1): photos.app.goo.gl:443
-DEBUG:urllib3.connectionpool:https://photos.app.goo.gl:443 "GET /WimaQtK4CcfiK5XX9 HTTP/1.1" 302 <size>
-DEBUG:urllib3.connectionpool:Starting new HTTPS connection (1): photos.google.com:443
-DEBUG:urllib3.connectionpool:https://photos.google.com:443 "GET /share/AF1QipPCsFGXMiNen4klwMZr19-TvS06mqq81GQQ5EEYWsZ4ynbJ_n6i0f8nGWD28Qyqtw?key=RmpvLXQzdXVaQXBZU1R5R2NGbmV3bnVZU084c3dR HTTP/1.1" 200 None
 127.0.0.1 - - "GET /photolink?fmt=html&width=1200&url=https://photos.app.goo.gl/WimaQtK4CcfiK5XX9 HTTP/1.1" 200 <size> "-" curl
 # one-page calendar
 127.0.0.1 - - "GET /calendar HTTP/1.1" 302 <size> "-" curl
 127.0.0.1 - - "GET /calendar/ HTTP/1.1" 200 <size> "-" curl
 Debug mode enabled.
-[INFO] Shutting down: Master
+Shutting down: Master
