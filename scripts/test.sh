@@ -113,7 +113,7 @@ sort localhost.comments /tmp/$$.tmp \
           -e 's/[[][^]]*] //g' \
 	  -e 's:Starting gunicorn .*:Starting gunicorn:' \
           -e "s:${HOME}:~:" \
-    | egrep -v '^DEBUG:urllib3.connectionpool' \
+    | egrep -v '^DEBUG:urllib3.connectionpool|Worker.*was sent SIGTERM' \
     | awk -f scripts/filter.awk \
     >> $ACT
 
