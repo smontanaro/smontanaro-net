@@ -190,17 +190,19 @@ if [ $n -eq 0 -o $m -gt 0 ] ; then
     echo "$(tput bold)Error generating from: terms$(tput sgr0)" 1>&2
 fi
 
-if [ -r .coverage -a -r smontanaro/.coverage ] ; then
-    echo combine multiple .coverage files
-    coverage combine .coverage smontanaro/.coverage
-elif [ -r smontanaro/.coverage ] ; then
-     echo rename smontanaro/.coverage to the top level
-     mv smontanaro/.coverage .coverage
-else
-    echo only ./.coverage found - nothing to combine or rename
-fi
+if [ "x$DOCOVER" != "x" ] ; then
+    if [ -r .coverage -a -r smontanaro/.coverage ] ; then
+        echo combine multiple .coverage files
+        coverage combine .coverage smontanaro/.coverage
+    elif [ -r smontanaro/.coverage ] ; then
+         echo rename smontanaro/.coverage to the top level
+         mv smontanaro/.coverage .coverage
+    else
+        echo only ./.coverage found - nothing to combine or rename
+    fi
 
-rm -rf htmlcov
-coverage html
+    rm -rf htmlcov
+    coverage html
+fi
 
 diff -wub localhost.exp $ACT && test $PYT -eq 0 && echo "success" || echo "failure"
