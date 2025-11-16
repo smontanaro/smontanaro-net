@@ -7,6 +7,7 @@ charset-normalizer
 click
 coverage
 Flask
+Flask-SQLAlchemy-Lite
 Flask-WTF
 gunicorn
 html2text
@@ -25,6 +26,7 @@ python-dateutil
 regex @ git+https://github.com/smontanaro/mrab-regex
 requests
 six
+SQLAlchemy
 textblob
 toml
 urllib3
