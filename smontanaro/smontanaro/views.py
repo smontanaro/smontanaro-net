@@ -16,7 +16,8 @@ import urllib.parse
 # import mpl
 
 # import arrow
-from flask import redirect, url_for, render_template, abort, jsonify, request, current_app
+from flask import (redirect, url_for, render_template, abort, jsonify,
+                   request, current_app)
 import regex as re
 
 from .exc import NoResponse
