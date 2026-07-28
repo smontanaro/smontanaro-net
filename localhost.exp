@@ -47,6 +47,7 @@ vintage_trek      GET        /vintage-trek/<path:path>
 vintage_trek      GET        /vintage-trek/
 Starting gunicorn
 Using worker: sync
+Control socket listening at ~/.gunicorn/gunicorn.ctl
 127.0.0.1 - - "GET /favicon.ico HTTP/1.1" 302 <size> "-" curl
 127.0.0.1 - - "GET /robots.txt HTTP/1.1" 302 <size> "-" curl
 127.0.0.1 - - "GET /env HTTP/1.1" 200 <size> "-" curl
