@@ -52,7 +52,7 @@ pylint : FORCE
 	-pylint --rcfile=.pylintrc $(APP_SRC)
 
 test : FORCE
-	bash scripts/test.sh
+	bash scripts/test.sh -c
 
 clean : FORCE
 	rm -rf search_cache dist htmlcov
