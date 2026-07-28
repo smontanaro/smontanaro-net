@@ -176,6 +176,10 @@ runcov scripts/makerefsdb.py -c -d %{DB} --one \
 cp -p /etc/hosts ${TRASH}
 runcov scripts/makerefsdb.py -d %{DB} --one ${TRASH}
 
+runcov scripts/getua.py < sample.log > /dev/null
+runcov scripts/extracttbfromsyslog.py < sample-syslog > /dev/null
+head -100 sample-syslog | runcov scripts/extracttbfromsyslog.py > /dev/null
+
 # Exercise some bits only csv2topic uses
 runcov scripts/csv2topic.py references.db < topic.csv > /dev/null
 
