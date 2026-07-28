@@ -2,6 +2,7 @@
 
 "check static site redirects"
 
+# ruff: noqa: F401, F811
 from _test_helper import client
 
 def test_get_robots(client):

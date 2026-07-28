@@ -2,6 +2,7 @@
 import datetime
 import regex as re
 
+# ruff: noqa: F401, F811
 from _test_helper import client
 
 
@@ -18,7 +19,7 @@ def test_calendar(client):
                 saving = True
             elif saving:
                 checklines.append(re.search(">([^<]+)<", line).group(1).strip())
-        assert checklines == f"2023 Jan May Aug Feb Jun Sep Apr".split()
+        assert checklines == "2023 Jan May Aug Feb Jun Sep Apr".split()
 
 def test_calendar_year(client):
     with client.application.app_context():
@@ -56,8 +57,6 @@ def test_today(client):
         assert checklines[0] == f"{date.year}"
 
 def test_date(client):
-    date = datetime.date.today()
-
     with client.application.app_context():
         rv = client.get("/calendar/1989/4/12")
         assert rv.status_code == 200
@@ -69,8 +68,6 @@ def test_date(client):
         assert check == "Apr 12 Wed".split()
 
 def test_bad_date(client):
-    date = datetime.date.today()
-
     with client.application.app_context():
         rv = client.get("/calendar/2023/2/29")
         assert rv.status_code == 200

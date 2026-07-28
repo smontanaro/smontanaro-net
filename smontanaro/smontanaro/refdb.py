@@ -105,7 +105,7 @@ def get_random_topic(sqldb):
     conn = ensure_db(sqldb)
     cur = conn.cursor()
     cur.execute("select distinct topic from topics")
-    all_topics = set(t[0] for t in cur.fetchall())
+    all_topics = {t[0] for t in cur.fetchall()}
 
     # Now run through all topics and add their parents, etc
     new_topics = set()

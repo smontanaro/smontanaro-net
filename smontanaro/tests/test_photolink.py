@@ -2,6 +2,7 @@
 import re
 import urllib.parse
 
+# ruff: noqa: F401, F811
 from _test_helper import client
 
 

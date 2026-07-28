@@ -65,31 +65,31 @@ def swallow(exceptions):
 def main():
     "see __doc__"
 
-    with open("CR/generated/sitemap.xml", "w", encoding="utf-8") as index:
-        with swallow((BrokenPipeError, KeyboardInterrupt)):
-            print(INDEX_HEADER, file=index)
-            for year_month in glob.glob("CR/20??-??"):
-                year, month = os.path.split(year_month)[1].split("-")
-                print(MONTH_INDEX.format(year=year, month=month).strip(),
-                      file=index)
-                with open(os.path.join(year_month, "generated", "sitemap.xml"),
-                          "w", encoding="utf-8") as sitemap:
-                    print(HEADER, file=sitemap)
-                    for emlfile in glob.glob(f"{year_month}/eml-files/*.eml"):
-                        emlfile = emlfile.strip()
-                        dpath, fpath = os.path.split(emlfile)
-                        year, month = dpath.split("/")[1].split("-")
-                        seq = int(fpath.split(".")[2], 10)
-                        seq = f"{seq:04d}"
-                        pckgz = os.path.splitext(emlfile)[0] + ".pck.gz"
-                        stampfile = pckgz if os.path.exists(pckgz) else emlfile
-                        lastmod = arrow.get(os.path.getmtime(stampfile))
-                        lastmod = lastmod.replace(microsecond=0)
-                        print(TEMPLATE.format(year=year, month=month, seq=seq,
-                                              lastmod=lastmod, priority=1.0),
-                                              file=sitemap)
-                    print(FOOTER, file=sitemap)
-            print(INDEX_FOOTER, file=index)
+    with (open("CR/generated/sitemap.xml", "w", encoding="utf-8") as index,
+          swallow((BrokenPipeError, KeyboardInterrupt))):
+        print(INDEX_HEADER, file=index)
+        for year_month in glob.glob("CR/20??-??"):
+            year, month = os.path.split(year_month)[1].split("-")
+            print(MONTH_INDEX.format(year=year, month=month).strip(),
+                  file=index)
+            with open(os.path.join(year_month, "generated", "sitemap.xml"),
+                      "w", encoding="utf-8") as sitemap:
+                print(HEADER, file=sitemap)
+                for emlfile in glob.glob(f"{year_month}/eml-files/*.eml"):
+                    emlfile = emlfile.strip()
+                    dpath, fpath = os.path.split(emlfile)
+                    year, month = dpath.split("/")[1].split("-")
+                    seq = int(fpath.split(".")[2], 10)
+                    seq = f"{seq:04d}"
+                    pckgz = os.path.splitext(emlfile)[0] + ".pck.gz"
+                    stampfile = pckgz if os.path.exists(pckgz) else emlfile
+                    lastmod = arrow.get(os.path.getmtime(stampfile))
+                    lastmod = lastmod.replace(microsecond=0)
+                    print(TEMPLATE.format(year=year, month=month, seq=seq,
+                                          lastmod=lastmod, priority=1.0),
+                                          file=sitemap)
+                print(FOOTER, file=sitemap)
+        print(INDEX_FOOTER, file=index)
     return 0
 
 if __name__ == "__main__":

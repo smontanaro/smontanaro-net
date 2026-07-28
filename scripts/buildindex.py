@@ -129,7 +129,7 @@ def process_file(fname, classifier, blq, dbq):
         add_fragment(fragment, fname, subject, sender, rowid, dbq)
     (sender, addr) = parse_from(msg["from"])
 
-    sub_frags = set([subject])
+    sub_frags = {subject,}
 
     # add from:name, from:someone@somewhere, subject:...
     for term in (f"from:{sender.strip().lower()}",
@@ -150,8 +150,7 @@ def process_file(fname, classifier, blq, dbq):
 def get_terms(text, blq):
     "yield a series of words matching desired pattern"
     blq.put(("phrase_gen", (text,)))
-    for phrase in blq.get():
-        yield phrase
+    yield from blq.get()
 
 def add_fragment(fragment, fname, subject, sender, rowid, dbq):
     "add fragment record to file_search table"
@@ -427,8 +426,8 @@ class ShareSQLDB(threading.Thread):
 
         # zap terms...
         #   containing characters outside the printable ascii range
-        nonprint = set(chr(i) for i in range(128, 256))
-        nonprint |= set(chr(i) for i in range(0, ord(' ')))
+        nonprint = {chr(i) for i in range(128, 256)}
+        nonprint |= {chr(i) for i in range(ord(' '))}
         #   or anything beginning with punctuation
         punct = set(string.punctuation)
         #   or ending with punctuation other than periods
@@ -443,6 +442,7 @@ class ShareSQLDB(threading.Thread):
                          "    and term not like 'subject:%'")
         for (term,) in self.cur:
             # terms containing puctuation
+            # ruff: disable[SIM114]
             if (set(term) & nonprint or
                 term[0] in punct or
                 term[-1] in punct_nodot):

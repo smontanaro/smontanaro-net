@@ -7,6 +7,7 @@ Process References: headers in email files from emaildir, adding to sqldb
 
 import argparse
 import datetime
+import itertools
 import os
 import re
 import sqlite3
@@ -100,7 +101,7 @@ def insert_references(message, conn, filename):
                 ref_list.append(in_reply_to)
 
     with conn:
-        for (parent, child) in zip(ref_list[:-1], ref_list[1:]):
+        for (parent, child) in itertools.pairwise(ref_list):
             conn.execute("insert into msgreplies"
                          " values (?, ?)",
                          (child, parent))

@@ -18,10 +18,12 @@ def main():
     "see __doc__"
     conn = ensure_db(sys.argv[1])
     rdr = csv.DictReader(sys.stdin)
+    # ruff: noqa: SIM905
     yms = "yr mo seq".split()
     for row in rdr:
-        existing = set((yr, mo, seq)
-            for (yr, mo, seq, *rest) in get_topic(row["topic"], conn))
+        existing = {
+            (yr, mo, seq) for (yr, mo, seq, *rest) in get_topic(row["topic"], conn)
+            }
         if existing:
             print("--", existing)
         bits = get_message_bits(row["message-id"], conn)

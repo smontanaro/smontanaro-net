@@ -2,6 +2,8 @@ import os
 import tempfile
 
 from smontanaro.srchdb import SRCHDB
+
+# ruff: noqa: F401, F811
 from _test_helper import client
 
 

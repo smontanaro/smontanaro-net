@@ -14,6 +14,7 @@ import os
 import pickle                   # nosec
 import statistics
 import string
+# ruff: noqa: F401
 import typing
 import urllib.parse
 
@@ -129,7 +130,7 @@ class Message(email.message.EmailMessage):
     "subclass to add as_html() method"
     content_headers = ("content-type", "content-transfer-encoding")
     app = None
-    urlmap: typing.Dict[str, str] = {}
+    urlmap: dict[str, str] = {}
     urlmaptime = datetime.datetime.fromtimestamp(0)
 
     def as_html(self):
@@ -512,7 +513,7 @@ class Message(email.message.EmailMessage):
 
                     if tgt_msgid in last_refs:
                         continue
-                    last_refs |= set([tgt_msgid])
+                    last_refs |= {tgt_msgid,}
                     cur.execute("select year, month, seq from messages"
                                 "  where messageid = ?",
                                 (tgt_msgid,))
@@ -719,7 +720,7 @@ def make_topic_hierarchy(topics, htopics, prefix):
         if not tlist:
             return
         topic, rest = tlist[0], tlist[1:]
-        topic_pfx = ":".join([prefix, topic]).lstrip(":")
+        topic_pfx = f"{prefix}:{topic}".lstrip(":")
         key = topic
         if key not in htopics:
             htopics[key] = [topic_pfx, {}]

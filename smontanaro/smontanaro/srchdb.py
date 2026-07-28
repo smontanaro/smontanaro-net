@@ -68,8 +68,7 @@ class SearchDB:
                     filenames.add(filename)
                     cached.append((filename, fragment, subject, sender))
             self._save_to_cache(term, cached)
-        for record in cached:
-            yield record
+        yield from cached
 
     def have_term(self, term):
         "return rowid if we already have term in the database, else zero"

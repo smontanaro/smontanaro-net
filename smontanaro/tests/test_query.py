@@ -5,14 +5,13 @@ import pickle
 import time
 
 import pytest
-import regex as re
 
 from smontanaro.query import execute_query, parse_query, execute_structured_query
 from smontanaro.srchdb import SRCHDB, CACHE_DIR
 from smontanaro.strip import CRLF
 from smontanaro.util import read_message
-from smontanaro.views import query_index
 
+# ruff: noqa: F401, F811
 from _test_helper import client
 
 
@@ -59,14 +58,12 @@ def test_transitive_complex_query(client):
                 execute_query("bartali AND coppi").pages())
 
 def test_invalid_not_and_query(client):
-    with client.application.app_context():
-        with pytest.raises(ValueError):
-            execute_query("NOT coppi AND NOT bartali")
+    with client.application.app_context(), pytest.raises(ValueError):
+        execute_query("NOT coppi AND NOT bartali")
 
 def test_invalid_not_or_query(client):
-    with client.application.app_context():
-        with pytest.raises(ValueError):
-            execute_query("coppi OR NOT bartali")
+    with client.application.app_context(), pytest.raises(ValueError):
+        execute_query("coppi OR NOT bartali")
 
 def test_complex_query1(client):
     with client.application.app_context():
@@ -137,18 +134,18 @@ def test_query_cache(client):
 
 def test_missing_cached_file(client):
     with client.application.app_context():
-        result = execute_query("126mm")
+        execute_query("126mm")
     with open(os.path.join(CACHE_DIR, "index.pkl"), "rb") as fobj:
         index = pickle.load(fobj)       # nosec
     os.unlink(index["126mm"])
     with client.application.app_context():
-        result = execute_query("126mm")
+        execute_query("126mm")
 
 def test_from_query(client):
     with client.application.app_context():
         result = execute_query("from:mark petry")
         assert result.data
-        assert set(v[0] for v in result.data.values()) == set([""])
+        assert {v[0] for v in result.data.values()} == {"",}
 
 def test_trailing_space_from(client):
     with client.application.app_context():

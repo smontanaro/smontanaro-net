@@ -1,6 +1,7 @@
 from smontanaro.util import read_message, eml_file
 from smontanaro.views import MessageFilter
 
+# ruff: noqa: F401, F811
 from _test_helper import client
 
 def test_message_strip(client):

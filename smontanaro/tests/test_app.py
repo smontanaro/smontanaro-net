@@ -23,9 +23,10 @@ from smontanaro.strip import (strip_footers, strip_leading_quotes,
 from smontanaro.util import (read_message, read_message_string, parse_from,
                              trim_subject_prefix, open_, all_words,
                              EXCEPTIONS)
-from smontanaro.views import (MessageFilter, eml_file, query_index, next_msg,
+from smontanaro.views import (MessageFilter, eml_file, next_msg,
                               get_nav_items)
 
+# ruff: noqa: F401, F811
 from _test_helper import client
 
 # pytest's use (and apparent requirement) of client as both an outer name and
@@ -83,10 +84,10 @@ def test_get_nav_items(client, yr, mo, prv, nxt):
                    (2011, 2, 1643,),
                    ])
 def test_get_nav_items2(client, yr, mo, seq):
-    exp_keys = {"Date Index", "Thread Index", "Prev", "Next"}
+    exp_keys = {"Date Index", "Thread Index",}
     with client.application.app_context():
         items = dict(get_nav_items(year=yr, month=mo, seq=seq))
-        assert "Date Index" in items and "Thread Index" in items
+        assert set(items.keys()) & exp_keys == exp_keys
         if "Prev" in items:
             assert items["Prev"] == url_for("cr_message",
                                             **next_msg(yr, mo, int(seq), -1))
@@ -223,9 +224,8 @@ def test_next_msg(client, yr, mo, seq ,incr, nmo, nseq):
                           ])
 def test_next_msg_fail(client, yr, mo, seq ,incr):
     "make sure we can hop over gaps and between months"
-    with client.application.app_context():
-        with pytest.raises(ValueError):
-            nxt = next_msg(yr, mo, seq, incr)
+    with client.application.app_context(), pytest.raises(ValueError):
+        nxt = next_msg(yr, mo, seq, incr)
 
 def test_encoded_from(client):
     "check decode of quopri-encoding From:"
@@ -636,9 +636,8 @@ def test_open_invalid_encoding():
     fd, name = tempfile.mkstemp()
     os.close(fd)
     try:
-        with pytest.raises(ValueError):
-            with open_(f"{name}", "rb", encoding="ascii") as fobj:
-                assert fobj.read() == b"Hello World!"
+        with pytest.raises(ValueError), open_(f"{name}", "rb", encoding="ascii") as fobj:
+            assert fobj.read() == b"Hello World!"
     finally:
         os.unlink(f"{name}")
 
@@ -651,7 +650,8 @@ def test_have_term(client):
             key = "skip m"
             assert SRCHDB.have_term(key) == 0
             cur.execute("insert into search_terms VALUES (?)", (key,))
-            assert (rowid := SRCHDB.have_term(key)) > 0
+            rowid = SRCHDB.have_term(key)
+            assert rowid > 0
         finally:
             cur.execute("delete from search_terms where rowid = ?",
                         (rowid,))
