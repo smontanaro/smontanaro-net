@@ -203,8 +203,7 @@ def main():
     ensure_indexes(conn)
     (tmpfd, tmpf) = tempfile.mkstemp()
     with open(tmpf, "w", encoding="utf-8") as fobj:
-        for line in conn.iterdump():
-            fobj.write(f"{line}\n")
+        fobj.writelines(f"{line}\n" for line in conn.iterdump())
     conn.commit()
     if os.path.exists(args.sqldb):
         os.unlink(args.sqldb)
