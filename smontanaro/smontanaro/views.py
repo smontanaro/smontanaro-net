@@ -406,7 +406,7 @@ def init_search():
         try:
             matches = query_index(query)
         except SyntaxError:
-            logging.root.info("Query SPRDPL error: %r", query)
+            logging.root.error("Query SPRDPL error: %r", query)
             raise
         return render_template('page.jinja',
                                matches=matches,
