@@ -403,7 +403,11 @@ def init_search():
 
         page = request.args.get("page", default=1, type=int)
         size = request.args.get("pagesize", default=100, type=int)
-        matches = query_index(query)
+        try:
+            matches = query_index(query)
+        except SyntaxError:
+            logging.root.info("Query SPRDPL error: %r", query)
+            raise
         return render_template('page.jinja',
                                matches=matches,
                                query=urllib.parse.unquote_plus(query),
