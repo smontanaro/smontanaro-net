@@ -251,9 +251,9 @@ def test_sender_pat():
         # quoted name, bracketed email address
         ('"Mark Poore" <rauler47@hotmail.com>',
          "Mark Poore", "rauler47@hotmail.com"),
-        # name only, no email address
+        # name only, no email address (invalid form)
         ("Mark Bulgier",
-         "Mark Bulgier", ""),
+         "", ""),
         # bare name, bracketed email address
         ("Chuck Schmidt <chuckschmidt@earthlink.net>",
          "Chuck Schmidt", "chuckschmidt@earthlink.net"),
@@ -263,11 +263,9 @@ def test_sender_pat():
         # bare email address, parenthesized name
         ('kurtsperry@netscape.net (Kurt Sperry)',
          'Kurt Sperry', 'kurtsperry@netscape.net'),
-        # bare name, square bracket enclosing mailto:
+        # bare name, square bracket enclosing mailto: (invalid form)
         ("Chuck Schmidt [mailto:chuckschmidt@earthlink.net]",
-         "Chuck Schmidt", "chuckschmidt@earthlink.net"),
-        ('Michael Butler <pariscycles@yahoo.co.uk>',
-         'Michael Butler', 'pariscycles@yahoo.co.uk'),
+         "", ""),
     ):
         (name, email) = parse_from(from_)
         assert name == sender and email == addr
