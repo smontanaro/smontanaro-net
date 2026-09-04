@@ -367,6 +367,10 @@ def init_debug():
                 func_list[rule.rule] = str(app.view_functions[rule.endpoint])
         return jsonify(func_list)
 
+    @app.route("/syslog")
+    def print_syslog():
+        return redirect(url_for("static", filename="txt/syslog.txt"))
+
 def init_search():
     app = current_app
 
