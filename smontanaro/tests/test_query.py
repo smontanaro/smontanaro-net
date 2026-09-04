@@ -107,6 +107,7 @@ def _complex_query_helper(query, check):
 def test_query_cache(client):
     # hopefully none of these will already be cached.
     queries = [
+        'from:"aldoross4@siscom.net"',
         "from:aldoross4@siscom.net",
         "from:brianbaylis@juno.com",
         "126mm",
