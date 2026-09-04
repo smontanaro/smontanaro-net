@@ -7,6 +7,7 @@ from dataclasses import dataclass, field as dataclass_field
 import datetime
 import email.message
 import email.policy
+import email.utils
 import gzip
 import html.parser
 import logging
@@ -49,16 +50,6 @@ ZAP_HEADERS = {
 EOL_SEP = r"\r?\n"
 PARA_SEP = fr"{EOL_SEP}\s*(?:{EOL_SEP})+"
 INDENTED_SEP = fr"({EOL_SEP}\s+)"
-
-# Match sender of an email (crude)
-ADDR_PAT = re.compile(r'''(?:\s*<?([^ >]+@[^ >]*)>?)''')          # email only
-NAME_PAT = re.compile(r'''([^@]+)$''')                            # name only
-NAME_ANGLED_PAT = re.compile(r'''"?([^"@<[]*)"?'''                # name <email>
-                             r'''(?:\s*[[<]?(?:mailto:)?([^] >]+@[^] >]*)[]>]?)''')
-EMAIL_PAREN_PAT = re.compile(r'''(?:\s*<?([^ >]+@[^ >]*)>?)'''    # email (name)
-                             r'''\s*\(([^"@<)]*)\)''')
-WHITESPACE_PAT = re.compile(r'\s')
-
 CRLF = "\r\n"
 
 
@@ -105,24 +96,7 @@ def read_words(word_file, keep_odd=False):
 
 
 def parse_from(from_):
-    "Parse content of the from_ header into name and email"
-    if (mat := EMAIL_PAREN_PAT.match(from_)) is not None:
-        name = mat.group(2).strip()
-        addr = mat.group(1).strip()
-    elif (WHITESPACE_PAT.match(from_) is None and
-          (mat := ADDR_PAT.match(from_)) is not None):
-        name = ""
-        addr = mat.group(1).strip()
-    elif mat := NAME_PAT.match(from_):
-        name = mat.group(1).strip()
-        addr = ""
-    else:
-        mat = NAME_ANGLED_PAT.match(from_)
-        if mat is None:
-            name = addr = ""
-        else:
-            name = mat.group(1).strip()
-            addr = mat.group(2).strip()
+    (name, addr) = email.utils.parseaddr(from_)
     return (name, addr)
 
 
