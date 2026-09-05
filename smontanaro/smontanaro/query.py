@@ -11,6 +11,7 @@
 #    from:Brian Baylis AND (subject:Masi OR subject:Confente)
 
 from dataclasses import dataclass, field as datafield
+import urllib.parse
 
 import regex as re
 from sprdpl import lex, parse
@@ -56,6 +57,7 @@ _RULES = [
 _PARSER = parse.Parser(_RULES, 'expr')
 
 def parse_query(query):
+    query = urllib.parse.unquote_plus(query)
     query = re.sub(r"\bOR\b", "∨∨", query)
     query = re.sub(r"\bAND\b", "∧∧", query)
     query = re.sub(r"\bNOT\b", "¬", query)
