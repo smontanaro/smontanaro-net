@@ -253,9 +253,12 @@ def test_sender_pat():
          "Mark Poore", "rauler47@hotmail.com"),
         # name only, no email address (invalid form)
         ("Mark Bulgier",
-         "", ""),
+         "", "Mark"),
         # bare name, bracketed email address
         ("Chuck Schmidt <chuckschmidt@earthlink.net>",
+         "Chuck Schmidt", "chuckschmidt@earthlink.net"),
+        # bare name, bracketed email address, but needs unquoting
+        ("Chuck+Schmidt <chuckschmidt@earthlink.net>",
          "Chuck Schmidt", "chuckschmidt@earthlink.net"),
         # quoted, complex name, bracketed email address
         ('"Beyer Jr., Chris (C.C.)" <cbeyer2@volvocars.com>',
