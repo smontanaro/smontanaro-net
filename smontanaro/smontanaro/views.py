@@ -272,7 +272,13 @@ def query_index(query):
     # TBD - paginate results
 
     pages = []
-    result = execute_query(query.strip())
+    query = query.strip()
+    try:
+        result = execute_query(query)
+    except SyntaxError as exc:
+        logging.root.error("Error parsing query: %r", query)
+        raise
+
     for page in sorted(result.pages()):
         (fragment, subject, sender) = result[page]
         match = re.match("CR/([0-9]+)-([0-9]+)/eml-files/"
