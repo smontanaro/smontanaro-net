@@ -96,7 +96,7 @@ def read_words(word_file, keep_odd=False):
 
 
 def parse_from(from_):
-    (name, addr) = email.utils.parseaddr(from_)
+    (name, addr) = email.utils.parseaddr(urllib.parse.unquote_plus(from_))
     return (name, addr)
 
 
