@@ -4,7 +4,7 @@ Disallow: /
 User-agent: meta-externalagent
 Disallow: /
 
-gUser-agent: ReflectionBot
+User-agent: ReflectionBot
 Disallow: *
 
 User-agent: *
