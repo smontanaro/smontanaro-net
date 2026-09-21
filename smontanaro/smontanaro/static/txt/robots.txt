@@ -1,8 +1,11 @@
+User-agent: DataForSeoBot
+Disallow: *
+
 User-agent: GPTBot
-Disallow: /
+Disallow: *
 
 User-agent: meta-externalagent
-Disallow: /
+Disallow: *
 
 User-agent: ReflectionBot
 crawl-delay: 50
