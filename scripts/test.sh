@@ -1,5 +1,7 @@
 #!/bin/bash
 
+. venv/bin/activate
+
 if [ "x$CRDIR" = "x" ] ; then
     export CRDIR=$(pwd)
 fi
