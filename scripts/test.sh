@@ -120,7 +120,7 @@ sort localhost.comments /tmp/$$.tmp \
     >> $ACT
 
 # Run our official unit tests
-runcov $(which pytest) $VERBOSE
+runcov $(which pytest) $VERBOSE smontanaro
 PYT=$?
 
 # cover crcachectl script
