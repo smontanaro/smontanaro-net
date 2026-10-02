@@ -51,8 +51,17 @@ bandit : FORCE
 pylint : FORCE
 	-pylint --rcfile=.pylintrc $(APP_SRC)
 
-test : FORCE
+test : venv
 	bash scripts/test.sh -c
+
+venv : FORCE
+	if [ ! -d venv ] ; then \
+	    python -m venv venv ; \
+	    . venv/bin/activate ; \
+	    python -m pip install -r requirements.txt ; \
+	else \
+	    . venv/bin/activate ; python -m pip install --upgrade -r requirements.txt ; \
+	fi
 
 clean : FORCE
 	rm -rf search_cache dist htmlcov
