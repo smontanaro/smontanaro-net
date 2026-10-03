@@ -508,6 +508,7 @@ class Message(email.message.EmailMessage):
                 pass                # preserve as-is for later calcuations
             elif hdr == "from":
                 # Create a link for searching other posts by the same user.
+                val = decode_email_header(val)
                 (sender, addr) = parse_from(val)
                 self["x-html-from"] = generate_from_html(sender, addr)
             else:
