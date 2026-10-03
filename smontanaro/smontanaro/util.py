@@ -514,6 +514,21 @@ class Message(email.message.EmailMessage):
                 self.replace_header(hdr, html.escape(str(val)))
 
 
+def decode_email_header(header_value):
+    """Decode an RFC 2047 encoded email header string."""
+    # from a Brave search (that is, likely AI-generated)
+    decoded_parts = email.header.decode_header(header_value)
+    decoded_string = []
+    for part, charset in decoded_parts:
+        if isinstance(part, bytes):
+            # Decode bytes using the specified charset, defaulting to utf-8
+            decoded_string.append(part.decode(charset or 'utf-8'))
+        else:
+            # Already a string (usually ASCII)
+            decoded_string.append(part)
+    return ''.join(decoded_string)
+
+
 @dataclass
 class MessageHierarchy:
     "represent a message and its children"
