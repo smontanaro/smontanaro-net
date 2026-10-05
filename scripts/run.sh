@@ -17,6 +17,6 @@ if [ "x$(which gunicorn)" = "x" ] ; then
     exit 1
 fi
 
-${COV} $(which gunicorn) --pythonpath=$(pwd)/smontanaro \
+${COV} $(which gunicorn) --pythonpath=$(pwd)/smontanaro --log-level critical \
        --error-logfile=/dev/stderr --access-logfile=/dev/stderr \
        --bind $HOST:$PORT wsgi:app
