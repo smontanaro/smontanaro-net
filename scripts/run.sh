@@ -1,6 +1,8 @@
 #!/bin/bash
 
-export CRDIR=${HOME}/src/smontanaro.net
+if [ "x$CRDIR" = "x" ] ; then
+    export CRDIR=$(pwd)
+fi
 export FLASK_APP=smontanaro:create_app
 export FLASK_DEBUG=True
 PORT=${PORT:-8080}
