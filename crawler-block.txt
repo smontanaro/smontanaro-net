@@ -1,11 +1,47 @@
+        location ~ [.](php|asp|aspx|env|git|cgi) {
+	    return 403;
+        }
+
+        location ~ [.](aws|env|git|gitlab|svn|vscode)|_profiler|admin|api|app|assets..|backend|backup|build|cms|config|core|data|database|dev|docker|files|frontend|laravel|media|phpinfo|prod|project|public|server|settings|sftp|site|storage|v1|v2|web|wp-config|www {
+	    return 403;
+        }
+
+        location ~ /(apple-touch-icon|_ignition|Autodiscover|actuator|ads.txt|wp-includes/wlwmanifest.xml|cgi-bin) {
+	    return 403;
+        }
+
         if ($http_user_agent ~ (dotbot|anthropic|facebookexternalhit|ahrefs.com|megaindex.com|semrush.com|petalsearch.com) ) {
         return 403;
         }
 
-        if ($http_user_agent ~ (meta-externalagent|gptbot|babbar.tech|webmeup-crawler.com|help@moz.com) ) {
+        if ($http_user_agent ~ (meta-externalagent|gptbot|babbar.tech|webmeup-crawler.com|help@moz.com|Bytespider) ) {
         return 403;
         }
 
-        if ($http_user_agent ~ (dataforseobot|grammarly|applebot|amazonbot|mj12bot.com|yandex.com|blex-crawler) ) {
+        if ($http_user_agent ~ (mj12bot.com|yandex.com|blex-crawler|backlinks-crawler|ceramicterracotta) ) {
         return 403;
+        }
+
+        if ($http_user_agent ~ (socketburst|awario|amazonbot|CorsairBot|ShapBot|PerplexityBot|SeekportBot|Sogou|l9explore) ) {
+        return 403;
+        }
+
+        if ($http_user_agent ~ (bingbot|DataForSeoBot|AionBot|ExaSearchBot|KodaSearch|YouBot|WebSiphon) ) {
+        return 403;
+        }
+
+###        if ($remote_addr ~ (176.65.144.71|12.37.122.194|88.216.68.235|65.21.113.201|213.209.159.154|165.22.99.208) ) {
+###        return 403;
+###        }
+
+###        if ($remote_addr ~ (45.148.10.244|130.44.167.99|172.59.216.95|34.65.31.123|146.75.164.0|93.170.44.83) ) {
+###        return 403;
+###        }
+
+###        if ($remote_addr ~ (193.32.204.199|97.73.128.7|35.196.107.124|213.35.99.240) ) {
+###        return 403;
+###        }
+
+        location ~ '[.]php' {
+            return 403;
         }
