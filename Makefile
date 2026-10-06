@@ -56,7 +56,7 @@ test : venv
 
 venv : FORCE
 	if [ ! -d venv ] ; then \
-	    python -m venv venv ; \
+	    python3.15 -m venv venv ; \
 	    . venv/bin/activate ; \
 	    python -m pip install -r requirements.txt ; \
 	else \
