@@ -114,4 +114,7 @@ def get_random_topic(sqldb):
             topic = ":".join(topic.split(":")[0:-1])
             new_topics.add(topic)
     all_topics |= new_topics
-    return random.choice(list(all_topics))   # nosec
+    if all_topics:
+        return random.choice(list(all_topics))   # nosec
+    else:
+        return ""
