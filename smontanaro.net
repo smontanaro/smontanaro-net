@@ -20,7 +20,7 @@
 	    return 403;
         }
 
-        location ~ [.](aws|env|git|gitlab|svn|vscode)|_profiler|admin|api|app|assets..|backend|backup|build|cms|config|core|data|database|dev|docker|files|frontend|laravel|media|phpinfo|prod|project|public|server|settings|sftp|site|storage|v1|v2|web|wp-config|www {
+        location ~ [.](aws|env|git|gitlab|svn|vscode)|/(_profiler|admin|api|app|assets..|backend|backup|build|cms|config|core|data|database|dev|docker|files|frontend|laravel|media|phpinfo|prod|project|public|server|settings|sftp|site|storage|v1|v2|web|wp-config|www) {
 	    return 403;
         }
 
