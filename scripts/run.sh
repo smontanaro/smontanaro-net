@@ -21,4 +21,10 @@ fi
 
 ${COV} $(which gunicorn) --pythonpath=$(pwd)/smontanaro --log-level critical \
        --error-logfile=/dev/stderr --access-logfile=/dev/stderr \
-       --bind $HOST:$PORT wsgi:app
+       --bind $HOST:$PORT wsgi:app &
+
+if [ "x${TESTING}" != "x" ] ; then
+    echo $! > ${TESTING}
+fi
+
+wait

@@ -9,6 +9,8 @@ if [ "x$PYTHONPATH" = "x" ] ; then
     export PYTHONPATH=$(pwd)/smontanaro
 fi
 
+export TESTING=/tmp/$$.pid
+
 echo "+++++++++++++++++++++++++++"
 type python
 python --version
@@ -25,7 +27,7 @@ WARNINGS=localhost.warnings
 
 TRASH=/tmp/trash.$$
 DB=ref.db.test
-trap "rm -f ${TRASH} ${DB} localhost.comments /tmp/$$.tmp" EXIT
+trap "rm -f ${TESTING} ${TRASH} ${DB} localhost.comments /tmp/$$.tmp" EXIT
 
 # Mac requires gsleep for subsecond sleeps, Linux doesn't.
 if [ "x$(which gsleep | egrep -v 'not found')" = "x" ] ; then
@@ -99,23 +101,25 @@ echo 1>&2
 
 $SLEEP 1
 
-pkill -f gunicorn
+kill $(cat ${TESTING})
 
 flask routes \
     | egrep --color=never 'GET|POST' \
     | sed -e 's/[ ]*$//' \
-    | sort -s -d -k 1,1 > $ACT
+    | sort -s -d -k 1,1 -k 3,3 > $ACT
 
 # The HTTP/1.?1 pattern is because it appears Google Photos sometimes
 # sends back HTTP/11... ¯\_(ツ)_/¯
 sort localhost.comments /tmp/$$.tmp \
     | sed -e 's/^[0-9][0-9]:[0-9][0-9]:[0-9][0-9][.0-9]* //' \
           -e 's:HTTP/1[.]*1" \([2-5][0-9][0-9]\) [0-9][0-9]*:HTTP/1.1" \1 <size>:' \
+          -e "s:~/:${HOME}/:" \
+          -e "s:${CRDIR}:CRDIR:" \
           -e 's:"curl/[0-9][0-9.]*.*:curl:' \
           -e 's/[[][^]]*] //g' \
 	  -e 's:Starting gunicorn .*:Starting gunicorn:' \
           -e "s:${HOME}:~:" \
-    | egrep -v '^DEBUG:urllib3.connectionpool|Worker.*was sent SIGTERM' \
+    | egrep -v '^WORKER TIMEOUT|^Debug mode enabled|^DEBUG:urllib3.connectionpool' \
     | awk -f scripts/filter.awk \
     >> $ACT
 
