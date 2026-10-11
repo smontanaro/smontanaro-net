@@ -68,7 +68,7 @@ venv : FORCE
             python -m pip install -r requirements.txt ; \
         else \
 	    . $${PYVER}/bin/activate ; python -m pip install --upgrade -r requirements.txt ; \
-        fi
+	fi
 	rm -f venv
 	ln -s $${PYVER} venv
 
