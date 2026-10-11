@@ -62,15 +62,16 @@ test : venv
 	bash scripts/test.sh -c
 
 venv : FORCE
-	if [ ! -d $${PYVER} ] ; then \
-	    python$${PYVER} -m venv $${PYVER} ; \
-	    . $${PYVER}/bin/activate ; \
+	@echo "Python version: $(PYVER)"
+	if [ ! -d $(PYVER) ] ; then \
+	    python$(PYVER) -m venv $(PYVER) ; \
+	    . $(PYVER)/bin/activate ; \
             python -m pip install -r requirements.txt ; \
         else \
-	    . $${PYVER}/bin/activate ; python -m pip install --upgrade -r requirements.txt ; \
+	    . $(PYVER)/bin/activate ; python -m pip install --upgrade -r requirements.txt ; \
 	fi
 	rm -f venv
-	ln -s $${PYVER} venv
+	ln -s $(PYVER) venv
 
 clean : FORCE
 	rm -rf search_cache dist htmlcov
