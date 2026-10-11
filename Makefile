@@ -6,6 +6,7 @@ ifeq ($(V43), no)
     $(error "GNU Make >= 4.3 is required")
 endif
 
+PYVER ?= 3.14
 MONTHS = $(sort $(wildcard shell CR/20??-??))
 GENDIRS = $(foreach dir,$(MONTHS),$(dir)/generated)
 DATES = $(foreach dir,$(GENDIRS),$(dir)/dates.body)
@@ -61,14 +62,15 @@ test : venv
 	bash scripts/test.sh -c
 
 venv : FORCE
-	if [ ! -d py314 ] ; then \
-	    python3.14 -m venv py314 ; \
-	    . py314/bin/activate ; \
-	    ln -s py314 venv ; \
+	if [ ! -d $${PYVER} ] ; then \
+	    python$${PYVER} -m venv $${PYVER} ; \
+	    . $${PYVER}/bin/activate ; \
             python -m pip install -r requirements.txt ; \
         else \
-	    . py314/bin/activate ; python -m pip install --upgrade -r requirements.txt ; \
+	    . $${PYVER}/bin/activate ; python -m pip install --upgrade -r requirements.txt ; \
         fi
+	rm -f venv
+	ln -s $${PYVER} venv
 
 clean : FORCE
 	rm -rf search_cache dist htmlcov
