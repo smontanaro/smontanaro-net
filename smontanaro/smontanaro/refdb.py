@@ -116,5 +116,4 @@ def get_random_topic(sqldb):
     all_topics |= new_topics
     if all_topics:
         return random.choice(list(all_topics))   # nosec
-    else:
-        return ""
+    return ""
