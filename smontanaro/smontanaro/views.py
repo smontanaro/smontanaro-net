@@ -275,7 +275,7 @@ def query_index(query):
     query = query.strip()
     try:
         result = execute_query(query)
-    except SyntaxError as exc:
+    except SyntaxError:
         logging.root.error("Error parsing query: %r", query)
         raise
 
@@ -320,8 +320,6 @@ def init_redirect():
         mat = re.search("msg([0-9]+)[.]html", filename)
         if mat is None:
             abort(404)
-            # dead code, but this should make pylint like us again...
-            return redirect("cr_index")
 
         seq = f"{(int(mat.groups()[0]) + 1):04d}"
         return redirect(url_for("cr_message", year=year, month=month,
