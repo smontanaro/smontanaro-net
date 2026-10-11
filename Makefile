@@ -11,6 +11,7 @@ GENDIRS = $(foreach dir,$(MONTHS),$(dir)/generated)
 DATES = $(foreach dir,$(GENDIRS),$(dir)/dates.body)
 THREADS = $(foreach dir,$(GENDIRS),$(dir)/threads.body)
 REFDB = references.db
+SRCHDB = searchindex.db
 VIEWS = smontanaro/smontanaro/views.py
 APP_SRC = $(wildcard smontanaro/smontanaro/*.py) $(wildcard scripts/*.py)
 TST_SRC = $(wildcard smontanaro/tests/*.py)
@@ -36,9 +37,14 @@ $(DATES) $(THREADS) &: $(VIEWS) scripts/gen-bodies.sh \
 smontanaro.net : smontanaro.net.in crawler-block.txt
 	m4 smontanaro.net.in > smontanaro.net
 	@echo "Once pushed to the server, update /etc/nginx/sites-available/smontanaro.net"
+
 $(REFDB).new : FORCE
 	coverage run -a --rcfile=.coveragerc scripts/makerefsdb.py -d $(REFDB).new CR
 	@echo "Replace $(REFDB) with $(REFDB).new when ready"
+
+$(SRCHDB).new : FORCE
+	ls -d CR/2* | CRDIR=$$PWD PYTHONPATH=$$PWD/smontanaro python scripts/buildindex.py -t train.csv srchdb.new
+	@echo "Replace $(SRCHDB) with $(SRCHDB).new when ready"
 
 lint : mypy bandit pylint
 
@@ -55,13 +61,14 @@ test : venv
 	bash scripts/test.sh -c
 
 venv : FORCE
-	if [ ! -d venv ] ; then \
-	    python3.15 -m venv venv ; \
-	    . venv/bin/activate ; \
-	    python -m pip install -r requirements.txt ; \
-	else \
-	    . venv/bin/activate ; python -m pip install --upgrade -r requirements.txt ; \
-	fi
+	if [ ! -d py314 ] ; then \
+	    python3.14 -m venv py314 ; \
+	    . py314/bin/activate ; \
+	    ln -s py314 venv ; \
+            python -m pip install -r requirements.txt ; \
+        else \
+	    . py314/bin/activate ; python -m pip install --upgrade -r requirements.txt ; \
+        fi
 
 clean : FORCE
 	rm -rf search_cache dist htmlcov
