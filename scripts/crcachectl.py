@@ -40,12 +40,13 @@ def main():
         if index:
             for key in sorted(index):
                 path = relpath(index[key], args.dir)
-                stamp = os.path.getmtime(path)
-                dt = datetime.datetime.fromtimestamp(stamp)
                 status = "okay"
                 if not os.path.exists(path):
                     status = "missing"
+                    dt = datetime.datetime.fromtimestamp(0)
                 else:
+                    stamp = os.path.getmtime(path)
+                    dt = datetime.datetime.fromtimestamp(stamp)
                     with open(path, "rb") as fp:
                         if not pickle.load(fp): # nosec
                             status = "empty"
@@ -76,14 +77,16 @@ def main():
         # Despite abs path in the index, only remove files relative to
         # the cache dir.  This is marginally safer and makes testing
         # easier.
-        path = relpath(path, args.dir)
-        if os.path.exists(path):
+        path = relpath(index[key], args.dir)
+        if not os.path.exists(path):
+            print("missing", repr(key), path)
             if not args.quiet:
                 print("delete", repr(key), path)
             try:
                 os.unlink(path)
             except FileNotFoundError:
                 pass
+        del index[key]
         del path
     if delkeys:
         with open(relpath("index.pkl", args.dir), "wb") as cache:
