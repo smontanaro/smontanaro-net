@@ -3,6 +3,8 @@
 "List or delete search cache entries"
 
 import argparse
+import csv
+import datetime
 import os
 import pickle                           # nosec
 import sys
@@ -33,36 +35,36 @@ def main():
         index = pickle.load(cache)      # nosec
 
     if args.list:
+        writer = csv.DictWriter(sys.stdout, fieldnames=["date", "status", "key", "file"])
+        writer.writeheader()
         if index:
-            if not args.quiet:
-                print("Cache keys:")
             for key in sorted(index):
-                if not args.quiet:
-                    print(" ", key, end="")
-                if args.verbose:
-                    print(f" ({index[key]})", end="")
-                    path = relpath(index[key], args.dir)
-                    if not os.path.exists(path):
-                        print(" missing", end="")
-                    else:
-                        with open(path, "rb") as fp:
-                            if not pickle.load(fp): # nosec
-                                print(" empty", end="")
-                if not args.quiet:
-                    print()
-        else:
-            if not args.quiet:
-                print("Empty cache")
+                path = relpath(index[key], args.dir)
+                stamp = os.path.getmtime(path)
+                dt = datetime.datetime.fromtimestamp(stamp)
+                status = "okay"
+                if not os.path.exists(path):
+                    status = "missing"
+                else:
+                    with open(path, "rb") as fp:
+                        if not pickle.load(fp): # nosec
+                            status = "empty"
+                writer.writerow({
+                    "date": dt,
+                    "key": key,
+                    "file": index[key],
+                    "status": status
+                    })
             return 0
 
     delkeys = set()
     if args.empty:
         for key in index:
-            path = relpath(index[key], args.dir)
+            path = relpath(path, args.dir)
             if not os.path.exists(path):
                 delkeys.add(key)
             else:
-                with open(relpath(index[key], args.dir), "rb") as fp:
+                with open(relpath(path, args.dir), "rb") as fp:
                     if not pickle.load(fp): # nosec
                         delkeys.add(key)
     elif args.keys is not None:
@@ -74,7 +76,7 @@ def main():
         # Despite abs path in the index, only remove files relative to
         # the cache dir.  This is marginally safer and makes testing
         # easier.
-        path = relpath(index[key], args.dir)
+        path = relpath(path, args.dir)
         if os.path.exists(path):
             if not args.quiet:
                 print("delete", repr(key), path)
@@ -82,7 +84,7 @@ def main():
                 os.unlink(path)
             except FileNotFoundError:
                 pass
-        del index[key]
+        del path
     if delkeys:
         with open(relpath("index.pkl", args.dir), "wb") as cache:
             pickle.dump(index, cache)
