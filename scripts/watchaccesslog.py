@@ -136,4 +136,9 @@ def main(scr):
     return 0
 
 if __name__ == "__main__":
-    sys.exit(curses.wrapper(main))
+    try:
+        result = curses.wrapper(main)
+    except KeyboardInterrupt:
+        result = 0
+    sys.exit(result)
+    
