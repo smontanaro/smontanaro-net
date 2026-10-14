@@ -63,17 +63,22 @@ def summarize_records(lines):
 
     condensed = {}
     for line in lines:
-        record = LOG_PATTERN.match(line)
+        record = LOG_PATTERN.match(line).groupdict()
+        record["date"] = datetime.datetime.strptime(record["date"],
+                                                    "%d/%b/%Y:%H:%M:%S %z")
         if record["status"] in ["304", "403", "405", "444"]:
             continue
         net = f'{".".join(record["ip"].split(".")[0:3])}.0/24'
         key = (net, record["status"], record["user_agent"])
         bot_info = condensed.get(key)
         if bot_info is None:
-            bot_info = [0, set([record["ip"]])]
+            bot_info = [1, set([record["ip"]]), record["date"]]
         else:
             bot_info[0] += 1
         condensed[key] = bot_info
+        # delta = record["date"] - bot_info[2]
+        # print(bot_info[0], len(bot_info[1]), record["ip"], key[0],
+        #       record["date"], delta, file=sys.stderr)
     return condensed
 
 
@@ -82,7 +87,7 @@ HMS_FMT = "%d/%b/%Y:%H:%M:%S"
 def main(scr):
     "Bring it all together."
 
-    socket.setdefaulttimeout(2.0)
+    socket.setdefaulttimeout(4.0)
     hpck = os.path.expanduser("~/tmp/hostnames.pck")
     if os.path.exists(hpck):
         with open(hpck, "rb") as pck:
@@ -100,14 +105,14 @@ def main(scr):
         scr.addstr(0, 0, f"{date.strftime(HMS_FMT)} ->"
                 f" {datetime.datetime.now().strftime(HMS_FMT)}",
                    curses.A_BOLD)
-        scr.addstr(1, 0, f"{'count':6s} {'IPs':5s} {'net/ip':16s} "
-                   f"{'status':6s} {'bot name':16s} host name",
+        scr.addstr(1, 0, f"{'count':>6s} {'net':16s} "
+                   f"{'status':6s} {'bot/browser':16s} {'host name':<10s}",
                    curses.A_BOLD)
         condensed = summarize_records(lines)
         row = 2
         for (bot_info, record) in sorted(zip(condensed.values(),
                                           condensed.keys()))[-35:]:
-            (count, ips) = bot_info
+            (count, ips, _first_dt) = bot_info
             ips = list(ips)
             name = hosts.get(record[0])
             if name is None:
@@ -124,7 +129,7 @@ def main(scr):
                 net_ip = ips[0]
             else:
                 net_ip = net
-            out = f"{count:6d} {len(ips):5d} {net_ip:16s} {record[1]:6s} {botname:16s} {name}"
+            out = f"{count:6d} {record[0]:16s} {record[1]:6s} {botname:16s} {name}"
             scr.addstr(row, 0, out)
             row += 1
         with open(hpck, "wb") as pck:
