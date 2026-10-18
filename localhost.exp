@@ -107,7 +107,7 @@ WARNING:root:Can't render images
 127.0.0.1 - - "GET /vintage-trek/Trekpromoa.htm HTTP/1.1" 200 <size> "-" curl
 127.0.0.1 - - "GET /43bikes/cinelli-sc.html HTTP/1.1" 200 <size> "-" curl
 # file doesn't exist
-ERROR:root:File not found: CRDIR/CR/2000-09/eml-files/classicrendezvous.10009.9999.eml
+File not found: CRDIR/CR/2000-09/eml-files/classicrendezvous.10009.9999.eml
 127.0.0.1 - - "GET /CR/2000/09/9999 HTTP/1.1" 404 <size> "-" curl
 127.0.0.1 - - "GET /bogus-replica/index.html HTTP/1.1" 404 <size> "-" curl
 # try to escape from bikes dir
