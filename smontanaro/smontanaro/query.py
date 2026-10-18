@@ -11,6 +11,7 @@
 #    from:Brian Baylis AND (subject:Masi OR subject:Confente)
 
 from dataclasses import dataclass, field as datafield
+import logging
 import urllib.parse
 
 import regex as re
@@ -61,7 +62,11 @@ def parse_query(query):
     query = re.sub(r"\bOR\b", "∨∨", query)
     query = re.sub(r"\bAND\b", "∧∧", query)
     query = re.sub(r"\bNOT\b", "¬", query)
-    return _PARSER.parse(_LEXER.input(query))
+    try:
+        return _PARSER.parse(_LEXER.input(query))
+    except parse.ParseError as err:
+        logging.error(f"{err}: {query}")
+        raise
 
 def execute_query(query):
     "parse and execute parts of a possibly compound query"
