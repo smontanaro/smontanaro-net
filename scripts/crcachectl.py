@@ -61,7 +61,7 @@ def main():
     delkeys = set()
     if args.empty:
         for key in index:
-            path = relpath(path, args.dir)
+            path = relpath(index[key], args.dir)
             if not os.path.exists(path):
                 delkeys.add(key)
             else:
