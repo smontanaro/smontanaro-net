@@ -114,6 +114,7 @@ sort localhost.comments /tmp/$$.tmp \
           -e 's:HTTP/1[.]*1" \([2-5][0-9][0-9]\) [0-9][0-9]*:HTTP/1.1" \1 <size>:' \
           -e "s:~/:${HOME}/:" \
           -e "s:${CRDIR}:CRDIR:" \
+          -e 's/ERROR:root://' \
           -e 's:"curl/[0-9][0-9.]*.*:curl:' \
           -e 's/[[][^]]*] //g' \
 	  -e 's:Starting gunicorn .*:Starting gunicorn:' \
@@ -134,7 +135,7 @@ runcov scripts/crcachectl.py --empty > /dev/null
 runcov scripts/crcachectl.py -d bartali -q
 runcov scripts/crcachectl.py -lq --delete-all > /dev/null
 runcov scripts/crcachectl.py --delete-all
-runcov scripts/crcachectl.py -lv
+runcov scripts/crcachectl.py -lv > /dev/null
 runcov scripts/crcachectl.py -qv
 
 # The dates module is only used by a couple auxiliary scripts.
