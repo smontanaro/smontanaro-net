@@ -105,8 +105,7 @@ kill $(cat ${TESTING})
 
 flask routes \
     | egrep --color=never 'GET|POST' \
-    | sed -e 's/[ ]*$//' \
-    | sort -s -d -k 1,1 -k 3,3 > $ACT
+    | sed -e 's/[ ]*$//' > $ACT
 
 # The HTTP/1.?1 pattern is because it appears Google Photos sometimes
 # sends back HTTP/11... ¯\_(ツ)_/¯
@@ -129,11 +128,11 @@ PYT=$?
 
 # cover crcachectl script
 find search_cache -name 'tmp*' | head -1 | xargs rm
-runcov scripts/crcachectl.py -l
-runcov scripts/crcachectl.py -l -v -d 126mm
-runcov scripts/crcachectl.py --empty
+runcov scripts/crcachectl.py -l > /dev/null
+runcov scripts/crcachectl.py -l -v -d 126mm > /dev/null
+runcov scripts/crcachectl.py --empty > /dev/null
 runcov scripts/crcachectl.py -d bartali -q
-runcov scripts/crcachectl.py -lq --delete-all
+runcov scripts/crcachectl.py -lq --delete-all > /dev/null
 runcov scripts/crcachectl.py --delete-all
 runcov scripts/crcachectl.py -lv
 runcov scripts/crcachectl.py -qv
