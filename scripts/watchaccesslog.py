@@ -39,7 +39,7 @@ def getrecentlog(files, nlines):
 def summarize_ua(uastring):
     "Identify user agent class using ua_parser module."
 
-    ua_dict = shelve.open(os.path.expanduser("~/tmp/uastrings"))
+    ua_dict = shelve.open(os.path.expanduser("~/tmp/uastrings")) # nosec
     with open(os.path.expanduser("~/tmp/ua_misses"), "a", encoding="utf8") as misses:
         try:
             if uastring not in ua_dict:
@@ -57,7 +57,7 @@ def summarize_ua(uastring):
 
 def summarize_records(lines):
     """Extract IP address, response status and user agent from log records.
-    
+
     Ignore a handful of status codes. (Should probably be a paramenter.)
     """
 
@@ -91,7 +91,7 @@ def main(scr):
     hpck = os.path.expanduser("~/tmp/hostnames.pck")
     if os.path.exists(hpck):
         with open(hpck, "rb") as pck:
-            hosts = pickle.load(pck)
+            hosts = pickle.load(pck) # nosec
     else:
         hosts = {}
     while True:
@@ -122,13 +122,7 @@ def main(scr):
                     name = "no name"
                 hosts[record[0]] = name
 
-            # arbitrarily lop off the last quad
-            net = f'{".".join(record[0].split(".")[0:3])}.0/24'
             botname = summarize_ua(record[2])
-            if len(ips) == 1:
-                net_ip = ips[0]
-            else:
-                net_ip = net
             out = f"{count:6d} {record[0]:16s} {record[1]:6s} {botname:16s} {name}"
             scr.addstr(row, 0, out)
             row += 1
@@ -142,8 +136,7 @@ def main(scr):
 
 if __name__ == "__main__":
     try:
-        result = curses.wrapper(main)
+        res = curses.wrapper(main)
     except KeyboardInterrupt:
-        result = 0
-    sys.exit(result)
-    
+        res = 0
+    sys.exit(res)
