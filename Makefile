@@ -6,7 +6,7 @@ ifeq ($(V43), no)
     $(error "GNU Make >= 4.3 is required")
 endif
 
-PYVER ?= 3.14
+PYVER ?= 3.15
 MONTHS = $(sort $(wildcard shell CR/20??-??))
 GENDIRS = $(foreach dir,$(MONTHS),$(dir)/generated)
 DATES = $(foreach dir,$(GENDIRS),$(dir)/dates.body)
