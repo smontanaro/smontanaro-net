@@ -8,6 +8,8 @@ import regex as re
 
 QUOTE_PAT = r'(?:(?:>\s?)*)?'
 CRLF = "\r\n"
+LINE_SPLIT = re.compile(r"(\r?\n+)").split
+EMPTY_JOIN = "".join
 
 def strip_footers(payload):
     "strip non-content footers"
@@ -166,7 +168,7 @@ def _strip_helper(payload, start, end, maxlines=10**10):
     if isinstance(end, tuple):
         end, e_flags = end
 
-    lines = re.split(r"(\r?\n+)", payload)
+    lines = LINE_SPLIT(payload)
     state = "start"
     new_payload = []
     pappend = new_payload.append
@@ -195,7 +197,7 @@ def _strip_helper(payload, start, end, maxlines=10**10):
                 # eprint("terminated without seeing the footer!")
                 state = "terminated"
                 new_payload.extend(stripped)
-    return "".join(new_payload)
+    return EMPTY_JOIN(new_payload)
 
 def strip_trailing_underscores(payload):
     "strip trailing underscores at the bottom of the message"
