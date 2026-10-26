@@ -195,6 +195,10 @@ for old in ${SCANDIR}/old*.html ; do
     mv ${old} ${new}
 done
 
+# watch access log - this will fail on my Mac, but a few lines will be
+# executed
+run scripts/watchaccesslog.py
+
 # Small refdb run to exercise one or two functions only it uses.
 run scripts/makerefsdb.py -d %{DB} CR/2000-10
 run scripts/makerefsdb.py -c -d %{DB} --one \
