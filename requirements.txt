@@ -29,6 +29,7 @@ itsdangerous
 Jinja2
 joblib
 lazy-object-proxy
+lxml
 markdown-it-py
 MarkupSafe
 mccabe
