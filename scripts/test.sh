@@ -43,21 +43,30 @@ else
     DATE=gdate
 fi
 
-runcov () {
+run () {
     echo "run: $1" 1>&2
     python "$@"
 }
 
 VERBOSE=
 export DOCOVER=
-while getopts 'vhc' OPTION; do
+export DOPROFILE=
+while getopts 'vhcp' OPTION; do
     case "$OPTION" in
         c)
 	    export DOCOVER=true
             RUNCOV='coverage run -a --rcfile=.coveragerc'
-            runcov () {
+            run () {
                 echo "cover: $1" 1>&2
                 ${RUNCOV} "$@"
+            }
+            ;;
+        p)
+            export DOPROFILE=true
+            RUNPROF='python3 -m profiling.sampling run'
+            run () {
+                echo "profile: $1" 1>&2
+                ${RUNPROF} "$@"
             }
             ;;
         v)
@@ -70,6 +79,11 @@ while getopts 'vhc' OPTION; do
     esac
 done
 shift "$(($OPTIND -1))"
+
+if [ "x${DOPROFILE}${DOCOVER}" = "xtruetrue" ] ; then
+    echo "Can't profile and cover in the same run" 1>&2
+    exit 2
+fi
 
 dateit () {
     while read line ; do
@@ -124,29 +138,29 @@ sort localhost.comments /tmp/$$.tmp \
     >> $ACT
 
 # Run our official unit tests
-runcov $(which pytest) $VERBOSE smontanaro
+run $(which pytest) $VERBOSE smontanaro
 PYT=$?
 
 # cover crcachectl script
 find search_cache -name 'tmp*' | head -1 | xargs rm
-runcov scripts/crcachectl.py -l > /dev/null
-runcov scripts/crcachectl.py -l -v -d 126mm > /dev/null
-runcov scripts/crcachectl.py --empty > /dev/null
-runcov scripts/crcachectl.py -d bartali -q
-runcov scripts/crcachectl.py -lq --delete-all > /dev/null
-runcov scripts/crcachectl.py --delete-all
-runcov scripts/crcachectl.py -lv > /dev/null
-runcov scripts/crcachectl.py -qv
+run scripts/crcachectl.py -l > /dev/null
+run scripts/crcachectl.py -l -v -d 126mm > /dev/null
+run scripts/crcachectl.py --empty > /dev/null
+run scripts/crcachectl.py -d bartali -q
+run scripts/crcachectl.py -lq --delete-all > /dev/null
+run scripts/crcachectl.py --delete-all
+run scripts/crcachectl.py -lv > /dev/null
+run scripts/crcachectl.py -qv
 
 # The dates module is only used by a couple auxiliary scripts.
-runcov scripts/listbydate.py CR/2000-03 >/dev/null
-runcov scripts/generate_date_index.py -d references.db 2000 3 >/dev/null
+run scripts/listbydate.py CR/2000-03 >/dev/null
+run scripts/generate_date_index.py -d references.db 2000 3 >/dev/null
 
 # Exercise the thread index generator
-runcov scripts/generate_thread_index.py -d references.db 2000 3 >/dev/null
+run scripts/generate_thread_index.py -d references.db 2000 3 >/dev/null
 
 # Exercise findlinks...
-runcov scripts/findlinks.py CR/2004-01/eml-files/*.eml >/dev/null
+run scripts/findlinks.py CR/2004-01/eml-files/*.eml >/dev/null
 
 # Exercise training...
 echo 'yes
@@ -154,44 +168,50 @@ yes
 retrain
 
 foo
-quit' | runcov scripts/training.py 'CR/2001-01/eml-files/*.eml' 15 >/dev/null
+quit' | run scripts/training.py 'CR/2001-01/eml-files/*.eml' 15 >/dev/null
 
 # Exercise listbydate...
-runcov scripts/listbydate.py 'CR/2001-01/eml-files' >/dev/null
+run scripts/listbydate.py 'CR/2001-01/eml-files' >/dev/null
 
 # makesitemap
-runcov scripts/makesitemap.py
+run scripts/makesitemap.py
 
 # idwj
 find CR/2004-11/eml-files -name '*.eml' \
     | head -300 \
-    | runcov scripts/idwj.py > /dev/null
+    | run scripts/idwj.py > /dev/null
 
 if [ -r syslog.www ] ; then
     # extracttbfromsyslog
-    runcov scripts/extracttbfromsyslog.py < syslog.www > /dev/null
+    run scripts/extracttbfromsyslog.py < syslog.www > /dev/null
 fi
 
 # abs2rel
-runcov scripts/abs2rel.py -n smontanaro/smontanaro/static/bikes/43bikes/derosa-web
+SCANDIR=smontanaro/smontanaro/static/bikes/43bikes/fortythree/merlin-web
+run scripts/abs2rel.py -n ${SCANDIR}
+run scripts/abs2rel.py ${SCANDIR}
+for old in ${SCANDIR}/old*.html ; do
+    new=$(sed -e 's:/old-::' <<<${old})
+    mv ${old} ${new}
+done
 
 # Small refdb run to exercise one or two functions only it uses.
-runcov scripts/makerefsdb.py -d %{DB} CR/2000-10
-runcov scripts/makerefsdb.py -c -d %{DB} --one \
+run scripts/makerefsdb.py -d %{DB} CR/2000-10
+run scripts/makerefsdb.py -c -d %{DB} --one \
        CR/2001-01/eml-files/classicrendezvous.10101.0001.eml
 cp -p /etc/hosts ${TRASH}
-runcov scripts/makerefsdb.py -d %{DB} --one ${TRASH}
+run scripts/makerefsdb.py -d %{DB} --one ${TRASH}
 
-runcov scripts/getua.py < sample.log > /dev/null
-runcov scripts/extracttbfromsyslog.py < sample-syslog > /dev/null
-head -100 sample-syslog | runcov scripts/extracttbfromsyslog.py > /dev/null
+run scripts/getua.py < sample.log > /dev/null
+run scripts/extracttbfromsyslog.py < sample-syslog > /dev/null
+head -100 sample-syslog | run scripts/extracttbfromsyslog.py > /dev/null
 
 # Exercise some bits only csv2topic uses
-runcov scripts/csv2topic.py references.db < topic.csv > /dev/null
+run scripts/csv2topic.py references.db < topic.csv > /dev/null
 
 # Exercise the code used to build the sqlite search database
 echo "CR/2007-11" | \
-    CRDIR=$(pwd) runcov scripts/buildindex.py -t train.csv srch.db.test
+    CRDIR=$(pwd) run scripts/buildindex.py -t train.csv srch.db.test
 
 n=$(echo "select * from search_terms where term = 'from:dale brown'" | sqlite3 srch.db.test | wc -l)
 m=$(echo "select * from search_terms where term like 'from:% '" | sqlite3 srch.db.test | wc -l)
