@@ -187,6 +187,7 @@ if [ -r syslog.www ] ; then
 fi
 
 # abs2rel
+### To Do: need a better directory & html file(s) for the test
 SCANDIR=smontanaro/smontanaro/static/bikes/43bikes/fortythree/merlin-web
 run scripts/abs2rel.py -n ${SCANDIR}
 run scripts/abs2rel.py ${SCANDIR}
@@ -195,9 +196,12 @@ for old in ${SCANDIR}/old*.html ; do
     mv ${old} ${new}
 done
 
-# watch access log - this will fail on my Mac, but a few lines will be
-# executed
-run scripts/watchaccesslog.py
+if [ -d /var/log/nginx ] ; then
+    files="/var/log/nginx/access.log.1 /var/log/nginx.access.log"
+else
+    files="/Users/skip/tmp/access.log.1 /Users/skip/tmp/access.log"
+fi
+run scripts/watchaccesslog.py -s -n 500 ${files} 2>/tmp/trash < /dev/null
 
 # Small refdb run to exercise one or two functions only it uses.
 run scripts/makerefsdb.py -d %{DB} CR/2000-10

@@ -2,6 +2,7 @@
 
 "Keep track of recent website access log activity."
 
+import argparse
 import curses
 import datetime
 import os
@@ -87,6 +88,17 @@ HMS_FMT = "%d/%b/%Y:%H:%M:%S"
 def main(scr):
     "Bring it all together."
 
+    parser = argparse.ArgumentParser()
+    parser.add_argument(dest="files", nargs="*", help="files to monitor",)
+    parser.add_argument("-n", "--nlines", dest="nlines", default=2000,
+                        type=int, help="how many most recent lines to process")
+    parser.add_argument("-s", "--single", dest="single", default=False,
+                        action="store_true", help="only one go-round")
+    args = parser.parse_args()
+
+    if not args.files:
+        args.files = ["/var/log/nginx/access.log.1",
+                      "/var/log/nginx/access.log"]
     socket.setdefaulttimeout(4.0)
     hpck = os.path.expanduser("~/tmp/hostnames.pck")
     if os.path.exists(hpck):
@@ -96,9 +108,7 @@ def main(scr):
         hosts = {}
     while True:
         scr.clear()
-        lines = getrecentlog(files=["/var/log/nginx/access.log.1",
-                                "/var/log/nginx/access.log"],
-                             nlines=2000)
+        lines = getrecentlog(files=args.files, nlines=args.nlines)
         first_record = LOG_PATTERN.match(lines[0])
         date = datetime.datetime.strptime(first_record["date"],
                                           f"{HMS_FMT} %z")
@@ -130,6 +140,14 @@ def main(scr):
             pickle.dump(hosts, pck)
         scr.move(1, 0)
         scr.refresh()
+        if args.single:
+            if os.isatty(sys.stdin.fileno()):
+                scr.addstr(row, 0, "Hit any key to exit")
+                scr.refresh()
+                scr.get_wch()
+            else:
+                time.sleep(0.5)
+            break
         time.sleep(39)
 
     return 0
