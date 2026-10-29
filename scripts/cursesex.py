@@ -10,7 +10,7 @@ def cursesex(scr):
         row = 0
         scr.clear()
         scr.addstr(row, 0, "hello world")
-        out = f"{'count':6s} {'record[0]':16s} {'record[1]':6s} {'botname':16s} {'name'}"
+        out = f"{n:6d} {'record[0]':16s} {'record[1]':6s} {'botname':16s} {'name'}"
         scr.addstr(row+1, 0, out)
         scr.addstr(row+2, 0, f"sleeping... {n}")
         row += 3
